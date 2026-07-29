@@ -8,7 +8,7 @@ import { TodaySection } from "@/components/dashboard/TodaySection";
 import { AssignmentSummarySkeleton } from "@/components/dashboard/AssignmentSummaryCard";
 import { RiskHud } from "@/components/dashboard/RiskHud";
 import { FocusCard, FocusCardSkeleton } from "@/components/dashboard/FocusCard";
-import { PlanCard } from "@/components/dashboard/PlanCard";
+import { PlanCard, PlanCardSkeleton } from "@/components/dashboard/PlanCard";
 import { GpaTrendCard, GpaTrendCardSkeleton } from "@/components/dashboard/GpaTrendCard";
 
 export default function DashboardPage() {
@@ -57,7 +57,9 @@ export default function DashboardPage() {
           <Suspense fallback={<FocusCardSkeleton />}>
             <FocusCard />
           </Suspense>
-          <PlanCard />
+          <Suspense fallback={<PlanCardSkeleton />}>
+            <PlanCard />
+          </Suspense>
           <Suspense fallback={<GpaTrendCardSkeleton />}>
             <GpaTrendCard />
           </Suspense>

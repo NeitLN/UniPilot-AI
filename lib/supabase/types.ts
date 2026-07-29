@@ -258,6 +258,7 @@ export interface Database {
           assignment_id: string | null;
           start_at: string;
           end_at: string;
+          reason: string | null;
         };
         Insert: {
           id?: string;
@@ -265,6 +266,7 @@ export interface Database {
           assignment_id?: string | null;
           start_at: string;
           end_at: string;
+          reason?: string | null;
         };
         Update: {
           id?: string;
@@ -272,6 +274,7 @@ export interface Database {
           assignment_id?: string | null;
           start_at?: string;
           end_at?: string;
+          reason?: string | null;
         };
         Relationships: [];
       };
