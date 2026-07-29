@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { exchangeCodeForTokens } from "@/lib/calendar/oauth";
+import { encryptToken } from "@/lib/calendar/tokenCrypto";
 import { OAUTH_STATE_COOKIE } from "../start/route";
 
 function redirectWithError(request: NextRequest, error: string) {
@@ -44,7 +45,7 @@ export async function GET(request: NextRequest) {
       .upsert(
         {
           user_id: user.id,
-          refresh_token: tokens.refresh_token,
+          refresh_token: encryptToken(tokens.refresh_token),
           access_token: tokens.access_token,
           access_token_expires_at: new Date(
             Date.now() + tokens.expires_in * 1000,

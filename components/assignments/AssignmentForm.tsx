@@ -4,9 +4,13 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import {
   createAssignment,
   updateAssignment,
-  initialAssignmentFormState,
   type AssignmentFormState,
 } from "@/app/(app)/assignments/actions";
+
+// Defined locally rather than imported from actions.ts: a "use server" module
+// may only export async functions, so a plain object export from it resolves
+// to `undefined` on the client — this was a real bug caught via manual testing.
+const INITIAL_STATE: AssignmentFormState = { errors: {} };
 import type { AssignmentPriority, AssignmentStatus } from "@/lib/supabase/types";
 
 export interface CourseOption {
@@ -51,7 +55,7 @@ export function AssignmentForm({
   const [state, formAction, pending] = useActionState<
     AssignmentFormState,
     FormData
-  >(action, initialAssignmentFormState);
+  >(action, INITIAL_STATE);
 
   const [progress, setProgress] = useState(initialValues?.progress ?? 0);
   const formRef = useRef<HTMLFormElement>(null);

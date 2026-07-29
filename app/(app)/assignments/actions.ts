@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { courseBelongsToCaller } from "@/lib/supabase/ownership";
 import {
   validateAssignment,
   type AssignmentInput,
@@ -14,8 +15,6 @@ export interface AssignmentFormState {
   formError?: string;
   ok?: boolean;
 }
-
-export const initialAssignmentFormState: AssignmentFormState = { errors: {} };
 
 function readInput(formData: FormData): AssignmentInput {
   return {
@@ -59,6 +58,10 @@ export async function createAssignment(
   } = await supabase.auth.getUser();
   if (!user) return { errors: {}, formError: "Session expired — sign in again." };
 
+  if (!(await courseBelongsToCaller(supabase, input.courseId))) {
+    return { errors: { courseId: "Pick a course from the list." } };
+  }
+
   const { error } = await supabase
     .from("assignments")
     .insert({ user_id: user.id, ...toRow(input) });
@@ -79,6 +82,11 @@ export async function updateAssignment(
   if (Object.keys(errors).length > 0) return { errors };
 
   const supabase = await createClient();
+
+  if (!(await courseBelongsToCaller(supabase, input.courseId))) {
+    return { errors: { courseId: "Pick a course from the list." } };
+  }
+
   const { error } = await supabase
     .from("assignments")
     .update(toRow(input))

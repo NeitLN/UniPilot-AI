@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { syncCalendarForUser } from "@/lib/calendar/sync";
+import { courseBelongsToCaller } from "@/lib/supabase/ownership";
 
 export interface SyncNowResult {
   status: "ok" | "error";
@@ -39,6 +40,11 @@ export async function assignCourseToBlock(
   courseId: string | null,
 ) {
   const supabase = await createClient();
+
+  if (courseId && !(await courseBelongsToCaller(supabase, courseId))) {
+    throw new Error("That course isn't yours to link.");
+  }
+
   const { error } = await supabase
     .from("class_blocks")
     .update({ course_id: courseId })

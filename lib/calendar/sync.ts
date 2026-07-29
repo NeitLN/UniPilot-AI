@@ -2,6 +2,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
 import { refreshAccessToken } from "./oauth";
+import { decryptToken } from "./tokenCrypto";
 import { mapGoogleEventToClassBlock, type GoogleCalendarEvent } from "./map";
 
 const EVENTS_ENDPOINT =
@@ -9,6 +10,8 @@ const EVENTS_ENDPOINT =
 const TOKEN_REFRESH_BUFFER_MS = 60_000;
 const WINDOW_BEFORE_DAYS = 7;
 const WINDOW_AFTER_DAYS = 60;
+const PAGE_SIZE = 250;
+const MAX_PAGES = 20; // safety cap (5,000 events) against a runaway paging loop
 
 export type SyncResult =
   | { ok: true; eventCount: number }
@@ -92,7 +95,7 @@ async function getFreshAccessToken(
     return connection.access_token;
   }
 
-  const refreshed = await refreshAccessToken(connection.refresh_token);
+  const refreshed = await refreshAccessToken(decryptToken(connection.refresh_token));
   const newExpiresAt = new Date(Date.now() + refreshed.expires_in * 1000);
 
   await supabase
@@ -111,22 +114,34 @@ async function fetchEvents(accessToken: string): Promise<GoogleCalendarEvent[]> 
   const timeMin = new Date(now.getTime() - WINDOW_BEFORE_DAYS * 86_400_000);
   const timeMax = new Date(now.getTime() + WINDOW_AFTER_DAYS * 86_400_000);
 
-  const params = new URLSearchParams({
-    timeMin: timeMin.toISOString(),
-    timeMax: timeMax.toISOString(),
-    singleEvents: "true",
-    orderBy: "startTime",
-    maxResults: "250",
-  });
+  const items: GoogleCalendarEvent[] = [];
+  let pageToken: string | undefined;
 
-  const res = await fetch(`${EVENTS_ENDPOINT}?${params.toString()}`, {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
+  for (let page = 0; page < MAX_PAGES; page++) {
+    const params = new URLSearchParams({
+      timeMin: timeMin.toISOString(),
+      timeMax: timeMax.toISOString(),
+      singleEvents: "true",
+      orderBy: "startTime",
+      maxResults: String(PAGE_SIZE),
+    });
+    if (pageToken) params.set("pageToken", pageToken);
 
-  if (!res.ok) {
-    throw new Error(`Google Calendar API error: ${await res.text()}`);
+    const res = await fetch(`${EVENTS_ENDPOINT}?${params.toString()}`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+
+    if (!res.ok) {
+      throw new Error(`Google Calendar API error: ${await res.text()}`);
+    }
+
+    const body: { items?: GoogleCalendarEvent[]; nextPageToken?: string } =
+      await res.json();
+    items.push(...(body.items ?? []));
+
+    if (!body.nextPageToken) break;
+    pageToken = body.nextPageToken;
   }
 
-  const body: { items?: GoogleCalendarEvent[] } = await res.json();
-  return body.items ?? [];
+  return items;
 }
