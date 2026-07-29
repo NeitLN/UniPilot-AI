@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f2f0fb;
+  --foreground: #1d1338;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --font-display: var(--font-fredoka);
+  --font-sans: var(--font-nunito);
+
+  /* UniPilot AI design tokens — see docs/ROADMAP.md §3 */
+  --color-violet: #6c3cf5;
+  --color-violet-deep: #5a2fe0;
+  --color-violet-soft: #8b62ff;
+  --color-violet-tint: #ede7ff;
+
+  --color-lime: #d8ff4a;
+  --color-lime-deep: #b8e62e;
+  --color-lime-tint: #eafbcf;
+
+  --color-ink: #1d1338;
+  --color-ink-2: #4a4460;
+  --color-ink-3: #8a83a3;
+
+  --color-coral: #ff5470;
+  --color-coral-tint: #ffe7eb;
+
+  --color-tangerine: #ffb020;
+  --color-tangerine-tint: #fff1d6;
+
+  --color-mint: #22dda6;
+  --color-mint-tint: #defbf1;
+
+  --color-sky: #45c2ff;
+
+  --color-canvas: #f2f0fb;
+  --color-card: #ffffff;
+
+  --radius-card: 30px;
+  --radius-ctl: 16px;
+  --radius-pill: 20px;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
