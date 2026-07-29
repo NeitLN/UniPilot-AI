@@ -22,3 +22,16 @@ export async function courseBelongsToCaller(
     .maybeSingle();
   return data !== null;
 }
+
+/** Same reasoning as courseBelongsToCaller, for logging a focus session against an assignment. */
+export async function assignmentBelongsToCaller(
+  supabase: SupabaseClient<Database>,
+  assignmentId: string,
+): Promise<boolean> {
+  const { data } = await supabase
+    .from("assignments")
+    .select("id")
+    .eq("id", assignmentId)
+    .maybeSingle();
+  return data !== null;
+}

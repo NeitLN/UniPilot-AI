@@ -1,11 +1,12 @@
 import { Suspense } from "react";
 import { KpiCard, KpiCardSkeleton } from "@/components/dashboard/KpiCard";
 import { ActiveTasksKpi } from "@/components/dashboard/ActiveTasksKpi";
+import { FocusWeekKpi } from "@/components/dashboard/FocusWeekKpi";
 import { DueSoonSection } from "@/components/dashboard/DueSoonSection";
 import { TodaySection } from "@/components/dashboard/TodaySection";
 import { AssignmentSummarySkeleton } from "@/components/dashboard/AssignmentSummaryCard";
 import { RiskHud } from "@/components/dashboard/RiskHud";
-import { FocusCard } from "@/components/dashboard/FocusCard";
+import { FocusCard, FocusCardSkeleton } from "@/components/dashboard/FocusCard";
 import { PlanCard } from "@/components/dashboard/PlanCard";
 import { GpaTrendCard } from "@/components/dashboard/GpaTrendCard";
 
@@ -26,12 +27,9 @@ export default function DashboardPage() {
         <Suspense fallback={<KpiCardSkeleton tone="coral" />}>
           <ActiveTasksKpi />
         </Suspense>
-        <KpiCard
-          tone="mint"
-          label="Focus this week"
-          value="—"
-          hint="Lands in Phase 5"
-        />
+        <Suspense fallback={<KpiCardSkeleton tone="mint" />}>
+          <FocusWeekKpi />
+        </Suspense>
         <KpiCard
           tone="tangerine"
           label="Workload risk"
@@ -53,7 +51,9 @@ export default function DashboardPage() {
         </div>
 
         <div className="flex flex-col gap-3.5">
-          <FocusCard />
+          <Suspense fallback={<FocusCardSkeleton />}>
+            <FocusCard />
+          </Suspense>
           <PlanCard />
           <GpaTrendCard />
         </div>
