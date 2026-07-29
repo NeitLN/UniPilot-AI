@@ -72,7 +72,7 @@ export function PlanEditor({
       </div>
 
       {sessions.length === 0 ? (
-        <p className="mt-3 text-[12.5px] font-medium text-[#C9B9FF]">
+        <p className="mt-3 text-[12.5px] font-medium text-white/88">
           No sessions fit this week — try adjusting your availability, or check
           back after adding assignments.
         </p>
@@ -80,7 +80,12 @@ export function PlanEditor({
         <div className="mt-3 flex flex-col gap-3">
           {grouped.map(([day, daySessions]) => (
             <div key={day}>
-              <p className="text-[11px] font-extrabold uppercase tracking-wide text-[#C9B9FF]">
+              {/* Day label is formatted with the runtime's local timezone —
+                  expected to differ between SSR and hydration, not a real mismatch. */}
+              <p
+                className="text-[11px] font-extrabold uppercase tracking-wide text-white/88"
+                suppressHydrationWarning
+              >
                 {day}
               </p>
               <div className="mt-1.5 flex flex-col gap-1.5">
@@ -219,7 +224,12 @@ function SessionRow({ session }: { session: PlanSessionData }) {
 
   return (
     <div className="flex flex-col gap-1.5 rounded-ctl bg-white/12 px-3 py-2.5 sm:flex-row sm:items-center">
-      <div className="w-[112px] shrink-0 font-display text-[13.5px] font-bold">
+      {/* Formatted in the runtime's local timezone — expected to differ
+          between SSR and hydration, not a real mismatch. */}
+      <div
+        className="w-[112px] shrink-0 font-display text-[13.5px] font-bold"
+        suppressHydrationWarning
+      >
         {new Date(session.startAt).toLocaleTimeString(undefined, {
           hour: "numeric",
           minute: "2-digit",

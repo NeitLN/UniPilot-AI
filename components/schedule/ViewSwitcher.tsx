@@ -80,7 +80,9 @@ export function ViewSwitcher({
         </button>
       </div>
 
-      <p className="text-sm font-bold text-ink">
+      {/* Formatted in the runtime's local timezone — expected to differ
+          between SSR and hydration, not a real mismatch. */}
+      <p className="text-sm font-bold text-ink" suppressHydrationWarning>
         {anchor.toLocaleDateString(undefined, {
           month: "long",
           day: view === "month" ? undefined : "numeric",

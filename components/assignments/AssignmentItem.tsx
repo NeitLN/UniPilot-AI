@@ -50,7 +50,12 @@ export function AssignmentItem({
     <div className="flex flex-col gap-3 border-t border-line py-[11px] first:border-t-0 first:pt-0 sm:flex-row sm:items-center">
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-bold text-ink">{assignment.title}</p>
-        <p className="mt-0.5 truncate text-[11.5px] font-semibold text-ink-3">
+        {/* toLocaleString reflects the server's timezone during SSR and the
+            browser's on hydration — expected to differ, not a real mismatch. */}
+        <p
+          className="mt-0.5 truncate text-[11.5px] font-semibold text-ink-3"
+          suppressHydrationWarning
+        >
           {assignment.courseName ?? "No course"} · Due{" "}
           {due.toLocaleString(undefined, {
             month: "short",

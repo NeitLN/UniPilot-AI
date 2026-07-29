@@ -52,7 +52,9 @@ export function SyncStatusBar({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-card bg-white px-5 py-3.5">
-        <div className="text-[12.5px] font-semibold text-ink-2">
+        {/* Formatted in the runtime's local timezone — expected to differ
+            between SSR and hydration, not a real mismatch. */}
+        <div className="text-[12.5px] font-semibold text-ink-2" suppressHydrationWarning>
           {!connected ? (
             "Google Calendar isn't connected yet."
           ) : lastSyncedAt ? (

@@ -65,7 +65,12 @@ function BlockCard({
       className="w-full rounded-ctl bg-line px-3 py-2 text-left hover:bg-[#E6E2F2]"
     >
       <p className="truncate text-[12.5px] font-bold text-ink">{block.title}</p>
-      <p className="mt-0.5 truncate text-[11px] font-semibold text-ink-3">
+      {/* Formatted in the runtime's local timezone — expected to differ
+          between SSR and hydration, not a real mismatch. */}
+      <p
+        className="mt-0.5 truncate text-[11px] font-semibold text-ink-3"
+        suppressHydrationWarning
+      >
         {new Date(block.startAt).toLocaleTimeString(undefined, {
           hour: "numeric",
           minute: "2-digit",
@@ -103,7 +108,12 @@ function DayList({
           onClick={() => onSelect(b.id)}
           className="flex items-center gap-3 rounded-ctl border-t border-line px-2 py-3 text-left first:border-t-0 hover:bg-line"
         >
-          <div className="w-16 shrink-0 text-[11.5px] font-bold text-ink-3">
+          {/* Formatted in the runtime's local timezone — expected to differ
+              between SSR and hydration, not a real mismatch. */}
+          <div
+            className="w-16 shrink-0 text-[11.5px] font-bold text-ink-3"
+            suppressHydrationWarning
+          >
             {new Date(b.startAt).toLocaleTimeString(undefined, {
               hour: "numeric",
               minute: "2-digit",
@@ -145,10 +155,13 @@ function WeekColumns({
 
         return (
           <div key={day.toISOString()} className="rounded-card bg-white p-3">
+            {/* Weekday/day-of-month reflect the runtime's local timezone —
+                expected to differ between SSR and hydration, not a real mismatch. */}
             <p
               className={`text-center text-[11px] font-extrabold uppercase tracking-wide ${
                 isToday ? "text-violet" : "text-ink-3"
               }`}
+              suppressHydrationWarning
             >
               {day.toLocaleDateString(undefined, { weekday: "short" })}
             </p>
@@ -156,6 +169,7 @@ function WeekColumns({
               className={`mx-auto mt-0.5 flex h-6 w-6 items-center justify-center rounded-full text-center text-[12.5px] font-bold ${
                 isToday ? "bg-violet text-white" : "text-ink"
               }`}
+              suppressHydrationWarning
             >
               {day.getDate()}
             </p>
@@ -203,10 +217,13 @@ function MonthGrid({
             key={day.toISOString()}
             className={`min-h-[84px] rounded-ctl p-1.5 ${inMonth ? "bg-canvas" : "bg-canvas/40"}`}
           >
+            {/* Day-of-month reflects the runtime's local timezone — expected
+                to differ between SSR and hydration, not a real mismatch. */}
             <p
               className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold ${
                 isToday ? "bg-violet text-white" : inMonth ? "text-ink" : "text-ink-3"
               }`}
+              suppressHydrationWarning
             >
               {day.getDate()}
             </p>
