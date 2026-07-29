@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { KpiCard, KpiCardSkeleton } from "@/components/dashboard/KpiCard";
+import { GpaKpi } from "@/components/dashboard/GpaKpi";
 import { ActiveTasksKpi } from "@/components/dashboard/ActiveTasksKpi";
 import { FocusWeekKpi } from "@/components/dashboard/FocusWeekKpi";
 import { DueSoonSection } from "@/components/dashboard/DueSoonSection";
@@ -8,7 +9,7 @@ import { AssignmentSummarySkeleton } from "@/components/dashboard/AssignmentSumm
 import { RiskHud } from "@/components/dashboard/RiskHud";
 import { FocusCard, FocusCardSkeleton } from "@/components/dashboard/FocusCard";
 import { PlanCard } from "@/components/dashboard/PlanCard";
-import { GpaTrendCard } from "@/components/dashboard/GpaTrendCard";
+import { GpaTrendCard, GpaTrendCardSkeleton } from "@/components/dashboard/GpaTrendCard";
 
 export default function DashboardPage() {
   return (
@@ -23,7 +24,9 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-2 gap-3.5 md:grid-cols-4">
-        <KpiCard tone="violet" label="GPA" value="—" hint="Lands in Phase 6" />
+        <Suspense fallback={<KpiCardSkeleton tone="violet" />}>
+          <GpaKpi />
+        </Suspense>
         <Suspense fallback={<KpiCardSkeleton tone="coral" />}>
           <ActiveTasksKpi />
         </Suspense>
@@ -55,7 +58,9 @@ export default function DashboardPage() {
             <FocusCard />
           </Suspense>
           <PlanCard />
-          <GpaTrendCard />
+          <Suspense fallback={<GpaTrendCardSkeleton />}>
+            <GpaTrendCard />
+          </Suspense>
         </div>
       </div>
     </div>
