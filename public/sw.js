@@ -12,6 +12,13 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
   if (url.pathname.startsWith("/api/")) return;
+  // Next.js's client-side RSC prefetch/segment fetches (recognizable by the
+  // `RSC` header or `_rsc` query param) are a background optimization, not
+  // part of the "read while offline" story — skip them so a stale cached
+  // fragment never gets served in place of the router's own cache, and so
+  // replaying these fetches through the SW doesn't hit WebKit's stricter
+  // access-control handling of re-issued requests with custom headers.
+  if (request.headers.get("RSC") || url.searchParams.has("_rsc")) return;
 
   event.respondWith(
     (async () => {

@@ -6,6 +6,7 @@ import {
   priorityLabel,
   progressTone,
   statusLabel,
+  statusTone,
 } from "@/lib/rules/assignment";
 import { Tag } from "@/components/ui/Tag";
 import { ProgressBar } from "@/components/ui/ProgressBar";
@@ -43,13 +44,7 @@ export function AssignmentItem({
   const overdue = overdueLabel(assignment);
   const tone = progressTone(assignment);
   const due = new Date(assignment.dueAt);
-
-  const statusTone =
-    assignment.status === "done"
-      ? "mint"
-      : assignment.status === "in_progress"
-        ? "violet"
-        : "neutral";
+  const statusTagTone = statusTone(assignment);
 
   return (
     <div className="flex flex-col gap-3 border-t border-line py-[11px] first:border-t-0 first:pt-0 sm:flex-row sm:items-center">
@@ -68,7 +63,7 @@ export function AssignmentItem({
           {overdue ? (
             <Tag tone="coral">{overdue}</Tag>
           ) : (
-            <Tag tone={statusTone}>{statusLabel(assignment)}</Tag>
+            <Tag tone={statusTagTone}>{statusLabel(assignment)}</Tag>
           )}
           {assignment.priority === "high" && (
             <Tag tone="tangerine">{priorityLabel(assignment)}</Tag>

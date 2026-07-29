@@ -30,9 +30,9 @@ export async function RiskHud() {
           <span
             className={`rounded-pill px-2.5 py-1 text-[11.5px] font-extrabold ${
               !result
-                ? "bg-tangerine text-tangerine-text"
+                ? "bg-tangerine-tint text-tangerine-text"
                 : result.warn
-                  ? "bg-coral text-white"
+                  ? "bg-coral-deep text-white"
                   : "bg-mint text-mint-text"
             }`}
           >

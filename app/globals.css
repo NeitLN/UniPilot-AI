@@ -24,15 +24,24 @@
 
   --color-ink: #1d1338;
   --color-ink-2: #4a4460;
-  --color-ink-3: #8a83a3;
+  /* Darkened from an earlier #8a83a3 — that only hit 3.58:1 on white,
+     below WCAG AA's 4.5:1 for normal text (Lighthouse a11y audit, Phase 11). */
+  --color-ink-3: #716b86;
 
   --color-coral: #ff5470;
   --color-coral-tint: #ffe7eb;
   --color-coral-text: #c2003a;
+  /* Solid-fill companion to --color-coral for large surfaces carrying small
+     white text (KPI cards, badges) — plain white-on-coral only reaches
+     ~3.1:1 even at full opacity, never 4.5:1, regardless of text opacity. */
+  --color-coral-deep: #bf3f54;
 
   --color-tangerine: #ffb020;
   --color-tangerine-tint: #fff1d6;
-  --color-tangerine-text: #8a5300;
+  /* Darkened from an earlier #8a5300 — that paired with solid --color-tangerine
+     was only 3.46:1 (below 4.5:1); still passes comfortably against
+     --color-tangerine-tint, which has far more headroom either way. */
+  --color-tangerine-text: #613a00;
 
   --color-mint: #22dda6;
   --color-mint-tint: #defbf1;

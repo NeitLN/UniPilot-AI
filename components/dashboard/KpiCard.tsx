@@ -2,7 +2,9 @@ export type KpiTone = "violet" | "coral" | "mint" | "tangerine";
 
 const TONE_BG: Record<KpiTone, string> = {
   violet: "bg-violet",
-  coral: "bg-coral",
+  // coral-deep, not coral: plain white text on solid coral never reaches
+  // 4.5:1 contrast at any opacity (Lighthouse a11y audit, Phase 11).
+  coral: "bg-coral-deep",
   mint: "bg-mint",
   tangerine: "bg-tangerine",
 };
@@ -42,10 +44,10 @@ export interface KpiCardProps {
 export function KpiCard({ tone, label, value, unit, hint, barPct }: KpiCardProps) {
   return (
     <div className={`rounded-card ${TONE_BG[tone]} ${TONE_TEXT[tone]} px-5 py-[18px] pb-5`}>
-      <p className="text-[12.5px] font-bold opacity-75">{label}</p>
+      <p className="text-[12.5px] font-bold">{label}</p>
       <p className="mt-1 font-display text-[46px] font-bold leading-none tracking-[-0.045em]">
         {value}
-        {unit && <span className="ml-1.5 text-[13px] font-bold opacity-70">{unit}</span>}
+        {unit && <span className="ml-1.5 text-[13px] font-bold">{unit}</span>}
       </p>
       {typeof barPct === "number" && (
         <div className={`mt-3 h-[7px] rounded-full ${TONE_TRACK[tone]}`}>
@@ -55,7 +57,7 @@ export function KpiCard({ tone, label, value, unit, hint, barPct }: KpiCardProps
           />
         </div>
       )}
-      <p className="mt-2.5 text-[11.5px] font-semibold opacity-72">{hint}</p>
+      <p className="mt-2.5 text-[11.5px] font-semibold">{hint}</p>
     </div>
   );
 }

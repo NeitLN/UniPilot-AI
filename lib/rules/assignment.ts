@@ -114,6 +114,20 @@ export function overdueLabel(a: AssignmentLike, now = new Date()): string | null
   return `Overdue ${overdueDays(a, now)}d`;
 }
 
+export type StatusTone = "mint" | "violet" | "neutral";
+
+/** Status pill color — done/in-progress/not-started (BR-01). */
+export function statusTone(a: Pick<AssignmentLike, "status">): StatusTone {
+  switch (a.status) {
+    case "done":
+      return "mint";
+    case "in_progress":
+      return "violet";
+    case "not_started":
+      return "neutral";
+  }
+}
+
 export type ProgressTone = "coral" | "tangerine" | "violet" | "muted";
 
 /** Progress bar color per docs/UniPilot/UniPilot_AI_ROADMAP.md §PHASE 2. */

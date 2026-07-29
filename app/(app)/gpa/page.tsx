@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { gpa, gpaBySemester } from "@/lib/rules/gpa";
+import { gpa, gpaBySemester, qualityPoints } from "@/lib/rules/gpa";
 import { AddGradeButton } from "@/components/gpa/AddGradeButton";
 import { CourseBreakdown, type GradeRow } from "@/components/gpa/CourseBreakdown";
 import { GpaTrendChart } from "@/components/gpa/GpaTrendChart";
@@ -34,7 +34,10 @@ export default async function GpaPage() {
 
   const overallGpa = gpa(grades);
   const doneCredits = grades.reduce((s, g) => s + g.creditHours, 0);
-  const currentQP = grades.reduce((s, g) => s + g.gradePoint * g.creditHours, 0);
+  const currentQP = grades.reduce(
+    (s, g) => s + qualityPoints(g.gradePoint, g.creditHours),
+    0,
+  );
   const trendPoints = gpaBySemester(grades);
 
   return (

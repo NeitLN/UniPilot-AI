@@ -25,11 +25,11 @@ export async function PlanCard() {
           <Pilo mood="happy" size={34} />
         </span>
         <h2 className="font-display text-lg font-bold">Pilo&rsquo;s plan</h2>
-        <span className="ml-auto shrink-0 rounded-pill bg-white/22 px-2.5 py-1 text-[10.5px] font-extrabold">
+        <span className="ml-auto shrink-0 rounded-pill bg-white/10 px-2.5 py-1 text-[10.5px] font-extrabold">
           {status === "draft" ? "Draft" : status === "active" ? "Active" : "No plan"}
         </span>
       </div>
-      <p className="mt-3 text-[11.5px] font-medium leading-relaxed text-[#C9B9FF]">
+      <p className="mt-3 text-[11.5px] font-medium leading-relaxed text-white/88">
         {status === "draft"
           ? "A draft is waiting for your review — nothing is scheduled until you confirm it."
           : status === "active"

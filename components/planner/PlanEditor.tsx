@@ -182,13 +182,13 @@ function SessionRow({ session }: { session: PlanSessionData }) {
             type="datetime-local"
             value={startAt}
             onChange={(e) => setStartAt(e.target.value)}
-            className="rounded-[10px] border border-white/25 bg-white/10 px-2 py-1.5 text-[12px] text-white outline-none"
+            className="rounded-[10px] border border-white/25 bg-white/10 px-2 py-1.5 text-[12px] text-white outline-none focus-visible:ring-2 focus-visible:ring-white"
           />
           <input
             type="datetime-local"
             value={endAt}
             onChange={(e) => setEndAt(e.target.value)}
-            className="rounded-[10px] border border-white/25 bg-white/10 px-2 py-1.5 text-[12px] text-white outline-none"
+            className="rounded-[10px] border border-white/25 bg-white/10 px-2 py-1.5 text-[12px] text-white outline-none focus-visible:ring-2 focus-visible:ring-white"
           />
         </div>
         {error && (

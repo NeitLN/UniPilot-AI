@@ -3,6 +3,11 @@
 // long-lived credential to the user's real Google Calendar. AES-256-GCM
 // with a random IV per call; auth tag makes tampering fail loudly instead
 // of decrypting to garbage.
+//
+// No "server-only" import here (unlike the other secret-touching lib files):
+// it breaks Vitest for any file that imports it, and this module already
+// can't run in a browser bundle regardless — it imports node:crypto, which
+// has no client-side polyfill and would fail the build immediately.
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from "node:crypto";
 
 const ALGORITHM = "aes-256-gcm";
