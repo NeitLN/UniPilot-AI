@@ -45,6 +45,16 @@
   --color-line: #f0eef7;
   --color-border-cb: #dcd8ec;
 
+  /* Dark-surface-only tones (sidebar, Risk HUD, Pilo's plan) — DESIGN.md §2.1 */
+  --color-dusk-text: #b7acd8;
+  --color-dusk-muted: #9c90c4;
+  --color-dusk-label: #6c5f94;
+  --color-dusk-border: #33245c;
+  --color-dusk-panel: #2a1d4d;
+  --color-dusk-seg: #382a5e;
+  --color-dusk-hud: #a79ccb;
+  --color-dusk-btn: #c9bee8;
+
   --radius-card: 30px;
   --radius-ctl: 16px;
   --radius-pill: 20px;
@@ -53,4 +63,10 @@
 body {
   background: var(--background);
   color: var(--foreground);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse {
+    animation: none;
+  }
 }
