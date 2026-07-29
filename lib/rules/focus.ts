@@ -16,44 +16,69 @@ export interface FocusSessionLike {
   result: FocusResult;
 }
 
-function dayKey(d: Date): string {
-  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+/**
+ * `YYYY-MM-DD` for `d` as seen in `timeZone` — not the server's local zone.
+ * A server that runs in UTC (typical for Vercel) would otherwise bucket a
+ * late-evening session into the *next* calendar day for anyone west of UTC,
+ * silently breaking streaks that felt consecutive to the user.
+ */
+function dayKey(d: Date, timeZone: string): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(d);
 }
 
-function startOfDay(d: Date): Date {
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+/** Shifts a `YYYY-MM-DD` key by whole days. Date.UTC here is just a calendar
+ * calculator (no real instant/timezone involved), so it's DST-safe. */
+function shiftDayKey(key: string, days: number): string {
+  const [y, m, d] = key.split("-").map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  dt.setUTCDate(dt.getUTCDate() + days);
+  return dt.toISOString().slice(0, 10);
 }
 
-function addDays(d: Date, days: number): Date {
-  const next = new Date(d);
-  next.setDate(next.getDate() + days);
-  return next;
+function defaultTimeZone(): string {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone;
+}
+
+export interface StreakOptions {
+  today?: Date;
+  timeZone?: string;
 }
 
 /**
  * Consecutive days (walking back from today) with at least one `completed`
  * session. If today has none yet, the streak is anchored at yesterday
  * instead of being broken — today just hasn't happened yet.
+ *
+ * `today`/`timeZone` are optional and grouped in one options object (rather
+ * than positional params) so a caller who only wants to override `timeZone`
+ * never has to also write `new Date()` at the call site — that would be a
+ * direct impure call inside a Server Component's render body.
  */
 export function streakDays(
   sessions: Pick<FocusSessionLike, "startedAt" | "result">[],
-  today = new Date(),
+  options: StreakOptions = {},
 ): number {
+  const { today = new Date(), timeZone = defaultTimeZone() } = options;
   const completedDays = new Set(
     sessions
       .filter((s) => s.result === "completed")
-      .map((s) => dayKey(new Date(s.startedAt))),
+      .map((s) => dayKey(new Date(s.startedAt), timeZone)),
   );
 
-  let cursor = startOfDay(today);
-  if (!completedDays.has(dayKey(cursor))) {
-    cursor = addDays(cursor, -1);
+  let cursorKey = dayKey(today, timeZone);
+  if (!completedDays.has(cursorKey)) {
+    cursorKey = shiftDayKey(cursorKey, -1);
   }
 
   let streak = 0;
-  while (completedDays.has(dayKey(cursor))) {
+  while (completedDays.has(cursorKey)) {
     streak++;
-    cursor = addDays(cursor, -1);
+    cursorKey = shiftDayKey(cursorKey, -1);
   }
   return streak;
 }
@@ -66,13 +91,22 @@ export interface WeeklyFocusStats {
   minutesByAssignment: Record<string, number>;
 }
 
-/** Sessions from the 7 days up to and including `now`. */
+export interface WeeklyStatsOptions {
+  now?: Date;
+  timeZone?: string;
+}
+
+/** Sessions from the 7 days (in `timeZone`) up to and including `now`. */
 export function weeklyStats(
   sessions: FocusSessionLike[],
-  now = new Date(),
+  options: WeeklyStatsOptions = {},
 ): WeeklyFocusStats {
-  const weekAgo = addDays(startOfDay(now), -6).getTime();
-  const recent = sessions.filter((s) => new Date(s.startedAt).getTime() >= weekAgo);
+  const { now = new Date(), timeZone = defaultTimeZone() } = options;
+  const todayKey = dayKey(now, timeZone);
+  const weekAgoKey = shiftDayKey(todayKey, -6);
+  const recent = sessions.filter(
+    (s) => dayKey(new Date(s.startedAt), timeZone) >= weekAgoKey,
+  );
 
   const stats: WeeklyFocusStats = {
     completedCycles: 0,

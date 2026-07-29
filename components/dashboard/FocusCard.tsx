@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { streakDays } from "@/lib/rules/focus";
+import { getViewerTimeZone } from "@/lib/timezone";
 
 export async function FocusCard() {
   const supabase = await createClient();
+  const timeZone = await getViewerTimeZone();
   const sixtyDaysAgo = new Date();
   sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
 
@@ -14,6 +16,7 @@ export async function FocusCard() {
 
   const streak = streakDays(
     (data ?? []).map((s) => ({ startedAt: s.started_at, result: s.result })),
+    { timeZone },
   );
 
   return (

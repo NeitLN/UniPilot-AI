@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Fredoka, Nunito } from "next/font/google";
+import { TimezoneCookie } from "@/components/TimezoneCookie";
 import "./globals.css";
 
 const fredoka = Fredoka({
@@ -30,6 +31,7 @@ export default function RootLayout({
       className={`${fredoka.variable} ${nunito.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans bg-canvas text-ink">
+        <TimezoneCookie />
         {children}
       </body>
     </html>

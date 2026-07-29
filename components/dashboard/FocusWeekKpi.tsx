@@ -1,9 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { weeklyStats } from "@/lib/rules/focus";
+import { getViewerTimeZone } from "@/lib/timezone";
 import { KpiCard } from "./KpiCard";
 
 export async function FocusWeekKpi() {
   const supabase = await createClient();
+  const timeZone = await getViewerTimeZone();
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
@@ -18,7 +20,7 @@ export async function FocusWeekKpi() {
     durationSeconds: s.duration_seconds,
     result: s.result,
   }));
-  const stats = weeklyStats(sessions);
+  const stats = weeklyStats(sessions, { timeZone });
 
   return (
     <KpiCard

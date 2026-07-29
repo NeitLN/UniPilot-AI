@@ -64,19 +64,25 @@ export function FocusTimer({ assignments }: { assignments: FocusAssignmentOption
     }
   }, []);
 
-  async function complete() {
-    if (!session) return;
+  // Shared by both finish paths (auto-timeout and manual Stop) — they only
+  // differ in which bit of "we just finished" UI state to set afterward.
+  async function finishSession(current: StoredSession) {
     setPending(true);
     await logFocusSession({
-      assignmentId: session.assignmentId,
-      startedAt: session.startedAt,
+      assignmentId: current.assignmentId,
+      startedAt: current.startedAt,
       endedAt: new Date().toISOString(),
     });
     window.localStorage.removeItem(STORAGE_KEY);
     setSession(null);
-    setJustCompleted(true);
     setPending(false);
     router.refresh();
+  }
+
+  async function complete() {
+    if (!session) return;
+    await finishSession(session);
+    setJustCompleted(true);
   }
 
   useEffect(() => {
@@ -112,17 +118,8 @@ export function FocusTimer({ assignments }: { assignments: FocusAssignmentOption
 
   async function confirmStopEarly() {
     if (!session) return;
-    setPending(true);
-    await logFocusSession({
-      assignmentId: session.assignmentId,
-      startedAt: session.startedAt,
-      endedAt: new Date().toISOString(),
-    });
-    window.localStorage.removeItem(STORAGE_KEY);
-    setSession(null);
+    await finishSession(session);
     setConfirmingStop(false);
-    setPending(false);
-    router.refresh();
   }
 
   const isRunning = session !== null;

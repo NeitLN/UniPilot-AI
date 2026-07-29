@@ -1,21 +1,25 @@
 import { createClient } from "@/lib/supabase/server";
 import { streakDays, weeklyStats } from "@/lib/rules/focus";
+import { getViewerTimeZone } from "@/lib/timezone";
 import { FocusTimer } from "@/components/focus/FocusTimer";
 import { FocusStats, type FocusStatsData } from "@/components/focus/FocusStats";
 
 export default async function FocusPage() {
   const supabase = await createClient();
+  const timeZone = await getViewerTimeZone();
   const sixtyDaysAgo = new Date();
   sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
   const sixtyDaysAgoIso = sixtyDaysAgo.toISOString();
 
   const [{ data: assignmentRows }, { data: courseRows }, { data: sessionRows }] =
     await Promise.all([
+      // Unfiltered on purpose: past focus sessions can point at assignments
+      // that are now done or archived, and those still need a real title/
+      // course for the stats breakdown below (see the picker filter further
+      // down for the active-only subset actually offered to start a session).
       supabase
         .from("assignments")
-        .select("id, title, course_id")
-        .is("archived_at", null)
-        .neq("status", "done")
+        .select("id, title, course_id, status, archived_at")
         .order("due_at", { ascending: true }),
       supabase.from("courses").select("id, name"),
       supabase
@@ -25,10 +29,15 @@ export default async function FocusPage() {
         .order("started_at", { ascending: false }),
     ]);
 
-  const assignments = assignmentRows ?? [];
+  const allAssignments = assignmentRows ?? [];
+  const activeAssignments = allAssignments.filter(
+    (a) => !a.archived_at && a.status !== "done",
+  );
   const courseNameById = new Map((courseRows ?? []).map((c) => [c.id, c.name]));
-  const assignmentTitleById = new Map(assignments.map((a) => [a.id, a.title]));
-  const assignmentCourseById = new Map(assignments.map((a) => [a.id, a.course_id]));
+  const assignmentTitleById = new Map(allAssignments.map((a) => [a.id, a.title]));
+  const assignmentCourseById = new Map(
+    allAssignments.map((a) => [a.id, a.course_id]),
+  );
 
   const sessions = (sessionRows ?? []).map((s) => ({
     assignmentId: s.assignment_id,
@@ -37,8 +46,8 @@ export default async function FocusPage() {
     result: s.result,
   }));
 
-  const stats = weeklyStats(sessions);
-  const streak = streakDays(sessions);
+  const stats = weeklyStats(sessions, { timeZone });
+  const streak = streakDays(sessions, { timeZone });
 
   const byAssignment = Object.entries(stats.minutesByAssignment)
     .map(([id, minutes]) => ({
@@ -83,7 +92,7 @@ export default async function FocusPage() {
 
       <div className="flex flex-col gap-3.5 lg:grid lg:grid-cols-[1fr_1.4fr] lg:items-start">
         <FocusTimer
-          assignments={assignments.map((a) => ({ id: a.id, title: a.title }))}
+          assignments={activeAssignments.map((a) => ({ id: a.id, title: a.title }))}
         />
         <FocusStats data={statsData} />
       </div>

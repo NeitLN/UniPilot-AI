@@ -48,7 +48,17 @@ export async function logFocusSession(
     result,
   });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) {
+    // 23505 = unique_violation on (user_id, started_at) — the same in-flight
+    // session (same localStorage entry) was already logged by another tab.
+    // The session IS recorded, so this is a success from the caller's view.
+    if (error.code === "23505") {
+      revalidatePath("/focus");
+      revalidatePath("/");
+      return { ok: true };
+    }
+    return { ok: false, error: error.message };
+  }
 
   revalidatePath("/focus");
   revalidatePath("/");
