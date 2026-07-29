@@ -58,6 +58,8 @@ async function ensureDevUser() {
 async function clearExistingData(userId) {
   // Children first to respect FKs where cascade isn't already guaranteed.
   await supabase.from("notifications").delete().eq("user_id", userId);
+  await supabase.from("risk_warnings").delete().eq("user_id", userId);
+  await supabase.from("risk_scores").delete().eq("user_id", userId);
   await supabase.from("study_plans").delete().eq("user_id", userId); // cascades to study_sessions
   await supabase.from("focus_sessions").delete().eq("user_id", userId);
   await supabase.from("grades").delete().eq("user_id", userId);

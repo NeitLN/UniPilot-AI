@@ -1,12 +1,13 @@
 import { Suspense } from "react";
-import { KpiCard, KpiCardSkeleton } from "@/components/dashboard/KpiCard";
+import { KpiCardSkeleton } from "@/components/dashboard/KpiCard";
 import { GpaKpi } from "@/components/dashboard/GpaKpi";
 import { ActiveTasksKpi } from "@/components/dashboard/ActiveTasksKpi";
 import { FocusWeekKpi } from "@/components/dashboard/FocusWeekKpi";
 import { DueSoonSection } from "@/components/dashboard/DueSoonSection";
 import { TodaySection } from "@/components/dashboard/TodaySection";
 import { AssignmentSummarySkeleton } from "@/components/dashboard/AssignmentSummaryCard";
-import { RiskHud } from "@/components/dashboard/RiskHud";
+import { RiskHud, RiskHudSkeleton } from "@/components/dashboard/RiskHud";
+import { WorkloadRiskKpi } from "@/components/dashboard/WorkloadRiskKpi";
 import { FocusCard, FocusCardSkeleton } from "@/components/dashboard/FocusCard";
 import { PlanCard, PlanCardSkeleton } from "@/components/dashboard/PlanCard";
 import { GpaTrendCard, GpaTrendCardSkeleton } from "@/components/dashboard/GpaTrendCard";
@@ -33,15 +34,14 @@ export default function DashboardPage() {
         <Suspense fallback={<KpiCardSkeleton tone="mint" />}>
           <FocusWeekKpi />
         </Suspense>
-        <KpiCard
-          tone="tangerine"
-          label="Workload risk"
-          value="—"
-          hint="Lands in Phase 8"
-        />
+        <Suspense fallback={<KpiCardSkeleton tone="tangerine" />}>
+          <WorkloadRiskKpi />
+        </Suspense>
       </div>
 
-      <RiskHud />
+      <Suspense fallback={<RiskHudSkeleton />}>
+        <RiskHud />
+      </Suspense>
 
       <div className="flex flex-col gap-3.5 lg:grid lg:grid-cols-[1.4fr_1fr] lg:items-start">
         <div className="flex flex-col gap-3.5">
