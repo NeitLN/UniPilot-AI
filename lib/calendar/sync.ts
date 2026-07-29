@@ -1,0 +1,132 @@
+import "server-only";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/lib/supabase/types";
+import { refreshAccessToken } from "./oauth";
+import { mapGoogleEventToClassBlock, type GoogleCalendarEvent } from "./map";
+
+const EVENTS_ENDPOINT =
+  "https://www.googleapis.com/calendar/v3/calendars/primary/events";
+const TOKEN_REFRESH_BUFFER_MS = 60_000;
+const WINDOW_BEFORE_DAYS = 7;
+const WINDOW_AFTER_DAYS = 60;
+
+export type SyncResult =
+  | { ok: true; eventCount: number }
+  | { ok: false; reason: "not_connected" }
+  | { ok: false; reason: "sync_error"; message: string };
+
+/**
+ * Syncs the signed-in user's primary Google Calendar into class_blocks.
+ * BR-03: on any failure, the existing cache is left untouched and the
+ * connection row records the error so the UI can show a banner — never a
+ * blank Schedule page.
+ */
+export async function syncCalendarForUser(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+): Promise<SyncResult> {
+  const { data: connection, error: connectionError } = await supabase
+    .from("google_calendar_connections")
+    .select(
+      "refresh_token, access_token, access_token_expires_at",
+    )
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (connectionError || !connection) {
+    return { ok: false, reason: "not_connected" };
+  }
+
+  try {
+    const accessToken = await getFreshAccessToken(supabase, userId, connection);
+    const events = await fetchEvents(accessToken);
+    const syncedAt = new Date();
+
+    const rows = events
+      .map((event) => mapGoogleEventToClassBlock(event, userId, syncedAt))
+      .filter((row): row is NonNullable<typeof row> => row !== null);
+
+    if (rows.length > 0) {
+      const { error: upsertError } = await supabase
+        .from("class_blocks")
+        .upsert(rows, { onConflict: "user_id,gcal_event_id" });
+      if (upsertError) throw new Error(upsertError.message);
+    }
+
+    await supabase
+      .from("google_calendar_connections")
+      .update({
+        last_synced_at: syncedAt.toISOString(),
+        last_sync_status: "ok",
+        last_sync_error: null,
+      })
+      .eq("user_id", userId);
+
+    return { ok: true, eventCount: rows.length };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown sync error";
+    // Cache in class_blocks is intentionally left alone here (BR-03).
+    await supabase
+      .from("google_calendar_connections")
+      .update({ last_sync_status: "error", last_sync_error: message })
+      .eq("user_id", userId);
+
+    return { ok: false, reason: "sync_error", message };
+  }
+}
+
+async function getFreshAccessToken(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  connection: {
+    refresh_token: string;
+    access_token: string | null;
+    access_token_expires_at: string | null;
+  },
+): Promise<string> {
+  const expiresAt = connection.access_token_expires_at
+    ? new Date(connection.access_token_expires_at).getTime()
+    : 0;
+
+  if (connection.access_token && expiresAt - TOKEN_REFRESH_BUFFER_MS > Date.now()) {
+    return connection.access_token;
+  }
+
+  const refreshed = await refreshAccessToken(connection.refresh_token);
+  const newExpiresAt = new Date(Date.now() + refreshed.expires_in * 1000);
+
+  await supabase
+    .from("google_calendar_connections")
+    .update({
+      access_token: refreshed.access_token,
+      access_token_expires_at: newExpiresAt.toISOString(),
+    })
+    .eq("user_id", userId);
+
+  return refreshed.access_token;
+}
+
+async function fetchEvents(accessToken: string): Promise<GoogleCalendarEvent[]> {
+  const now = new Date();
+  const timeMin = new Date(now.getTime() - WINDOW_BEFORE_DAYS * 86_400_000);
+  const timeMax = new Date(now.getTime() + WINDOW_AFTER_DAYS * 86_400_000);
+
+  const params = new URLSearchParams({
+    timeMin: timeMin.toISOString(),
+    timeMax: timeMax.toISOString(),
+    singleEvents: "true",
+    orderBy: "startTime",
+    maxResults: "250",
+  });
+
+  const res = await fetch(`${EVENTS_ENDPOINT}?${params.toString()}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+
+  if (!res.ok) {
+    throw new Error(`Google Calendar API error: ${await res.text()}`);
+  }
+
+  const body: { items?: GoogleCalendarEvent[] } = await res.json();
+  return body.items ?? [];
+}

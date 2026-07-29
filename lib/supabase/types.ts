@@ -1,4 +1,4 @@
-// Hand-written to mirror supabase/migrations/0001_init.sql.
+// Hand-written to mirror supabase/migrations/0001_init.sql and 0002_calendar_connections.sql.
 // Regenerate with `npx supabase gen types typescript --project-id cpuxjofpolmpxhlhnsel --schema public`
 // once the Supabase CLI is linked, and diff against this file for drift.
 
@@ -15,6 +15,7 @@ export type AssignmentPriority = "low" | "medium" | "high";
 export type FocusResult = "completed" | "partial";
 export type PlanStatus = "draft" | "active" | "cancelled";
 export type WarningStatus = "open" | "handled" | "dismissed";
+export type CalendarSyncStatus = "never" | "ok" | "error";
 
 export interface Database {
   public: {
@@ -370,6 +371,42 @@ export interface Database {
         };
         Relationships: [];
       };
+      google_calendar_connections: {
+        Row: {
+          user_id: string;
+          refresh_token: string;
+          access_token: string | null;
+          access_token_expires_at: string | null;
+          scope: string;
+          connected_at: string;
+          last_synced_at: string | null;
+          last_sync_status: CalendarSyncStatus;
+          last_sync_error: string | null;
+        };
+        Insert: {
+          user_id: string;
+          refresh_token: string;
+          access_token?: string | null;
+          access_token_expires_at?: string | null;
+          scope: string;
+          connected_at?: string;
+          last_synced_at?: string | null;
+          last_sync_status?: CalendarSyncStatus;
+          last_sync_error?: string | null;
+        };
+        Update: {
+          user_id?: string;
+          refresh_token?: string;
+          access_token?: string | null;
+          access_token_expires_at?: string | null;
+          scope?: string;
+          connected_at?: string;
+          last_synced_at?: string | null;
+          last_sync_status?: CalendarSyncStatus;
+          last_sync_error?: string | null;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -379,6 +416,7 @@ export interface Database {
       focus_result: FocusResult;
       plan_status: PlanStatus;
       warning_status: WarningStatus;
+      calendar_sync_status: CalendarSyncStatus;
     };
     CompositeTypes: Record<string, never>;
   };
