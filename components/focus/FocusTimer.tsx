@@ -6,6 +6,7 @@ import { Pilo } from "@/components/brand/Pilo";
 import { Modal } from "@/components/ui/Modal";
 import { logFocusSession } from "@/app/(app)/focus/actions";
 import { POMODORO_SECONDS } from "@/lib/rules/focus";
+import { enqueueMutation } from "@/lib/offline/idb";
 
 const STORAGE_KEY = "unipilot:focus:session";
 const RADIUS = 65;
@@ -68,11 +69,18 @@ export function FocusTimer({ assignments }: { assignments: FocusAssignmentOption
   // differ in which bit of "we just finished" UI state to set afterward.
   async function finishSession(current: StoredSession) {
     setPending(true);
-    await logFocusSession({
+    const input = {
       assignmentId: current.assignmentId,
       startedAt: current.startedAt,
       endedAt: new Date().toISOString(),
-    });
+    };
+    if (navigator.onLine) {
+      await logFocusSession(input);
+    } else {
+      // No network to reach the server action — queue it so the completed
+      // cycle isn't lost, synced the moment the browser comes back online.
+      await enqueueMutation("logFocusSession", input);
+    }
     window.localStorage.removeItem(STORAGE_KEY);
     setSession(null);
     setPending(false);

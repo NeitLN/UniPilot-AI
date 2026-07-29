@@ -27,6 +27,7 @@ export interface AssignmentRow {
   notes: string | null;
   reminderAt: string | null;
   archivedAt: string | null;
+  updatedAt: string;
 }
 
 export function AssignmentItem({
@@ -110,6 +111,7 @@ export function AssignmentItem({
             reminderAt: assignment.reminderAt
               ? toLocalInputValue(assignment.reminderAt)
               : "",
+            updatedAt: assignment.updatedAt,
           }}
           onSaved={() => setEditing(false)}
           onCancel={() => setEditing(false)}

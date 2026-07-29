@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { syncNow } from "@/app/(app)/schedule/actions";
+import { useOnlineStatus } from "@/lib/offline/useOnlineStatus";
 import type { CalendarSyncStatus } from "@/lib/supabase/types";
 
 const OAUTH_ERROR_MESSAGES: Record<string, string> = {
@@ -29,6 +30,7 @@ export function SyncStatusBar({
   oauthError,
 }: SyncStatusBarProps) {
   const router = useRouter();
+  const isOnline = useOnlineStatus();
   const [pending, startTransition] = useTransition();
   const [runError, setRunError] = useState<string | null>(null);
 
@@ -44,7 +46,8 @@ export function SyncStatusBar({
   const banner =
     (oauthError && OAUTH_ERROR_MESSAGES[oauthError]) ||
     runError ||
-    (lastSyncStatus === "error" ? lastSyncError : null);
+    (lastSyncStatus === "error" ? lastSyncError : null) ||
+    (!isOnline ? "You're offline — Calendar sync needs a connection." : null);
 
   return (
     <div className="flex flex-col gap-2">
@@ -71,18 +74,22 @@ export function SyncStatusBar({
           <button
             type="button"
             onClick={handleSyncNow}
-            disabled={pending}
+            disabled={pending || !isOnline}
             className="rounded-ctl bg-violet px-3.5 py-2 text-xs font-bold text-white hover:bg-violet-deep disabled:opacity-60"
           >
             {pending ? "Syncing…" : "Sync now"}
           </button>
-        ) : (
+        ) : isOnline ? (
           <a
             href="/api/calendar/oauth/start"
             className="rounded-ctl bg-violet px-3.5 py-2 text-xs font-bold text-white hover:bg-violet-deep"
           >
             Connect Google Calendar
           </a>
+        ) : (
+          <span className="rounded-ctl bg-line px-3.5 py-2 text-xs font-bold text-ink-3">
+            Connect Google Calendar
+          </span>
         )}
       </div>
 

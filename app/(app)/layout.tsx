@@ -4,6 +4,7 @@ import { Logo } from "@/components/brand/Logo";
 import { SidebarNav } from "@/components/dashboard/SidebarNav";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
+import { OfflineBanner } from "@/components/offline/OfflineBanner";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -24,6 +25,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </aside>
 
       <div className="flex flex-1 flex-col min-w-0">
+        <OfflineBanner />
         <header className="flex items-center justify-between gap-3 border-b border-black/5 bg-card px-6 py-4 md:hidden">
           <Logo tone="dark" size={32} />
           <Suspense fallback={null}>

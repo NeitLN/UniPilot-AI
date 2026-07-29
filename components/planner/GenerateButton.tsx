@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useOnlineStatus } from "@/lib/offline/useOnlineStatus";
 
 export interface GenerateButtonProps {
   disabled: boolean;
@@ -18,6 +19,7 @@ interface GenerateResponse {
 
 export function GenerateButton({ disabled, disabledReasons, label }: GenerateButtonProps) {
   const router = useRouter();
+  const isOnline = useOnlineStatus();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [retryable, setRetryable] = useState(false);
@@ -50,20 +52,25 @@ export function GenerateButton({ disabled, disabledReasons, label }: GenerateBut
     }
   }
 
+  const blocked = disabled || !isOnline;
+  const reasons = !isOnline
+    ? ["AI Planner needs a connection — reconnect and try again.", ...disabledReasons]
+    : disabledReasons;
+
   return (
     <div className="flex flex-col items-end gap-1.5">
       <button
         type="button"
         onClick={handleGenerate}
-        disabled={disabled || pending}
+        disabled={blocked || pending}
         className="rounded-ctl bg-violet px-4 py-2.5 text-sm font-bold text-white hover:bg-violet-deep disabled:opacity-45"
       >
         {pending ? "Generating…" : label}
       </button>
 
-      {disabled && disabledReasons.length > 0 && (
+      {blocked && reasons.length > 0 && (
         <ul className="text-right text-[11.5px] font-semibold text-ink-3">
-          {disabledReasons.map((r) => (
+          {reasons.map((r) => (
             <li key={r}>{r}</li>
           ))}
         </ul>

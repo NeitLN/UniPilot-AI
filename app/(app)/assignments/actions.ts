@@ -123,6 +123,19 @@ export async function updateAssignment(
   return { errors: {}, ok: true };
 }
 
+/** Used by the offline mutation queue to detect a server-side edit that
+ * happened after an offline edit was made, so a queued update never silently
+ * clobbers a newer server row (Phase 10 conflict handling). */
+export async function getAssignmentUpdatedAt(id: string): Promise<string | null> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("assignments")
+    .select("updated_at")
+    .eq("id", id)
+    .maybeSingle();
+  return data?.updated_at ?? null;
+}
+
 export async function archiveAssignment(id: string) {
   const supabase = await createClient();
   // Archiving cancels any pending reminder for this assignment (FR-19).

@@ -7,6 +7,8 @@ import {
   type AssignmentFormState,
 } from "@/app/(app)/assignments/actions";
 import { ensurePushSubscription } from "@/lib/push/subscribe";
+import { enqueueMutation } from "@/lib/offline/idb";
+import { useOnlineStatus } from "@/lib/offline/useOnlineStatus";
 
 // Defined locally rather than imported from actions.ts: a "use server" module
 // may only export async functions, so a plain object export from it resolves
@@ -31,6 +33,7 @@ export interface AssignmentFormValues {
   progress: number;
   notes: string;
   reminderAt: string;
+  updatedAt: string;
 }
 
 export interface AssignmentFormProps {
@@ -60,6 +63,7 @@ export function AssignmentForm({
 
   const [progress, setProgress] = useState(initialValues?.progress ?? 0);
   const formRef = useRef<HTMLFormElement>(null);
+  const isOnline = useOnlineStatus();
 
   useEffect(() => {
     if (!state.ok) return;
@@ -83,8 +87,35 @@ export function AssignmentForm({
     }
   }, [state.errors]);
 
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    if (isOnline) return; // let the normal server-action form submission run
+
+    e.preventDefault();
+    const payload: Record<string, string> = {};
+    for (const [key, value] of new FormData(e.currentTarget).entries()) {
+      if (typeof value === "string") payload[key] = value;
+    }
+
+    if (isEdit) {
+      await enqueueMutation("updateAssignment", {
+        id: initialValues!.id,
+        snapshotUpdatedAt: initialValues!.updatedAt,
+        ...payload,
+      });
+    } else {
+      await enqueueMutation("createAssignment", payload);
+    }
+
+    onSaved();
+  }
+
   return (
-    <form ref={formRef} action={formAction} className="flex flex-col gap-3.5">
+    <form
+      ref={formRef}
+      action={formAction}
+      onSubmit={handleSubmit}
+      className="flex flex-col gap-3.5"
+    >
       <h2 className="font-display text-lg font-bold text-ink">
         {isEdit ? "Edit assignment" : "New assignment"}
       </h2>
