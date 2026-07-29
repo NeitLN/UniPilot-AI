@@ -41,6 +41,7 @@ export interface Database {
           weekly_availability_hours?: number;
           created_at?: string;
         };
+        Relationships: [];
       };
       courses: {
         Row: {
@@ -70,6 +71,7 @@ export interface Database {
           semester?: string;
           created_at?: string;
         };
+        Relationships: [];
       };
       assignments: {
         Row: {
@@ -120,6 +122,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       class_blocks: {
         Row: {
@@ -155,6 +158,7 @@ export interface Database {
           end_at?: string;
           synced_at?: string;
         };
+        Relationships: [];
       };
       focus_sessions: {
         Row: {
@@ -184,6 +188,7 @@ export interface Database {
           duration_seconds?: number;
           result?: FocusResult;
         };
+        Relationships: [];
       };
       grades: {
         Row: {
@@ -213,6 +218,7 @@ export interface Database {
           credit_hours?: number;
           created_at?: string;
         };
+        Relationships: [];
       };
       study_plans: {
         Row: {
@@ -242,6 +248,7 @@ export interface Database {
           generated_at?: string;
           confirmed_at?: string | null;
         };
+        Relationships: [];
       };
       study_sessions: {
         Row: {
@@ -265,6 +272,7 @@ export interface Database {
           start_at?: string;
           end_at?: string;
         };
+        Relationships: [];
       };
       risk_scores: {
         Row: {
@@ -297,6 +305,7 @@ export interface Database {
           score?: number;
           computed_at?: string;
         };
+        Relationships: [];
       };
       risk_warnings: {
         Row: {
@@ -323,6 +332,7 @@ export interface Database {
           action_taken?: string | null;
           created_at?: string;
         };
+        Relationships: [];
       };
       notifications: {
         Row: {
@@ -358,6 +368,7 @@ export interface Database {
           read_at?: string | null;
           push_status?: string | null;
         };
+        Relationships: [];
       };
     };
     Views: Record<string, never>;

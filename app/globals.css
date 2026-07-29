@@ -28,17 +28,22 @@
 
   --color-coral: #ff5470;
   --color-coral-tint: #ffe7eb;
+  --color-coral-text: #c2003a;
 
   --color-tangerine: #ffb020;
   --color-tangerine-tint: #fff1d6;
+  --color-tangerine-text: #8a5300;
 
   --color-mint: #22dda6;
   --color-mint-tint: #defbf1;
+  --color-mint-text: #08372a;
 
   --color-sky: #45c2ff;
 
   --color-canvas: #f2f0fb;
   --color-card: #ffffff;
+  --color-line: #f0eef7;
+  --color-border-cb: #dcd8ec;
 
   --radius-card: 30px;
   --radius-ctl: 16px;

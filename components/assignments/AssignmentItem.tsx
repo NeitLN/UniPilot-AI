@@ -1,0 +1,134 @@
+"use client";
+
+import { useState } from "react";
+import {
+  overdueLabel,
+  priorityLabel,
+  progressTone,
+  statusLabel,
+} from "@/lib/rules/assignment";
+import { Tag } from "@/components/ui/Tag";
+import { ProgressBar } from "@/components/ui/ProgressBar";
+import { Modal } from "@/components/ui/Modal";
+import { AssignmentForm, type CourseOption } from "./AssignmentForm";
+import { ArchiveDialog } from "./ArchiveDialog";
+import type { AssignmentPriority, AssignmentStatus } from "@/lib/supabase/types";
+
+export interface AssignmentRow {
+  id: string;
+  title: string;
+  courseId: string;
+  courseName: string | null;
+  dueAt: string;
+  weight: number;
+  priority: AssignmentPriority;
+  status: AssignmentStatus;
+  progress: number;
+  notes: string | null;
+  reminderAt: string | null;
+  archivedAt: string | null;
+}
+
+export function AssignmentItem({
+  assignment,
+  courses,
+}: {
+  assignment: AssignmentRow;
+  courses: CourseOption[];
+}) {
+  const [editing, setEditing] = useState(false);
+  const [archiving, setArchiving] = useState(false);
+
+  const overdue = overdueLabel(assignment);
+  const tone = progressTone(assignment);
+  const due = new Date(assignment.dueAt);
+
+  const statusTone =
+    assignment.status === "done"
+      ? "mint"
+      : assignment.status === "in_progress"
+        ? "violet"
+        : "neutral";
+
+  return (
+    <div className="flex flex-col gap-3 border-t border-line py-[11px] first:border-t-0 first:pt-0 sm:flex-row sm:items-center">
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-bold text-ink">{assignment.title}</p>
+        <p className="mt-0.5 truncate text-[11.5px] font-semibold text-ink-3">
+          {assignment.courseName ?? "No course"} · Due{" "}
+          {due.toLocaleString(undefined, {
+            month: "short",
+            day: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+          })}
+        </p>
+        <div className="mt-1.5 flex flex-wrap gap-1.5">
+          {overdue ? (
+            <Tag tone="coral">{overdue}</Tag>
+          ) : (
+            <Tag tone={statusTone}>{statusLabel(assignment)}</Tag>
+          )}
+          {assignment.priority === "high" && (
+            <Tag tone="tangerine">{priorityLabel(assignment)}</Tag>
+          )}
+        </div>
+      </div>
+
+      <ProgressBar value={assignment.progress} tone={tone} className="sm:w-[92px]" />
+
+      <div className="flex shrink-0 gap-1.5">
+        <button
+          type="button"
+          onClick={() => setEditing(true)}
+          className="rounded-ctl bg-line px-3 py-2 text-xs font-bold text-ink-2 hover:bg-[#E6E2F2]"
+        >
+          Edit
+        </button>
+        <button
+          type="button"
+          onClick={() => setArchiving(true)}
+          className="rounded-ctl bg-line px-3 py-2 text-xs font-bold text-ink-2 hover:bg-[#E6E2F2]"
+        >
+          Archive
+        </button>
+      </div>
+
+      <Modal open={editing} onClose={() => setEditing(false)} title="Edit assignment">
+        <AssignmentForm
+          courses={courses}
+          initialValues={{
+            id: assignment.id,
+            title: assignment.title,
+            courseId: assignment.courseId,
+            dueAt: toLocalInputValue(assignment.dueAt),
+            weight: assignment.weight,
+            priority: assignment.priority,
+            status: assignment.status,
+            progress: assignment.progress,
+            notes: assignment.notes ?? "",
+            reminderAt: assignment.reminderAt
+              ? toLocalInputValue(assignment.reminderAt)
+              : "",
+          }}
+          onSaved={() => setEditing(false)}
+          onCancel={() => setEditing(false)}
+        />
+      </Modal>
+
+      <ArchiveDialog
+        assignmentId={assignment.id}
+        assignmentTitle={assignment.title}
+        open={archiving}
+        onClose={() => setArchiving(false)}
+      />
+    </div>
+  );
+}
+
+/** `datetime-local` inputs need `YYYY-MM-DDTHH:mm` in the viewer's local time. */
+function toLocalInputValue(iso: string): string {
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
