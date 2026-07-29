@@ -45,7 +45,7 @@ export function ViewSwitcher({
             type="button"
             onClick={() => navigate(v.value, date)}
             aria-pressed={view === v.value}
-            className={`rounded-[12px] px-3 py-1.5 text-xs font-bold transition-colors ${
+            className={`flex min-h-11 items-center rounded-[12px] px-3 py-1.5 text-xs font-bold transition-colors ${
               view === v.value ? "bg-white text-ink" : "text-ink-3"
             }`}
           >
@@ -59,14 +59,14 @@ export function ViewSwitcher({
           type="button"
           aria-label="Previous"
           onClick={() => navigate(view, toDateParam(shiftDate(view, anchor, -1)))}
-          className="rounded-ctl bg-line px-2.5 py-1.5 text-sm font-bold text-ink-2 hover:bg-[#E6E2F2]"
+          className="flex min-h-11 min-w-11 items-center justify-center rounded-ctl bg-line px-2.5 py-1.5 text-sm font-bold text-ink-2 hover:bg-[#E6E2F2]"
         >
           ‹
         </button>
         <button
           type="button"
           onClick={() => navigate(view, toDateParam(new Date()))}
-          className="rounded-ctl bg-line px-3 py-1.5 text-xs font-bold text-ink-2 hover:bg-[#E6E2F2]"
+          className="flex min-h-11 items-center rounded-ctl bg-line px-3 py-1.5 text-xs font-bold text-ink-2 hover:bg-[#E6E2F2]"
         >
           Today
         </button>
@@ -74,7 +74,7 @@ export function ViewSwitcher({
           type="button"
           aria-label="Next"
           onClick={() => navigate(view, toDateParam(shiftDate(view, anchor, 1)))}
-          className="rounded-ctl bg-line px-2.5 py-1.5 text-sm font-bold text-ink-2 hover:bg-[#E6E2F2]"
+          className="flex min-h-11 min-w-11 items-center justify-center rounded-ctl bg-line px-2.5 py-1.5 text-sm font-bold text-ink-2 hover:bg-[#E6E2F2]"
         >
           ›
         </button>

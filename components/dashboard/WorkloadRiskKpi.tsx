@@ -10,7 +10,10 @@ export async function WorkloadRiskKpi() {
 
   const computation = user
     ? await computeAndStoreRisk(supabase, user.id)
-    : ({ status: "insufficient_data" } as const);
+    : ({
+        status: "insufficient_data",
+        gate: { availableHours: 0, pendingCount: 0, focusHistoryDays: 0 },
+      } as const);
 
   if (computation.status !== "ok") {
     return (

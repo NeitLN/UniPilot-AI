@@ -118,10 +118,12 @@ export async function updateTargetGpa(targetGpa: number) {
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Session expired — sign in again.");
 
+  // upsert, not update: a signup that predates the on_auth_user_created
+  // trigger (0008_profiles_trigger.sql) could still be missing its row —
+  // .update() would silently affect 0 rows in that case.
   const { error } = await supabase
     .from("profiles")
-    .update({ target_gpa: targetGpa })
-    .eq("id", user.id);
+    .upsert({ id: user.id, target_gpa: targetGpa });
   if (error) throw new Error(error.message);
 
   revalidatePath("/gpa");

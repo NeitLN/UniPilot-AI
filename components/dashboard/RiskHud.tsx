@@ -18,7 +18,10 @@ export async function RiskHud() {
 
   const computation = user
     ? await computeAndStoreRisk(supabase, user.id)
-    : ({ status: "insufficient_data" } as const);
+    : ({
+        status: "insufficient_data",
+        gate: { availableHours: 0, pendingCount: 0, focusHistoryDays: 0 },
+      } as const);
 
   const result = computation.status === "ok" ? computation.result : null;
 
@@ -73,7 +76,7 @@ export async function RiskHud() {
       {result && (
         <Link
           href="/risk"
-          className="shrink-0 rounded-ctl bg-lime px-4 py-2.5 text-center text-[13px] font-extrabold text-ink hover:bg-lime-deep sm:self-center"
+          className="flex min-h-11 shrink-0 items-center justify-center rounded-ctl bg-lime px-4 py-2.5 text-center text-[13px] font-extrabold text-ink hover:bg-lime-deep sm:self-center"
         >
           View report
         </Link>

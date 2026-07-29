@@ -13,7 +13,7 @@ export function AddGradeButton({ courses }: { courses: CourseOption[] }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-ctl bg-violet px-4 py-2.5 text-sm font-bold text-white hover:bg-violet-deep"
+        className="flex min-h-11 items-center rounded-ctl bg-violet px-4 py-2.5 text-sm font-bold text-white hover:bg-violet-deep"
       >
         Add grade
       </button>

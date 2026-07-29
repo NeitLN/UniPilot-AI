@@ -1,10 +1,15 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
-import { canCompute, computeRisk, type RiskResult } from "@/lib/rules/risk";
+import {
+  canCompute,
+  computeRisk,
+  type RiskGateInput,
+  type RiskResult,
+} from "@/lib/rules/risk";
 
 export type RiskComputeResult =
-  | { status: "insufficient_data" }
+  | { status: "insufficient_data"; gate: RiskGateInput }
   | { status: "ok"; result: RiskResult; scoreId: string };
 
 function todayDateString(): string {
@@ -90,7 +95,10 @@ export async function computeAndStoreRisk(
   }
 
   if (!canCompute({ availableHours, pendingCount, focusHistoryDays })) {
-    return { status: "insufficient_data" };
+    return {
+      status: "insufficient_data",
+      gate: { availableHours, pendingCount, focusHistoryDays },
+    };
   }
 
   const result = computeRisk({

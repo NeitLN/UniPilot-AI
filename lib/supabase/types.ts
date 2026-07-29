@@ -136,6 +136,10 @@ export interface Database {
           start_at: string;
           end_at: string;
           synced_at: string;
+          is_all_day: boolean;
+          notes: string | null;
+          reminder_minutes_before: number | null;
+          recurrence_group_id: string | null;
         };
         Insert: {
           id?: string;
@@ -147,6 +151,10 @@ export interface Database {
           start_at: string;
           end_at: string;
           synced_at?: string;
+          is_all_day?: boolean;
+          notes?: string | null;
+          reminder_minutes_before?: number | null;
+          recurrence_group_id?: string | null;
         };
         Update: {
           id?: string;
@@ -158,6 +166,10 @@ export interface Database {
           start_at?: string;
           end_at?: string;
           synced_at?: string;
+          is_all_day?: boolean;
+          notes?: string | null;
+          reminder_minutes_before?: number | null;
+          recurrence_group_id?: string | null;
         };
         Relationships: [];
       };
@@ -350,6 +362,7 @@ export interface Database {
           read_at: string | null;
           push_status: string | null;
           assignment_id: string | null;
+          class_block_id: string | null;
         };
         Insert: {
           id?: string;
@@ -362,6 +375,7 @@ export interface Database {
           read_at?: string | null;
           push_status?: string | null;
           assignment_id?: string | null;
+          class_block_id?: string | null;
         };
         Update: {
           id?: string;
@@ -374,6 +388,7 @@ export interface Database {
           read_at?: string | null;
           push_status?: string | null;
           assignment_id?: string | null;
+          class_block_id?: string | null;
         };
         Relationships: [];
       };

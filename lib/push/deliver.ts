@@ -62,3 +62,33 @@ export async function deliverDueNotifications(
 
   return { deliveredCount: due.length };
 }
+
+/**
+ * FR-03: delivers every user's due-but-undelivered notifications, not just
+ * the signed-in caller's — meant for a cron trigger (see
+ * app/api/cron/notifications/route.ts), since `deliverDueNotifications`
+ * above only fires opportunistically when that user's browser is open.
+ * Pass a service-role client (lib/supabase/service.ts) so this can read
+ * across every user regardless of RLS.
+ */
+export async function deliverAllDueNotifications(
+  supabase: SupabaseClient<Database>,
+): Promise<DeliverResult> {
+  const now = new Date().toISOString();
+
+  const { data: due } = await supabase
+    .from("notifications")
+    .select("user_id")
+    .is("delivered_at", null)
+    .lte("scheduled_at", now);
+
+  const userIds = [...new Set((due ?? []).map((n) => n.user_id))];
+
+  let deliveredCount = 0;
+  for (const userId of userIds) {
+    const result = await deliverDueNotifications(supabase, userId);
+    deliveredCount += result.deliveredCount;
+  }
+
+  return { deliveredCount };
+}

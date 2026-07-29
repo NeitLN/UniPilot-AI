@@ -109,7 +109,7 @@ export function PlanEditor({
           type="button"
           onClick={handleCancel}
           disabled={pending}
-          className="flex-1 rounded-ctl bg-white/18 py-2.5 text-sm font-bold text-white disabled:opacity-60"
+          className="flex min-h-11 flex-1 items-center justify-center rounded-ctl bg-white/18 py-2.5 text-sm font-bold text-white disabled:opacity-60"
         >
           Cancel
         </button>
@@ -117,7 +117,7 @@ export function PlanEditor({
           type="button"
           onClick={handleConfirm}
           disabled={pending || sessions.length === 0}
-          className="flex-1 rounded-ctl bg-lime py-2.5 text-sm font-bold text-ink disabled:opacity-60"
+          className="flex min-h-11 flex-1 items-center justify-center rounded-ctl bg-lime py-2.5 text-sm font-bold text-ink disabled:opacity-60"
         >
           {pending ? "Working…" : "Confirm plan"}
         </button>
@@ -205,7 +205,7 @@ function SessionRow({ session }: { session: PlanSessionData }) {
           <button
             type="button"
             onClick={() => setEditing(false)}
-            className="rounded-ctl bg-white/15 px-3 py-1.5 text-[11px] font-bold text-white"
+            className="flex min-h-11 items-center rounded-ctl bg-white/15 px-3 py-1.5 text-[11px] font-bold text-white"
           >
             Cancel
           </button>
@@ -213,7 +213,7 @@ function SessionRow({ session }: { session: PlanSessionData }) {
             type="button"
             onClick={handleSave}
             disabled={pending}
-            className="rounded-ctl bg-lime px-3 py-1.5 text-[11px] font-bold text-ink disabled:opacity-60"
+            className="flex min-h-11 items-center rounded-ctl bg-lime px-3 py-1.5 text-[11px] font-bold text-ink disabled:opacity-60"
           >
             {pending ? "Saving…" : "Save"}
           </button>
@@ -255,7 +255,7 @@ function SessionRow({ session }: { session: PlanSessionData }) {
         <button
           type="button"
           onClick={() => setEditing(true)}
-          className="rounded-ctl bg-white/15 px-2.5 py-1.5 text-[11px] font-bold text-white"
+          className="flex min-h-11 min-w-11 items-center justify-center rounded-ctl bg-white/15 px-2.5 py-1.5 text-[11px] font-bold text-white"
         >
           Edit
         </button>
@@ -263,7 +263,7 @@ function SessionRow({ session }: { session: PlanSessionData }) {
           type="button"
           onClick={handleDelete}
           disabled={pending}
-          className="rounded-ctl bg-white/15 px-2.5 py-1.5 text-[11px] font-bold text-white disabled:opacity-60"
+          className="flex min-h-11 items-center rounded-ctl bg-white/15 px-2.5 py-1.5 text-[11px] font-bold text-white disabled:opacity-60"
         >
           Delete
         </button>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useOnlineStatus } from "@/lib/offline/useOnlineStatus";
 
@@ -63,7 +64,7 @@ export function GenerateButton({ disabled, disabledReasons, label }: GenerateBut
         type="button"
         onClick={handleGenerate}
         disabled={blocked || pending}
-        className="rounded-ctl bg-violet px-4 py-2.5 text-sm font-bold text-white hover:bg-violet-deep disabled:opacity-45"
+        className="flex min-h-11 items-center rounded-ctl bg-violet px-4 py-2.5 text-sm font-bold text-white hover:bg-violet-deep disabled:opacity-45"
       >
         {pending ? "Generating…" : label}
       </button>
@@ -71,7 +72,28 @@ export function GenerateButton({ disabled, disabledReasons, label }: GenerateBut
       {blocked && reasons.length > 0 && (
         <ul className="text-right text-[11.5px] font-semibold text-ink-3">
           {reasons.map((r) => (
-            <li key={r}>{r}</li>
+            <li key={r}>
+              {r}
+              {r.includes("weekly availability") && (
+                <>
+                  {" "}
+                  <Link href="/settings" className="font-extrabold text-violet hover:underline">
+                    Set it now →
+                  </Link>
+                </>
+              )}
+              {r.includes("Add at least one assignment") && (
+                <>
+                  {" "}
+                  <Link
+                    href="/assignments"
+                    className="font-extrabold text-violet hover:underline"
+                  >
+                    Add one now →
+                  </Link>
+                </>
+              )}
+            </li>
           ))}
         </ul>
       )}

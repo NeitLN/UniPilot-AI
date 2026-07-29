@@ -51,7 +51,7 @@ export function ArchiveDialog({
         <button
           type="button"
           onClick={onClose}
-          className="flex-1 rounded-ctl bg-line py-2.5 text-sm font-bold text-ink-2 hover:bg-[#E6E2F2]"
+          className="flex min-h-11 flex-1 items-center justify-center rounded-ctl bg-line py-2.5 text-sm font-bold text-ink-2 hover:bg-[#E6E2F2]"
         >
           Cancel
         </button>
@@ -59,7 +59,7 @@ export function ArchiveDialog({
           type="button"
           onClick={handleConfirm}
           disabled={pending}
-          className="flex-1 rounded-ctl bg-coral py-2.5 text-sm font-bold text-white hover:bg-coral/90 disabled:opacity-60"
+          className="flex min-h-11 flex-1 items-center justify-center rounded-ctl bg-coral py-2.5 text-sm font-bold text-white hover:bg-coral/90 disabled:opacity-60"
         >
           {pending ? "Archiving…" : "Archive"}
         </button>

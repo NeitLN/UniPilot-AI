@@ -47,7 +47,9 @@ export function KpiCard({ tone, label, value, unit, hint, barPct }: KpiCardProps
       <p className="text-[12.5px] font-bold">{label}</p>
       <p className="mt-1 font-display text-[46px] font-bold leading-none tracking-[-0.045em]">
         {value}
-        {unit && <span className="ml-1.5 text-[13px] font-bold">{unit}</span>}
+        {unit && (
+          <span className="ml-1.5 text-[13px] font-bold tracking-normal">{unit}</span>
+        )}
       </p>
       {typeof barPct === "number" && (
         <div className={`mt-3 h-[7px] rounded-full ${TONE_TRACK[tone]}`}>

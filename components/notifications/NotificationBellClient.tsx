@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   markNotificationRead,
@@ -57,7 +58,7 @@ export function NotificationBellClient({
           unreadCount > 0 ? `Notifications, ${unreadCount} unread` : "Notifications"
         }
         onClick={() => setOpen((v) => !v)}
-        className="relative flex h-9 w-9 items-center justify-center rounded-full bg-line text-ink hover:bg-[#E6E2F2]"
+        className="relative flex h-11 w-11 items-center justify-center rounded-full bg-line text-ink hover:bg-[#E6E2F2]"
       >
         <BellIcon />
         {unreadCount > 0 && (
@@ -125,6 +126,14 @@ export function NotificationBellClient({
                 ))}
               </ul>
             )}
+
+            <Link
+              href="/notifications"
+              onClick={() => setOpen(false)}
+              className="mt-2 flex min-h-11 items-center justify-center rounded-ctl px-2.5 py-2 text-center text-[12.5px] font-bold text-violet hover:bg-violet-tint"
+            >
+              View all
+            </Link>
           </div>
         </>
       )}

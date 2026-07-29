@@ -7,9 +7,18 @@ export interface ModalProps {
   onClose: () => void;
   title: string;
   children: React.ReactNode;
+  /** "md" (default) fits every other form here; "lg" gives extra width to
+   * forms with side-by-side datetime inputs (e.g. EventForm), which clip
+   * their "AM/PM" text at max-w-md. */
+  size?: "md" | "lg";
 }
 
-export function Modal({ open, onClose, title, children }: ModalProps) {
+const SIZE_CLASSES: Record<"md" | "lg", string> = {
+  md: "max-w-md",
+  lg: "max-w-xl",
+};
+
+export function Modal({ open, onClose, title, children, size = "md" }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -37,7 +46,7 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
         aria-label={title}
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md overscroll-contain rounded-card bg-white p-6 outline-none"
+        className={`w-full ${SIZE_CLASSES[size]} overscroll-contain rounded-card bg-white p-6 outline-none`}
       >
         {children}
       </div>

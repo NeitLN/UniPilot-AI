@@ -39,6 +39,7 @@ export function ScheduleGrid({
       )}
 
       <ClassDetailPanel
+        key={selected?.id ?? "none"}
         block={selected}
         open={selected !== null}
         onClose={() => setSelectedId(null)}

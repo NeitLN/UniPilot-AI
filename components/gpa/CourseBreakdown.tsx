@@ -86,14 +86,14 @@ export function CourseBreakdown({
                         <button
                           type="button"
                           onClick={() => setEditing(g)}
-                          className="rounded-ctl bg-line px-2.5 py-1.5 text-[11px] font-bold text-ink-2 hover:bg-[#E6E2F2]"
+                          className="flex min-h-11 items-center rounded-ctl bg-line px-2.5 py-1.5 text-[11px] font-bold text-ink-2 hover:bg-[#E6E2F2]"
                         >
                           Edit
                         </button>
                         <button
                           type="button"
                           onClick={() => setDeleting(g)}
-                          className="rounded-ctl bg-line px-2.5 py-1.5 text-[11px] font-bold text-ink-2 hover:bg-[#E6E2F2]"
+                          className="flex min-h-11 items-center rounded-ctl bg-line px-2.5 py-1.5 text-[11px] font-bold text-ink-2 hover:bg-[#E6E2F2]"
                         >
                           Delete
                         </button>
@@ -174,7 +174,7 @@ function DeleteGradeDialog({
         <button
           type="button"
           onClick={onClose}
-          className="flex-1 rounded-ctl bg-line py-2.5 text-sm font-bold text-ink-2 hover:bg-[#E6E2F2]"
+          className="flex min-h-11 flex-1 items-center justify-center rounded-ctl bg-line py-2.5 text-sm font-bold text-ink-2 hover:bg-[#E6E2F2]"
         >
           Cancel
         </button>
@@ -182,7 +182,7 @@ function DeleteGradeDialog({
           type="button"
           onClick={handleConfirm}
           disabled={pending}
-          className="flex-1 rounded-ctl bg-coral py-2.5 text-sm font-bold text-white hover:bg-coral/90 disabled:opacity-60"
+          className="flex min-h-11 flex-1 items-center justify-center rounded-ctl bg-coral py-2.5 text-sm font-bold text-white hover:bg-coral/90 disabled:opacity-60"
         >
           {pending ? "Deleting…" : "Delete"}
         </button>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Pilo } from "@/components/brand/Pilo";
 import { Modal } from "@/components/ui/Modal";
@@ -213,9 +214,16 @@ export function FocusTimer({ assignments }: { assignments: FocusAssignmentOption
           </button>
           {!selectedId && (
             <p className="mt-2 text-[11.5px] font-semibold text-ink/70">
-              {assignments.length === 0
-                ? "Add an assignment first — Pomodoro needs one to log against."
-                : "Pick an assignment first."}
+              {assignments.length === 0 ? (
+                <>
+                  Add an assignment first — Pomodoro needs one to log against.{" "}
+                  <Link href="/assignments" className="font-extrabold text-violet hover:underline">
+                    Add one now →
+                  </Link>
+                </>
+              ) : (
+                "Pick an assignment first."
+              )}
             </p>
           )}
         </>
@@ -243,7 +251,7 @@ export function FocusTimer({ assignments }: { assignments: FocusAssignmentOption
           <button
             type="button"
             onClick={() => setConfirmingStop(false)}
-            className="flex-1 rounded-ctl bg-line py-2.5 text-sm font-bold text-ink-2 hover:bg-[#E6E2F2]"
+            className="flex min-h-11 flex-1 items-center justify-center rounded-ctl bg-line py-2.5 text-sm font-bold text-ink-2 hover:bg-[#E6E2F2]"
           >
             Keep going
           </button>
@@ -251,7 +259,7 @@ export function FocusTimer({ assignments }: { assignments: FocusAssignmentOption
             type="button"
             onClick={confirmStopEarly}
             disabled={pending}
-            className="flex-1 rounded-ctl bg-coral py-2.5 text-sm font-bold text-white hover:bg-coral/90 disabled:opacity-60"
+            className="flex min-h-11 flex-1 items-center justify-center rounded-ctl bg-coral py-2.5 text-sm font-bold text-white hover:bg-coral/90 disabled:opacity-60"
           >
             {pending ? "Stopping…" : "Stop"}
           </button>

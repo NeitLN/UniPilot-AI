@@ -1,5 +1,7 @@
 import { Suspense } from "react";
+import { WelcomeBanner } from "@/components/dashboard/WelcomeBanner";
 import { KpiCardSkeleton } from "@/components/dashboard/KpiCard";
+import { SemesterLabel, SemesterLabelSkeleton } from "@/components/dashboard/SemesterLabel";
 import { GpaKpi } from "@/components/dashboard/GpaKpi";
 import { ActiveTasksKpi } from "@/components/dashboard/ActiveTasksKpi";
 import { FocusWeekKpi } from "@/components/dashboard/FocusWeekKpi";
@@ -19,10 +21,16 @@ export default function DashboardPage() {
         <h1 className="font-display text-3xl font-semibold text-ink">
           Dashboard
         </h1>
-        <p className="mt-1 text-sm font-semibold text-ink-2">
-          Semester 253 · week 6
-        </p>
+        <Suspense
+          fallback={<SemesterLabelSkeleton className="mt-1 h-4 w-28 rounded-full bg-ink/10" />}
+        >
+          <SemesterLabel className="mt-1 text-sm font-semibold text-ink-2" />
+        </Suspense>
       </div>
+
+      <Suspense fallback={null}>
+        <WelcomeBanner />
+      </Suspense>
 
       <div className="grid grid-cols-2 gap-3.5 md:grid-cols-4">
         <Suspense fallback={<KpiCardSkeleton tone="violet" />}>

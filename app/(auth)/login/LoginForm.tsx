@@ -26,7 +26,7 @@ export function LoginForm() {
         <button
           type="button"
           onClick={() => setMode("login")}
-          className={`flex-1 rounded-[12px] py-2 text-sm font-bold transition-colors ${
+          className={`flex min-h-11 flex-1 items-center justify-center rounded-[12px] py-2 text-sm font-bold transition-colors ${
             isLogin ? "bg-white text-ink" : "text-ink-3"
           }`}
         >
@@ -35,7 +35,7 @@ export function LoginForm() {
         <button
           type="button"
           onClick={() => setMode("signup")}
-          className={`flex-1 rounded-[12px] py-2 text-sm font-bold transition-colors ${
+          className={`flex min-h-11 flex-1 items-center justify-center rounded-[12px] py-2 text-sm font-bold transition-colors ${
             !isLogin ? "bg-white text-ink" : "text-ink-3"
           }`}
         >
@@ -83,7 +83,7 @@ export function LoginForm() {
         <button
           type="submit"
           disabled={pending}
-          className="mt-2 rounded-ctl bg-ink py-2.5 text-sm font-bold text-white disabled:opacity-60"
+          className="mt-2 flex min-h-11 items-center justify-center rounded-ctl bg-ink py-2.5 text-sm font-bold text-white disabled:opacity-60"
         >
           {pending ? "Please wait…" : isLogin ? "Sign in" : "Create account"}
         </button>

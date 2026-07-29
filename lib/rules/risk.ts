@@ -13,6 +13,25 @@ export function canCompute(i: RiskGateInput): boolean {
   return i.availableHours > 0 && i.pendingCount >= 1 && i.focusHistoryDays >= 7;
 }
 
+/** Same gate as canCompute, but names which specific condition(s) are
+ * unmet — powers the empty-state message on the Risk page instead of a
+ * generic "not enough data". */
+export function riskGateReasons(i: RiskGateInput): string[] {
+  const reasons: string[] = [];
+  if (i.availableHours <= 0) {
+    reasons.push("Set your weekly availability hours above 0 in your profile.");
+  }
+  if (i.pendingCount < 1) {
+    reasons.push("Add at least one assignment that isn't done yet.");
+  }
+  if (i.focusHistoryDays < 7) {
+    reasons.push(
+      `Log focus sessions on ${7 - i.focusHistoryDays} more day${7 - i.focusHistoryDays === 1 ? "" : "s"} (${i.focusHistoryDays}/7 so far).`,
+    );
+  }
+  return reasons;
+}
+
 export interface RiskComputeInput {
   plannedHours: number;
   availableHours: number;

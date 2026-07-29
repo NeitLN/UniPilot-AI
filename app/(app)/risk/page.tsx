@@ -1,6 +1,7 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { computeAndStoreRisk } from "@/lib/risk/compute";
-import { topSuggestion } from "@/lib/rules/risk";
+import { riskGateReasons, topSuggestion } from "@/lib/rules/risk";
 import { Pilo } from "@/components/brand/Pilo";
 import { WarningActions } from "@/components/risk/WarningActions";
 
@@ -18,18 +19,55 @@ export default async function RiskPage() {
 
   const computation = user
     ? await computeAndStoreRisk(supabase, user.id)
-    : ({ status: "insufficient_data" } as const);
+    : ({
+        status: "insufficient_data",
+        gate: { availableHours: 0, pendingCount: 0, focusHistoryDays: 0 },
+      } as const);
 
   if (computation.status !== "ok") {
+    const reasons = riskGateReasons(computation.gate);
     return (
       <div className="flex flex-col gap-3.5">
         <Header />
         <div className="flex flex-col items-center gap-3 rounded-card bg-white py-12 text-center">
           <Pilo mood="sleepy" size={72} />
           <p className="max-w-sm text-sm font-semibold text-ink-2">
-            Not enough data yet — needs 7 days of focus history, some weekly
-            availability, and at least one pending assignment.
+            Not enough data yet — the score needs all three of these:
           </p>
+          <ul className="flex flex-col gap-1.5 text-[12.5px] font-semibold text-ink-3">
+            {reasons.map((r) => (
+              <li key={r}>
+                {r}
+                {r.includes("weekly availability") && (
+                  <>
+                    {" "}
+                    <Link href="/settings" className="font-extrabold text-violet hover:underline">
+                      Set it now →
+                    </Link>
+                  </>
+                )}
+                {r.includes("Add at least one assignment") && (
+                  <>
+                    {" "}
+                    <Link
+                      href="/assignments"
+                      className="font-extrabold text-violet hover:underline"
+                    >
+                      Add one now →
+                    </Link>
+                  </>
+                )}
+                {r.includes("Log focus sessions") && (
+                  <>
+                    {" "}
+                    <Link href="/focus" className="font-extrabold text-violet hover:underline">
+                      Start a session →
+                    </Link>
+                  </>
+                )}
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     );

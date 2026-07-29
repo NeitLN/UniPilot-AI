@@ -5,7 +5,7 @@ import "server-only";
 
 const ENDPOINT_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
 const DEFAULT_MODEL = "gemini-2.5-flash";
-const TIMEOUT_MS = 20_000;
+const TIMEOUT_MS = 15_000; // NFR-02: a still-running request times out and shows Retry at 15s
 
 export class GeminiTimeoutError extends Error {
   constructor() {

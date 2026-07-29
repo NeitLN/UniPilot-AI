@@ -63,3 +63,64 @@ export async function cancelAssignmentReminder(
     .eq("assignment_id", assignmentId)
     .is("delivered_at", null);
 }
+
+/**
+ * Creates the "event_reminder" notification for one class_block occurrence,
+ * fired `reminderMinutesBefore` minutes ahead of its start_at. A null
+ * reminderMinutesBefore means the event has no alert — nothing is created.
+ * Unlike assignment reminders this is insert-only: each occurrence of a
+ * recurring event is its own class_block row, so there's nothing to
+ * reconcile against on create.
+ */
+export async function scheduleEventReminder(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  classBlockId: string,
+  eventTitle: string,
+  startAt: string,
+  reminderMinutesBefore: number | null,
+): Promise<void> {
+  if (reminderMinutesBefore === null) return;
+
+  const scheduledAt = new Date(
+    new Date(startAt).getTime() - reminderMinutesBefore * 60_000,
+  ).toISOString();
+
+  await supabase.from("notifications").insert({
+    user_id: userId,
+    kind: "event_reminder",
+    class_block_id: classBlockId,
+    title: eventTitle,
+    body:
+      reminderMinutesBefore === 0
+        ? "Starting now."
+        : `Starts in ${reminderMinutesBefore < 60 ? `${reminderMinutesBefore} min` : `${Math.round(reminderMinutesBefore / 60)}h`}.`,
+    scheduled_at: scheduledAt,
+  });
+}
+
+/** Drops this occurrence's still-pending alert, then reschedules it against
+ * whatever was just edited — used when a single event occurrence is updated. */
+export async function rescheduleEventReminder(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  classBlockId: string,
+  eventTitle: string,
+  startAt: string,
+  reminderMinutesBefore: number | null,
+): Promise<void> {
+  await supabase
+    .from("notifications")
+    .delete()
+    .eq("class_block_id", classBlockId)
+    .is("delivered_at", null);
+
+  await scheduleEventReminder(
+    supabase,
+    userId,
+    classBlockId,
+    eventTitle,
+    startAt,
+    reminderMinutesBefore,
+  );
+}

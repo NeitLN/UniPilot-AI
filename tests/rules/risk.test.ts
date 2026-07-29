@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canCompute, computeRisk, topSuggestion } from "@/lib/rules/risk";
+import { canCompute, computeRisk, riskGateReasons, topSuggestion } from "@/lib/rules/risk";
 
 describe("canCompute", () => {
   it("requires availability > 0", () => {
@@ -24,6 +24,35 @@ describe("canCompute", () => {
     expect(
       canCompute({ availableHours: 10, pendingCount: 3, focusHistoryDays: 7 }),
     ).toBe(true);
+  });
+});
+
+describe("riskGateReasons", () => {
+  it("returns nothing when all three conditions hold", () => {
+    expect(
+      riskGateReasons({ availableHours: 10, pendingCount: 3, focusHistoryDays: 7 }),
+    ).toEqual([]);
+  });
+
+  it("names each unmet condition, including days remaining", () => {
+    const reasons = riskGateReasons({
+      availableHours: 0,
+      pendingCount: 0,
+      focusHistoryDays: 3,
+    });
+    expect(reasons).toHaveLength(3);
+    expect(reasons[0]).toMatch(/weekly availability/);
+    expect(reasons[1]).toMatch(/Add at least one assignment/);
+    expect(reasons[2]).toMatch(/4 more days \(3\/7 so far\)/);
+  });
+
+  it("uses singular 'day' when exactly one is left", () => {
+    const reasons = riskGateReasons({
+      availableHours: 10,
+      pendingCount: 3,
+      focusHistoryDays: 6,
+    });
+    expect(reasons).toEqual(["Log focus sessions on 1 more day (6/7 so far)."]);
   });
 });
 

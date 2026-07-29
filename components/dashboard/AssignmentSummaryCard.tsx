@@ -29,7 +29,7 @@ export function AssignmentSummaryCard({
         <h2 className="font-display text-lg font-bold text-ink">{title}</h2>
         <Link
           href="/assignments"
-          className="text-[12.5px] font-extrabold text-violet hover:underline"
+          className="flex min-h-11 items-center text-[12.5px] font-extrabold text-violet hover:underline"
         >
           View all
         </Link>

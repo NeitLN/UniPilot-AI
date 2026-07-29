@@ -249,14 +249,14 @@ export function AssignmentForm({
         <button
           type="button"
           onClick={onCancel}
-          className="flex-1 rounded-ctl bg-line py-2.5 text-sm font-bold text-ink-2 hover:bg-[#E6E2F2]"
+          className="flex min-h-11 flex-1 items-center justify-center rounded-ctl bg-line py-2.5 text-sm font-bold text-ink-2 hover:bg-[#E6E2F2]"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={pending}
-          className="flex-1 rounded-ctl bg-ink py-2.5 text-sm font-bold text-white hover:bg-ink/90 disabled:opacity-60"
+          className="flex min-h-11 flex-1 items-center justify-center rounded-ctl bg-ink py-2.5 text-sm font-bold text-white hover:bg-ink/90 disabled:opacity-60"
         >
           {pending ? "Saving…" : isEdit ? "Save changes" : "Add assignment"}
         </button>

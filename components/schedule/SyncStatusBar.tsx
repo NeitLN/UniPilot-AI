@@ -77,14 +77,14 @@ export function SyncStatusBar({
             type="button"
             onClick={handleSyncNow}
             disabled={pending || !isOnline}
-            className="rounded-ctl bg-violet px-3.5 py-2 text-xs font-bold text-white hover:bg-violet-deep disabled:opacity-60"
+            className="flex min-h-11 items-center rounded-ctl bg-violet px-3.5 py-2 text-xs font-bold text-white hover:bg-violet-deep disabled:opacity-60"
           >
             {pending ? "Syncing…" : "Sync now"}
           </button>
         ) : isOnline ? (
           <a
             href="/api/calendar/oauth/start"
-            className="rounded-ctl bg-violet px-3.5 py-2 text-xs font-bold text-white hover:bg-violet-deep"
+            className="flex min-h-11 items-center rounded-ctl bg-violet px-3.5 py-2 text-xs font-bold text-white hover:bg-violet-deep"
           >
             Connect Google Calendar
           </a>
