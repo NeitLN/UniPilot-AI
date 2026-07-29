@@ -349,6 +349,7 @@ export interface Database {
           delivered_at: string | null;
           read_at: string | null;
           push_status: string | null;
+          assignment_id: string | null;
         };
         Insert: {
           id?: string;
@@ -360,6 +361,7 @@ export interface Database {
           delivered_at?: string | null;
           read_at?: string | null;
           push_status?: string | null;
+          assignment_id?: string | null;
         };
         Update: {
           id?: string;
@@ -371,6 +373,34 @@ export interface Database {
           delivered_at?: string | null;
           read_at?: string | null;
           push_status?: string | null;
+          assignment_id?: string | null;
+        };
+        Relationships: [];
+      };
+      push_subscriptions: {
+        Row: {
+          id: string;
+          user_id: string;
+          endpoint: string;
+          p256dh: string;
+          auth: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          endpoint: string;
+          p256dh: string;
+          auth: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          endpoint?: string;
+          p256dh?: string;
+          auth?: string;
+          created_at?: string;
         };
         Relationships: [];
       };

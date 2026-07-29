@@ -128,14 +128,27 @@ export async function computeAndStoreRisk(
     // into duplicate warnings for the same score (see migration 0005).
     // ignoreDuplicates also means a warning the user already dismissed or
     // handled today doesn't get silently reset back to "open".
-    const { error: warningError } = await supabase
+    const { data: insertedWarning, error: warningError } = await supabase
       .from("risk_warnings")
       .upsert(
         { user_id: userId, risk_score_id: scoreRow.id, status: "open" },
         { onConflict: "risk_score_id", ignoreDuplicates: true },
-      );
+      )
+      .select("id");
     if (warningError) {
       throw new Error(warningError.message);
+    }
+
+    // Only the very first time this score crosses the threshold today —
+    // ignoreDuplicates means `insertedWarning` is empty on every later call.
+    if (insertedWarning && insertedWarning.length > 0) {
+      await supabase.from("notifications").insert({
+        user_id: userId,
+        kind: "risk_warning",
+        title: "Workload risk is elevated",
+        body: `Today's score is ${result.score} — see the Workload risk page for suggestions.`,
+        scheduled_at: now.toISOString(),
+      });
     }
   }
 

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { courseBelongsToCaller } from "@/lib/supabase/ownership";
+import { syncAssignmentReminder, cancelAssignmentReminder } from "@/lib/notifications/sync";
 import {
   validateAssignment,
   type AssignmentInput,
@@ -62,11 +63,23 @@ export async function createAssignment(
     return { errors: { courseId: "Pick a course from the list." } };
   }
 
-  const { error } = await supabase
+  const { data: created, error } = await supabase
     .from("assignments")
-    .insert({ user_id: user.id, ...toRow(input) });
+    .insert({ user_id: user.id, ...toRow(input) })
+    .select("id")
+    .single();
 
-  if (error) return { errors: {}, formError: error.message };
+  if (error || !created) {
+    return { errors: {}, formError: error?.message ?? "Couldn't save this assignment." };
+  }
+
+  await syncAssignmentReminder(
+    supabase,
+    user.id,
+    created.id,
+    input.title,
+    input.reminderAt ? new Date(input.reminderAt).toISOString() : null,
+  );
 
   revalidatePath("/assignments");
   return { errors: {}, ok: true };
@@ -82,6 +95,10 @@ export async function updateAssignment(
   if (Object.keys(errors).length > 0) return { errors };
 
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { errors: {}, formError: "Session expired — sign in again." };
 
   if (!(await courseBelongsToCaller(supabase, input.courseId))) {
     return { errors: { courseId: "Pick a course from the list." } };
@@ -93,6 +110,14 @@ export async function updateAssignment(
     .eq("id", id);
 
   if (error) return { errors: {}, formError: error.message };
+
+  await syncAssignmentReminder(
+    supabase,
+    user.id,
+    id,
+    input.title,
+    input.reminderAt ? new Date(input.reminderAt).toISOString() : null,
+  );
 
   revalidatePath("/assignments");
   return { errors: {}, ok: true };
@@ -107,5 +132,7 @@ export async function archiveAssignment(id: string) {
     .eq("id", id);
 
   if (error) throw new Error(error.message);
+
+  await cancelAssignmentReminder(supabase, id);
   revalidatePath("/assignments");
 }

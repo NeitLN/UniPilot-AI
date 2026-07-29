@@ -1,10 +1,14 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
 import { SidebarNav } from "@/components/dashboard/SidebarNav";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen w-full">
+      <ServiceWorkerRegister />
       <aside className="hidden md:flex w-[246px] shrink-0 flex-col bg-ink px-4 py-6">
         <div className="px-1.5 pb-6">
           <Logo tone="light" size={40} />
@@ -20,9 +24,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </aside>
 
       <div className="flex flex-1 flex-col min-w-0">
-        <header className="flex items-center gap-3 border-b border-black/5 bg-card px-6 py-4 md:hidden">
+        <header className="flex items-center justify-between gap-3 border-b border-black/5 bg-card px-6 py-4 md:hidden">
           <Logo tone="dark" size={32} />
+          <Suspense fallback={null}>
+            <NotificationBell />
+          </Suspense>
         </header>
+
+        <div className="hidden items-center justify-end border-b border-black/5 bg-card px-7 py-3 md:flex">
+          <Suspense fallback={null}>
+            <NotificationBell />
+          </Suspense>
+        </div>
 
         <main className="flex-1 bg-canvas px-4 py-6 md:px-7 md:py-6">
           {children}

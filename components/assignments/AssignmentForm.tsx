@@ -6,6 +6,7 @@ import {
   updateAssignment,
   type AssignmentFormState,
 } from "@/app/(app)/assignments/actions";
+import { ensurePushSubscription } from "@/lib/push/subscribe";
 
 // Defined locally rather than imported from actions.ts: a "use server" module
 // may only export async functions, so a plain object export from it resolves
@@ -61,7 +62,15 @@ export function AssignmentForm({
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
-    if (state.ok) onSaved();
+    if (!state.ok) return;
+    // Ask for notification permission right here — the moment the user has
+    // just saved an assignment with a reminder — not on first app load.
+    const reminderInput =
+      formRef.current?.querySelector<HTMLInputElement>('[name="reminderAt"]');
+    if (reminderInput?.value) {
+      void ensurePushSubscription();
+    }
+    onSaved();
   }, [state.ok, onSaved]);
 
   useEffect(() => {
