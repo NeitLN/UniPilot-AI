@@ -45,3 +45,45 @@ test.describe("Manage assignments", () => {
     await expect(page.getByText(title, { exact: true })).not.toBeVisible({ timeout: 10_000 });
   });
 });
+
+// FR-25 (docs/PRODUCT_REVIEW.md) — the last stop before an assignment is
+// gone for good, only ever reachable from the Archived filter.
+test.describe("Permanently delete an archived assignment", () => {
+  const title = `E2E Archived ${Date.now()}`;
+
+  test("archive then delete permanently — no 'Delete permanently' button while still active", async ({
+    page,
+  }) => {
+    await page.goto("/assignments");
+    await page.getByRole("button", { name: "Add assignment", exact: true }).click();
+    await page.locator('input[name="title"]').fill(title);
+    await page.locator('select[name="courseId"]').selectOption({ index: 1 });
+    await page.locator('input[name="dueAt"]').fill("2026-09-01T23:59");
+    await page.locator('input[name="weight"]').fill("15");
+    await page.locator('select[name="priority"]').selectOption("medium");
+    await page.getByRole("button", { name: "Add assignment", exact: true }).last().click();
+    await expect(page.getByText(title, { exact: true })).toBeVisible({ timeout: 10_000 });
+
+    // Never offered while still active — only archived rows can be
+    // permanently deleted (enforced server-side too, see actions.ts).
+    const activeRow = page.locator("div.border-t").filter({ hasText: title });
+    await expect(activeRow.getByRole("button", { name: "Delete permanently" })).toHaveCount(0);
+
+    await activeRow.getByRole("button", { name: "Archive", exact: true }).click();
+    await page.getByRole("button", { name: "Archive", exact: true }).last().click();
+    await expect(page.getByText(title, { exact: true })).not.toBeVisible({ timeout: 10_000 });
+
+    await page.goto("/assignments?status=archived");
+    const archivedRow = page.locator("div.border-t").filter({ hasText: title });
+    await expect(archivedRow).toBeVisible();
+
+    await archivedRow.getByRole("button", { name: "Delete permanently", exact: true }).click();
+    await expect(page.getByRole("heading", { name: /^Delete /, exact: false })).toBeVisible();
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: "Delete permanently", exact: true })
+      .click();
+
+    await expect(page.getByText(title, { exact: true })).not.toBeVisible({ timeout: 10_000 });
+  });
+});

@@ -14,6 +14,7 @@ import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Modal } from "@/components/ui/Modal";
 import { AssignmentForm, type CourseOption } from "./AssignmentForm";
 import { ArchiveDialog } from "./ArchiveDialog";
+import { DeleteAssignmentDialog } from "./DeleteAssignmentDialog";
 import type { AssignmentPriority, AssignmentStatus } from "@/lib/supabase/types";
 
 export interface AssignmentRow {
@@ -44,6 +45,7 @@ export function AssignmentItem({
 }) {
   const [editing, setEditing] = useState(false);
   const [archiving, setArchiving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [restoring, startRestore] = useTransition();
 
   function handleRestore() {
@@ -92,14 +94,23 @@ export function AssignmentItem({
 
       <div className="flex shrink-0 gap-1.5">
         {isArchivedView ? (
-          <button
-            type="button"
-            onClick={handleRestore}
-            disabled={restoring}
-            className="flex min-h-11 items-center rounded-ctl bg-line px-3 py-2 text-xs font-bold text-ink-2 hover:bg-[#E6E2F2] disabled:opacity-60"
-          >
-            {restoring ? "Restoring…" : "Restore"}
-          </button>
+          <>
+            <button
+              type="button"
+              onClick={handleRestore}
+              disabled={restoring}
+              className="flex min-h-11 items-center rounded-ctl bg-line px-3 py-2 text-xs font-bold text-ink-2 hover:bg-[#E6E2F2] disabled:opacity-60"
+            >
+              {restoring ? "Restoring…" : "Restore"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setDeleting(true)}
+              className="flex min-h-11 items-center rounded-ctl bg-line px-3 py-2 text-xs font-bold text-coral hover:bg-[#E6E2F2]"
+            >
+              Delete permanently
+            </button>
+          </>
         ) : (
           <>
             <button
@@ -149,6 +160,13 @@ export function AssignmentItem({
         assignmentTitle={assignment.title}
         open={archiving}
         onClose={() => setArchiving(false)}
+      />
+
+      <DeleteAssignmentDialog
+        assignmentId={assignment.id}
+        assignmentTitle={assignment.title}
+        open={deleting}
+        onClose={() => setDeleting(false)}
       />
     </div>
   );

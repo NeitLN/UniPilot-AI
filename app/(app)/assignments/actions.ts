@@ -186,3 +186,39 @@ export async function restoreAssignment(id: string) {
   if (error) throw new Error(error.message);
   revalidatePath("/assignments");
 }
+
+/**
+ * FR-25 (docs/PRODUCT_REVIEW.md) — only ever allowed on an assignment
+ * that's already archived, enforced here rather than trusted from the
+ * client: hiding the button in the UI stops a normal user from reaching
+ * this by accident, but a hard delete is exactly the kind of action that
+ * needs a real server-side gate, not just a missing button.
+ *
+ * Safe to do at all now that migration 0012 (Phase 4.1) re-pointed
+ * focus_sessions.assignment_id to ON DELETE SET NULL — the assignment's
+ * study/focus history survives with the title link gone, rather than
+ * being cascade-deleted along with the assignment the way it would have
+ * been before that migration. study_sessions.assignment_id was already
+ * ON DELETE SET NULL from the original schema; only notifications rows
+ * for this assignment are cascade-removed, which is correct — a reminder
+ * for a permanently deleted assignment has nothing left to remind about.
+ */
+export async function deleteAssignmentPermanently(id: string) {
+  const supabase = await createClient();
+
+  const { data: assignment } = await supabase
+    .from("assignments")
+    .select("archived_at")
+    .eq("id", id)
+    .maybeSingle();
+  if (!assignment?.archived_at) {
+    throw new Error("Only archived assignments can be permanently deleted.");
+  }
+
+  const { error } = await supabase.from("assignments").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/assignments");
+  revalidatePath("/focus");
+  revalidatePath("/");
+}
