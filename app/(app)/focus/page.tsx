@@ -1,8 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
-import { streakDays, weeklyStats } from "@/lib/rules/focus";
+import { streakDays, weeklyStats, weeklyMinutesSeries } from "@/lib/rules/focus";
 import { getViewerTimeZone } from "@/lib/timezone";
 import { FocusTimer } from "@/components/focus/FocusTimer";
 import { FocusStats, type FocusStatsData } from "@/components/focus/FocusStats";
+import { LearningStats, type CourseTimeGrade } from "@/components/focus/LearningStats";
 
 export default async function FocusPage() {
   const supabase = await createClient();
@@ -11,7 +12,7 @@ export default async function FocusPage() {
   sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
   const sixtyDaysAgoIso = sixtyDaysAgo.toISOString();
 
-  const [{ data: assignmentRows }, { data: courseRows }, { data: sessionRows }] =
+  const [{ data: assignmentRows }, { data: courseRows }, { data: sessionRows }, { data: gradeRows }] =
     await Promise.all([
       // Unfiltered on purpose: past focus sessions can point at assignments
       // that are now done or archived, and those still need a real title/
@@ -27,6 +28,12 @@ export default async function FocusPage() {
         .select("assignment_id, started_at, duration_seconds, result")
         .gte("started_at", sixtyDaysAgoIso)
         .order("started_at", { ascending: false }),
+      // §5 learning stats: most recent grade per course, to line focus time
+      // up against how that course actually turned out.
+      supabase
+        .from("grades")
+        .select("course_id, grade_point, semester")
+        .order("semester", { ascending: true }),
     ]);
 
   const allAssignments = assignmentRows ?? [];
@@ -79,6 +86,36 @@ export default async function FocusPage() {
     byCourse,
   };
 
+  const weeklySeries = weeklyMinutesSeries(sessions, { timeZone, weeks: 8 });
+
+  // Last grade per course (rows arrive oldest-semester-first, so a later
+  // entry for the same course simply overwrites — "most recent" wins).
+  const gradePointByCourse = new Map<string, number>();
+  for (const g of gradeRows ?? []) {
+    gradePointByCourse.set(g.course_id, g.grade_point);
+  }
+  const allTimeCourseMinutes = new Map<string, number>();
+  for (const s of sessions) {
+    const courseId = assignmentCourseById.get(s.assignmentId);
+    const courseName = courseId
+      ? (courseNameById.get(courseId) ?? "Unknown course")
+      : "No course";
+    allTimeCourseMinutes.set(
+      courseName,
+      (allTimeCourseMinutes.get(courseName) ?? 0) + s.durationSeconds / 60,
+    );
+  }
+  const courseTimeGrades: CourseTimeGrade[] = Array.from(allTimeCourseMinutes.entries())
+    .map(([name, minutes]) => {
+      const course = (courseRows ?? []).find((c) => c.name === name);
+      return {
+        name,
+        minutes: Math.round(minutes),
+        gradePoint: course ? (gradePointByCourse.get(course.id) ?? null) : null,
+      };
+    })
+    .sort((a, b) => b.minutes - a.minutes);
+
   return (
     <div className="flex flex-col gap-3.5">
       <div>
@@ -96,6 +133,8 @@ export default async function FocusPage() {
         />
         <FocusStats data={statsData} />
       </div>
+
+      <LearningStats weeklySeries={weeklySeries} byCourse={courseTimeGrades} />
     </div>
   );
 }

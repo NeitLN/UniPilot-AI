@@ -158,3 +158,36 @@ export function formatMinutes(minutes: number): string {
   if (minutes > 0 && minutes < 1) return "< 1 min";
   return `${Math.round(minutes)} min`;
 }
+
+export interface WeekMinutes {
+  /** `YYYY-MM-DD` of the bucket's first day. */
+  weekStart: string;
+  minutes: number;
+}
+
+/**
+ * §5 "Thống kê học tập theo thời gian" — rolling 7-day buckets counted back
+ * from `now`, oldest first, matching weeklyStats' own week definition rather
+ * than ISO week numbers (so "this week" always means the same thing in both
+ * places).
+ */
+export function weeklyMinutesSeries(
+  sessions: FocusSessionLike[],
+  options: WeeklyStatsOptions & { weeks?: number } = {},
+): WeekMinutes[] {
+  const { now = new Date(), timeZone = defaultTimeZone(), weeks = 8 } = options;
+  const todayKey = dayKey(now, timeZone);
+
+  const buckets: WeekMinutes[] = [];
+  for (let i = weeks - 1; i >= 0; i--) {
+    buckets.push({ weekStart: shiftDayKey(shiftDayKey(todayKey, -7 * i), -6), minutes: 0 });
+  }
+
+  for (const s of sessions) {
+    const key = dayKey(new Date(s.startedAt), timeZone);
+    const bucket = buckets.find((b) => key >= b.weekStart && key <= shiftDayKey(b.weekStart, 6));
+    if (bucket) bucket.minutes += s.durationSeconds / 60;
+  }
+
+  return buckets.map((b) => ({ ...b, minutes: Math.round(b.minutes) }));
+}

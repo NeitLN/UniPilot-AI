@@ -5,6 +5,7 @@ import {
   formatMinutes,
   streakDays,
   weeklyStats,
+  weeklyMinutesSeries,
   POMODORO_SECONDS,
   type FocusSessionLike,
 } from "@/lib/rules/focus";
@@ -178,5 +179,29 @@ describe("formatMinutes", () => {
 
   it("shows '0 min' only for a literal zero", () => {
     expect(formatMinutes(0)).toBe("0 min");
+  });
+});
+
+describe("weeklyMinutesSeries", () => {
+  const now = new Date("2026-07-30T12:00:00.000Z");
+
+  it("buckets sessions into contiguous rolling weeks, oldest first", () => {
+    const sessions: FocusSessionLike[] = [
+      // this week (Jul 24-30)
+      { assignmentId: "a", startedAt: "2026-07-30T09:00:00.000Z", durationSeconds: 1500, result: "completed" },
+      // one week back (Jul 17-23)
+      { assignmentId: "a", startedAt: "2026-07-20T09:00:00.000Z", durationSeconds: 3000, result: "completed" },
+    ];
+    const series = weeklyMinutesSeries(sessions, { now, timeZone: "UTC", weeks: 3 });
+    expect(series).toHaveLength(3);
+    expect(series[2].minutes).toBe(25); // this week
+    expect(series[1].minutes).toBe(50); // one week back
+    expect(series[0].minutes).toBe(0); // two weeks back — nothing logged
+    expect(series[2].weekStart).toBe("2026-07-24");
+  });
+
+  it("returns all-zero buckets when there are no sessions", () => {
+    const series = weeklyMinutesSeries([], { now, timeZone: "UTC", weeks: 4 });
+    expect(series.every((w) => w.minutes === 0)).toBe(true);
   });
 });
