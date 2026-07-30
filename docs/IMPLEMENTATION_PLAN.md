@@ -1,8 +1,8 @@
 # Kế hoạch triển khai — từ PRODUCT_REVIEW.md
 
 **Nguồn:** [`docs/PRODUCT_REVIEW.md`](./PRODUCT_REVIEW.md) (30/07/2026)
-**Trạng thái nền:** `main` @ `378098d` — typecheck sạch, lint sạch, 144 unit test + 14 E2E test xanh
-**Tổng:** 5 phase, ~22 giờ · **Phase 1 + 2: ✅ Hoàn thành** (xem §Phase tương ứng để biết chi tiết + phát hiện phát sinh)
+**Trạng thái nền:** `main` @ `52fd5e4` — typecheck sạch, lint sạch, 149 unit test + 14 E2E test xanh
+**Tổng:** 5 phase, ~22 giờ · **Phase 1 + 2 + 3: ✅ Hoàn thành** (xem §Phase tương ứng để biết chi tiết + phát hiện phát sinh)
 
 ---
 
@@ -133,6 +133,14 @@ Sau khi đọc kỹ code để lập kế hoạch, có 2 con số trong `PRODUCT
 
 > **Mục tiêu:** những thứ khiến người dùng dám tin để dùng lâu dài, và biết được hệ thống vừa làm gì.
 > **Thời lượng:** ~4.5 giờ · **Rủi ro:** thấp
+> **✅ Hoàn thành** — 4 commit riêng (`43fa564`, `6b87065`, `8135151`, `52fd5e4`). 149/149 unit test, 14/14 E2E xanh; xác minh trực tiếp trên tài khoản demo ở cả 3 viewport + 2 theme.
+>
+> **Phụ thuộc ngoài chưa giải quyết được (đã ghi rõ, không bỏ dở âm thầm):** FR-21 cần thêm `/auth/confirm` vào allowlist redirect URL trong Supabase Auth dashboard — không có quyền cấu hình trong phiên này nên chưa xác minh được đường dẫn thật qua email (link click), chỉ xác minh được toàn bộ logic phía ứng dụng (form, route handler, page states).
+>
+> **3 bug thật tìm được khi xác minh trên tài khoản thật** (không phải trên dữ liệu giả lập):
+> - **3.3:** nhãn "Target GPA" dán đè lên cột cao nhất khi 2 giá trị gần nhau (2.95–3.87 với target 3.60) — chữ chồng lên nhau không đọc được. Chuyển từ overlay nổi trên chart sang chú thích cố định bên dưới tiêu đề.
+> - **3.3:** `text-tangerine-text` (màu cố định, thiết kế để đi kèm nền `tangerine-tint` sáng) dùng đứng một mình trên `bg-card` — khi `bg-card` đổi tối theo theme, chữ gần như biến mất. Đổi sang `text-ink-2` (màu tự đổi theo theme).
+> - **3.2:** tài khoản demo có sẵn 1 kết nối Google Calendar thật từ trước (scope cũ `calendar.readonly`, trước khi Đợt 4 mở rộng sang `calendar.events`) — xác nhận panel "sync thất bại" hoạt động đúng với lỗi thật từ Google API, không phải giả lập.
 
 ### 3.1 — FR-21: Quên mật khẩu (~2h)
 
