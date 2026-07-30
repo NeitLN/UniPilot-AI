@@ -98,8 +98,23 @@ export async function deleteStudySession(sessionId: string) {
   revalidatePath("/planner");
 }
 
+// FR-23 (docs/PRODUCT_REVIEW.md): confirmPlan used to swallow the Google
+// Calendar push outcome entirely — the plan really did save either way,
+// but the user had no way to tell whether their sessions also reached
+// Google without opening Google Calendar and checking themselves.
+export type ConfirmPlanResult =
+  | { pushed: number }
+  | { pushSkipped: "not_connected" }
+  | { pushFailed: string };
+
+function toConfirmPlanResult(result: Awaited<ReturnType<typeof pushConfirmedSessionsToCalendar>>): ConfirmPlanResult {
+  if (result.ok) return { pushed: result.pushed };
+  if (result.reason === "not_connected") return { pushSkipped: "not_connected" };
+  return { pushFailed: result.message };
+}
+
 /** BR-02: the only place a draft is allowed to become active — never automatic. */
-export async function confirmPlan(planId: string) {
+export async function confirmPlan(planId: string): Promise<ConfirmPlanResult> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -147,16 +162,44 @@ export async function confirmPlan(planId: string) {
 
   // §5 "Đồng bộ 2 chiều Google Calendar" — best-effort: a Google failure
   // (not connected, expired grant, API error) must never undo or block a
-  // plan the user just confirmed, so this is deliberately swallowed rather
-  // than surfaced as a form error.
+  // plan the user just confirmed (AC-4) — the plan above is already
+  // committed by this point regardless of what happens next. pushConfirmed-
+  // SessionsToCalendar never actually throws (it catches internally and
+  // returns a PushResult), but this still wraps it: the plan having saved
+  // must never depend on that continuing to hold in the future.
+  let pushResult: ConfirmPlanResult;
   try {
-    await pushConfirmedSessionsToCalendar(supabase, user.id, planId);
+    pushResult = toConfirmPlanResult(await pushConfirmedSessionsToCalendar(supabase, user.id, planId));
   } catch (err) {
-    console.error("Google Calendar push failed:", err);
+    pushResult = {
+      pushFailed: err instanceof Error ? err.message : "Unknown push error",
+    };
   }
 
   revalidatePath("/planner");
   revalidatePath("/");
+  return pushResult;
+}
+
+/** Retries only the calendar half of confirmPlan — never touches
+ * study_plans.status or reminders, so unlike calling confirmPlan again this
+ * can't insert duplicate reminder notifications. Safe to call repeatedly:
+ * pushConfirmedSessionsToCalendar only ever pushes sessions that don't
+ * already have a gcal_event_id. */
+export async function retryCalendarPush(planId: string): Promise<ConfirmPlanResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Session expired — sign in again.");
+
+  try {
+    const result = toConfirmPlanResult(await pushConfirmedSessionsToCalendar(supabase, user.id, planId));
+    revalidatePath("/planner");
+    return result;
+  } catch (err) {
+    return { pushFailed: err instanceof Error ? err.message : "Unknown push error" };
+  }
 }
 
 /** BR-02: cancelling a draft deletes it outright — an active plan is untouched. */

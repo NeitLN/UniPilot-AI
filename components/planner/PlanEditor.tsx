@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -7,8 +8,25 @@ import {
   cancelPlan,
   deleteStudySession,
   updateStudySession,
+  retryCalendarPush,
+  type ConfirmPlanResult,
 } from "@/app/(app)/planner/actions";
 import { Pilo } from "@/components/brand/Pilo";
+
+/** FR-23 (docs/PRODUCT_REVIEW.md): confirmPlan used to swallow this outcome
+ * entirely, so the user had no way to tell whether their sessions also
+ * reached Google without checking there themselves. */
+function calendarPushMessage(result: ConfirmPlanResult): string {
+  if ("pushed" in result) {
+    return result.pushed > 0
+      ? `Added ${result.pushed} session${result.pushed === 1 ? "" : "s"} to Google Calendar.`
+      : "Your plan is confirmed.";
+  }
+  if ("pushSkipped" in result) {
+    return "Your plan is confirmed. Connect Google Calendar to automatically add sessions to it.";
+  }
+  return "Your plan is confirmed, but syncing to Google Calendar didn't work.";
+}
 
 export interface PlanSessionData {
   id: string;
@@ -28,17 +46,33 @@ export function PlanEditor({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [actionError, setActionError] = useState<string | null>(null);
+  // Set once confirmPlan resolves — swaps this card into a summary panel
+  // instead of immediately router.refresh()-ing away. The parent Server
+  // Component swaps PlanEditor out for ActivePlanSummary as soon as the
+  // plan's status changes, which would unmount this component (and any
+  // local state, including the calendar result) before the user ever saw
+  // it — so that refresh is deferred to the panel's own "Done" button.
+  const [confirmResult, setConfirmResult] = useState<ConfirmPlanResult | null>(null);
 
   function handleConfirm() {
     setActionError(null);
     startTransition(async () => {
       try {
-        await confirmPlan(planId);
-        router.refresh();
+        setConfirmResult(await confirmPlan(planId));
       } catch (err) {
         setActionError(
           err instanceof Error ? err.message : "Couldn't confirm the plan.",
         );
+      }
+    });
+  }
+
+  function handleRetryPush() {
+    startTransition(async () => {
+      try {
+        setConfirmResult(await retryCalendarPush(planId));
+      } catch (err) {
+        setActionError(err instanceof Error ? err.message : "Couldn't retry the sync.");
       }
     });
   }
@@ -55,6 +89,51 @@ export function PlanEditor({
         );
       }
     });
+  }
+
+  if (confirmResult) {
+    const failed = "pushFailed" in confirmResult;
+    const skipped = "pushSkipped" in confirmResult;
+    return (
+      <div className="rounded-card bg-violet p-5 text-white">
+        <div className="flex items-center gap-2.5">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-card">
+            <Pilo mood="happy" size={34} />
+          </span>
+          <h2 className="font-display text-lg font-bold">Plan confirmed!</h2>
+        </div>
+        <p className="mt-3 text-[12.5px] font-medium text-white/88">
+          {calendarPushMessage(confirmResult)}
+        </p>
+        {skipped && (
+          <Link
+            href="/schedule"
+            className="mt-2 inline-block text-[12.5px] font-bold text-lime hover:underline"
+          >
+            Connect Google Calendar →
+          </Link>
+        )}
+        <div className="mt-4 flex gap-2.5">
+          {failed && (
+            <button
+              type="button"
+              onClick={handleRetryPush}
+              disabled={pending}
+              className="flex min-h-11 flex-1 items-center justify-center rounded-ctl bg-white/18 py-2.5 text-sm font-bold text-white disabled:opacity-60"
+            >
+              {pending ? "Retrying…" : "Try syncing again"}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => router.refresh()}
+            className="flex min-h-11 flex-1 items-center justify-center rounded-ctl bg-lime py-2.5 text-sm font-bold text-ink"
+          >
+            Done
+          </button>
+        </div>
+      </div>
+    );
   }
 
   const grouped = groupByDay(sessions);
