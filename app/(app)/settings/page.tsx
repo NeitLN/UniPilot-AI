@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { SettingsForm } from "@/components/settings/SettingsForm";
 import { ThemeToggle } from "@/components/settings/ThemeToggle";
 import { ExportData } from "@/components/settings/ExportData";
+import { DeleteAccountSection } from "@/components/settings/DeleteAccountSection";
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -37,6 +38,12 @@ export default async function SettingsPage() {
       <div className="max-w-md rounded-card bg-card p-5">
         <ExportData />
       </div>
+
+      {user?.email && (
+        <div className="max-w-md rounded-card bg-card p-5">
+          <DeleteAccountSection userEmail={user.email} />
+        </div>
+      )}
     </div>
   );
 }

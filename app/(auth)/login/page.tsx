@@ -1,7 +1,13 @@
 import { Logo } from "@/components/brand/Logo";
 import { LoginForm } from "./LoginForm";
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ deleted?: string }>;
+}) {
+  const { deleted } = await searchParams;
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-canvas px-4">
       <div className="w-full max-w-sm rounded-card bg-card p-8 text-center">
@@ -11,6 +17,14 @@ export default function LoginPage() {
         <p className="mt-2 mb-6 text-sm font-semibold text-ink-2">
           Personal Student Life OS
         </p>
+        {/* FR-27: neutral wording, consistent with AC-3 on the password
+            reset flow — doesn't confirm which account existed or was
+            deleted, just that the action completed. */}
+        {deleted && (
+          <p role="status" className="mb-6 text-sm font-semibold text-mint">
+            Account deleted. Thanks for using UniPilot AI.
+          </p>
+        )}
         <LoginForm />
       </div>
     </div>

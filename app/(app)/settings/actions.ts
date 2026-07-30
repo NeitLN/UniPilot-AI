@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
 
 export interface SettingsFormState {
   errors: Partial<Record<"fullName" | "weeklyAvailabilityHours" | "targetGpa", string>>;
@@ -61,4 +62,36 @@ export async function updateProfile(
   revalidatePath("/gpa");
   revalidatePath("/");
   return { errors: {}, ok: true };
+}
+
+/**
+ * FR-27 (docs/PRODUCT_REVIEW_2.md) — self-service account deletion. Every
+ * table's user_id column is `references auth.users on delete cascade`
+ * (migration 0001 onward), so deleting the auth user is the entire
+ * operation — the database removes every assignment, course, grade,
+ * focus session, study plan, notification, etc. in one cascade, in the
+ * correct dependency order, rather than this action guessing that order
+ * itself and risking getting it wrong.
+ *
+ * `confirmEmail` must match the signed-in user's own email exactly —
+ * same weight as FR-25's permanent-delete confirmation, but for
+ * everything at once instead of one row.
+ */
+export async function deleteAccount(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Session expired — sign in again.");
+
+  const confirmEmail = String(formData.get("confirmEmail") ?? "").trim();
+  if (!user.email || confirmEmail !== user.email) {
+    throw new Error("Type your email exactly to confirm.");
+  }
+
+  const serviceClient = createServiceClient();
+  const { error } = await serviceClient.auth.admin.deleteUser(user.id);
+  if (error) throw new Error(error.message);
+
+  await supabase.auth.signOut();
 }
