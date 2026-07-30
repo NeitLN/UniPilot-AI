@@ -3,21 +3,40 @@
 import { useActionState, useEffect, useRef } from "react";
 import { createCourse } from "@/app/(app)/schedule/actions";
 import type { CourseFormState } from "@/app/(app)/schedule/actions";
+import { updateCourse } from "@/app/(app)/courses/actions";
 
 const INITIAL_STATE: CourseFormState = { errors: {} };
 const FIELD_ORDER = ["name", "semester", "credits"] as const;
 
+export interface CourseFormValues {
+  id: string;
+  name: string;
+  code: string;
+  credits: number;
+  semester: string;
+  /** True once at least one grade has been recorded for this course —
+   * used only to show a note that credits here are informational and
+   * don't retroactively touch grades already on the books (see the
+   * grades.credit_hours field, entered separately per grade). */
+  hasGrades: boolean;
+}
+
 export interface CourseFormProps {
+  initialValues?: CourseFormValues;
   onSaved: (course: { id: string; name: string; code: string | null }) => void;
   onCancel: () => void;
   /** Compact layout for inline use (e.g. the "+ New course" shortcut inside
-   * EventForm) — drops the heading and shrinks the action buttons. */
+   * EventForm) — drops the heading and shrinks the action buttons. Only
+   * meaningful for create, since edit is never opened from that shortcut. */
   compact?: boolean;
 }
 
-export function CourseForm({ onSaved, onCancel, compact }: CourseFormProps) {
+export function CourseForm({ initialValues, onSaved, onCancel, compact }: CourseFormProps) {
+  const isEdit = Boolean(initialValues);
+  const action = isEdit ? updateCourse.bind(null, initialValues!.id) : createCourse;
+
   const [state, formAction, pending] = useActionState<CourseFormState, FormData>(
-    createCourse,
+    action,
     INITIAL_STATE,
   );
   const formRef = useRef<HTMLFormElement>(null);
@@ -40,7 +59,9 @@ export function CourseForm({ onSaved, onCancel, compact }: CourseFormProps) {
   return (
     <form ref={formRef} action={formAction} className="flex flex-col gap-3.5">
       {!compact && (
-        <h2 className="font-display text-lg font-bold text-foreground">New course</h2>
+        <h2 className="font-display text-lg font-bold text-foreground">
+          {isEdit ? "Edit course" : "New course"}
+        </h2>
       )}
 
       <Field label="Course name" error={state.errors.name}>
@@ -50,6 +71,7 @@ export function CourseForm({ onSaved, onCancel, compact }: CourseFormProps) {
           required
           autoComplete="off"
           placeholder="e.g. Database Systems"
+          defaultValue={initialValues?.name}
           className={inputClass(Boolean(state.errors.name))}
         />
       </Field>
@@ -61,6 +83,7 @@ export function CourseForm({ onSaved, onCancel, compact }: CourseFormProps) {
             type="text"
             autoComplete="off"
             placeholder="e.g. CS301"
+            defaultValue={initialValues?.code}
             className={inputClass(false)}
           />
         </Field>
@@ -73,11 +96,18 @@ export function CourseForm({ onSaved, onCancel, compact }: CourseFormProps) {
             min={1}
             step={1}
             required
-            defaultValue={3}
+            defaultValue={initialValues?.credits ?? 3}
             className={inputClass(Boolean(state.errors.credits))}
           />
         </Field>
       </div>
+
+      {isEdit && initialValues!.hasGrades && (
+        <p className="text-[11.5px] font-semibold text-ink-3">
+          This course already has a recorded grade. Changing credits here won&rsquo;t
+          affect it — grades keep their own credit hours from when they were added.
+        </p>
+      )}
 
       <Field label="Semester" error={state.errors.semester}>
         <input
@@ -86,6 +116,7 @@ export function CourseForm({ onSaved, onCancel, compact }: CourseFormProps) {
           required
           autoComplete="off"
           placeholder="e.g. 253"
+          defaultValue={initialValues?.semester}
           className={inputClass(Boolean(state.errors.semester))}
         />
       </Field>
@@ -109,7 +140,7 @@ export function CourseForm({ onSaved, onCancel, compact }: CourseFormProps) {
           disabled={pending}
           className="flex min-h-11 flex-1 items-center justify-center rounded-ctl bg-ink py-2.5 text-sm font-bold text-white hover:bg-ink/90 disabled:opacity-60"
         >
-          {pending ? "Saving…" : "Add course"}
+          {pending ? "Saving…" : isEdit ? "Save changes" : "Add course"}
         </button>
       </div>
     </form>

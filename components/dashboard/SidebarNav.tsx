@@ -13,6 +13,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/assignments", label: "Assignments" },
   { href: "/planner", label: "AI planner" },
   { href: "/schedule", label: "Schedule" },
+  { href: "/courses", label: "Courses" },
   { href: "/focus", label: "Focus timer" },
   { href: "/gpa", label: "GPA tracker" },
   { href: "/risk", label: "Workload risk" },

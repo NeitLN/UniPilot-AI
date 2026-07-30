@@ -77,7 +77,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </main>
 
         <nav
-          className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-7 gap-0.5 border-t border-border-subtle-2 bg-card px-1.5 py-2 md:hidden"
+          className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-8 gap-0.5 border-t border-border-subtle-2 bg-card px-1.5 py-2 md:hidden"
           aria-label="Mobile"
         >
           <Link
@@ -103,6 +103,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             className="flex min-h-11 flex-col items-center justify-center rounded-ctl px-0.5 text-center text-[9.5px] font-bold text-ink-2"
           >
             Sched
+          </Link>
+          <Link
+            href="/courses"
+            className="flex min-h-11 flex-col items-center justify-center rounded-ctl px-0.5 text-center text-[9.5px] font-bold text-ink-2"
+          >
+            Course
           </Link>
           <Link
             href="/focus"

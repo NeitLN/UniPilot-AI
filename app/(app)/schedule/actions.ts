@@ -305,5 +305,6 @@ export async function createCourse(
   revalidatePath("/schedule");
   revalidatePath("/assignments");
   revalidatePath("/gpa");
+  revalidatePath("/courses");
   return { errors: {}, ok: true, id: created.id };
 }
