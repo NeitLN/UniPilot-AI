@@ -35,8 +35,25 @@ export const metadata: Metadata = {
   },
 };
 
+// SR-06 (docs/PRODUCT_REVIEW_3.md): the manifest's own background_color
+// (the PWA splash screen shown while launching from a home-screen icon)
+// can't be conditioned on the OS's dark-mode preference — the Web App
+// Manifest spec has no supported way to do that, static or server-
+// generated (confirmed against this Next.js version's own manifest.ts
+// docs: browsers don't reliably send prefers-color-scheme with a
+// manifest fetch, and installed PWAs mostly cache the manifest at
+// install time regardless). A dark-mode user installing the app will see
+// a light splash for a moment; that's a real, known PWA platform limit,
+// not something worth a fake partial fix. What *is* actually supported
+// and effective here: the browser's own UI chrome color (the address bar
+// on Android Chrome), via prefers-color-scheme-scoped <meta
+// name="theme-color"> tags — matches --card's dark value so that chrome
+// doesn't stay a bright violet bar above an otherwise all-dark shell.
 export const viewport: Viewport = {
-  themeColor: "#6C3CF5",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#6C3CF5" },
+    { media: "(prefers-color-scheme: dark)", color: "#221a3d" },
+  ],
 };
 
 export default function RootLayout({
