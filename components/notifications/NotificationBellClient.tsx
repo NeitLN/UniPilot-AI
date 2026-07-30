@@ -24,6 +24,7 @@ export function NotificationBellClient({
   unreadCount: number;
 }) {
   const [open, setOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const [, startTransition] = useTransition();
 
@@ -38,15 +39,23 @@ export function NotificationBellClient({
 
   function handleMarkRead(id: string) {
     startTransition(async () => {
-      await markNotificationRead(id);
-      router.refresh();
+      try {
+        await markNotificationRead(id);
+        router.refresh();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Couldn't mark this as read.");
+      }
     });
   }
 
   function handleMarkAll() {
     startTransition(async () => {
-      await markAllNotificationsRead();
-      router.refresh();
+      try {
+        await markAllNotificationsRead();
+        router.refresh();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Couldn't mark all as read.");
+      }
     });
   }
 
@@ -89,6 +98,12 @@ export function NotificationBellClient({
                 </button>
               )}
             </div>
+
+            {error && (
+              <p role="alert" className="mt-1.5 px-1 text-[11px] font-semibold text-coral">
+                {error}
+              </p>
+            )}
 
             {notifications.length === 0 ? (
               <p className="px-1 py-6 text-center text-[12.5px] font-semibold text-ink-3">

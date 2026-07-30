@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   markNotificationRead,
@@ -18,18 +18,27 @@ export function NotificationsList({
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
 
   function handleMarkRead(id: string) {
     startTransition(async () => {
-      await markNotificationRead(id);
-      router.refresh();
+      try {
+        await markNotificationRead(id);
+        router.refresh();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Couldn't mark this as read.");
+      }
     });
   }
 
   function handleMarkAll() {
     startTransition(async () => {
-      await markAllNotificationsRead();
-      router.refresh();
+      try {
+        await markAllNotificationsRead();
+        router.refresh();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Couldn't mark all as read.");
+      }
     });
   }
 
@@ -48,6 +57,12 @@ export function NotificationsList({
 
   return (
     <div className="rounded-card bg-card p-4">
+      {error && (
+        <p role="alert" className="mb-3 text-[12.5px] font-semibold text-coral">
+          {error}
+        </p>
+      )}
+
       {unreadCount > 0 && (
         <div className="flex items-center justify-between border-b border-line pb-3">
           <p className="text-[12.5px] font-semibold text-ink-2">

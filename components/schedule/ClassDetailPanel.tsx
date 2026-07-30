@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Modal } from "@/components/ui/Modal";
+import { FieldError } from "@/components/ui/FieldError";
 import { assignCourseToBlock, deleteEvent } from "@/app/(app)/schedule/actions";
 import type { CourseOption } from "@/components/assignments/AssignmentForm";
 import { EventForm, type EventFormValues } from "./EventForm";
@@ -26,6 +27,7 @@ export function ClassDetailPanel({
   const [pending, startTransition] = useTransition();
   const [editing, setEditing] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [courseError, setCourseError] = useState<string | null>(null);
 
   if (!block) return null;
 
@@ -48,7 +50,12 @@ export function ClassDetailPanel({
 
   function handleCourseChange(courseId: string) {
     startTransition(async () => {
-      await assignCourseToBlock(block!.id, courseId || null);
+      try {
+        await assignCourseToBlock(block!.id, courseId || null);
+        setCourseError(null);
+      } catch (err) {
+        setCourseError(err instanceof Error ? err.message : "Couldn't link this course.");
+      }
     });
   }
 
@@ -107,6 +114,11 @@ export function ClassDetailPanel({
               </option>
             ))}
           </select>
+          {courseError && (
+            <FieldError as="span" className="text-[11px]">
+              {courseError}
+            </FieldError>
+          )}
         </label>
 
         <div className="mt-4">
@@ -222,11 +234,7 @@ function DeleteEventDialog({
         {`"${block.title}" will be removed from your schedule. You can't undo this.`}
       </p>
 
-      {error && (
-        <p role="alert" className="mt-2 text-xs font-semibold text-coral-text">
-          {error}
-        </p>
-      )}
+      {error && <FieldError className="mt-2 text-xs">{error}</FieldError>}
 
       <div className="mt-4 flex flex-col gap-2.5">
         {isRecurring ? (

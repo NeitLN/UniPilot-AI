@@ -49,9 +49,16 @@ export function AssignmentItem({
   const [deleting, setDeleting] = useState(false);
   const [showActions, setShowActions] = useState(false);
   const [restoring, startRestore] = useTransition();
+  const [restoreError, setRestoreError] = useState<string | null>(null);
 
   function handleRestore() {
-    startRestore(() => restoreAssignment(assignment.id));
+    startRestore(async () => {
+      try {
+        await restoreAssignment(assignment.id);
+      } catch (err) {
+        setRestoreError(err instanceof Error ? err.message : "Couldn't restore this assignment.");
+      }
+    });
   }
 
   const overdue = overdueLabel(assignment);
@@ -93,6 +100,11 @@ export function AssignmentItem({
             <Tag tone="neutral">Recurring</Tag>
           )}
         </div>
+        {restoreError && (
+          <p role="alert" className="mt-1.5 text-[11px] font-semibold text-coral">
+            {restoreError}
+          </p>
+        )}
       </div>
 
       <ProgressBar value={assignment.progress} tone={tone} className="sm:w-[92px]" />
