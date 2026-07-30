@@ -1,7 +1,14 @@
 import type { WeekMinutes } from "@/lib/rules/focus";
 import { formatMinutes } from "@/lib/rules/focus";
 
-const CHART_HEIGHT = 100;
+// UX-06 (docs/PRODUCT_REVIEW.md): this chart had no per-bar value at all —
+// the GPA trend chart (components/gpa/GpaTrendChart.tsx) already solved the
+// same "read the exact number, not just relative bar height" need with a
+// label above each bar; same BAR_MAX_HEIGHT/LABEL_SPACE split there so the
+// label never eats into the tallest bar's own height (the QA-01 bug).
+const BAR_MAX_HEIGHT = 84;
+const LABEL_SPACE = 16;
+const CHART_HEIGHT = BAR_MAX_HEIGHT + LABEL_SPACE;
 
 export interface CourseTimeGrade {
   name: string;
@@ -34,19 +41,25 @@ export function LearningStats({ weeklySeries, byCourse }: LearningStatsProps) {
     <div className="rounded-card bg-card p-5">
       <h2 className="font-display text-lg font-bold text-foreground">Learning stats</h2>
       <p className="mt-0.5 text-[11.5px] font-semibold text-ink-3">
-        Focus time over the last {weeklySeries.length} weeks.
+        Minutes studied per week, last {weeklySeries.length} weeks.
       </p>
 
       <div className="mt-4 flex items-end gap-2" style={{ height: CHART_HEIGHT }}>
         {weeklySeries.map((w) => {
-          const barHeight = w.minutes === 0 ? 2 : Math.max(4, Math.round((w.minutes / maxMinutes) * CHART_HEIGHT));
+          const barHeight = w.minutes === 0 ? 2 : Math.max(4, Math.round((w.minutes / maxMinutes) * BAR_MAX_HEIGHT));
           return (
             <div
               key={w.weekStart}
-              className="flex flex-1 flex-col items-center justify-end gap-1"
+              className="flex flex-1 shrink-0 flex-col items-center justify-end gap-1"
               style={{ height: CHART_HEIGHT }}
             >
-              <div className="w-full rounded-t-[4px] bg-violet" style={{ height: barHeight }} />
+              <span className="truncate text-[9px] font-bold text-ink-3 tabular-nums">
+                {w.minutes > 0 ? Math.round(w.minutes) : ""}
+              </span>
+              <div
+                className="w-full shrink-0 rounded-t-[4px] bg-violet"
+                style={{ height: barHeight }}
+              />
             </div>
           );
         })}

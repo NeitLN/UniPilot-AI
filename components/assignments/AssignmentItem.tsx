@@ -32,6 +32,7 @@ export interface AssignmentRow {
   archivedAt: string | null;
   updatedAt: string;
   score: number | null;
+  recurrenceGroupId: string | null;
 }
 
 export function AssignmentItem({
@@ -46,6 +47,7 @@ export function AssignmentItem({
   const [editing, setEditing] = useState(false);
   const [archiving, setArchiving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showActions, setShowActions] = useState(false);
   const [restoring, startRestore] = useTransition();
 
   function handleRestore() {
@@ -87,12 +89,20 @@ export function AssignmentItem({
           {assignment.score !== null && (
             <Tag tone="violet">Score {assignment.score}%</Tag>
           )}
+          {assignment.recurrenceGroupId !== null && (
+            <Tag tone="neutral">Recurring</Tag>
+          )}
         </div>
       </div>
 
       <ProgressBar value={assignment.progress} tone={tone} className="sm:w-[92px]" />
 
-      <div className="flex shrink-0 gap-1.5">
+      {/* UX-05 (docs/PRODUCT_REVIEW.md): the full 2-button row stays on
+          sm+ (unchanged, still what the desktop E2E suite exercises) —
+          below that, one 44x44 "⋯" trigger opens the same actions from a
+          compact list instead of two always-visible buttons competing with
+          the title/tags/progress bar for a narrow card's width. */}
+      <div className="hidden shrink-0 gap-1.5 sm:flex">
         {isArchivedView ? (
           <>
             <button
@@ -131,6 +141,76 @@ export function AssignmentItem({
         )}
       </div>
 
+      <button
+        type="button"
+        onClick={() => setShowActions(true)}
+        aria-label="Actions"
+        className="flex min-h-11 min-w-11 shrink-0 items-center justify-center self-end rounded-ctl bg-line text-lg font-bold text-ink-2 hover:bg-[#E6E2F2] sm:hidden"
+      >
+        ⋯
+      </button>
+
+      <Modal open={showActions} onClose={() => setShowActions(false)} title="Actions">
+        <h2 className="font-display text-lg font-bold text-foreground">{assignment.title}</h2>
+        <div className="mt-4 flex flex-col gap-2">
+          {isArchivedView ? (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowActions(false);
+                  handleRestore();
+                }}
+                disabled={restoring}
+                className="flex min-h-11 w-full items-center justify-center rounded-ctl bg-line py-2.5 text-sm font-bold text-ink-2 hover:bg-[#E6E2F2] disabled:opacity-60"
+              >
+                {restoring ? "Restoring…" : "Restore"}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowActions(false);
+                  setDeleting(true);
+                }}
+                className="flex min-h-11 w-full items-center justify-center rounded-ctl bg-line py-2.5 text-sm font-bold text-coral hover:bg-[#E6E2F2]"
+              >
+                Delete permanently
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowActions(false);
+                  setEditing(true);
+                }}
+                className="flex min-h-11 w-full items-center justify-center rounded-ctl bg-line py-2.5 text-sm font-bold text-ink-2 hover:bg-[#E6E2F2]"
+              >
+                Edit
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowActions(false);
+                  setArchiving(true);
+                }}
+                className="flex min-h-11 w-full items-center justify-center rounded-ctl bg-line py-2.5 text-sm font-bold text-ink-2 hover:bg-[#E6E2F2]"
+              >
+                Archive
+              </button>
+            </>
+          )}
+          <button
+            type="button"
+            onClick={() => setShowActions(false)}
+            className="flex min-h-11 w-full items-center justify-center rounded-ctl py-2.5 text-sm font-bold text-ink-3 hover:bg-line"
+          >
+            Cancel
+          </button>
+        </div>
+      </Modal>
+
       <Modal open={editing} onClose={() => setEditing(false)} title="Edit assignment">
         <AssignmentForm
           courses={courses}
@@ -150,6 +230,7 @@ export function AssignmentItem({
             updatedAt: assignment.updatedAt,
             score: assignment.score,
           }}
+          isRecurring={assignment.recurrenceGroupId !== null}
           onSaved={() => setEditing(false)}
           onCancel={() => setEditing(false)}
         />
@@ -158,6 +239,7 @@ export function AssignmentItem({
       <ArchiveDialog
         assignmentId={assignment.id}
         assignmentTitle={assignment.title}
+        isRecurring={assignment.recurrenceGroupId !== null}
         open={archiving}
         onClose={() => setArchiving(false)}
       />

@@ -9,7 +9,18 @@ import { test, expect } from "@playwright/test";
 // either bug's class (flex silently shrinking content, a <select> forcing
 // a sibling input to collapse) fails a test instead of shipping unnoticed.
 
-const ROUTES = ["/", "/assignments", "/planner", "/schedule", "/focus", "/gpa", "/risk", "/settings"];
+const ROUTES = [
+  "/",
+  "/assignments",
+  "/planner",
+  "/schedule",
+  "/courses",
+  "/focus",
+  "/gpa",
+  "/risk",
+  "/reports",
+  "/settings",
+];
 
 test.describe("Layout regressions (docs/PRODUCT_REVIEW.md)", () => {
   // QA-01 — GPA trend bars used to all render at the same height regardless

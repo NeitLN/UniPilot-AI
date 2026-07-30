@@ -162,43 +162,82 @@ function WeekColumns({
   onSelect: (id: string) => void;
 }) {
   const days = Array.from({ length: 7 }, (_, i) => addDays(start, i));
+  const dayEntries = days.map((day) => ({
+    day,
+    dayBlocks: blocks
+      .filter((b) => isSameDay(new Date(b.startAt), day))
+      .sort((a, b) => a.startAt.localeCompare(b.startAt)),
+  }));
+
+  // UX-06 (docs/PRODUCT_REVIEW.md): a bare weekend usually adds 2 empty
+  // cards to scroll past on mobile's stacked grid-cols-1 layout — collapsed
+  // into one row there when neither day has anything. Desktop's
+  // sm:grid-cols-7 keeps both individual cells (hidden only on mobile) so
+  // the 7-column grid alignment never shifts.
+  const isWeekend = (day: Date) => day.getDay() === 0 || day.getDay() === 6;
+  const weekendEntries = dayEntries.filter((e) => isWeekend(e.day));
+  const weekendEmpty =
+    weekendEntries.length === 2 && weekendEntries.every((e) => e.dayBlocks.length === 0);
 
   return (
     <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-7">
-      {days.map((day) => {
-        const dayBlocks = blocks
-          .filter((b) => isSameDay(new Date(b.startAt), day))
-          .sort((a, b) => a.startAt.localeCompare(b.startAt));
-        const isToday = isSameDay(day, today);
+      {dayEntries.map(({ day, dayBlocks }) => (
+        <DayColumn
+          key={day.toISOString()}
+          day={day}
+          dayBlocks={dayBlocks}
+          isToday={isSameDay(day, today)}
+          onSelect={onSelect}
+          className={weekendEmpty && isWeekend(day) ? "hidden sm:block" : undefined}
+        />
+      ))}
+      {weekendEmpty && (
+        <div className="rounded-card bg-card p-3 text-center sm:hidden">
+          <p className="text-[11.5px] font-semibold text-ink-3">Weekend — no schedule</p>
+        </div>
+      )}
+    </div>
+  );
+}
 
-        return (
-          <div key={day.toISOString()} className="rounded-card bg-card p-3">
-            {/* Weekday/day-of-month reflect the runtime's local timezone —
-                expected to differ between SSR and hydration, not a real mismatch. */}
-            <p
-              className={`text-center text-[11px] font-extrabold uppercase tracking-wide ${
-                isToday ? "text-violet" : "text-ink-3"
-              }`}
-              suppressHydrationWarning
-            >
-              {day.toLocaleDateString(undefined, { weekday: "short" })}
-            </p>
-            <p
-              className={`mx-auto mt-0.5 flex h-6 w-6 items-center justify-center rounded-full text-center text-[12.5px] font-bold ${
-                isToday ? "bg-violet text-white" : "text-foreground"
-              }`}
-              suppressHydrationWarning
-            >
-              {day.getDate()}
-            </p>
-            <div className="mt-2 flex flex-col gap-1.5">
-              {dayBlocks.map((b) => (
-                <BlockCard key={b.id} block={b} onSelect={onSelect} />
-              ))}
-            </div>
-          </div>
-        );
-      })}
+function DayColumn({
+  day,
+  dayBlocks,
+  isToday,
+  onSelect,
+  className,
+}: {
+  day: Date;
+  dayBlocks: ClassBlockData[];
+  isToday: boolean;
+  onSelect: (id: string) => void;
+  className?: string;
+}) {
+  return (
+    <div className={`rounded-card bg-card p-3 ${className ?? ""}`}>
+      {/* Weekday/day-of-month reflect the runtime's local timezone —
+          expected to differ between SSR and hydration, not a real mismatch. */}
+      <p
+        className={`text-center text-[11px] font-extrabold uppercase tracking-wide ${
+          isToday ? "text-violet" : "text-ink-3"
+        }`}
+        suppressHydrationWarning
+      >
+        {day.toLocaleDateString(undefined, { weekday: "short" })}
+      </p>
+      <p
+        className={`mx-auto mt-0.5 flex h-6 w-6 items-center justify-center rounded-full text-center text-[12.5px] font-bold ${
+          isToday ? "bg-violet text-white" : "text-foreground"
+        }`}
+        suppressHydrationWarning
+      >
+        {day.getDate()}
+      </p>
+      <div className="mt-2 flex flex-col gap-1.5">
+        {dayBlocks.map((b) => (
+          <BlockCard key={b.id} block={b} onSelect={onSelect} />
+        ))}
+      </div>
     </div>
   );
 }
