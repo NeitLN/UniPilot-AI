@@ -276,38 +276,42 @@ npx tsc --noEmit → npx eslint app components lib tests → npx vitest run
 >
 > ⚠️ **Phát hiện phụ khác:** lần chạy E2E đầu tiên sau khi sửa xong bị **fail thật** (không phải flaky) ở đúng test `assignments.spec.ts:7`, cả khi chạy riêng lẻ. Nguyên nhân: tài khoản E2E đã tích luỹ **32 dòng "E2E Assignment..." rác** qua nhiều lần chạy test suite suốt các đợt trước (không liên quan gì tới code Phase 10) — trang `/assignments` quá dài khiến việc định vị nút trong dialog bị lệch. Dọn về còn đúng 1 dòng cố định (`E2E Baseline Assignment`) thì test xanh lại ngay, xác nhận không phải regression từ Phase 10.
 
-- [ ] Thêm token: `--line-hover` (light `#E6E2F2`, dark sáng hơn `--line` một bậc) + đăng ký vào `@theme inline`
-- [ ] Thay toàn bộ `hover:bg-[#E6E2F2]` → `hover:bg-line-hover`
-- [ ] Quét lại: `grep -rn "hover:bg-\[#" app components` phải trả về **0 kết quả**
-
-**Tiêu chí chấp nhận:**
-- [ ] Đo lại `getComputedStyle` đúng nút "Edit" ở dark mode: tương phản khi hover **≥ 4.5:1** (hiện tại **1.67:1**)
-- [ ] Light mode **không đổi** so với hiện tại (so sánh ảnh chụp trước/sau)
-- [ ] 21/21 E2E xanh
-
 ---
 
-## Phase 11 — Vòng đời AI Planner 🟡 (~2.5h)
+## Phase 11 — Vòng đời AI Planner 🟡 (~2.5h, thực tế ~2h) ✅ **Hoàn thành**
 
 > **Mục tiêu:** biến tính năng bán hàng của sản phẩm từ "tờ lịch tuần trước" thành thứ dùng được.
 
-### 11.1 — Phân biệt buổi đã qua / sắp tới (~1h)
+### 11.1 — Phân biệt buổi đã qua / sắp tới (~1h) ✅
 
 **File sửa:** `components/planner/ActivePlanSummary.tsx`
 
-- [ ] Nhận `now`, phân biệt buổi quá khứ (làm mờ + ○) và sắp tới
-- [ ] Hiện tiến độ: *"3/5 buổi đã qua"*
-- [ ] **Chú ý:** không được suy ra "đã học xong" — app **không biết** điều đó (focus session không liên kết với study session cụ thể, xem ghi chú ở `lib/rules/insights.ts`). Chỉ nói *"đã qua"*, không nói *"đã hoàn thành"* — nói sai còn tệ hơn không nói.
+- [x] Nhận `now`, phân biệt buổi quá khứ (○, chữ `text-ink-3`) và sắp tới (●, chữ thường)
+- [x] Hiện tiến độ: *"N of M sessions have passed"*
+- [x] **Đúng nguyên tắc đã đặt ra:** không dùng chữ "completed"/"đã học xong" ở đâu cả — chỉ "have passed" (đã qua thời điểm), không suy ra việc học thật
 
-### 11.2 — Trạng thái "kế hoạch đã kết thúc" (~1h)
+> ⚠️ **Tự bắt và sửa 1 lỗi trước khi commit:** thiết kế ban đầu dùng `opacity-50` trên cả dòng để làm mờ buổi đã qua. Đo thử ở dark mode ra **3.97:1** — dưới chuẩn AA 4.5:1, tức là **suýt tái phạm đúng lớp lỗi QA4-02 vừa sửa xong trong cùng phase**. Đổi sang dùng token `text-ink-3` (đã có sẵn, đã kiểm chứng) thay vì opacity thô → đo lại **4.52:1**, đạt chuẩn.
 
-- [ ] Mọi buổi đã qua → badge đổi thành **"Đã kết thúc"** (không phải "Active"), tone neutral thay vì mint
-- [ ] CTA rõ: *"Tạo kế hoạch cho tuần này"*
-- [ ] Logic thuần đặt ở `lib/rules/plan.ts` (đã có sẵn file) + unit test
+### 11.2 — Trạng thái "kế hoạch đã kết thúc" (~1h) ✅
 
-### 11.3 — Nâng link Weekly report trên Dashboard (~30 phút)
+- [x] Mọi buổi đã qua → badge đổi thành **"Ended"**, tone `neutral` thay vì `mint`
+- [x] CTA rõ trong nội dung card: *"This plan has ended. Use 'Generate new draft' above to plan this week."*
+- [x] Logic thuần `computePlanProgress()` trong `lib/rules/plan.ts` — 5 unit test mới (rỗng / còn active / đã kết thúc / toàn bộ còn tương lai / biên đúng thời điểm `now`)
 
-- [ ] Đổi từ 1 dòng chữ thành thẻ có số liệu thật (streak + phút tuần này), để tính năng này thực sự nhìn thấy được trên mobile
+> **Phát hiện phát sinh, sửa luôn trong phase này:** `components/dashboard/PlanCard.tsx` (widget "Pilo's plan" trên Dashboard) là **component khác**, tách biệt hoàn toàn khỏi `ActivePlanSummary`, nhưng bị **đúng lỗi QA4-03 y hệt** — badge "Active" chỉ dựa vào `study_plans.status`, không hề biết thời gian. Phát hiện khi chụp ảnh xác nhận Phase 11 và thấy card này vẫn hiện "Active" dù plan đã kết thúc. Sửa bằng cách gọi lại đúng `computePlanProgress()` đã build ở trên — không viết lại logic lần hai, tránh 2 nguồn sự thật lệch nhau.
+
+### 11.3 — Nâng link Weekly report trên Dashboard (~30 phút) ✅
+
+**File mới:** `components/dashboard/WeeklyReportTeaser.tsx`
+
+- [x] Đổi từ 1 dòng chữ thành thẻ có số liệu thật — **nhưng không phải streak/phút tuần này** như đề xuất ban đầu, vì 2 con số đó **đã hiển thị sẵn** ở `FocusCard`/`FocusWeekKpi` ngay phía trên (lặp lại không có giá trị). Thay bằng thứ duy nhất chỉ `/reports` mới tính: **so sánh với tuần trước** (↑/↓ phút, dùng lại `weekOverWeek()` từ `lib/rules/insights.ts`)
+
+**Tiêu chí chấp nhận Phase 11 — xác minh bằng dữ liệu thật, cả 2 chiều:**
+- [x] Dữ liệu demo thật (5/5 buổi đã qua) → cả `/planner` lẫn Dashboard's `PlanCard` đều hiện đúng "Ended", không còn "Active" ở đâu
+- [x] Tạo 1 plan có buổi tương lai (tài khoản E2E, 1 buổi quá khứ + 1 buổi tương lai, dọn sạch sau khi xong) → hiện đúng "Active", markers `○`/`●` phân biệt đúng từng buổi, "1 of 2 sessions have passed"
+- [x] Unit test: 179/179 xanh (174 → 179, +5 test `computePlanProgress`)
+- [x] E2E: 21/21 xanh (2 lần chạy liên tiếp)
+- [x] 0 page error trên mọi màn hình đã kiểm tra
 
 **Tiêu chí chấp nhận Phase 11:**
 - [ ] Với dữ liệu demo hiện tại (5 buổi đều đã qua) → hiện đúng "Đã kết thúc", không còn "Active"
