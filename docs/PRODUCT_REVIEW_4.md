@@ -234,36 +234,47 @@ npx tsc --noEmit → npx eslint app components lib tests → npx vitest run
 
 ---
 
-## Phase 10 — Sửa 2 lỗi P0 🔴 (~3h)
+## Phase 10 — Sửa 2 lỗi P0 🔴 (~3h, thực tế ~2.5h) ✅ **Hoàn thành**
 
 > **Mục tiêu:** một lỗi đang làm sai dữ liệu, một lỗi đang làm chữ biến mất. Ưu tiên tuyệt đối.
 
-### 10.1 — QA4-01: Chỉ được tồn tại đúng 1 plan active (~1.5h)
+### 10.1 — QA4-01: Chỉ được tồn tại đúng 1 plan active (~1.5h) ✅
 
 **File sửa:** `app/(app)/planner/actions.ts`
 **File mới:** `supabase/migrations/0014_single_active_plan.sql`
 
-- [ ] `confirmPlan`: trước khi set plan mới thành `active`, hạ mọi plan `active` khác của user xuống `cancelled`
-- [ ] **Migration dọn dữ liệu lịch sử:** 3 plan active hiện có → giữ lại cái `confirmed_at` mới nhất, còn lại `cancelled`
-- [ ] **Ràng buộc DB chống tái phát:** partial unique index
-  ```sql
-  create unique index study_plans_one_active_per_user
-    on study_plans (user_id) where status = 'active';
-  ```
-  → Kể cả code sau này viết sai, DB vẫn chặn. Đây mới là chỗ sửa gốc.
-- [ ] Dọn notification trùng lặp sinh ra từ các plan bị huỷ
+- [x] `confirmPlan`: trước khi set plan mới thành `active`, hạ mọi plan `active` khác của user xuống `cancelled`
+- [x] **Migration dọn dữ liệu lịch sử:** 3 plan active hiện có → giữ lại `f83e2e3e` (`confirmed_at` mới nhất, 14:04:53), 2 cái còn lại → `cancelled`
+- [x] **Ràng buộc DB chống tái phát:** partial unique index `study_plans_one_active_per_user`
+- [x] Dọn notification trùng lặp: rà theo `(user_id, kind, title, scheduled_at)`, giữ bản ghi cũ nhất mỗi nhóm — **18 → 13** (xoá đúng 5 bản ghi trùng đã xác định trước khi chạy)
 
-**Tiêu chí chấp nhận:**
-- [ ] Truy vấn `study_plans?status=eq.active` trả về **đúng 1 dòng** cho tài khoản demo
-- [ ] Confirm plan mới → plan cũ tự chuyển `cancelled`, xác nhận bằng truy vấn DB
-- [ ] Thử insert 2 plan active bằng service-role → **DB từ chối** (chứng minh index hoạt động)
-- [ ] `/reports` "Plan adherence" tính trên đúng plan hiện hành
+**Tiêu chí chấp nhận — tất cả xác minh bằng truy vấn/thao tác thật:**
+- [x] `study_plans?status=eq.active` cho tài khoản demo → **đúng 1 dòng** (`f83e2e3e`)
+- [x] Confirm plan mới (2 vòng generate→confirm liên tiếp trên tài khoản E2E qua UI thật) → plan trước tự chuyển `cancelled`, xác nhận bằng truy vấn DB: `active` × 1, `cancelled` × 1, `draft` × 1 (đúng như thiết kế)
+- [x] Ép `PATCH` 1 plan `cancelled` → `active` bằng service-role trong khi đã có 1 active → **DB từ chối**: `23505 duplicate key value violates unique constraint "study_plans_one_active_per_user"`
+- [x] `/reports` "Plan adherence" vẫn 100%, không lỗi console, tính đúng trên plan hiện hành duy nhất
 
-> ⚠️ **Cẩn trọng:** migration này **sửa dữ liệu thật**, không chỉ thêm cột. Bắt buộc truy vấn ghi lại trạng thái trước khi chạy, để đối chiếu sau.
+> Dữ liệu test trên tài khoản E2E (3 plan + 15 notification tạo ra trong lúc verify) đã dọn sạch sau khi xong.
 
-### 10.2 — QA4-02: Token `--line-hover`, thay 44 vị trí (~1.5h)
+### 10.2 — QA4-02: Token `--line-hover`, thay 44 vị trí (~1.5h) ✅
 
-**File sửa:** `app/globals.css`, 44 vị trí trong `app/` + `components/`
+**File sửa:** `app/globals.css`, 44 vị trí trong 22 file ở `app/` + `components/`
+
+**Tiêu chí chấp nhận — đo `getComputedStyle` thật trên nút "Edit", `/assignments`:**
+
+| | Trước | Sau |
+|---|---|---|
+| Nền khi hover (dark) | `#E6E2F2` (giá trị light, hardcode) | `#3D3169` (token `--line-hover` riêng cho dark) |
+| Tương phản chữ/nền khi hover (dark) | **1.67:1** ❌ | **5.38:1** ✅ |
+| Nền khi hover (light) | `#E6E2F2` | `#E6E2F2` — **không đổi** |
+| Tương phản (light) | 7.23:1 | 7.23:1 — không đổi |
+
+- [x] `grep -rn "hover:bg-\[#" app components` → 0 kết quả
+- [x] 21/21 E2E xanh (chạy 2 lần liên tiếp sau khi dọn dữ liệu rác tích luỹ trên tài khoản E2E — xem ghi chú bên dưới)
+
+> ⚠️ **Phát hiện phụ, không sửa hôm nay:** khi tính tương phản cho token mới, phát hiện `text-coral` đứng trên nền hover (cả 2 theme) **cũng dưới chuẩn AA** — light 2.45:1, dark (sau khi sửa) 3.67:1. Đây là bug khác QA4-02 (không phải ink-2/ink-3 biến mất, mà là bản thân `text-coral` chưa từng đủ tương phản trên nền này ở **cả 2 theme**, kể cả trước khi sửa). Ghi nhận cho một đợt riêng, không mở rộng phạm vi Phase 10.
+>
+> ⚠️ **Phát hiện phụ khác:** lần chạy E2E đầu tiên sau khi sửa xong bị **fail thật** (không phải flaky) ở đúng test `assignments.spec.ts:7`, cả khi chạy riêng lẻ. Nguyên nhân: tài khoản E2E đã tích luỹ **32 dòng "E2E Assignment..." rác** qua nhiều lần chạy test suite suốt các đợt trước (không liên quan gì tới code Phase 10) — trang `/assignments` quá dài khiến việc định vị nút trong dialog bị lệch. Dọn về còn đúng 1 dòng cố định (`E2E Baseline Assignment`) thì test xanh lại ngay, xác nhận không phải regression từ Phase 10.
 
 - [ ] Thêm token: `--line-hover` (light `#E6E2F2`, dark sáng hơn `--line` một bậc) + đăng ký vào `@theme inline`
 - [ ] Thay toàn bộ `hover:bg-[#E6E2F2]` → `hover:bg-line-hover`
@@ -335,11 +346,11 @@ npx tsc --noEmit → npx eslint app components lib tests → npx vitest run
 
 ## Bảng tổng hợp
 
-| Phase | Nội dung | Giờ | Mức | Phụ thuộc |
-|---|---|---|---|---|
-| **10** | Plan active trùng lặp + hover dark mode | ~3 | 🔴 P0 | — |
-| **11** | Vòng đời AI Planner | ~2.5 | 🟡 P1 | nên sau 10.1 |
-| **12** | Gom form + test tầng component | ~2.5 | 🟡 P1 | 12.2 nên sau 11 |
+| Phase | Nội dung | Giờ ước tính | Giờ thực tế | Mức | Trạng thái |
+|---|---|---|---|---|---|
+| **10** | Plan active trùng lặp + hover dark mode | ~3 | ~2.5 | 🔴 P0 | ✅ |
+| **11** | Vòng đời AI Planner | ~2.5 | — | 🟡 P1 | ⏳ chưa làm |
+| **12** | Gom form + test tầng component | ~2.5 | — | 🟡 P1 | ⏳ chưa làm |
 
 **Tổng: ~8 giờ**
 
