@@ -10,6 +10,7 @@ import {
 } from "@/app/(app)/assignments/actions";
 import { Pilo } from "@/components/brand/Pilo";
 import { FieldError } from "@/components/ui/FieldError";
+import { inputClass } from "@/components/ui/Field";
 
 const SETTINGS_INITIAL: SettingsFormState = { errors: {} };
 const COURSE_INITIAL: CourseFormState = { errors: {} };
@@ -280,8 +281,3 @@ export function OnboardingWizard() {
   );
 }
 
-function inputClass(hasError: boolean) {
-  return `w-full rounded-ctl border px-3.5 py-2.5 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-violet ${
-    hasError ? "border-coral" : "border-border-subtle focus:border-violet"
-  }`;
-}

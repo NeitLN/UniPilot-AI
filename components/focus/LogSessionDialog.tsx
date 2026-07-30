@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Modal } from "@/components/ui/Modal";
 import { FieldError } from "@/components/ui/FieldError";
+import { inputClass } from "@/components/ui/Field";
 import { logManualFocusSession } from "@/app/(app)/focus/actions";
 import {
   validateManualSession,
@@ -175,8 +176,3 @@ export function LogSessionDialog({ assignments }: { assignments: FocusAssignment
   );
 }
 
-function inputClass(hasError: boolean) {
-  return `w-full rounded-ctl border px-3.5 py-2.5 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-violet ${
-    hasError ? "border-coral" : "border-border-subtle focus:border-violet"
-  }`;
-}

@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { updateProfile, type SettingsFormState } from "@/app/(app)/settings/actions";
 import { FieldError } from "@/components/ui/FieldError";
+import { Field, inputClass } from "@/components/ui/Field";
 
 const INITIAL_STATE: SettingsFormState = { errors: {} };
 
@@ -82,32 +83,3 @@ export function SettingsForm({ initialValues }: { initialValues: SettingsFormVal
   );
 }
 
-function inputClass(hasError: boolean) {
-  return `w-full rounded-ctl border px-3.5 py-2.5 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-violet ${
-    hasError ? "border-coral" : "border-border-subtle focus:border-violet"
-  }`;
-}
-
-function Field({
-  label,
-  error,
-  className,
-  children,
-}: {
-  label: string;
-  error?: string;
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className={`flex flex-col gap-1 text-xs font-bold text-ink-2 ${className ?? ""}`}>
-      {label}
-      {children}
-      {error && (
-        <FieldError as="span" className="text-[11px]">
-          {error}
-        </FieldError>
-      )}
-    </label>
-  );
-}

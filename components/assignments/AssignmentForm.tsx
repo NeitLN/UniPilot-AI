@@ -11,6 +11,7 @@ import { enqueueMutation } from "@/lib/offline/idb";
 import { useOnlineStatus } from "@/lib/offline/useOnlineStatus";
 import { REPEAT_OPTIONS, type EventRepeat } from "@/lib/rules/event";
 import { FieldError } from "@/components/ui/FieldError";
+import { Field, inputClass } from "@/components/ui/Field";
 
 // Defined locally rather than imported from actions.ts: a "use server" module
 // may only export async functions, so a plain object export from it resolves
@@ -324,32 +325,3 @@ export function AssignmentForm({
   );
 }
 
-function inputClass(hasError: boolean) {
-  return `w-full rounded-ctl border px-3.5 py-2.5 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-violet ${
-    hasError ? "border-coral" : "border-border-subtle focus:border-violet"
-  }`;
-}
-
-function Field({
-  label,
-  error,
-  className,
-  children,
-}: {
-  label: string;
-  error?: string;
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className={`flex flex-col gap-1 text-xs font-bold text-ink-2 ${className ?? ""}`}>
-      {label}
-      {children}
-      {error && (
-        <FieldError as="span" className="text-[11px]">
-          {error}
-        </FieldError>
-      )}
-    </label>
-  );
-}

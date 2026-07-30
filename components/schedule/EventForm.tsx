@@ -7,6 +7,12 @@ import { REPEAT_OPTIONS, REMINDER_OPTIONS, type EventRepeat } from "@/lib/rules/
 import { CourseForm } from "@/components/courses/CourseForm";
 import type { CourseOption } from "@/components/assignments/AssignmentForm";
 import { FieldError } from "@/components/ui/FieldError";
+import { Field, inputClass as sharedInputClass } from "@/components/ui/Field";
+
+// EventForm's inputs sit in flex rows and need min-w-0 to keep long text
+// (e.g. "AM/PM") from forcing an overflow — every other form's Field/
+// inputClass usage is identical without it (see components/ui/Field.tsx).
+const inputClass = (hasError: boolean) => sharedInputClass(hasError, "min-w-0");
 
 const INITIAL_STATE: EventFormState = { errors: {} };
 const FIELD_ORDER = ["title", "startAt", "endAt", "repeatUntil"] as const;
@@ -272,32 +278,3 @@ function defaultEnd(start?: string): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-function inputClass(hasError: boolean) {
-  return `w-full min-w-0 rounded-ctl border px-3.5 py-2.5 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-violet ${
-    hasError ? "border-coral" : "border-border-subtle focus:border-violet"
-  }`;
-}
-
-function Field({
-  label,
-  error,
-  className,
-  children,
-}: {
-  label: string;
-  error?: string;
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className={`flex flex-col gap-1 text-xs font-bold text-ink-2 ${className ?? ""}`}>
-      {label}
-      {children}
-      {error && (
-        <FieldError as="span" className="text-[11px]">
-          {error}
-        </FieldError>
-      )}
-    </label>
-  );
-}
