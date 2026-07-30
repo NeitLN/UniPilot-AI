@@ -10,6 +10,7 @@ import { ensurePushSubscription } from "@/lib/push/subscribe";
 import { enqueueMutation } from "@/lib/offline/idb";
 import { useOnlineStatus } from "@/lib/offline/useOnlineStatus";
 import { REPEAT_OPTIONS, type EventRepeat } from "@/lib/rules/event";
+import { FieldError } from "@/components/ui/FieldError";
 
 // Defined locally rather than imported from actions.ts: a "use server" module
 // may only export async functions, so a plain object export from it resolves
@@ -301,11 +302,7 @@ export function AssignmentForm({
         />
       </Field>
 
-      {state.formError && (
-        <p role="alert" className="text-xs font-semibold text-coral-text">
-          {state.formError}
-        </p>
-      )}
+      {state.formError && <FieldError>{state.formError}</FieldError>}
 
       <div className="mt-1 flex gap-2.5">
         <button
@@ -349,9 +346,9 @@ function Field({
       {label}
       {children}
       {error && (
-        <span role="alert" className="text-[11px] font-semibold text-coral-text">
+        <FieldError as="span" className="text-[11px]">
           {error}
-        </span>
+        </FieldError>
       )}
     </label>
   );

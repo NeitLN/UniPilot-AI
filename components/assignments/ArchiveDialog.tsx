@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Modal } from "@/components/ui/Modal";
+import { FieldError } from "@/components/ui/FieldError";
 import { archiveAssignment } from "@/app/(app)/assignments/actions";
 
 export interface ArchiveDialogProps {
@@ -46,9 +47,7 @@ export function ArchiveDialog({
       </p>
 
       {error && (
-        <p role="alert" className="mt-2 text-xs font-semibold text-coral-text">
-          {error}
-        </p>
+        <FieldError className="mt-2 text-xs">{error}</FieldError>
       )}
 
       <div className="mt-4 flex flex-col gap-2.5">

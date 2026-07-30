@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Modal } from "@/components/ui/Modal";
+import { FieldError } from "@/components/ui/FieldError";
 import { deleteAssignmentPermanently } from "@/app/(app)/assignments/actions";
 
 export interface DeleteAssignmentDialogProps {
@@ -46,11 +47,7 @@ export function DeleteAssignmentDialog({
         title.
       </p>
 
-      {error && (
-        <p role="alert" className="mt-2 text-xs font-semibold text-coral-text">
-          {error}
-        </p>
-      )}
+      {error && <FieldError className="mt-2 text-xs">{error}</FieldError>}
 
       <div className="mt-4 flex gap-2.5">
         <button

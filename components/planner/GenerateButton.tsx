@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useOnlineStatus } from "@/lib/offline/useOnlineStatus";
+import { FieldError } from "@/components/ui/FieldError";
 
 export interface GenerateButtonProps {
   disabled: boolean;
@@ -100,9 +101,7 @@ export function GenerateButton({ disabled, disabledReasons, label }: GenerateBut
 
       {error && (
         <div className="flex items-center gap-2">
-          <p role="alert" className="text-[11.5px] font-semibold text-coral-text">
-            {error}
-          </p>
+          <FieldError className="text-[11.5px]">{error}</FieldError>
           {retryable && (
             <button
               type="button"
@@ -116,7 +115,7 @@ export function GenerateButton({ disabled, disabledReasons, label }: GenerateBut
       )}
 
       {result && (
-        <p className="text-[11.5px] font-semibold text-mint-text">
+        <p className="text-[11.5px] font-semibold text-mint">
           Scheduled {result.sessionCount} session{result.sessionCount === 1 ? "" : "s"}
           {result.rejectedCount > 0
             ? `, ${result.rejectedCount} didn't fit and ${result.rejectedCount === 1 ? "was" : "were"} left out.`

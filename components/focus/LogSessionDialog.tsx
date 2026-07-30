@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Modal } from "@/components/ui/Modal";
+import { FieldError } from "@/components/ui/FieldError";
 import { logManualFocusSession } from "@/app/(app)/focus/actions";
 import {
   validateManualSession,
@@ -120,9 +121,9 @@ export function LogSessionDialog({ assignments }: { assignments: FocusAssignment
                 className={inputClass(Boolean(errors.startedAt))}
               />
               {errors.startedAt && (
-                <span role="alert" className="text-[11px] font-semibold text-coral-text">
+                <FieldError as="span" className="text-[11px]">
                   {errors.startedAt}
-                </span>
+                </FieldError>
               )}
             </label>
 
@@ -139,9 +140,9 @@ export function LogSessionDialog({ assignments }: { assignments: FocusAssignment
                 className={inputClass(Boolean(errors.durationMinutes))}
               />
               {errors.durationMinutes && (
-                <span role="alert" className="text-[11px] font-semibold text-coral-text">
+                <FieldError as="span" className="text-[11px]">
                   {errors.durationMinutes}
-                </span>
+                </FieldError>
               )}
             </label>
           </div>
@@ -150,11 +151,7 @@ export function LogSessionDialog({ assignments }: { assignments: FocusAssignment
             {`${POMODORO_SECONDS / 60}+ minutes counts as a completed cycle toward your streak — anything shorter logs as partial, same as the timer.`}
           </p>
 
-          {formError && (
-            <p role="alert" className="text-xs font-semibold text-coral-text">
-              {formError}
-            </p>
-          )}
+          {formError && <FieldError>{formError}</FieldError>}
 
           <div className="mt-1 flex gap-2.5">
             <button

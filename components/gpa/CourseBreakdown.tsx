@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Modal } from "@/components/ui/Modal";
+import { FieldError } from "@/components/ui/FieldError";
 import { GradeForm } from "./GradeForm";
 import { deleteGrade } from "@/app/(app)/gpa/actions";
 import {
@@ -69,7 +70,7 @@ export function CourseBreakdown({
                 return (
                   <tr key={g.id} className="border-b border-line last:border-b-0">
                     <td
-                      className={`py-2 pr-3 font-bold ${draggingDown ? "text-coral-text" : "text-foreground"}`}
+                      className={`py-2 pr-3 font-bold ${draggingDown ? "text-coral" : "text-foreground"}`}
                     >
                       <span className="truncate">{g.courseName}</span>
                       {draggingDown && (
@@ -186,9 +187,7 @@ function DeleteGradeDialog({
         {`"${grade.courseName}" (${grade.semester}) will be removed from your GPA calculation.`}
       </p>
       {error && (
-        <p role="alert" className="mt-2 text-xs font-semibold text-coral-text">
-          {error}
-        </p>
+        <FieldError className="mt-2 text-xs">{error}</FieldError>
       )}
       <div className="mt-4 flex gap-2.5">
         <button

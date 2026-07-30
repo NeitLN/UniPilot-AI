@@ -4,6 +4,7 @@ import { useActionState, useEffect, useRef } from "react";
 import { createCourse } from "@/app/(app)/schedule/actions";
 import type { CourseFormState } from "@/app/(app)/schedule/actions";
 import { updateCourse } from "@/app/(app)/courses/actions";
+import { FieldError } from "@/components/ui/FieldError";
 
 const INITIAL_STATE: CourseFormState = { errors: {} };
 const FIELD_ORDER = ["name", "semester", "credits"] as const;
@@ -121,11 +122,7 @@ export function CourseForm({ initialValues, onSaved, onCancel, compact }: Course
         />
       </Field>
 
-      {state.formError && (
-        <p role="alert" className="text-xs font-semibold text-coral-text">
-          {state.formError}
-        </p>
-      )}
+      {state.formError && <FieldError>{state.formError}</FieldError>}
 
       <div className="mt-1 flex gap-2.5">
         <button
@@ -169,9 +166,9 @@ function Field({
       {label}
       {children}
       {error && (
-        <span role="alert" className="text-[11px] font-semibold text-coral-text">
+        <FieldError as="span" className="text-[11px]">
           {error}
-        </span>
+        </FieldError>
       )}
     </label>
   );

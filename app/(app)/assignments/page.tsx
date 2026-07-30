@@ -5,6 +5,7 @@ import { AddAssignmentButton } from "@/components/assignments/AddAssignmentButto
 import { AssignmentFilters } from "@/components/assignments/AssignmentFilters";
 import { AssignmentItem } from "@/components/assignments/AssignmentItem";
 import { Pagination } from "@/components/ui/Pagination";
+import { FieldError } from "@/components/ui/FieldError";
 import type { AssignmentStatus } from "@/lib/supabase/types";
 
 const STATUS_VALUES: AssignmentStatus[] = ["not_started", "in_progress", "done"];
@@ -119,9 +120,9 @@ export default async function AssignmentsPage({
 
       <div className="mt-4 rounded-card bg-card p-5">
         {error && (
-          <p className="text-sm font-semibold text-coral-text">
+          <FieldError className="text-sm">
             Couldn&rsquo;t load assignments: {error.message}
-          </p>
+          </FieldError>
         )}
 
         {!error && assignments.length === 0 && (

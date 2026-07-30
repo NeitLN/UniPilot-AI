@@ -9,6 +9,7 @@ import {
   type AssignmentFormState,
 } from "@/app/(app)/assignments/actions";
 import { Pilo } from "@/components/brand/Pilo";
+import { FieldError } from "@/components/ui/FieldError";
 
 const SETTINGS_INITIAL: SettingsFormState = { errors: {} };
 const COURSE_INITIAL: CourseFormState = { errors: {} };
@@ -91,15 +92,13 @@ export function OnboardingWizard() {
                 className={inputClass(Boolean(settingsState.errors.weeklyAvailabilityHours))}
               />
               {settingsState.errors.weeklyAvailabilityHours && (
-                <span className="text-[11px] font-semibold text-coral-text">
+                <FieldError as="span" className="text-[11px]">
                   {settingsState.errors.weeklyAvailabilityHours}
-                </span>
+                </FieldError>
               )}
             </label>
             {settingsState.formError && (
-              <p role="alert" className="text-xs font-semibold text-coral-text">
-                {settingsState.formError}
-              </p>
+              <FieldError>{settingsState.formError}</FieldError>
             )}
             <button
               type="submit"
@@ -135,9 +134,9 @@ export function OnboardingWizard() {
                 className={inputClass(Boolean(courseState.errors.name))}
               />
               {courseState.errors.name && (
-                <span className="text-[11px] font-semibold text-coral-text">
+                <FieldError as="span" className="text-[11px]">
                   {courseState.errors.name}
-                </span>
+                </FieldError>
               )}
             </label>
             <div className="flex gap-3">
@@ -175,15 +174,13 @@ export function OnboardingWizard() {
                 className={inputClass(Boolean(courseState.errors.semester))}
               />
               {courseState.errors.semester && (
-                <span className="text-[11px] font-semibold text-coral-text">
+                <FieldError as="span" className="text-[11px]">
                   {courseState.errors.semester}
-                </span>
+                </FieldError>
               )}
             </label>
             {courseState.formError && (
-              <p role="alert" className="text-xs font-semibold text-coral-text">
-                {courseState.formError}
-              </p>
+              <FieldError>{courseState.formError}</FieldError>
             )}
             <button
               type="submit"
@@ -219,9 +216,9 @@ export function OnboardingWizard() {
                 className={inputClass(Boolean(assignmentState.errors.title))}
               />
               {assignmentState.errors.title && (
-                <span className="text-[11px] font-semibold text-coral-text">
+                <FieldError as="span" className="text-[11px]">
                   {assignmentState.errors.title}
-                </span>
+                </FieldError>
               )}
             </label>
             <div className="flex gap-3">
@@ -249,9 +246,7 @@ export function OnboardingWizard() {
               </label>
             </div>
             {assignmentState.formError && (
-              <p role="alert" className="text-xs font-semibold text-coral-text">
-                {assignmentState.formError}
-              </p>
+              <FieldError>{assignmentState.formError}</FieldError>
             )}
             <button
               type="submit"

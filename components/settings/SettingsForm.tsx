@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { updateProfile, type SettingsFormState } from "@/app/(app)/settings/actions";
+import { FieldError } from "@/components/ui/FieldError";
 
 const INITIAL_STATE: SettingsFormState = { errors: {} };
 
@@ -63,13 +64,9 @@ export function SettingsForm({ initialValues }: { initialValues: SettingsFormVal
         />
       </Field>
 
-      {state.formError && (
-        <p role="alert" className="text-xs font-semibold text-coral-text">
-          {state.formError}
-        </p>
-      )}
+      {state.formError && <FieldError>{state.formError}</FieldError>}
       {state.ok && (
-        <p role="status" className="text-xs font-semibold text-mint-text">
+        <p role="status" className="text-xs font-semibold text-mint">
           Saved.
         </p>
       )}
@@ -107,9 +104,9 @@ function Field({
       {label}
       {children}
       {error && (
-        <span role="alert" className="text-[11px] font-semibold text-coral-text">
+        <FieldError as="span" className="text-[11px]">
           {error}
-        </span>
+        </FieldError>
       )}
     </label>
   );

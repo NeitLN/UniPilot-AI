@@ -6,6 +6,7 @@ import type { EventFormState } from "@/app/(app)/schedule/actions";
 import { REPEAT_OPTIONS, REMINDER_OPTIONS, type EventRepeat } from "@/lib/rules/event";
 import { CourseForm } from "@/components/courses/CourseForm";
 import type { CourseOption } from "@/components/assignments/AssignmentForm";
+import { FieldError } from "@/components/ui/FieldError";
 
 const INITIAL_STATE: EventFormState = { errors: {} };
 const FIELD_ORDER = ["title", "startAt", "endAt", "repeatUntil"] as const;
@@ -230,11 +231,7 @@ export function EventForm({ courses, initialValues, onSaved, onCancel }: EventFo
         />
       </Field>
 
-      {state.formError && (
-        <p role="alert" className="text-xs font-semibold text-coral-text">
-          {state.formError}
-        </p>
-      )}
+      {state.formError && <FieldError>{state.formError}</FieldError>}
 
       <div className="mt-1 flex gap-2.5">
         <button
@@ -297,9 +294,9 @@ function Field({
       {label}
       {children}
       {error && (
-        <span role="alert" className="text-[11px] font-semibold text-coral-text">
+        <FieldError as="span" className="text-[11px]">
           {error}
-        </span>
+        </FieldError>
       )}
     </label>
   );

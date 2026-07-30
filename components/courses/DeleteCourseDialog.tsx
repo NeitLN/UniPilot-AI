@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { Modal } from "@/components/ui/Modal";
+import { FieldError } from "@/components/ui/FieldError";
 import { deleteCourse, type CourseUsage } from "@/app/(app)/courses/actions";
 
 export interface DeleteCourseDialogProps {
@@ -92,11 +93,7 @@ export function DeleteCourseDialog({ course, usage, open, onClose }: DeleteCours
             This course has no assignments, grades, or schedule blocks linked to it —
             deleting it can&rsquo;t be undone.
           </p>
-          {error && (
-            <p role="alert" className="mt-2 text-xs font-semibold text-coral-text">
-              {error}
-            </p>
-          )}
+          {error && <FieldError className="mt-2 text-xs">{error}</FieldError>}
           <div className="mt-4 flex gap-2.5">
             <button
               type="button"

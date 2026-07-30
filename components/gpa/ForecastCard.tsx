@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { requiredAverage } from "@/lib/rules/gpa";
 import { updateTargetGpa } from "@/app/(app)/gpa/actions";
+import { FieldError } from "@/components/ui/FieldError";
 
 export interface ForecastCardProps {
   initialTargetGpa: number;
@@ -76,11 +77,7 @@ export function ForecastCard({
         </label>
       </div>
 
-      {saveError && (
-        <p role="alert" className="mt-2 text-[11.5px] font-semibold text-coral-text">
-          {saveError}
-        </p>
-      )}
+      {saveError && <FieldError className="mt-2 text-[11.5px]">{saveError}</FieldError>}
 
       {!hasGrades && (
         <div className="mt-4 rounded-ctl bg-line p-4">

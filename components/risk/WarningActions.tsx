@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { markWarningHandled, dismissWarning } from "@/app/(app)/risk/actions";
+import { FieldError } from "@/components/ui/FieldError";
 
 export function WarningActions({
   warningId,
@@ -59,11 +60,7 @@ export function WarningActions({
           {pending ? "Saving…" : "Confirm"}
         </button>
       </div>
-      {error && (
-        <p role="alert" className="mt-2 text-[11.5px] font-semibold text-coral-text">
-          {error}
-        </p>
-      )}
+      {error && <FieldError className="mt-2 text-[11.5px]">{error}</FieldError>}
     </div>
   );
 }

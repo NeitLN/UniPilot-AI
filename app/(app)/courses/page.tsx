@@ -3,6 +3,7 @@ import { getCourseUsage } from "./actions";
 import { Pilo } from "@/components/brand/Pilo";
 import { AddCourseButton } from "@/components/courses/AddCourseButton";
 import { CourseListItem, type CourseRow } from "@/components/courses/CourseListItem";
+import { FieldError } from "@/components/ui/FieldError";
 
 export default async function CoursesPage() {
   const supabase = await createClient();
@@ -50,9 +51,9 @@ export default async function CoursesPage() {
 
       {error && (
         <div className="rounded-card bg-card p-5">
-          <p className="text-sm font-semibold text-coral-text">
+          <FieldError className="text-sm">
             Couldn&rsquo;t load courses: {error.message}
-          </p>
+          </FieldError>
         </div>
       )}
 
