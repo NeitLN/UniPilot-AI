@@ -18,8 +18,18 @@ import {
   type CourseStudyLoad,
 } from "@/lib/rules/insights";
 import { Pilo } from "@/components/brand/Pilo";
+import type { AssignmentStatus } from "@/lib/supabase/types";
 
 const DAY_MS = 86_400_000;
+
+interface AssignmentReportRow {
+  id: string;
+  course_id: string | null;
+  status: AssignmentStatus;
+  archived_at: string | null;
+  due_at: string;
+  updated_at: string;
+}
 
 export default async function WeeklyReportPage() {
   const supabase = await createClient();
@@ -28,21 +38,25 @@ export default async function WeeklyReportPage() {
   const oneWeekAgo = new Date(now.getTime() - 7 * DAY_MS);
   const fourteenDaysAgo = new Date(now.getTime() - 14 * DAY_MS);
 
+  const ASSIGNMENT_COLUMNS = "id, course_id, status, archived_at, due_at, updated_at";
+
   const [
-    { data: assignmentRows },
     { data: courseRows },
     { data: sessionRows },
     { data: gradeRows },
     { data: activePlan },
   ] = await Promise.all([
-    supabase
-      .from("assignments")
-      .select("id, course_id, status, archived_at, due_at, updated_at"),
     supabase.from("courses").select("id, name"),
     supabase
       .from("focus_sessions")
       .select("assignment_id, started_at, duration_seconds, result, source")
       .gte("started_at", fourteenDaysAgo.toISOString()),
+    // Cumulative GPA is a lifetime figure by definition — unlike
+    // assignments below, grades can't be bounded to the reporting window
+    // without silently breaking the "GPA now vs. GPA before this week"
+    // comparison this page exists to show. Left unbounded deliberately;
+    // grades also accumulate far slower than assignments (a handful per
+    // semester, not per week), so this isn't the growth risk that one is.
     supabase.from("grades").select("course_id, grade_point, credit_hours, created_at"),
     supabase
       .from("study_plans")
@@ -57,7 +71,46 @@ export default async function WeeklyReportPage() {
     ? await supabase.from("study_sessions").select("start_at").eq("plan_id", activePlan.id)
     : { data: [] as { start_at: string }[] };
 
-  const allAssignments = assignmentRows ?? [];
+  // SR-05 (docs/PRODUCT_REVIEW_3.md): used to select every assignment ever
+  // created, unbounded — this page only shows 7 days, but was paying for a
+  // full-history scan every time. Three different things below actually
+  // need an assignment row, with three different lifetimes:
+  //  - completedThisWeek/PreviousWeek: only "done" rows updated.in the last
+  //    14 days can possibly land in either week's count.
+  //  - nextDueMsByCourse: any currently-active (not done, not archived) row,
+  //    regardless of how long ago it was last touched.
+  //  - the byAssignment -> course lookup for this week's *focus* minutes:
+  //    specifically whichever assignment each recent focus session points
+  //    at, which could be an old, untouched, already-archived row.
+  // "archived_at is null or updated_at >= cutoff" covers the first two.
+  // The third needs its own by-id fetch, sequenced after sessionRows
+  // resolves — can't be folded into the same Promise.all since it depends
+  // on that query's result, but it's still one extra query, not N.
+  const sessionAssignmentIds = [
+    ...new Set(
+      (sessionRows ?? [])
+        .map((s) => s.assignment_id)
+        .filter((id): id is string => Boolean(id)),
+    ),
+  ];
+  const [{ data: recentOrActiveAssignments }, { data: sessionReferencedAssignments }] =
+    await Promise.all([
+      supabase
+        .from("assignments")
+        .select(ASSIGNMENT_COLUMNS)
+        .or(`archived_at.is.null,updated_at.gte.${fourteenDaysAgo.toISOString()}`),
+      sessionAssignmentIds.length > 0
+        ? supabase.from("assignments").select(ASSIGNMENT_COLUMNS).in("id", sessionAssignmentIds)
+        : Promise.resolve({ data: [] as AssignmentReportRow[] }),
+    ]);
+
+  const assignmentById = new Map(
+    [...(recentOrActiveAssignments ?? []), ...(sessionReferencedAssignments ?? [])].map((a) => [
+      a.id,
+      a,
+    ]),
+  );
+  const allAssignments = Array.from(assignmentById.values());
   const courseNameById = new Map((courseRows ?? []).map((c) => [c.id, c.name]));
   const assignmentCourseById = new Map(allAssignments.map((a) => [a.id, a.course_id]));
 
