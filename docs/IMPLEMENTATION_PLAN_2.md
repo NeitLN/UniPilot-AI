@@ -25,9 +25,17 @@ npx tsc --noEmit → npx eslint app components lib tests → npx vitest run
 > **Mục tiêu:** hai lỗi khiến app **không đáng tin khi có sự cố**. Ưu tiên tuyệt đối.
 > **Thời lượng:** ~3 giờ · **Rủi ro:** thấp (không đụng schema, không đụng quy tắc nghiệp vụ)
 
-### 6.1 — SR-01: Trả nhắc deadline về đúng tần suất (~45 phút) ⚠️ **cần bạn quyết trước**
+### 6.1 — SR-01: Trả nhắc deadline về đúng tần suất (~45 phút, thực tế mất ~1h do phát sinh) ✅ **Hoàn thành**
 
-**Mặc định tôi sẽ làm phương án A** (GitHub Actions) trừ khi bạn chọn khác — xem bảng so sánh 3 phương án ở `PRODUCT_REVIEW_3.md` §SR-01.
+**Đã làm phương án A** (GitHub Actions), commit `b4e8988`, `aead94e`.
+
+> **Hoá ra có tới 3 nguyên nhân độc lập, không phải 1.** Kế hoạch ban đầu chỉ nhắm đúng vấn đề tần suất (Hobby plan giới hạn cron 1 lần/ngày). Khi verify thật (không chỉ tin cấu hình), phát hiện thêm 2 lớp lỗi nữa đã che khuất nguyên nhân đầu:
+>
+> 1. **Tần suất** (đã biết từ đầu) — `vercel.json` cron `0 7 * * *` → chuyển hẳn sang GitHub Actions `*/15 * * * *`, xoá `vercel.json` (rỗng, không còn tác dụng).
+> 2. **Middleware chặn nhầm** (phát hiện khi chạy `gh workflow run` thật, nhận về `307 → /login` thay vì `200`) — `lib/supabase/middleware.ts` redirect mọi request không có phiên đăng nhập, kể cả request server-to-server dùng `CRON_SECRET`. Lỗi này có từ **commit đầu tiên của repo** (692db78), sớm hơn cả tính năng cron (3f21467) rất nhiều commit. Sửa: thêm `/api/cron/notifications` vào `ALWAYS_ACCESSIBLE_ROUTES`.
+> 3. **`CRON_SECRET` chưa từng được thêm vào Vercel Production** (phát hiện khi vẫn nhận `401` sau khi sửa #2) — `vercel env ls production` cho thấy biến này **không tồn tại** trên Vercel, dù có sẵn trong `.env.local`. Route lúc nào cũng `401` vì `process.env.CRON_SECRET` là `undefined` trên server, bất kể header gửi lên là gì. Sửa: `vercel env add CRON_SECRET production` + `preview`, sau đó redeploy (biến môi trường mới không tự áp dụng cho deployment đang chạy).
+>
+> **Kết luận thật, không tô hồng:** với cả 3 lỗi cộng lại, nhắc deadline qua lịch tự động **nhiều khả năng chưa từng giao được lần nào** kể từ khi tính năng FR-03 được tạo ra — không phải "trễ tới 23 giờ" như đánh giá ban đầu, mà là **hoàn toàn không chạy**. Con đường duy nhất từng hoạt động là `NotificationBell` (chỉ chạy khi mở app).
 
 **File mới:** `.github/workflows/notifications-cron.yml`
 
@@ -43,10 +51,10 @@ on:
 > ⚠️ **Phụ thuộc ngoài — cần bạn làm 1 bước thủ công:** thêm secret `CRON_SECRET` vào GitHub repo (Settings → Secrets and variables → Actions), **đúng giá trị** đang có trong `.env.local` và trong biến môi trường của Vercel. Tôi không có quyền ghi secret vào repo. Nếu chưa thêm, workflow sẽ chạy nhưng nhận 401 — và **tôi sẽ báo rõ chứ không coi là xong**.
 
 **Tiêu chí chấp nhận:**
-- [ ] Vercel deploy vẫn thành công sau khi bỏ `crons` khỏi `vercel.json`
-- [ ] Workflow chạy thật ít nhất 1 lần, xem được log trong tab Actions, trả về `200` kèm `deliveredCount`
-- [ ] **Chứng minh lỗi cũ đã hết:** tạo 1 assignment có `reminder_at` cách hiện tại ~2 phút, **đóng hẳn app**, xác nhận thông báo được giao trong vòng ≤20 phút (không phải chờ tới 14:00 hôm sau). Dọn sạch dữ liệu test sau khi xong.
-- [ ] Ghi rõ độ trễ thực tế đo được vào doc (GH Actions có thể trôi 5–15 phút — nêu con số thật, không nêu con số lý thuyết)
+- [x] Vercel deploy vẫn thành công sau khi bỏ `crons` khỏi `vercel.json` — xác nhận qua `gh api .../status`
+- [x] Workflow chạy thật, log xem được trong tab Actions: lần đầu `307` (middleware), sau sửa `401` (thiếu env var), sau sửa tiếp `200` — cả 3 lần đều chạy **thật**, không suy đoán
+- [x] **Chứng minh lỗi cũ đã hết — bằng dữ liệu thật:** chèn thẳng 1 dòng `notifications` (qua REST API, service-role key) với `scheduled_at` ở quá khứ cho tài khoản demo thật → chạy workflow → xác nhận `deliveredCount:1` và `delivered_at` được ghi đúng thời điểm chạy → xoá dòng test, xác nhận query trả về `[]` (tài khoản về đúng baseline)
+- [ ] Độ trễ thực tế của GH Actions schedule (không phải `workflow_dispatch` thủ công) — **chưa đo được**, cần chờ lịch tự động chạy vài lần tự nhiên rồi mới có số liệu thật; không đoán số liệu
 
 ### 6.2 — SR-02: Error boundary + bọc 4 chỗ gọi trần (~2h)
 
