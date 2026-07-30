@@ -57,7 +57,7 @@ export function CourseForm({ initialValues, onSaved, onCancel, compact }: Course
   }, [state.errors]);
 
   return (
-    <form ref={formRef} action={formAction} className="flex flex-col gap-3.5">
+    <form ref={formRef} action={formAction} noValidate className="flex flex-col gap-3.5">
       {!compact && (
         <h2 className="font-display text-lg font-bold text-foreground">
           {isEdit ? "Edit course" : "New course"}

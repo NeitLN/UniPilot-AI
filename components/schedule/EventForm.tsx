@@ -74,7 +74,7 @@ export function EventForm({ courses, initialValues, onSaved, onCancel }: EventFo
   }
 
   return (
-    <form ref={formRef} action={formAction} className="flex flex-col gap-3.5">
+    <form ref={formRef} action={formAction} noValidate className="flex flex-col gap-3.5">
       <h2 className="font-display text-lg font-bold text-foreground">
         {isEdit ? "Edit event" : "New event"}
       </h2>

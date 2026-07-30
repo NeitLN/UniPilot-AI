@@ -56,7 +56,7 @@ export function GradeForm({
   }, [state.errors]);
 
   return (
-    <form ref={formRef} action={formAction} className="flex flex-col gap-3.5">
+    <form ref={formRef} action={formAction} noValidate className="flex flex-col gap-3.5">
       <h2 className="font-display text-lg font-bold text-foreground">
         {isEdit ? "Edit grade" : "Add grade"}
       </h2>
