@@ -5,6 +5,8 @@ export interface FocusStatsData {
   partialSessions: number;
   completedMinutes: number;
   partialMinutes: number;
+  /** FR-22: minutes logged by hand rather than via the Pomodoro timer. */
+  manualMinutes: number;
   streak: number;
   byAssignment: { id: string; title: string; minutes: number }[];
   byCourse: { name: string; minutes: number }[];
@@ -28,6 +30,12 @@ export function FocusStats({ data }: { data: FocusStatsData }) {
           Plus {data.partialSessions} partial session
           {data.partialSessions === 1 ? "" : "s"} (
           {formatMinutes(data.partialMinutes)}) — not counted toward the streak.
+        </p>
+      )}
+
+      {data.manualMinutes > 0 && (
+        <p className="mt-1.5 text-[11.5px] font-semibold text-ink-3">
+          Includes {formatMinutes(data.manualMinutes)} logged manually.
         </p>
       )}
 

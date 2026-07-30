@@ -1,6 +1,6 @@
 // BR-04 — Pomodoro classification, streak, and weekly stats.
 // docs/UniPilot/UniPilot_AI_ROADMAP.md §PHASE 5.
-import type { FocusResult } from "@/lib/supabase/types";
+import type { FocusResult, FocusSessionSource } from "@/lib/supabase/types";
 
 export const POMODORO_SECONDS = 25 * 60;
 
@@ -22,6 +22,54 @@ export function classify(elapsedSeconds: number): FocusResult {
   return elapsedSeconds >= POMODORO_SECONDS ? "completed" : "partial";
 }
 
+// FR-22 (docs/PRODUCT_REVIEW.md) — logging a past session by hand, for
+// study that happened offline/without the timer running.
+
+/** A session longer than this reads as a data-entry mistake (a whole day,
+ * a wrong AM/PM, forgetting to stop a timer) rather than a real study
+ * block — rejected outright instead of quietly accepted into the
+ * streak/minutes totals. */
+export const MAX_MANUAL_SESSION_MINUTES = 600;
+
+export interface ManualSessionInput {
+  startedAt: string; // ISO
+  durationMinutes: number;
+}
+
+export type ManualSessionFieldErrors = Partial<Record<"startedAt" | "durationMinutes", string>>;
+
+/** `now` is injectable (rather than defaulting silently to `new Date()`
+ * inside) so this stays a pure function callers can unit test
+ * deterministically — matching every other validate* in lib/rules. */
+export function validateManualSession(
+  input: ManualSessionInput,
+  now: Date = new Date(),
+): ManualSessionFieldErrors {
+  const errors: ManualSessionFieldErrors = {};
+
+  const started = new Date(input.startedAt);
+  if (Number.isNaN(started.getTime())) {
+    errors.startedAt = "Pick a valid start time.";
+  } else if (started.getTime() > now.getTime()) {
+    errors.startedAt = "Start time can't be in the future.";
+  }
+
+  const durationMinutes = Math.round(input.durationMinutes);
+  if (!Number.isFinite(durationMinutes) || durationMinutes <= 0) {
+    errors.durationMinutes = "Enter a duration greater than 0.";
+  } else if (durationMinutes > MAX_MANUAL_SESSION_MINUTES) {
+    errors.durationMinutes = `Sessions over ${MAX_MANUAL_SESSION_MINUTES / 60} hours aren't accepted — check the duration.`;
+  } else if (!errors.startedAt) {
+    const endedAtMs = started.getTime() + durationMinutes * 60_000;
+    if (endedAtMs > now.getTime()) {
+      errors.durationMinutes =
+        "That duration would end in the future — shorten it or pick an earlier start.";
+    }
+  }
+
+  return errors;
+}
+
 export interface FocusSessionLike {
   // Phase 4.1: null once the assignment this session was logged against
   // has since been deleted (migration 0012 — assignment_id goes null
@@ -31,6 +79,11 @@ export interface FocusSessionLike {
   startedAt: string;
   durationSeconds: number;
   result: FocusResult;
+  // FR-22: optional so every existing call site/fixture that doesn't care
+  // about the timer/manual distinction doesn't need to start passing it —
+  // absent is treated the same as "timer" (weeklyStats only tallies
+  // manualMinutes for an explicit "manual").
+  source?: FocusSessionSource;
 }
 
 /** Sentinel key `minutesByAssignment` groups orphaned sessions under —
@@ -110,6 +163,10 @@ export interface WeeklyFocusStats {
   completedMinutes: number;
   partialMinutes: number;
   minutesByAssignment: Record<string, number>;
+  /** FR-22: minutes from sessions logged by hand rather than the Pomodoro
+   * timer, so the UI can disclose the split without needing to reach into
+   * individual session rows. */
+  manualMinutes: number;
 }
 
 export interface WeeklyStatsOptions {
@@ -135,6 +192,7 @@ export function weeklyStats(
     completedMinutes: 0,
     partialMinutes: 0,
     minutesByAssignment: {},
+    manualMinutes: 0,
   };
 
   for (const s of recent) {
@@ -148,6 +206,7 @@ export function weeklyStats(
     }
     const key = s.assignmentId ?? ORPHANED_SESSION_KEY;
     stats.minutesByAssignment[key] = (stats.minutesByAssignment[key] ?? 0) + minutes;
+    if (s.source === "manual") stats.manualMinutes += minutes;
   }
 
   // completedMinutes rounds — it only ever backs the headline "Minutes" KPI,

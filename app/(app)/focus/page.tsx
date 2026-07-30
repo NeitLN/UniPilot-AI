@@ -4,6 +4,7 @@ import { getViewerTimeZone } from "@/lib/timezone";
 import { FocusTimer } from "@/components/focus/FocusTimer";
 import { FocusStats, type FocusStatsData } from "@/components/focus/FocusStats";
 import { LearningStats, type CourseTimeGrade } from "@/components/focus/LearningStats";
+import { LogSessionDialog } from "@/components/focus/LogSessionDialog";
 
 export default async function FocusPage() {
   const supabase = await createClient();
@@ -25,7 +26,7 @@ export default async function FocusPage() {
       supabase.from("courses").select("id, name"),
       supabase
         .from("focus_sessions")
-        .select("assignment_id, started_at, duration_seconds, result")
+        .select("assignment_id, started_at, duration_seconds, result, source")
         .gte("started_at", sixtyDaysAgoIso)
         .order("started_at", { ascending: false }),
       // §5 learning stats: most recent grade per course, to line focus time
@@ -51,6 +52,7 @@ export default async function FocusPage() {
     startedAt: s.started_at,
     durationSeconds: s.duration_seconds,
     result: s.result,
+    source: s.source,
   }));
 
   const stats = weeklyStats(sessions, { timeZone });
@@ -87,6 +89,7 @@ export default async function FocusPage() {
     partialSessions: stats.partialSessions,
     completedMinutes: stats.completedMinutes,
     partialMinutes: stats.partialMinutes,
+    manualMinutes: stats.manualMinutes,
     streak,
     byAssignment,
     byCourse,
@@ -127,13 +130,18 @@ export default async function FocusPage() {
 
   return (
     <div className="flex flex-col gap-3.5">
-      <div>
-        <h1 className="font-display text-3xl font-semibold text-foreground">
-          Focus timer
-        </h1>
-        <p className="mt-1 text-sm font-semibold text-ink-2">
-          25 minutes, one assignment at a time.
-        </p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="font-display text-3xl font-semibold text-foreground">
+            Focus timer
+          </h1>
+          <p className="mt-1 text-sm font-semibold text-ink-2">
+            25 minutes, one assignment at a time.
+          </p>
+        </div>
+        <LogSessionDialog
+          assignments={activeAssignments.map((a) => ({ id: a.id, title: a.title }))}
+        />
       </div>
 
       <div className="flex flex-col gap-3.5 lg:grid lg:grid-cols-[1fr_1.4fr] lg:items-start">

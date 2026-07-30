@@ -6,7 +6,9 @@ import {
   streakDays,
   weeklyStats,
   weeklyMinutesSeries,
+  validateManualSession,
   ORPHANED_SESSION_KEY,
+  MAX_MANUAL_SESSION_MINUTES,
   POMODORO_SECONDS,
   type FocusSessionLike,
 } from "@/lib/rules/focus";
@@ -133,6 +135,29 @@ describe("weeklyStats", () => {
     const stats = weeklyStats(sessions, { now });
     expect(stats.minutesByAssignment[ORPHANED_SESSION_KEY]).toBe(30);
   });
+
+  // FR-22 (docs/PRODUCT_REVIEW.md): a manually logged session counts
+  // exactly like a timer one everywhere else (cycles, minutes, streak) —
+  // manualMinutes exists purely so the UI can *also* disclose the split,
+  // not to treat manual entries differently in any of the other totals.
+  it("tracks manualMinutes for source: 'manual' sessions, on top of the normal totals", () => {
+    const sessions: FocusSessionLike[] = [
+      { assignmentId: "a1", startedAt: now.toISOString(), durationSeconds: 1500, result: "completed", source: "manual" },
+      { assignmentId: "a1", startedAt: now.toISOString(), durationSeconds: 1500, result: "completed", source: "timer" },
+    ];
+    const stats = weeklyStats(sessions, { now });
+    expect(stats.completedCycles).toBe(2);
+    expect(stats.completedMinutes).toBe(50);
+    expect(stats.manualMinutes).toBe(25);
+  });
+
+  it("treats a session with no source at all the same as 'timer' — manualMinutes stays 0", () => {
+    const sessions: FocusSessionLike[] = [
+      { assignmentId: "a1", startedAt: now.toISOString(), durationSeconds: 1500, result: "completed" },
+    ];
+    const stats = weeklyStats(sessions, { now });
+    expect(stats.manualMinutes).toBe(0);
+  });
 });
 
 describe("streakDays timezone handling", () => {
@@ -229,5 +254,67 @@ describe("weeklyMinutesSeries", () => {
   it("returns all-zero buckets when there are no sessions", () => {
     const series = weeklyMinutesSeries([], { now, timeZone: "UTC", weeks: 4 });
     expect(series.every((w) => w.minutes === 0)).toBe(true);
+  });
+});
+
+describe("validateManualSession", () => {
+  const now = new Date("2026-07-30T12:00:00.000Z");
+
+  it("passes for a plausible past session", () => {
+    const errors = validateManualSession(
+      { startedAt: "2026-07-30T09:00:00.000Z", durationMinutes: 45 },
+      now,
+    );
+    expect(errors).toEqual({});
+  });
+
+  it("rejects a start time in the future", () => {
+    const errors = validateManualSession(
+      { startedAt: "2026-07-30T13:00:00.000Z", durationMinutes: 30 },
+      now,
+    );
+    expect(errors.startedAt).toBeDefined();
+  });
+
+  it("rejects a duration that would push the end time into the future", () => {
+    // starts an hour ago, but "runs" for 2 hours — ends 1 hour from now.
+    const errors = validateManualSession(
+      { startedAt: "2026-07-30T11:00:00.000Z", durationMinutes: 120 },
+      now,
+    );
+    expect(errors.durationMinutes).toBeDefined();
+  });
+
+  it("rejects a non-positive duration", () => {
+    expect(
+      validateManualSession({ startedAt: "2026-07-30T09:00:00.000Z", durationMinutes: 0 }, now)
+        .durationMinutes,
+    ).toBeDefined();
+    expect(
+      validateManualSession({ startedAt: "2026-07-30T09:00:00.000Z", durationMinutes: -5 }, now)
+        .durationMinutes,
+    ).toBeDefined();
+  });
+
+  it(`rejects a duration over ${MAX_MANUAL_SESSION_MINUTES} minutes`, () => {
+    const errors = validateManualSession(
+      { startedAt: "2020-01-01T00:00:00.000Z", durationMinutes: MAX_MANUAL_SESSION_MINUTES + 1 },
+      now,
+    );
+    expect(errors.durationMinutes).toBeDefined();
+  });
+
+  it(`accepts exactly ${MAX_MANUAL_SESSION_MINUTES} minutes`, () => {
+    const errors = validateManualSession(
+      { startedAt: "2020-01-01T00:00:00.000Z", durationMinutes: MAX_MANUAL_SESSION_MINUTES },
+      now,
+    );
+    expect(errors.durationMinutes).toBeUndefined();
+  });
+
+  it("rejects an unparseable start time", () => {
+    expect(
+      validateManualSession({ startedAt: "not-a-date", durationMinutes: 30 }, now).startedAt,
+    ).toBeDefined();
   });
 });
