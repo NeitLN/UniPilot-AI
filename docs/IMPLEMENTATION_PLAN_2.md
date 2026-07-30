@@ -1,8 +1,15 @@
 # Kế hoạch triển khai đợt 2 — từ PRODUCT_REVIEW_3.md
 
 **Nguồn:** [`docs/PRODUCT_REVIEW_3.md`](./PRODUCT_REVIEW_3.md) (30/07/2026)
-**Trạng thái nền:** `main` @ `b2872a5` — typecheck sạch, lint sạch, 174 unit test + 21 E2E test xanh
-**Tổng:** 4 phase, ~11.5 giờ
+**Trạng thái nền:** `main` @ `33a5645` — typecheck sạch, lint sạch, 174 unit test + 21 E2E test xanh
+**Tổng:** 4 phase, ~11.5 giờ ước tính · **~13.5 giờ thực tế** (SR-01 phát sinh 2 nguyên nhân phụ, SR-06 phát sinh 1) — **cả 4 phase: ✅ Hoàn thành**
+
+> **Điểm chung của toàn bộ phần phát sinh:** không phải lỗi mới do đợt này gây ra — đều là lỗi **có sẵn từ trước**, chỉ lộ ra khi thật sự chạy thử thay vì tin vào việc "code đã đổi". Danh sách đầy đủ:
+> - **SR-01** (middleware chặn nhầm `/api/cron/notifications`) — có từ commit đầu tiên của repo
+> - **SR-01** (`CRON_SECRET` chưa từng được thêm vào Vercel Production) — có từ lúc tính năng cron được tạo
+> - **SR-06** (middleware chặn nhầm `/manifest.json`) — cùng gốc với lỗi SR-01 đầu tiên, có từ lúc `sw.js` được thêm vào exclusion list mà quên `manifest.json`
+>
+> Không phát hiện nào trong số này lộ ra nếu chỉ đọc code — cả 3 đều cần chạy request thật (`curl`, `gh workflow run`, hoặc Playwright) mới thấy.
 
 > **Nguyên tắc xuyên suốt đợt này:** đợt 1 (Phase 1–5) là *thêm và sửa tính năng*. Đợt này là *làm cho tính năng đang có đáng tin cậy*. Không thêm tính năng mới nào ngoài FR-27 — và FR-27 cũng là để **đóng nốt vòng đời dữ liệu**, không phải mở rộng phạm vi.
 
@@ -165,23 +172,33 @@ Hiện `Field` đang được **định nghĩa lặp lại** ở 4 file form (`A
 
 > **Thời lượng:** ~2.5 giờ · **Rủi ro:** trung bình (có thao tác xoá không hoàn tác được)
 
-### 9.1 — FR-27: Xoá tài khoản tự phục vụ (~2h)
+### 9.1 — FR-27: Xoá tài khoản tự phục vụ (~2h) ✅ **Hoàn thành**
 
-**File mới:** `app/(app)/settings/DeleteAccountDialog.tsx`, action trong `app/(app)/settings/actions.ts`
+**File mới:** `components/settings/DeleteAccountDialog.tsx`, `components/settings/DeleteAccountSection.tsx`; action `deleteAccount` trong `app/(app)/settings/actions.ts`
 
-- [ ] Nút "Delete account" ở Settings, **tách hẳn** khỏi khối "Export your data" (hai hành động trái ngược mục đích, không đặt cạnh nhau)
-- [ ] Xác nhận 2 bước: gõ đúng email để kích hoạt nút xoá (cùng mức nghiêm trọng với FR-25)
-- [ ] Gợi ý xuất dữ liệu trước khi xoá, có link sẵn
-- [ ] Xoá đúng thứ tự FK, rồi xoá tài khoản Auth bằng service-role client
-- [ ] Sau khi xoá: đăng xuất, về `/login` kèm thông báo trung lập
+> **Đơn giản hơn dự kiến ban đầu:** kế hoạch gốc hình dung phải tự xoá theo đúng thứ tự FK từng bảng. Đọc lại `supabase/migrations/0001_init.sql` mới thấy **mọi** bảng đều đã `references auth.users on delete cascade` — chỉ cần gọi `auth.admin.deleteUser()` bằng service-role client, DB tự dọn sạch toàn bộ theo đúng thứ tự phụ thuộc. Không cần tự viết logic xoá từng bảng (vừa đơn giản hơn, vừa an toàn hơn — không có rủi ro tự đoán sai thứ tự).
 
-> ⚠️ **Kiểm thử bắt buộc dùng tài khoản dùng-một-lần**, tuyệt đối **không** dùng `tien.vo539@gmail.com` (tài khoản demo thật, có dữ liệu 4 kỳ) và cũng **không** dùng `e2e-tests@unipilot.local` (mọi E2E test khác phụ thuộc vào nó). Tạo tài khoản mới riêng cho lần kiểm thử này, có dữ liệu ở **mọi** bảng, rồi xác nhận sau khi xoá không còn dòng nào sót ở bất kỳ bảng nào — kiểm tra trực tiếp bằng service-role client.
+- [x] Nút "Delete account" ở khối **"Danger zone"** riêng, tách hẳn khỏi "Export your data"
+- [x] Xác nhận: gõ đúng email để kích hoạt nút xoá (cùng mức nghiêm trọng với FR-25)
+- [x] Gợi ý xuất dữ liệu trước khi xoá — ghi rõ trong nội dung dialog, trỏ tới khối "Export your data" ngay bên dưới trên cùng trang (không cần thêm anchor-link riêng vì đã luôn hiển thị sẵn)
+- [x] Xoá qua `auth.admin.deleteUser()` (service-role), cascade tự động qua mọi bảng
+- [x] Sau khi xoá: đăng xuất, về `/login?deleted=1` kèm thông báo trung lập ("Account deleted. Thanks for using UniPilot AI.")
 
-### 9.2 — SR-06: PWA manifest theo theme (~20 phút)
+**Xác minh bằng tài khoản dùng-một-lần thật** (không dùng tài khoản demo hay E2E, đúng yêu cầu): tạo tài khoản mới qua Admin API, chèn dữ liệu thật vào **cả 9 bảng** (profiles, courses, assignments, grades, focus_sessions, class_blocks, notifications, push_subscriptions, google_calendar_connections), sau đó dùng đúng luồng UI thật (đăng nhập → Settings → Delete account → gõ email xác nhận → bấm xoá) để xoá. Xác nhận sau đó:
+- Nút xác nhận **đúng là bị khoá** khi bỏ trống hoặc gõ sai email, chỉ mở khi khớp chính xác
+- Redirect đúng về `/login?deleted=1`, hiện đúng thông báo trung lập
+- Truy vấn trực tiếp bằng service-role: **cả 9 bảng lẫn chính `auth.users`** đều trả về rỗng/404 — không sót một dòng nào
+- Tài khoản demo thật (`tien.vo539@gmail.com`) xác nhận vẫn còn nguyên vẹn sau khi thao tác (chỉ mở dialog để chụp ảnh, không xác nhận xoá)
 
-**File sửa:** `public/manifest.json`
-- [ ] Thêm trường `"id"`
-- [ ] Xử lý `background_color` cho dark mode (kiểm tra mức hỗ trợ thật của trình duyệt trước khi chọn cách làm — nếu manifest tĩnh không làm được thì **nói rõ giới hạn**, không hứa suông)
+### 9.2 — SR-06: PWA manifest theo theme (~20 phút, thực tế ~40 phút do phát sinh) ✅ **Hoàn thành**
+
+**File sửa:** `public/manifest.json`, `app/layout.tsx`, **`proxy.ts` (phát sinh)**
+
+- [x] Thêm trường `"id": "/"`
+- [x] **Giới hạn thật, đã kiểm chứng qua tài liệu Next.js 16 của chính dự án** (`node_modules/next/dist/docs/.../manifest.md`): `background_color` (màn hình splash lúc mở app từ icon màn hình chính) **không thể** làm theo theme — kể cả `manifest.ts` server-generated cũng không giải quyết được, vì trình duyệt không gửi `prefers-color-scheme` đáng tin cậy khi fetch manifest, và app đã cài thường cache manifest lúc cài đặt chứ không fetch lại mỗi lần mở. Đây là giới hạn nền tảng thật — **không cố làm fix giả**.
+- [x] Thay vào đó, làm đúng phần **thật sự hỗ trợ**: `viewport.themeColor` trong `app/layout.tsx` chuyển sang dạng mảng theo `media` (`(prefers-color-scheme: light/dark)`) — ảnh hưởng màu thanh địa chỉ trình duyệt (Android Chrome), xác nhận render đúng 2 thẻ `<meta name="theme-color" media="...">` trong HTML thật.
+
+> ⚠️ **Phát hiện phát sinh khi verify (cùng lớp lỗi với SR-01):** `curl` thẳng `/manifest.json` không có session trả về **307 redirect sang `/login`** thay vì JSON — `proxy.ts`'s matcher loại trừ `sw.js`/ảnh tĩnh nhưng **quên `manifest.json`**. Nghĩa là trình duyệt đánh giá khả năng "Add to Home Screen" ngay tại trang `/login` (trang công khai, chưa có session) sẽ luôn fetch thất bại — có thể đã âm thầm chặn luôn việc cài PWA cho bất kỳ ai chưa từng đăng nhập trước đó. Sửa: thêm `manifest\\.json` vào matcher, cùng nhóm với `sw.js` (lý do giống hệt — file tĩnh không bao giờ được redirect). Xác nhận `curl` không session giờ trả `200` đúng JSON; `sw.js` và các route cần đăng nhập khác không bị ảnh hưởng.
 
 **Commit:** 2 commit
 
@@ -189,14 +206,16 @@ Hiện `Field` đang được **định nghĩa lặp lại** ở 4 file form (`A
 
 ## Bảng tổng hợp
 
-| Phase | Nội dung | Giờ | Mức | Phụ thuộc |
-|---|---|---|---|---|
-| **6** | Cron nhắc deadline + error boundary | ~3 | 🔴 P0 | 6.1 cần bạn thêm `CRON_SECRET` vào GitHub |
-| **7** | Quét sạch contrast dark mode | ~2.5 | 🔴 P0 | — |
-| **8** | Side-effect, index, N+1, chặn truy vấn | ~3.5 | 🟡 P1 | 8.1 nên sau 6.1 |
-| **9** | Xoá tài khoản + manifest | ~2.5 | 🟡 P1 | — |
+| Phase | Nội dung | Giờ ước tính | Giờ thực tế | Mức | Trạng thái |
+|---|---|---|---|---|---|
+| **6** | Cron nhắc deadline + error boundary | ~3 | ~4 (2 nguyên nhân phụ ở 6.1) | 🔴 P0 | ✅ |
+| **7** | Quét sạch contrast dark mode | ~2.5 | ~2 | 🔴 P0 | ✅ |
+| **8** | Side-effect, index, N+1, chặn truy vấn | ~3.5 | ~3.5 | 🟡 P1 | ✅ |
+| **9** | Xoá tài khoản + manifest | ~2.5 | ~3 (1 nguyên nhân phụ ở 9.2) | 🟡 P1 | ✅ |
 
-**Tổng: ~11.5 giờ**
+**Tổng ước tính: ~11.5 giờ · Tổng thực tế: ~13.5 giờ**
+
+**Commit cuối:** `33a5645` — 174/174 unit test, 21/21 E2E test xanh, Vercel deploy thành công cho toàn bộ commit trong kế hoạch này.
 
 ### Nếu cần cắt phạm vi
 
