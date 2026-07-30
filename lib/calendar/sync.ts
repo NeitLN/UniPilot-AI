@@ -78,7 +78,9 @@ export async function syncCalendarForUser(
   }
 }
 
-async function getFreshAccessToken(
+/** Exported for lib/calendar/push.ts, which needs the same
+ * refresh-if-stale logic to get a token before pushing events. */
+export async function getFreshAccessToken(
   supabase: SupabaseClient<Database>,
   userId: string,
   connection: {

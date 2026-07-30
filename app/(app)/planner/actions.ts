@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { validateSessions, buildSessionReminders } from "@/lib/rules/plan";
+import { pushConfirmedSessionsToCalendar } from "@/lib/calendar/push";
 
 export interface UpdateSessionResult {
   ok: boolean;
@@ -142,6 +143,16 @@ export async function confirmPlan(planId: string) {
         scheduled_at: r.scheduledAt,
       })),
     );
+  }
+
+  // §5 "Đồng bộ 2 chiều Google Calendar" — best-effort: a Google failure
+  // (not connected, expired grant, API error) must never undo or block a
+  // plan the user just confirmed, so this is deliberately swallowed rather
+  // than surfaced as a form error.
+  try {
+    await pushConfirmedSessionsToCalendar(supabase, user.id, planId);
+  } catch (err) {
+    console.error("Google Calendar push failed:", err);
   }
 
   revalidatePath("/planner");

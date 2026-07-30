@@ -50,3 +50,35 @@ export function mapGoogleEventToClassBlock(
     synced_at: syncedAt.toISOString(),
   };
 }
+
+// ─────────────────────────────────────────────────────────────
+// study_sessions row -> Google Calendar API v3 event body (the push half
+// of §5 "Đồng bộ 2 chiều Google Calendar" — see lib/calendar/push.ts for
+// the network/DB side that calls this).
+// ─────────────────────────────────────────────────────────────
+
+export interface StudySessionLike {
+  id: string;
+  startAt: string;
+  endAt: string;
+  title: string;
+}
+
+export interface GoogleCalendarEventBody {
+  summary: string;
+  start: { dateTime: string };
+  end: { dateTime: string };
+  // Tags the event as UniPilot-originated — lets a future feature tell a
+  // pushed session apart from a class the user added directly in Google,
+  // without needing a second lookup table.
+  extendedProperties: { private: { unipilotSessionId: string } };
+}
+
+export function buildCalendarEventBody(session: StudySessionLike): GoogleCalendarEventBody {
+  return {
+    summary: `Study: ${session.title}`,
+    start: { dateTime: new Date(session.startAt).toISOString() },
+    end: { dateTime: new Date(session.endAt).toISOString() },
+    extendedProperties: { private: { unipilotSessionId: session.id } },
+  };
+}

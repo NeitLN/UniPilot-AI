@@ -277,6 +277,7 @@ export interface Database {
           start_at: string;
           end_at: string;
           reason: string | null;
+          gcal_event_id: string | null;
         };
         Insert: {
           id?: string;
@@ -285,6 +286,7 @@ export interface Database {
           start_at: string;
           end_at: string;
           reason?: string | null;
+          gcal_event_id?: string | null;
         };
         Update: {
           id?: string;
@@ -293,6 +295,7 @@ export interface Database {
           start_at?: string;
           end_at?: string;
           reason?: string | null;
+          gcal_event_id?: string | null;
         };
         Relationships: [];
       };

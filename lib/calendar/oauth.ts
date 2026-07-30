@@ -6,8 +6,16 @@ import "server-only";
 const AUTH_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth";
 const TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 
-export const CALENDAR_SCOPE =
-  "https://www.googleapis.com/auth/calendar.readonly";
+// §5 "Đồng bộ 2 chiều Google Calendar": was calendar.readonly, which only
+// covers the existing pull sync (Schedule <- Google). calendar.events grants
+// read *and* write on events (not calendar-level settings), the minimum
+// needed to also push confirmed study sessions (Planner -> Google) without
+// requesting full calendar access. Existing connections were consented under
+// the old, narrower scope — Google requires a fresh consent screen for the
+// new one, so already-connected users see the connect flow again the next
+// time they visit /schedule (last_sync_status flips to "error" on the first
+// call that gets an insufficient-scope response, same as any other sync error).
+export const CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.events";
 
 function env(name: string): string {
   const value = process.env[name];
