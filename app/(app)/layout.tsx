@@ -17,6 +17,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex min-h-screen w-full">
+      {/* A-01: without this, keyboard/screen-reader users had to tab past
+          the sidebar's 8 nav links + sign-out + notification bell (11 tabs)
+          on every single page just to reach the actual content. */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-ctl focus:bg-ink focus:px-4 focus:py-2.5 focus:text-sm focus:font-bold focus:text-white"
+      >
+        Skip to main content
+      </a>
       <ServiceWorkerRegister />
       <aside className="hidden md:flex w-[246px] shrink-0 flex-col bg-ink px-4 py-6">
         <div className="px-1.5 pb-6">
@@ -59,7 +68,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </Suspense>
         </div>
 
-        <main className="flex-1 bg-canvas px-4 py-6 pb-24 md:px-7 md:py-6 md:pb-6">
+        <main
+          id="main-content"
+          tabIndex={-1}
+          className="flex-1 bg-canvas px-4 py-6 pb-24 md:px-7 md:py-6 md:pb-6"
+        >
           {children}
         </main>
 

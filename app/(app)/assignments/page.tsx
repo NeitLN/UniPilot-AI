@@ -16,6 +16,18 @@ interface AssignmentsPageProps {
   searchParams: Promise<{ course?: string; status?: string }>;
 }
 
+/** Text shown for "N ___" under the page title — kept in sync with
+ * whatever the current status filter actually selects (B-01: this used to
+ * always say "active" even while showing Done items, which disagreed with
+ * the Dashboard's definition of active). */
+function countLabel(status: string | undefined): string {
+  if (status === "archived") return "archived";
+  if (status && isAssignmentStatus(status)) {
+    return status === "not_started" ? "not started" : status.replace("_", " ");
+  }
+  return "active";
+}
+
 export default async function AssignmentsPage({
   searchParams,
 }: AssignmentsPageProps) {
@@ -34,11 +46,23 @@ export default async function AssignmentsPage({
     .select(
       "id, course_id, title, due_at, weight, priority, status, progress, notes, reminder_at, archived_at, updated_at",
     )
-    .is("archived_at", null)
     .order("due_at", { ascending: true });
 
+  if (status === "archived") {
+    // B-03: archived items previously had no way back into view at all.
+    query = query.not("archived_at", "is", null);
+  } else {
+    query = query.is("archived_at", null);
+    if (status && isAssignmentStatus(status)) {
+      query = query.eq("status", status);
+    } else {
+      // Default list = "active" — must agree with the Dashboard's
+      // definition (not done, not archived), not just "not archived".
+      query = query.neq("status", "done");
+    }
+  }
+
   if (course) query = query.eq("course_id", course);
-  if (status && isAssignmentStatus(status)) query = query.eq("status", status);
 
   const { data: rows, error } = await query;
 
@@ -68,7 +92,7 @@ export default async function AssignmentsPage({
             Assignments
           </h1>
           <p className="mt-1 text-sm font-semibold text-ink-2">
-            {assignments.length} active · sorted by due date
+            {assignments.length} {countLabel(status)} · sorted by due date
           </p>
         </div>
         <AddAssignmentButton courses={courses} />
@@ -95,7 +119,12 @@ export default async function AssignmentsPage({
         )}
 
         {assignments.map((a) => (
-          <AssignmentItem key={a.id} assignment={a} courses={courses} />
+          <AssignmentItem
+            key={a.id}
+            assignment={a}
+            courses={courses}
+            isArchivedView={status === "archived"}
+          />
         ))}
       </div>
     </div>

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { restoreAssignment } from "@/app/(app)/assignments/actions";
 import {
   overdueLabel,
   priorityLabel,
@@ -34,12 +35,19 @@ export interface AssignmentRow {
 export function AssignmentItem({
   assignment,
   courses,
+  isArchivedView = false,
 }: {
   assignment: AssignmentRow;
   courses: CourseOption[];
+  isArchivedView?: boolean;
 }) {
   const [editing, setEditing] = useState(false);
   const [archiving, setArchiving] = useState(false);
+  const [restoring, startRestore] = useTransition();
+
+  function handleRestore() {
+    startRestore(() => restoreAssignment(assignment.id));
+  }
 
   const overdue = overdueLabel(assignment);
   const tone = progressTone(assignment);
@@ -79,20 +87,33 @@ export function AssignmentItem({
       <ProgressBar value={assignment.progress} tone={tone} className="sm:w-[92px]" />
 
       <div className="flex shrink-0 gap-1.5">
-        <button
-          type="button"
-          onClick={() => setEditing(true)}
-          className="flex min-h-11 items-center rounded-ctl bg-line px-3 py-2 text-xs font-bold text-ink-2 hover:bg-[#E6E2F2]"
-        >
-          Edit
-        </button>
-        <button
-          type="button"
-          onClick={() => setArchiving(true)}
-          className="flex min-h-11 items-center rounded-ctl bg-line px-3 py-2 text-xs font-bold text-ink-2 hover:bg-[#E6E2F2]"
-        >
-          Archive
-        </button>
+        {isArchivedView ? (
+          <button
+            type="button"
+            onClick={handleRestore}
+            disabled={restoring}
+            className="flex min-h-11 items-center rounded-ctl bg-line px-3 py-2 text-xs font-bold text-ink-2 hover:bg-[#E6E2F2] disabled:opacity-60"
+          >
+            {restoring ? "Restoring…" : "Restore"}
+          </button>
+        ) : (
+          <>
+            <button
+              type="button"
+              onClick={() => setEditing(true)}
+              className="flex min-h-11 items-center rounded-ctl bg-line px-3 py-2 text-xs font-bold text-ink-2 hover:bg-[#E6E2F2]"
+            >
+              Edit
+            </button>
+            <button
+              type="button"
+              onClick={() => setArchiving(true)}
+              className="flex min-h-11 items-center rounded-ctl bg-line px-3 py-2 text-xs font-bold text-ink-2 hover:bg-[#E6E2F2]"
+            >
+              Archive
+            </button>
+          </>
+        )}
       </div>
 
       <Modal open={editing} onClose={() => setEditing(false)} title="Edit assignment">

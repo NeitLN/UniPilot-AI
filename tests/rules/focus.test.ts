@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   classify,
+  formatMinutes,
   streakDays,
   weeklyStats,
   POMODORO_SECONDS,
@@ -83,6 +84,15 @@ describe("weeklyStats", () => {
     expect(stats.minutesByAssignment).toEqual({ a1: 35, a2: 25 });
   });
 
+  it("keeps sub-minute partial time fractional instead of rounding it to 0 (B-02)", () => {
+    const sessions: FocusSessionLike[] = [
+      { assignmentId: "a1", startedAt: now.toISOString(), durationSeconds: 45, result: "partial" },
+    ];
+    const stats = weeklyStats(sessions, { now });
+    expect(stats.partialMinutes).toBeCloseTo(0.75);
+    expect(stats.minutesByAssignment.a1).toBeCloseTo(0.75);
+  });
+
   it("excludes sessions older than 7 days", () => {
     const sessions: FocusSessionLike[] = [
       {
@@ -133,5 +143,21 @@ describe("streakDays timezone handling", () => {
       { startedAt: new Date(2026, 6, 29).toISOString(), result: "completed" },
     ];
     expect(streakDays(sessions, { today })).toBe(1);
+  });
+});
+
+describe("formatMinutes", () => {
+  it("shows '< 1 min' instead of '0 min' for sub-minute durations (B-02)", () => {
+    expect(formatMinutes(0.75)).toBe("< 1 min");
+    expect(formatMinutes(0.02)).toBe("< 1 min");
+  });
+
+  it("rounds minute-or-longer durations normally", () => {
+    expect(formatMinutes(1)).toBe("1 min");
+    expect(formatMinutes(24.6)).toBe("25 min");
+  });
+
+  it("shows '0 min' only for a literal zero", () => {
+    expect(formatMinutes(0)).toBe("0 min");
   });
 });

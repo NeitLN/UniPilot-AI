@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
 import {
@@ -27,13 +28,19 @@ function todayDateString(): string {
  * Phase 9 — the warning row itself is what FR-16 requires to survive
  * regardless of push success.
  */
-export async function computeAndStoreRisk(
+export const computeAndStoreRisk = cache(async function computeAndStoreRisk(
   supabase: SupabaseClient<Database>,
   userId: string,
 ): Promise<RiskComputeResult> {
   const now = new Date();
   const sevenDaysAgo = new Date(now);
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  // The gate only needs to know whether >=7 distinct days have focus
+  // history, not the full lifetime of the table — 30 days is a wide-enough
+  // window that it can never itself become the reason the gate fails, but
+  // it stops this query from growing unbounded as sessions pile up (P-02).
+  const thirtyDaysAgo = new Date(now);
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
   const [
     { data: profile },
@@ -55,7 +62,10 @@ export async function computeAndStoreRisk(
       .is("archived_at", null)
       .neq("status", "done")
       .lt("due_at", now.toISOString()),
-    supabase.from("focus_sessions").select("started_at"),
+    supabase
+      .from("focus_sessions")
+      .select("started_at")
+      .gte("started_at", thirtyDaysAgo.toISOString()),
     supabase
       .from("focus_sessions")
       .select("result")
@@ -161,4 +171,4 @@ export async function computeAndStoreRisk(
   }
 
   return { status: "ok", result, scoreId: scoreRow.id };
-}
+});

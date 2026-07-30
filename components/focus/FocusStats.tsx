@@ -1,3 +1,5 @@
+import { formatMinutes } from "@/lib/rules/focus";
+
 export interface FocusStatsData {
   completedCycles: number;
   partialSessions: number;
@@ -24,8 +26,8 @@ export function FocusStats({ data }: { data: FocusStatsData }) {
       {data.partialSessions > 0 && (
         <p className="mt-3 text-[11.5px] font-semibold text-ink-3">
           Plus {data.partialSessions} partial session
-          {data.partialSessions === 1 ? "" : "s"} ({data.partialMinutes} min) —
-          not counted toward the streak.
+          {data.partialSessions === 1 ? "" : "s"} (
+          {formatMinutes(data.partialMinutes)}) — not counted toward the streak.
         </p>
       )}
 
@@ -45,7 +47,7 @@ export function FocusStats({ data }: { data: FocusStatsData }) {
                 className="flex items-center justify-between gap-3 text-[12.5px] font-semibold text-ink"
               >
                 <span className="min-w-0 truncate">{c.name}</span>
-                <span className="shrink-0 text-ink-3">{c.minutes} min</span>
+                <span className="shrink-0 text-ink-3">{formatMinutes(c.minutes)}</span>
               </li>
             ))}
           </ul>
@@ -62,7 +64,7 @@ export function FocusStats({ data }: { data: FocusStatsData }) {
                 className="flex items-center justify-between gap-3 text-[12.5px] font-semibold text-ink"
               >
                 <span className="min-w-0 truncate">{a.title}</span>
-                <span className="shrink-0 text-ink-3">{a.minutes} min</span>
+                <span className="shrink-0 text-ink-3">{formatMinutes(a.minutes)}</span>
               </li>
             ))}
           </ul>

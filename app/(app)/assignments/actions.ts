@@ -149,3 +149,17 @@ export async function archiveAssignment(id: string) {
   await cancelAssignmentReminder(supabase, id);
   revalidatePath("/assignments");
 }
+
+/** B-03: the inverse of archiveAssignment — no confirmation needed since,
+ * unlike archiving, restoring can't lose anything (the reminder was already
+ * cancelled on archive and isn't recreated here). */
+export async function restoreAssignment(id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("assignments")
+    .update({ archived_at: null })
+    .eq("id", id);
+
+  if (error) throw new Error(error.message);
+  revalidatePath("/assignments");
+}

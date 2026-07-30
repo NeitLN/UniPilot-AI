@@ -53,7 +53,7 @@ export default async function FocusPage() {
     .map(([id, minutes]) => ({
       id,
       title: assignmentTitleById.get(id) ?? "Deleted assignment",
-      minutes: Math.round(minutes),
+      minutes,
     }))
     .sort((a, b) => b.minutes - a.minutes);
 
@@ -66,7 +66,7 @@ export default async function FocusPage() {
     courseMinutes.set(courseName, (courseMinutes.get(courseName) ?? 0) + minutes);
   }
   const byCourse = Array.from(courseMinutes.entries())
-    .map(([name, minutes]) => ({ name, minutes: Math.round(minutes) }))
+    .map(([name, minutes]) => ({ name, minutes }))
     .sort((a, b) => b.minutes - a.minutes);
 
   const statsData: FocusStatsData = {

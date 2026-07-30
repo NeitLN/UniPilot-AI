@@ -41,6 +41,7 @@ export function AssignmentFilters({ courses }: { courses: CourseOption[] }) {
         <option value="not_started">Not started</option>
         <option value="in_progress">In progress</option>
         <option value="done">Done</option>
+        <option value="archived">Archived</option>
       </select>
     </div>
   );

@@ -129,7 +129,19 @@ export function weeklyStats(
       (stats.minutesByAssignment[s.assignmentId] ?? 0) + minutes;
   }
 
+  // completedMinutes rounds — it only ever backs the headline "Minutes" KPI,
+  // where a whole number reads better. partialMinutes stays fractional: it
+  // (and every by-course/by-assignment breakdown) goes through
+  // formatMinutes() below, which needs the real value to tell "a few
+  // seconds" apart from "genuinely nothing" instead of both showing "0 min".
   stats.completedMinutes = Math.round(stats.completedMinutes);
-  stats.partialMinutes = Math.round(stats.partialMinutes);
   return stats;
+}
+
+/** B-02: a sub-minute session used to render as a flat "0 min", reading as
+ * lost data. `< 1 min` says something real happened; anything at or past a
+ * minute rounds normally. */
+export function formatMinutes(minutes: number): string {
+  if (minutes > 0 && minutes < 1) return "< 1 min";
+  return `${Math.round(minutes)} min`;
 }

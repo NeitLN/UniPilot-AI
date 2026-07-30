@@ -34,8 +34,13 @@ export function ForecastCard({
     });
   }
 
+  // A-03: with 0 completed credits, requiredAverage() collapses to just
+  // `target` itself (nothing to weigh it against yet) — mathematically
+  // correct, but "3.60 — Achievable" reads as a real forecast when there's
+  // no grade data behind it at all. Show a neutral prompt instead.
+  const hasGrades = doneCredits > 0;
   const result =
-    remainingCredits > 0 && !Number.isNaN(target)
+    hasGrades && remainingCredits > 0 && !Number.isNaN(target)
       ? requiredAverage(target, doneCredits, remainingCredits, currentQP)
       : null;
 
@@ -75,6 +80,15 @@ export function ForecastCard({
         <p role="alert" className="mt-2 text-[11.5px] font-semibold text-coral-text">
           {saveError}
         </p>
+      )}
+
+      {!hasGrades && (
+        <div className="mt-4 rounded-ctl bg-line p-4">
+          <p className="text-[12.5px] font-semibold text-ink-2">
+            Add a grade first — the forecast needs at least one completed
+            course to weigh your target against.
+          </p>
+        </div>
       )}
 
       {result && (
