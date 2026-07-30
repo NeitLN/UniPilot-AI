@@ -6,6 +6,7 @@ import {
   streakDays,
   weeklyStats,
   weeklyMinutesSeries,
+  ORPHANED_SESSION_KEY,
   POMODORO_SECONDS,
   type FocusSessionLike,
 } from "@/lib/rules/focus";
@@ -106,6 +107,31 @@ describe("weeklyStats", () => {
     ];
     const stats = weeklyStats(sessions, { now });
     expect(stats.completedCycles).toBe(0);
+  });
+
+  // Phase 4.1 (docs/IMPLEMENTATION_PLAN.md): a session whose assignment was
+  // later deleted has assignmentId: null (migration 0012's ON DELETE SET
+  // NULL, replacing the old cascade-delete) — it must still count toward
+  // cycles/minutes exactly like any other session, just grouped under a
+  // sentinel key instead of a real assignment id.
+  it("still counts an orphaned session (assignmentId: null) toward cycles and minutes", () => {
+    const sessions: FocusSessionLike[] = [
+      { assignmentId: null, startedAt: now.toISOString(), durationSeconds: 1500, result: "completed" },
+      { assignmentId: "a1", startedAt: now.toISOString(), durationSeconds: 1500, result: "completed" },
+    ];
+    const stats = weeklyStats(sessions, { now });
+    expect(stats.completedCycles).toBe(2);
+    expect(stats.completedMinutes).toBe(50);
+    expect(stats.minutesByAssignment).toEqual({ [ORPHANED_SESSION_KEY]: 25, a1: 25 });
+  });
+
+  it("merges multiple orphaned sessions under the same sentinel key", () => {
+    const sessions: FocusSessionLike[] = [
+      { assignmentId: null, startedAt: now.toISOString(), durationSeconds: 1500, result: "completed" },
+      { assignmentId: null, startedAt: now.toISOString(), durationSeconds: 300, result: "partial" },
+    ];
+    const stats = weeklyStats(sessions, { now });
+    expect(stats.minutesByAssignment[ORPHANED_SESSION_KEY]).toBe(30);
   });
 });
 

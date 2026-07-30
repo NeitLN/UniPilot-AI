@@ -13,6 +13,7 @@ export type Json =
 export type AssignmentStatus = "not_started" | "in_progress" | "done";
 export type AssignmentPriority = "low" | "medium" | "high";
 export type FocusResult = "completed" | "partial";
+export type FocusSessionSource = "timer" | "manual";
 export type PlanStatus = "draft" | "active" | "cancelled";
 export type WarningStatus = "open" | "handled" | "dismissed";
 export type CalendarSyncStatus = "never" | "ok" | "error";
@@ -183,29 +184,35 @@ export interface Database {
         Row: {
           id: string;
           user_id: string;
-          assignment_id: string;
+          // Phase 4.1: nullable since migration 0012 — assignment_id goes
+          // null (not cascade-deleted) when the assignment it was logged
+          // against is later deleted, preserving streak/minute history.
+          assignment_id: string | null;
           started_at: string;
           ended_at: string;
           duration_seconds: number;
           result: FocusResult;
+          source: FocusSessionSource;
         };
         Insert: {
           id?: string;
           user_id: string;
-          assignment_id: string;
+          assignment_id?: string | null;
           started_at: string;
           ended_at: string;
           duration_seconds: number;
           result: FocusResult;
+          source?: FocusSessionSource;
         };
         Update: {
           id?: string;
           user_id?: string;
-          assignment_id?: string;
+          assignment_id?: string | null;
           started_at?: string;
           ended_at?: string;
           duration_seconds?: number;
           result?: FocusResult;
+          source?: FocusSessionSource;
         };
         Relationships: [];
       };
@@ -471,6 +478,7 @@ export interface Database {
       assignment_status: AssignmentStatus;
       assignment_priority: AssignmentPriority;
       focus_result: FocusResult;
+      focus_session_source: FocusSessionSource;
       plan_status: PlanStatus;
       warning_status: WarningStatus;
       calendar_sync_status: CalendarSyncStatus;

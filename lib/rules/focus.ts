@@ -23,11 +23,19 @@ export function classify(elapsedSeconds: number): FocusResult {
 }
 
 export interface FocusSessionLike {
-  assignmentId: string;
+  // Phase 4.1: null once the assignment this session was logged against
+  // has since been deleted (migration 0012 — assignment_id goes null
+  // rather than cascade-deleting the session itself, preserving streak
+  // and minute history).
+  assignmentId: string | null;
   startedAt: string;
   durationSeconds: number;
   result: FocusResult;
 }
+
+/** Sentinel key `minutesByAssignment` groups orphaned sessions under —
+ * never a valid assignment id, so it can't collide with a real one. */
+export const ORPHANED_SESSION_KEY = "__deleted__";
 
 /**
  * `YYYY-MM-DD` for `d` as seen in `timeZone` — not the server's local zone.
@@ -138,8 +146,8 @@ export function weeklyStats(
       stats.partialSessions++;
       stats.partialMinutes += minutes;
     }
-    stats.minutesByAssignment[s.assignmentId] =
-      (stats.minutesByAssignment[s.assignmentId] ?? 0) + minutes;
+    const key = s.assignmentId ?? ORPHANED_SESSION_KEY;
+    stats.minutesByAssignment[key] = (stats.minutesByAssignment[key] ?? 0) + minutes;
   }
 
   // completedMinutes rounds — it only ever backs the headline "Minutes" KPI,

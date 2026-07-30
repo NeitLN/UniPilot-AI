@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { streakDays, weeklyStats, weeklyMinutesSeries } from "@/lib/rules/focus";
+import { streakDays, weeklyStats, weeklyMinutesSeries, ORPHANED_SESSION_KEY } from "@/lib/rules/focus";
 import { getViewerTimeZone } from "@/lib/timezone";
 import { FocusTimer } from "@/components/focus/FocusTimer";
 import { FocusStats, type FocusStatsData } from "@/components/focus/FocusStats";
@@ -66,10 +66,16 @@ export default async function FocusPage() {
 
   const courseMinutes = new Map<string, number>();
   for (const [assignmentId, minutes] of Object.entries(stats.minutesByAssignment)) {
-    const courseId = assignmentCourseById.get(assignmentId);
-    const courseName = courseId
-      ? (courseNameById.get(courseId) ?? "Unknown course")
-      : "No course";
+    // Phase 4.1: an orphaned session (its assignment was deleted) has no
+    // course to look up at all — distinct from a real assignment that
+    // simply never had a course_id set ("No course").
+    let courseName: string;
+    if (assignmentId === ORPHANED_SESSION_KEY) {
+      courseName = "Unknown course";
+    } else {
+      const courseId = assignmentCourseById.get(assignmentId);
+      courseName = courseId ? (courseNameById.get(courseId) ?? "Unknown course") : "No course";
+    }
     courseMinutes.set(courseName, (courseMinutes.get(courseName) ?? 0) + minutes);
   }
   const byCourse = Array.from(courseMinutes.entries())
@@ -96,10 +102,13 @@ export default async function FocusPage() {
   }
   const allTimeCourseMinutes = new Map<string, number>();
   for (const s of sessions) {
-    const courseId = assignmentCourseById.get(s.assignmentId);
-    const courseName = courseId
-      ? (courseNameById.get(courseId) ?? "Unknown course")
-      : "No course";
+    let courseName: string;
+    if (s.assignmentId === null) {
+      courseName = "Unknown course";
+    } else {
+      const courseId = assignmentCourseById.get(s.assignmentId);
+      courseName = courseId ? (courseNameById.get(courseId) ?? "Unknown course") : "No course";
+    }
     allTimeCourseMinutes.set(
       courseName,
       (allTimeCourseMinutes.get(courseName) ?? 0) + s.durationSeconds / 60,
