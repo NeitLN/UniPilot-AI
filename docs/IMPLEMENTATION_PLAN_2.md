@@ -131,35 +131,31 @@ Hiện `Field` đang được **định nghĩa lặp lại** ở 4 file form (`A
 > **Mục tiêu:** những thứ hiện chưa ai thấy, nhưng sẽ thấy rõ khi dữ liệu lớn lên.
 > **Thời lượng:** ~3.5 giờ · **Rủi ro:** trung bình — có 1 migration, và đụng vào layout dùng chung
 
-### 8.1 — SR-04: Đưa side-effect ra khỏi render (~1.5h)
+### 8.1 — SR-04: Đưa side-effect ra khỏi render (~1.5h) ✅ **Hoàn thành**
 
-**File sửa:** `components/notifications/NotificationBell.tsx`
+**File sửa:** `components/notifications/NotificationBell.tsx`, `components/notifications/NotificationBellClient.tsx`, `app/api/push/send/route.ts`
 
-- [ ] Bỏ `await deliverDueNotifications(...)` khỏi thân render — component **chỉ đọc** số thông báo chưa đọc
-- [ ] Việc giao nhận đã có cron lo (Phase 6.1). Nếu vẫn muốn giao tức thì lúc đang mở app: gọi `/api/push/send` từ client **sau khi trang đã hiện** (route này **đã tồn tại sẵn nhưng hiện không ai gọi** — chỉ cần nối dây, không phải viết mới)
+- [x] Bỏ `await deliverDueNotifications(...)` khỏi thân render — component **chỉ đọc** số thông báo chưa đọc
+- [x] Giao nhận giờ do cron lo (Phase 6.1) là chính; nối dây thêm `/api/push/send` (route **đã có sẵn từ trước nhưng không ai gọi**) vào `NotificationBellClient` — gọi 1 lần lúc mount qua `fetch`, không chặn render, `router.refresh()` nếu có gì mới
 
 **Tiêu chí chấp nhận:**
-- [ ] Thông báo vẫn được giao đúng (qua cron, và qua lần gọi client nếu làm)
-- [ ] **Đo được cải thiện:** so sánh thời gian phản hồi của một lần chuyển trang trước/sau — nêu con số thật, nếu không đo được khác biệt rõ thì **nói thẳng là không đo được**, không phóng đại
+- [x] Thông báo vẫn được giao đúng — xác nhận bằng dữ liệu thật trên tài khoản E2E: chèn 1 dòng `notifications` đến hạn → đăng nhập → `delivered_at` được ghi (xác nhận qua truy vấn DB trực tiếp) → dòng hiện đúng trong dropdown ở lần tải trang kế tiếp
+- [ ] **Đo được cải thiện thời gian phản hồi:** **không đo** — khác biệt giữa 1 lệnh SELECT (cũ, đồng bộ trong render) và không có lệnh nào thêm (mới) là rất nhỏ so với độ trễ mạng/DB tổng thể của cả trang, và việc đo chính xác cần công cụ profiling không có sẵn trong phiên này. Nói thẳng thay vì bịa con số: **lợi ích chính không phải tốc độ per-request, mà là loại bỏ hẳn một write nằm trong đường render** — đúng bản chất vấn đề SR-04 nêu ra.
 
-### 8.2 — SR-05: Index + gom N+1 + chặn truy vấn (~2h)
+### 8.2 — SR-05: Index + gom N+1 + chặn truy vấn (~2h) ✅ **Hoàn thành**
 
-**File mới:** `supabase/migrations/0013_notifications_delivery_index.sql`
-```sql
-create index if not exists notifications_pending_idx
-  on notifications (delivered_at, scheduled_at);
-```
+**File mới:** `supabase/migrations/0013_notifications_delivery_index.sql` — đã `supabase db push` lên DB thật, xác nhận qua `supabase migration list` (0013 khớp cả Local/Remote).
 
 **File sửa:**
-- `lib/push/deliver.ts` — `deliverAllDueNotifications`: bỏ vòng lặp gọi lại `deliverDueNotifications` cho từng user (đang tốn 2 query/user); lấy 1 lần toàn bộ thông báo đến hạn + toàn bộ subscription liên quan, rồi cập nhật theo lô
-- `app/(app)/reports/page.tsx` — chặn khoảng thời gian cho `assignments`/`grades` thay vì tải toàn bộ lịch sử *(code do tôi viết ở Phase 5 — sửa lỗi của chính mình)*
+- `lib/push/deliver.ts` — `deliverAllDueNotifications` viết lại hoàn toàn: 1 query lấy toàn bộ thông báo đến hạn, 1 query lấy toàn bộ subscription liên quan (`in user_id`), gửi push, rồi **tối đa 3 UPDATE theo lô** (gom theo `push_status`) thay vì 1 UPDATE/thông báo. `deliverDueNotifications` (bản 1-user, dùng bởi `/api/push/send`) giữ nguyên logic cũ — không có vấn đề N+1 ở quy mô 1 user.
+- `app/(app)/reports/page.tsx` — `assignments` giờ chỉ lấy: (a) đang hoạt động (`archived_at is null`) HOẶC vừa cập nhật trong 14 ngày, **hợp với** (b) đúng những assignment mà các phiên focus gần đây trỏ tới (fetch riêng theo id, dù cũ/đã archive). `grades` **giữ nguyên không giới hạn** — GPA là số tích luỹ cả đời, giới hạn theo tuần sẽ làm sai phép so sánh "GPA trước/sau" mà chính trang này hiển thị; đề xuất "giới hạn 14 ngày" ban đầu trong review là **sai**, đã tự sửa lại khi cài đặt.
 
 **Tiêu chí chấp nhận:**
-- [ ] `/reports` hiển thị **đúng y hệt** các con số như trước khi sửa (so sánh trực tiếp trên tài khoản demo: Completed 2, Study time 325 min, Streak 10d, GPA 3.46, adherence 100%, và **cùng một câu insight**)
-- [ ] Migration chạy được trên DB thật, `create index if not exists` nên chạy lại nhiều lần vẫn an toàn
-- [ ] Cron vẫn trả về đúng `deliveredCount` như logic cũ với cùng dữ liệu đầu vào
+- [x] **Số liệu `/reports` không đổi:** không so sánh trực tiếp được vì cửa sổ 7 ngày trôi theo thời gian thực (đã sang ngày mới giữa lúc review và lúc sửa) — thay vào đó **chứng minh bằng toán học tại cùng một mốc "now"**: lấy dữ liệu thật của tài khoản demo qua REST (service-role), tính `completedThisWeek`/`completedPreviousWeek`/`nextDueMsByCourse` từ **cả 2 tập dữ liệu** (truy vấn cũ không giới hạn, và truy vấn mới có giới hạn+bổ sung) bằng cùng logic, cùng thời điểm → **khớp tuyệt đối** cả 3 giá trị.
+- [x] Migration chạy được trên DB thật, `create index if not exists` an toàn khi chạy lại
+- [x] `deliverAllDueNotifications` xác nhận đúng qua Phase 6.1's test dữ liệu thật (chèn thông báo test → `deliveredCount` khớp → `delivered_at` đúng)
 
-> ⚠️ **Cẩn trọng ở 8.2:** đây là chỗ dễ "tối ưu xong thì sai kết quả" nhất trong cả kế hoạch. Tiêu chí đầu tiên (số liệu `/reports` không đổi) là **bắt buộc**, không phải tuỳ chọn.
+> ⚠️ **Phát hiện khi làm:** đề xuất ban đầu "chặn cả `assignments` lẫn `grades`" trong `PRODUCT_REVIEW_3.md` không đúng hoàn toàn — `grades` phải giữ nguyên vì GPA tích luỹ. Bài học: review nêu đúng vấn đề (truy vấn không giới hạn) nhưng giải pháp cụ thể cho từng bảng cần đọc lại code trước khi áp dụng máy móc, không phải bảng nào "trông giống nhau" cũng xử lý giống nhau được.
 
 **Commit:** 3 commit (8.1, migration riêng, 8.2 code)
 
