@@ -1,0 +1,27 @@
+name: Deliver due notifications
+
+# SR-01 (docs/PRODUCT_REVIEW_3.md): Vercel's Hobby plan only allows a daily
+# cron, which made deadline reminders arrive up to ~23h late — exactly when
+# the user isn't looking, since the app's only other delivery path
+# (NotificationBell) needs the app open to fire at all. This workflow
+# restores the original 15-minute cadence at no cost, external to Vercel.
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  deliver:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call /api/cron/notifications
+        run: |
+          status=$(curl -s -o response.json -w "%{http_code}" \
+            "https://uni-pilot-ai-blush.vercel.app/api/cron/notifications" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
+          echo "HTTP status: $status"
+          cat response.json
+          if [ "$status" != "200" ]; then
+            echo "::error::Notification delivery failed with status $status"
+            exit 1
+          fi

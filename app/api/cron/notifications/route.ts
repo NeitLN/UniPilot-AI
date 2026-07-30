@@ -7,8 +7,11 @@ import { deliverAllDueNotifications } from "@/lib/push/deliver";
  * whichever user is signed in and currently viewing a page, so a reminder
  * never reaches someone who isn't in the app at the scheduled time. This
  * route sweeps every user's due notifications and is meant to be hit on a
- * schedule (see vercel.json's `crons` entry), authenticated with CRON_SECRET
- * rather than a user session since no user is signed in when it fires.
+ * schedule (see .github/workflows/notifications-cron.yml — every 15
+ * minutes via GitHub Actions, not Vercel's own cron, whose Hobby-plan
+ * once-daily limit made reminders arrive up to ~23h late, see SR-01 in
+ * docs/PRODUCT_REVIEW_3.md), authenticated with CRON_SECRET rather than a
+ * user session since no user is signed in when it fires.
  */
 export async function GET(request: NextRequest) {
   const secret = process.env.CRON_SECRET;
