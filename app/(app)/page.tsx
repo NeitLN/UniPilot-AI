@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import Link from "next/link";
 import { WelcomeBanner } from "@/components/dashboard/WelcomeBanner";
 import { KpiCardSkeleton } from "@/components/dashboard/KpiCard";
 import { SemesterLabel, SemesterLabelSkeleton } from "@/components/dashboard/SemesterLabel";
@@ -50,6 +51,14 @@ export default function DashboardPage() {
       <Suspense fallback={<RiskHudSkeleton />}>
         <RiskHud />
       </Suspense>
+
+      <Link
+        href="/reports"
+        className="flex min-h-11 items-center justify-between rounded-card bg-card p-4 text-sm font-bold text-foreground hover:bg-line"
+      >
+        See your weekly report
+        <span aria-hidden="true" className="text-ink-3">→</span>
+      </Link>
 
       <div className="flex flex-col gap-3.5 lg:grid lg:grid-cols-[1.4fr_1fr] lg:items-start">
         <div className="flex flex-col gap-3.5">

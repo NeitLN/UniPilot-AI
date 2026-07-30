@@ -96,7 +96,7 @@ export const ORPHANED_SESSION_KEY = "__deleted__";
  * late-evening session into the *next* calendar day for anyone west of UTC,
  * silently breaking streaks that felt consecutive to the user.
  */
-function dayKey(d: Date, timeZone: string): string {
+export function dayKey(d: Date, timeZone: string): string {
   return new Intl.DateTimeFormat("en-CA", {
     timeZone,
     year: "numeric",
@@ -114,7 +114,7 @@ function shiftDayKey(key: string, days: number): string {
   return dt.toISOString().slice(0, 10);
 }
 
-function defaultTimeZone(): string {
+export function defaultTimeZone(): string {
   return Intl.DateTimeFormat().resolvedOptions().timeZone;
 }
 

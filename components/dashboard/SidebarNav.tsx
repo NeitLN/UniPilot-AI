@@ -17,6 +17,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/focus", label: "Focus timer" },
   { href: "/gpa", label: "GPA tracker" },
   { href: "/risk", label: "Workload risk" },
+  { href: "/reports", label: "Weekly report" },
   { href: "/settings", label: "Settings" },
 ];
 
