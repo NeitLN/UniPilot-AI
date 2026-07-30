@@ -4,6 +4,19 @@ import type { FocusResult } from "@/lib/supabase/types";
 
 export const POMODORO_SECONDS = 25 * 60;
 
+// F-01: the SRS glossary defines Pomodoro as 25-minute work intervals
+// *followed by 5-minute breaks* — the timer only had the work half. A short
+// break follows every completed work cycle; a long break replaces it every
+// 4th (the standard Pomodoro Technique cadence).
+export const SHORT_BREAK_SECONDS = 5 * 60;
+export const LONG_BREAK_SECONDS = 15 * 60;
+export const CYCLES_BEFORE_LONG_BREAK = 4;
+
+/** `completedCycleNumber` is 1-indexed (the cycle that was just finished). */
+export function breakKindForCycle(completedCycleNumber: number): "short" | "long" {
+  return completedCycleNumber % CYCLES_BEFORE_LONG_BREAK === 0 ? "long" : "short";
+}
+
 /** Only a full 25:00 counts as `completed` — anything shorter is `partial` (BR-04). */
 export function classify(elapsedSeconds: number): FocusResult {
   return elapsedSeconds >= POMODORO_SECONDS ? "completed" : "partial";

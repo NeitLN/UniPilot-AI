@@ -6,10 +6,16 @@ import { useRouter } from "next/navigation";
 import { Pilo } from "@/components/brand/Pilo";
 import { Modal } from "@/components/ui/Modal";
 import { logFocusSession } from "@/app/(app)/focus/actions";
-import { POMODORO_SECONDS } from "@/lib/rules/focus";
+import {
+  breakKindForCycle,
+  LONG_BREAK_SECONDS,
+  POMODORO_SECONDS,
+  SHORT_BREAK_SECONDS,
+} from "@/lib/rules/focus";
 import { enqueueMutation } from "@/lib/offline/idb";
 
 const STORAGE_KEY = "unipilot:focus:session";
+const CYCLE_COUNT_KEY = "unipilot:focus:cycleCount";
 const RADIUS = 65;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
@@ -18,9 +24,16 @@ export interface FocusAssignmentOption {
   title: string;
 }
 
+type Phase = "work" | "break";
+type BreakKind = "short" | "long";
+
 interface StoredSession {
   assignmentId: string;
   startedAt: string;
+  phase: Phase;
+  breakKind?: BreakKind;
+  /** Set while paused; timer freezes at the remaining time it had then. */
+  pausedAt: string | null;
 }
 
 function readStoredSession(): StoredSession | null {
@@ -29,11 +42,27 @@ function readStoredSession(): StoredSession | null {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Partial<StoredSession>;
-    if (!parsed.assignmentId || !parsed.startedAt) return null;
-    return { assignmentId: parsed.assignmentId, startedAt: parsed.startedAt };
+    if (!parsed.assignmentId || !parsed.startedAt || !parsed.phase) return null;
+    return {
+      assignmentId: parsed.assignmentId,
+      startedAt: parsed.startedAt,
+      phase: parsed.phase,
+      breakKind: parsed.breakKind,
+      pausedAt: parsed.pausedAt ?? null,
+    };
   } catch {
     return null;
   }
+}
+
+function readCycleCount(): number {
+  if (typeof window === "undefined") return 0;
+  return Number(window.localStorage.getItem(CYCLE_COUNT_KEY) ?? "0") || 0;
+}
+
+function phaseDuration(session: Pick<StoredSession, "phase" | "breakKind">): number {
+  if (session.phase === "work") return POMODORO_SECONDS;
+  return session.breakKind === "long" ? LONG_BREAK_SECONDS : SHORT_BREAK_SECONDS;
 }
 
 function formatClock(seconds: number): string {
@@ -48,7 +77,7 @@ export function FocusTimer({ assignments }: { assignments: FocusAssignmentOption
   const [session, setSession] = useState<StoredSession | null>(null);
   const [selectedId, setSelectedId] = useState(assignments[0]?.id ?? "");
   const [remaining, setRemaining] = useState(POMODORO_SECONDS);
-  const [justCompleted, setJustCompleted] = useState(false);
+  const [finishedPhase, setFinishedPhase] = useState<Phase | null>(null);
   const [confirmingStop, setConfirmingStop] = useState(false);
   const [pending, setPending] = useState(false);
   const finishedRef = useRef(false);
@@ -66,9 +95,19 @@ export function FocusTimer({ assignments }: { assignments: FocusAssignmentOption
     }
   }, []);
 
-  // Shared by both finish paths (auto-timeout and manual Stop) — they only
-  // differ in which bit of "we just finished" UI state to set afterward.
-  async function finishSession(current: StoredSession) {
+  function persist(next: StoredSession | null) {
+    if (next) {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    } else {
+      window.localStorage.removeItem(STORAGE_KEY);
+    }
+    setSession(next);
+  }
+
+  // Only a WORK phase reaching a full 25:00 (auto-timeout or the ordinary
+  // finish path) logs anything to the server — breaks are pure local timer
+  // state, never sent as a focus_sessions row.
+  async function finishWorkSession(current: StoredSession) {
     setPending(true);
     const input = {
       assignmentId: current.assignmentId,
@@ -82,29 +121,44 @@ export function FocusTimer({ assignments }: { assignments: FocusAssignmentOption
       // cycle isn't lost, synced the moment the browser comes back online.
       await enqueueMutation("logFocusSession", input);
     }
-    window.localStorage.removeItem(STORAGE_KEY);
-    setSession(null);
     setPending(false);
     router.refresh();
   }
 
-  async function complete() {
+  /** Work phase hit 0:00 on its own — earns a break instead of just ending. */
+  async function completeWork() {
     if (!session) return;
-    await finishSession(session);
-    setJustCompleted(true);
+    await finishWorkSession(session);
+    const nextCycle = readCycleCount() + 1;
+    window.localStorage.setItem(CYCLE_COUNT_KEY, String(nextCycle));
+    persist({
+      assignmentId: session.assignmentId,
+      startedAt: new Date().toISOString(),
+      phase: "break",
+      breakKind: breakKindForCycle(nextCycle),
+      pausedAt: null,
+    });
+    setFinishedPhase("work");
+  }
+
+  function completeBreak() {
+    persist(null);
+    setFinishedPhase("break");
   }
 
   useEffect(() => {
-    if (!session) return;
+    if (!session || session.pausedAt) return;
     finishedRef.current = false;
 
     function tick() {
+      const duration = phaseDuration(session!);
       const elapsed = (Date.now() - new Date(session!.startedAt).getTime()) / 1000;
-      const left = POMODORO_SECONDS - elapsed;
+      const left = duration - elapsed;
       setRemaining(left);
       if (left <= 0 && !finishedRef.current) {
         finishedRef.current = true;
-        void complete();
+        if (session!.phase === "work") void completeWork();
+        else completeBreak();
       }
     }
 
@@ -116,31 +170,65 @@ export function FocusTimer({ assignments }: { assignments: FocusAssignmentOption
 
   function handleStart() {
     if (!selectedId) return;
-    const startedAt = new Date().toISOString();
-    window.localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({ assignmentId: selectedId, startedAt }),
-    );
-    setJustCompleted(false);
-    setSession({ assignmentId: selectedId, startedAt });
+    setFinishedPhase(null);
+    persist({
+      assignmentId: selectedId,
+      startedAt: new Date().toISOString(),
+      phase: "work",
+      pausedAt: null,
+    });
+  }
+
+  function handlePauseToggle() {
+    if (!session) return;
+    if (session.pausedAt) {
+      // Resuming: shift startedAt forward by however long the pause
+      // lasted, so elapsed-time math never counts the paused interval.
+      const pauseDurationMs = Date.now() - new Date(session.pausedAt).getTime();
+      persist({
+        ...session,
+        startedAt: new Date(
+          new Date(session.startedAt).getTime() + pauseDurationMs,
+        ).toISOString(),
+        pausedAt: null,
+      });
+    } else {
+      persist({ ...session, pausedAt: new Date().toISOString() });
+    }
   }
 
   async function confirmStopEarly() {
     if (!session) return;
-    await finishSession(session);
+    if (session.phase === "work") {
+      await finishWorkSession(session);
+    }
+    persist(null);
     setConfirmingStop(false);
   }
 
+  function skipBreak() {
+    persist(null);
+    setFinishedPhase(null);
+  }
+
   const isRunning = session !== null;
-  const displaySeconds = isRunning ? remaining : POMODORO_SECONDS;
-  const progress = Math.max(0, Math.min(1, displaySeconds / POMODORO_SECONDS));
+  const isPaused = Boolean(session?.pausedAt);
+  const isBreak = session?.phase === "break";
+  const duration = session ? phaseDuration(session) : POMODORO_SECONDS;
+  const displayRemaining = session
+    ? session.pausedAt
+      ? duration -
+        (new Date(session.pausedAt).getTime() - new Date(session.startedAt).getTime()) / 1000
+      : remaining
+    : POMODORO_SECONDS;
+  const progress = Math.max(0, Math.min(1, displayRemaining / duration));
   const dashOffset = CIRCUMFERENCE * (1 - progress);
   const activeAssignment = assignments.find(
     (a) => a.id === (session?.assignmentId ?? selectedId),
   );
 
   return (
-    <div className="rounded-card bg-lime p-5 text-center">
+    <div className={`rounded-card p-5 text-center ${isBreak ? "bg-mint" : "bg-lime"}`}>
       {!isRunning && (
         <label className="mb-3 block text-left text-xs font-bold text-ink/70">
           Assignment
@@ -163,7 +251,13 @@ export function FocusTimer({ assignments }: { assignments: FocusAssignmentOption
         </label>
       )}
 
-      {isRunning && activeAssignment && (
+      {isRunning && isBreak && (
+        <p className="mb-2 text-[12.5px] font-bold text-ink/70">
+          {session.breakKind === "long" ? "Long break" : "Short break"} — nice work
+          on {activeAssignment?.title ?? "that cycle"}
+        </p>
+      )}
+      {isRunning && !isBreak && activeAssignment && (
         <p className="mb-2 truncate text-[12.5px] font-bold text-ink/70">
           {activeAssignment.title}
         </p>
@@ -185,23 +279,44 @@ export function FocusTimer({ assignments }: { assignments: FocusAssignmentOption
           />
         </svg>
         <p className="font-display text-4xl font-bold text-ink tabular-nums">
-          {formatClock(displaySeconds)}
+          {formatClock(displayRemaining)}
         </p>
       </div>
 
       <p className="mt-3 text-[10.5px] font-extrabold uppercase tracking-[0.14em] text-ink/60">
-        Focus timer
+        {isBreak ? "Break" : "Focus timer"}
+        {isPaused ? " · Paused" : ""}
       </p>
 
       {isRunning ? (
-        <button
-          type="button"
-          onClick={() => setConfirmingStop(true)}
-          disabled={pending}
-          className="mt-4 w-full rounded-ctl bg-ink py-3 text-sm font-extrabold text-white disabled:opacity-60"
-        >
-          Stop
-        </button>
+        <div className="mt-4 flex gap-2">
+          <button
+            type="button"
+            onClick={handlePauseToggle}
+            disabled={pending}
+            className="flex-1 rounded-ctl bg-white py-3 text-sm font-extrabold text-ink disabled:opacity-60"
+          >
+            {isPaused ? "Resume" : "Pause"}
+          </button>
+          {isBreak ? (
+            <button
+              type="button"
+              onClick={skipBreak}
+              className="flex-1 rounded-ctl bg-ink py-3 text-sm font-extrabold text-white"
+            >
+              Skip break
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setConfirmingStop(true)}
+              disabled={pending}
+              className="flex-1 rounded-ctl bg-ink py-3 text-sm font-extrabold text-white disabled:opacity-60"
+            >
+              Stop
+            </button>
+          )}
+        </div>
       ) : (
         <>
           <button
@@ -229,12 +344,16 @@ export function FocusTimer({ assignments }: { assignments: FocusAssignmentOption
         </>
       )}
 
-      {justCompleted && !isRunning && (
+      {finishedPhase && !isRunning && (
         <div className="mt-3 flex items-center justify-center gap-2">
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white">
             <Pilo mood="happy" size={24} />
           </span>
-          <p className="text-[12.5px] font-bold text-ink">Nice work — cycle logged.</p>
+          <p className="text-[12.5px] font-bold text-ink">
+            {finishedPhase === "work"
+              ? "Cycle logged — break started."
+              : "Break's over — ready for another cycle?"}
+          </p>
         </div>
       )}
 
@@ -245,7 +364,7 @@ export function FocusTimer({ assignments }: { assignments: FocusAssignmentOption
       >
         <h2 className="font-display text-lg font-bold text-ink">Stop this session?</h2>
         <p className="mt-2 text-sm font-semibold text-ink-2">
-          {`This logs a partial session for ${formatClock(POMODORO_SECONDS - remaining)} — it won't count toward your streak.`}
+          {`This logs a partial session for ${formatClock(duration - displayRemaining)} — it won't count toward your streak.`}
         </p>
         <div className="mt-4 flex gap-2.5">
           <button

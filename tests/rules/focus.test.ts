@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  breakKindForCycle,
   classify,
   formatMinutes,
   streakDays,
@@ -143,6 +144,24 @@ describe("streakDays timezone handling", () => {
       { startedAt: new Date(2026, 6, 29).toISOString(), result: "completed" },
     ];
     expect(streakDays(sessions, { today })).toBe(1);
+  });
+});
+
+describe("breakKindForCycle", () => {
+  it("gives a short break for cycles 1-3", () => {
+    expect(breakKindForCycle(1)).toBe("short");
+    expect(breakKindForCycle(2)).toBe("short");
+    expect(breakKindForCycle(3)).toBe("short");
+  });
+
+  it("gives a long break on every 4th cycle (F-01)", () => {
+    expect(breakKindForCycle(4)).toBe("long");
+    expect(breakKindForCycle(8)).toBe("long");
+    expect(breakKindForCycle(12)).toBe("long");
+  });
+
+  it("resumes short breaks right after a long one", () => {
+    expect(breakKindForCycle(5)).toBe("short");
   });
 });
 

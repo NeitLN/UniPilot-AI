@@ -19,6 +19,12 @@ export interface GradeRow extends GradeLike {
   semester: string;
 }
 
+// P-03: the table always rendered every grade at once. GPA/trend still need
+// the full list to compute correctly (a per-page slice would silently give
+// a wrong cumulative GPA), so only the *table rows* are capped — a "Show
+// all" toggle reveals the rest without re-fetching anything.
+const INITIAL_ROWS = 10;
+
 export function CourseBreakdown({
   grades,
   courses,
@@ -30,6 +36,10 @@ export function CourseBreakdown({
 }) {
   const [editing, setEditing] = useState<GradeRow | null>(null);
   const [deleting, setDeleting] = useState<GradeRow | null>(null);
+  const [showAll, setShowAll] = useState(false);
+
+  const visibleGrades = showAll ? grades : grades.slice(0, INITIAL_ROWS);
+  const hiddenCount = grades.length - visibleGrades.length;
 
   return (
     <div className="rounded-card bg-white p-5">
@@ -54,7 +64,7 @@ export function CourseBreakdown({
               </tr>
             </thead>
             <tbody>
-              {grades.map((g) => {
+              {visibleGrades.map((g) => {
                 const draggingDown = dragsGpaDown(g, overallGpa);
                 return (
                   <tr key={g.id} className="border-b border-line last:border-b-0">
@@ -105,6 +115,16 @@ export function CourseBreakdown({
             </tbody>
           </table>
         </div>
+      )}
+
+      {hiddenCount > 0 && (
+        <button
+          type="button"
+          onClick={() => setShowAll(true)}
+          className="mt-3 flex min-h-11 w-full items-center justify-center rounded-ctl bg-line text-xs font-bold text-ink-2 hover:bg-[#E6E2F2]"
+        >
+          Show all {grades.length} courses ({hiddenCount} more)
+        </button>
       )}
 
       <Modal open={editing !== null} onClose={() => setEditing(null)} title="Edit grade">
