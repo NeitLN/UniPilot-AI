@@ -26,5 +26,14 @@ test.describe("Track GPA", () => {
     // "Required average" is also a substring of the unreachable-forecast
     // message, so this can match twice — either is proof the card rendered.
     await expect(page.getByText("Required average").first()).toBeVisible();
+
+    // Clean up — this grade has no purpose past this test, and a semester
+    // this random left sitting in the shared E2E account is exactly what
+    // previously accumulated into 9 stray rows wide enough to overflow the
+    // GPA trend chart at mobile widths (see tests/e2e/layout.spec.ts).
+    const row = page.locator("tr").filter({ hasText: semester });
+    await row.getByRole("button", { name: "Delete", exact: true }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Delete", exact: true }).click();
+    await expect(page.getByRole("cell", { name: semester })).not.toBeVisible({ timeout: 10_000 });
   });
 });
