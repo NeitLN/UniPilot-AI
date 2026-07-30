@@ -72,14 +72,27 @@ function BlockCard({
         className="mt-0.5 truncate text-[11px] font-semibold text-ink-3"
         suppressHydrationWarning
       >
-        {new Date(block.startAt).toLocaleTimeString(undefined, {
-          hour: "numeric",
-          minute: "2-digit",
-        })}
-        {block.courseName ? ` · ${block.courseName}` : ""}
+        {blockSubtitle(block)}
       </p>
     </button>
   );
+}
+
+// UX-03 (docs/PRODUCT_REVIEW.md): used to always show start time + course
+// name, even when the course name was identical to the block's own title
+// (the common case — class blocks are usually titled after their course),
+// which read as the same text printed twice. Also never showed an end
+// time, so there was no way to tell a class's length from the grid alone.
+function blockSubtitle(block: Pick<ClassBlockData, "startAt" | "endAt" | "isAllDay" | "title" | "courseName">): string {
+  const timeRange = block.isAllDay
+    ? "All day"
+    : `${formatTime(block.startAt)}–${formatTime(block.endAt)}`;
+  const showCourse = block.courseName && block.courseName !== block.title;
+  return showCourse ? `${timeRange} · ${block.courseName}` : timeRange;
+}
+
+function formatTime(iso: string): string {
+  return new Date(iso).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
 }
 
 function DayList({
@@ -112,19 +125,23 @@ function DayList({
           {/* Formatted in the runtime's local timezone — expected to differ
               between SSR and hydration, not a real mismatch. */}
           <div
-            className="w-16 shrink-0 text-[11.5px] font-bold text-ink-3"
+            className="flex w-16 shrink-0 flex-col text-[11.5px] font-bold text-ink-3"
             suppressHydrationWarning
           >
-            {new Date(b.startAt).toLocaleTimeString(undefined, {
-              hour: "numeric",
-              minute: "2-digit",
-            })}
+            {b.isAllDay ? (
+              "All day"
+            ) : (
+              <>
+                <span>{formatTime(b.startAt)}</span>
+                <span className="text-ink-3/70">{formatTime(b.endAt)}</span>
+              </>
+            )}
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-bold text-foreground">{b.title}</p>
             <p className="truncate text-[11.5px] font-semibold text-ink-3">
               {b.location ?? "No location"}
-              {b.courseName ? ` · ${b.courseName}` : ""}
+              {b.courseName && b.courseName !== b.title ? ` · ${b.courseName}` : ""}
             </p>
           </div>
         </button>
