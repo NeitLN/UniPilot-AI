@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { SettingsForm } from "@/components/settings/SettingsForm";
 import { ThemeToggle } from "@/components/settings/ThemeToggle";
+import { ExportData } from "@/components/settings/ExportData";
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -31,6 +32,10 @@ export default async function SettingsPage() {
             targetGpa: profile?.target_gpa ?? null,
           }}
         />
+      </div>
+
+      <div className="max-w-md rounded-card bg-card p-5">
+        <ExportData />
       </div>
     </div>
   );
