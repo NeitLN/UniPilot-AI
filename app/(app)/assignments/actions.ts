@@ -159,9 +159,43 @@ export async function getAssignmentUpdatedAt(id: string): Promise<string | null>
   return data?.updated_at ?? null;
 }
 
-export async function archiveAssignment(id: string) {
+/** `scope: "following"` archives this and every later occurrence in the
+ * same recurring series (mirrors Schedule's deleteEvent); "this" (the
+ * default, and the only option for a one-off assignment) archives just
+ * this row. Archiving cancels any pending reminder for this assignment
+ * (FR-19) — for "following", every affected row's reminder is cancelled. */
+export async function archiveAssignment(id: string, scope: "this" | "following" = "this") {
   const supabase = await createClient();
-  // Archiving cancels any pending reminder for this assignment (FR-19).
+
+  if (scope === "following") {
+    const { data: current } = await supabase
+      .from("assignments")
+      .select("due_at, recurrence_group_id")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (current?.recurrence_group_id) {
+      const { data: siblings, error: fetchError } = await supabase
+        .from("assignments")
+        .select("id")
+        .eq("recurrence_group_id", current.recurrence_group_id)
+        .gte("due_at", current.due_at)
+        .is("archived_at", null);
+      if (fetchError) throw new Error(fetchError.message);
+
+      const ids = (siblings ?? []).map((s) => s.id);
+      const { error } = await supabase
+        .from("assignments")
+        .update({ archived_at: new Date().toISOString(), reminder_at: null })
+        .in("id", ids);
+      if (error) throw new Error(error.message);
+
+      await Promise.all(ids.map((rowId) => cancelAssignmentReminder(supabase, rowId)));
+      revalidatePath("/assignments");
+      return;
+    }
+  }
+
   const { error } = await supabase
     .from("assignments")
     .update({ archived_at: new Date().toISOString(), reminder_at: null })

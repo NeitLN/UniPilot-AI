@@ -41,6 +41,9 @@ export interface AssignmentFormValues {
 export interface AssignmentFormProps {
   courses: CourseOption[];
   initialValues?: AssignmentFormValues;
+  /** FR-24: editing an already-materialized occurrence never re-expands the
+   * series — only shown as a note so it isn't a silent surprise. */
+  isRecurring?: boolean;
   onSaved: () => void;
   onCancel: () => void;
 }
@@ -50,6 +53,7 @@ const FIELD_ORDER = ["title", "courseId", "dueAt", "weight", "priority", "repeat
 export function AssignmentForm({
   courses,
   initialValues,
+  isRecurring = false,
   onSaved,
   onCancel,
 }: AssignmentFormProps) {
@@ -117,6 +121,7 @@ export function AssignmentForm({
       ref={formRef}
       action={formAction}
       onSubmit={handleSubmit}
+      noValidate
       className="flex flex-col gap-3.5"
     >
       <h2 className="font-display text-lg font-bold text-foreground">
@@ -208,6 +213,12 @@ export function AssignmentForm({
           </select>
         </Field>
       </div>
+
+      {isEdit && isRecurring && (
+        <p className="-mt-1.5 text-[11px] font-semibold text-ink-3">
+          Editing this occurrence only.
+        </p>
+      )}
 
       {!isEdit && (
         <div className="flex gap-3">
