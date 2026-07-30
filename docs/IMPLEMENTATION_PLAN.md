@@ -1,8 +1,8 @@
 # Kế hoạch triển khai — từ PRODUCT_REVIEW.md
 
 **Nguồn:** [`docs/PRODUCT_REVIEW.md`](./PRODUCT_REVIEW.md) (30/07/2026)
-**Trạng thái nền:** `main` @ `52fd5e4` — typecheck sạch, lint sạch, 149 unit test + 14 E2E test xanh
-**Tổng:** 5 phase, ~22 giờ · **Phase 1 + 2 + 3: ✅ Hoàn thành** (xem §Phase tương ứng để biết chi tiết + phát hiện phát sinh)
+**Trạng thái nền:** `main` @ `85e80b7` — typecheck sạch, lint sạch, 160 unit test + 16 E2E test xanh
+**Tổng:** 5 phase, ~22 giờ · **Phase 1 + 2 + 3 + 4: ✅ Hoàn thành** (xem §Phase tương ứng để biết chi tiết + phát hiện phát sinh)
 
 ---
 
@@ -194,6 +194,13 @@ Sửa xong flex-shrink thì 3.25 → 3.57 vẫn chỉ chênh 9px/120px. Vẫn kh
 
 > **Mục tiêu:** sửa rủi ro mất dữ liệu thành tựu, rồi mới mở tính năng xoá.
 > **Thời lượng:** ~5 giờ · **Rủi ro:** 🔴 **cao — có migration phá vỡ kiểu dữ liệu**
+> **✅ Hoàn thành** — 4 commit (`b6dc007` migration, `f143bcf` 4.1, `73cbd6f` 4.2, `85e80b7` 4.3). 160/160 unit test, 16/16 E2E xanh.
+>
+> **Xác minh migration trực tiếp trên DB** (không chỉ suy luận): tạo assignment + focus session thật, xoá assignment, xác nhận session sống sót với `assignment_id = null` thay vì bị cascade-xoá — đúng như thiết kế. Sau đó xác minh lại lần nữa ở tầng UI trên tài khoản demo thật: tạo assignment tạm có phiên focus 351 phút/14 cycle, xoá cứng assignment, xác nhận trang Focus vẫn hiện đúng 351 phút/14 cycle/streak 10 ngày, chỉ đổi nhãn thành "Deleted assignment"/"Unknown course". Đã dọn sạch mọi dữ liệu test, tài khoản demo về đúng baseline ban đầu (8 active, 0 archived, 13 completed/325 phút/streak 10d).
+>
+> **Quyết định thiết kế:** `FocusSessionLike.source` để **optional** (không bắt buộc) thay vì bắt mọi call site cập nhật — giảm độ lan toả của thay đổi, tất cả fixture/component cũ không cần sửa gì. `validateManualSession` tách thành hàm thuần trong `lib/rules/focus.ts` (không viết inline trong server action) để nhất quán với `validateAssignment`/`validateCourse`/`validateGrade` đã có, và có unit test riêng.
+>
+> **1 bug thật tìm được khi xác minh trên tài khoản demo:** nút xoá vĩnh viễn ban đầu dùng `text-coral-text` (màu cố định, thiết kế để đi kèm nền tint sáng) đứng một mình trên `bg-line` — cùng lớp lỗi dark-mode contrast đã gặp 2 lần ở Phase 3 (GPA trend chart). Đổi sang `text-coral` (màu sống động cố định, đã có tiền lệ dùng trực tiếp trong `LoginForm`'s error text) — đọc được ở cả 2 theme.
 
 ### 4.1 — Migration `ON DELETE SET NULL` (~2h) ⚠️ **PHẢI LÀM TRƯỚC 4.3**
 
