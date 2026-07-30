@@ -9,6 +9,7 @@ import {
 import { ensurePushSubscription } from "@/lib/push/subscribe";
 import { enqueueMutation } from "@/lib/offline/idb";
 import { useOnlineStatus } from "@/lib/offline/useOnlineStatus";
+import { REPEAT_OPTIONS, type EventRepeat } from "@/lib/rules/event";
 
 // Defined locally rather than imported from actions.ts: a "use server" module
 // may only export async functions, so a plain object export from it resolves
@@ -44,7 +45,7 @@ export interface AssignmentFormProps {
   onCancel: () => void;
 }
 
-const FIELD_ORDER = ["title", "courseId", "dueAt", "weight", "priority"] as const;
+const FIELD_ORDER = ["title", "courseId", "dueAt", "weight", "priority", "repeatUntil"] as const;
 
 export function AssignmentForm({
   courses,
@@ -63,6 +64,7 @@ export function AssignmentForm({
   >(action, INITIAL_STATE);
 
   const [progress, setProgress] = useState(initialValues?.progress ?? 0);
+  const [repeat, setRepeat] = useState<EventRepeat>("none");
   const formRef = useRef<HTMLFormElement>(null);
   const isOnline = useOnlineStatus();
 
@@ -206,6 +208,40 @@ export function AssignmentForm({
           </select>
         </Field>
       </div>
+
+      {!isEdit && (
+        <div className="flex gap-3">
+          <Field label="Repeat" className="flex-1">
+            <select
+              name="repeat"
+              value={repeat}
+              onChange={(e) => setRepeat(e.target.value as EventRepeat)}
+              className={inputClass(false)}
+            >
+              {REPEAT_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </Field>
+
+          {repeat !== "none" && (
+            <Field
+              label="Repeat until"
+              error={state.errors.repeatUntil}
+              className="flex-1"
+            >
+              <input
+                name="repeatUntil"
+                type="date"
+                required
+                className={inputClass(Boolean(state.errors.repeatUntil))}
+              />
+            </Field>
+          )}
+        </div>
+      )}
 
       <Field label={`Progress — ${progress}%`} error={state.errors.progress}>
         <input

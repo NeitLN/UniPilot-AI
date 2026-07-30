@@ -22,6 +22,8 @@ const baseInput: AssignmentInput = {
   notes: "",
   reminderAt: "",
   score: null,
+  repeat: "none",
+  repeatUntil: "",
 };
 
 describe("validateAssignment", () => {
@@ -65,6 +67,23 @@ describe("validateAssignment", () => {
     expect(validateAssignment({ ...baseInput, score: -1 }).score).toBeDefined();
     expect(validateAssignment({ ...baseInput, score: 0 }).score).toBeUndefined();
     expect(validateAssignment({ ...baseInput, score: 100 }).score).toBeUndefined();
+  });
+
+  it("requires repeatUntil when repeat isn't none", () => {
+    expect(
+      validateAssignment({ ...baseInput, repeat: "weekly", repeatUntil: "" }).repeatUntil,
+    ).toBeDefined();
+    expect(
+      validateAssignment({ ...baseInput, repeat: "weekly", repeatUntil: "2026-09-01" })
+        .repeatUntil,
+    ).toBeUndefined();
+  });
+
+  it("rejects a repeatUntil before the due date", () => {
+    expect(
+      validateAssignment({ ...baseInput, repeat: "weekly", repeatUntil: "2026-01-01" })
+        .repeatUntil,
+    ).toBeDefined();
   });
 });
 

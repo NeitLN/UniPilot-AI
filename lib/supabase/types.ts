@@ -89,6 +89,7 @@ export interface Database {
           notes: string | null;
           reminder_at: string | null;
           archived_at: string | null;
+          recurrence_group_id: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -106,6 +107,7 @@ export interface Database {
           notes?: string | null;
           reminder_at?: string | null;
           archived_at?: string | null;
+          recurrence_group_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -123,6 +125,7 @@ export interface Database {
           notes?: string | null;
           reminder_at?: string | null;
           archived_at?: string | null;
+          recurrence_group_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };

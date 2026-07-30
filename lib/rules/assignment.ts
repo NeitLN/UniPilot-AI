@@ -5,6 +5,7 @@ import type {
   AssignmentPriority,
   AssignmentStatus,
 } from "@/lib/supabase/types";
+import type { EventRepeat } from "@/lib/rules/event";
 
 export interface AssignmentLike {
   dueAt: string;
@@ -25,6 +26,12 @@ export interface AssignmentInput {
   reminderAt: string;
   /** Achieved score 0-100, null until graded (F-03). */
   score: number | null;
+  /** F-01: weekly labs/quizzes shouldn't need one manual entry per week —
+   * reuses the same repeat vocabulary as Schedule events. Only read on
+   * create; editing an already-materialized occurrence never re-expands it,
+   * matching how Schedule's EventForm hides repeat controls on edit. */
+  repeat: EventRepeat;
+  repeatUntil: string;
 }
 
 export const REQUIRED = [
@@ -36,7 +43,10 @@ export const REQUIRED = [
 ] as const;
 
 export type FieldErrors = Partial<
-  Record<"title" | "courseId" | "dueAt" | "weight" | "priority" | "progress" | "score", string>
+  Record<
+    "title" | "courseId" | "dueAt" | "weight" | "priority" | "progress" | "score" | "repeatUntil",
+    string
+  >
 >;
 
 export function validateAssignment(input: AssignmentInput): FieldErrors {
@@ -64,6 +74,17 @@ export function validateAssignment(input: AssignmentInput): FieldErrors {
   }
   if (input.score !== null && (Number.isNaN(input.score) || input.score < 0 || input.score > 100)) {
     errors.score = "Score must be between 0 and 100.";
+  }
+  if (input.repeat !== "none") {
+    if (!input.repeatUntil) {
+      errors.repeatUntil = "Pick when the repeat ends.";
+    } else if (input.dueAt) {
+      const due = new Date(input.dueAt);
+      const until = new Date(input.repeatUntil);
+      if (until.getTime() < due.getTime()) {
+        errors.repeatUntil = "Repeat end must be after the due date.";
+      }
+    }
   }
 
   return errors;

@@ -9,6 +9,7 @@ import {
   type AssignmentInput,
   type FieldErrors,
 } from "@/lib/rules/assignment";
+import { generateOccurrences, type EventRepeat } from "@/lib/rules/event";
 import type { AssignmentPriority, AssignmentStatus } from "@/lib/supabase/types";
 
 export interface AssignmentFormState {
@@ -29,6 +30,8 @@ function readInput(formData: FormData): AssignmentInput {
     notes: String(formData.get("notes") ?? "").trim(),
     reminderAt: String(formData.get("reminderAt") ?? ""),
     score: formData.get("score") ? Number(formData.get("score")) : null,
+    repeat: (formData.get("repeat") as EventRepeat) || "none",
+    repeatUntil: String(formData.get("repeatUntil") ?? ""),
   };
 }
 
@@ -65,20 +68,38 @@ export async function createAssignment(
     return { errors: { courseId: "Pick a course from the list." } };
   }
 
+  // F-01: reuse Schedule's occurrence expansion — a due date is just a
+  // zero-duration "event" for this purpose (start === end). Only the first
+  // occurrence keeps the reminder: a single absolute reminderAt can't sanely
+  // apply to every future due date in the series, and there's no per-row
+  // input to offset it from the way Schedule does with "minutes before".
+  const dueAt = new Date(input.dueAt);
+  const until = input.repeatUntil ? new Date(`${input.repeatUntil}T23:59:59`) : null;
+  const occurrences = generateOccurrences(dueAt, dueAt, input.repeat, until);
+  const recurrenceGroupId = occurrences.length > 1 ? crypto.randomUUID() : null;
+  const baseRow = toRow(input);
+
   const { data: created, error } = await supabase
     .from("assignments")
-    .insert({ user_id: user.id, ...toRow(input) })
-    .select("id")
-    .single();
+    .insert(
+      occurrences.map((o, i) => ({
+        user_id: user.id,
+        ...baseRow,
+        due_at: o.start.toISOString(),
+        reminder_at: i === 0 ? baseRow.reminder_at : null,
+        recurrence_group_id: recurrenceGroupId,
+      })),
+    )
+    .select("id");
 
-  if (error || !created) {
+  if (error || !created || created.length === 0) {
     return { errors: {}, formError: error?.message ?? "Couldn't save this assignment." };
   }
 
   await syncAssignmentReminder(
     supabase,
     user.id,
-    created.id,
+    created[0].id,
     input.title,
     input.reminderAt ? new Date(input.reminderAt).toISOString() : null,
   );
