@@ -320,31 +320,36 @@ npx tsc --noEmit → npx eslint app components lib tests → npx vitest run
 
 ---
 
-## Phase 12 — Bịt lỗ hổng test & gom nợ kỹ thuật 🟡 (~2.5h)
+## Phase 12 — Bịt lỗ hổng test & gom nợ kỹ thuật 🟡 (~2.5h, thực tế ~2h) ✅ **Hoàn thành**
 
 > **Mục tiêu:** cả 2 lỗi P0 đợt này đều lọt qua 195 test. Không sửa nguyên nhân đó thì đợt sau lại lọt tiếp.
 
-### 12.1 — Gom `Field` / `inputClass` (~1h)
+### 12.1 — Gom `Field` / `inputClass` (~1h) ✅
 
 **File mới:** `components/ui/Field.tsx`
 
-- [ ] Một `Field` + một `inputClass` dùng chung, thay 5 bản copy `Field` và 7 bản `inputClass`
-- [ ] Dùng lại `FieldError` đã có từ Phase 7
-- [ ] **Không đổi hành vi** — thuần refactor, E2E phải xanh nguyên trạng
+- [x] Diff từng bản trước khi gộp: **cả 5 bản `Field` giống hệt byte-for-byte**; 6/7 bản `inputClass` giống hệt, riêng `EventForm.tsx` có thêm `min-w-0` (layout flex-row cho input ngày giờ) — giữ nguyên khác biệt này qua tham số `extra?: string` thay vì đánh mất nó
+- [x] `EventForm.tsx`: alias `inputClass` cục bộ = `sharedInputClass(hasError, "min-w-0")` — cả 9 chỗ gọi `inputClass(...)` trong file không cần sửa dòng nào, tránh rủi ro bỏ sót
+- [x] Dùng lại `FieldError` đã có từ Phase 7
+- [x] **Không đổi hành vi:** `npx tsc --noEmit` sạch, `eslint` sạch, 21/21 E2E xanh (chạy lại nguyên trạng ngay sau refactor)
 
-### 12.2 — Test tầng component (~1.5h)
+### 12.2 — Test tầng component (~1.5h) ✅
 
-**File mới:** `tests/components/*.test.tsx` + cấu hình jsdom cho Vitest
+**File mới:** `tests/components/ActivePlanSummary.test.tsx`, `FieldError.test.tsx`, `Field.test.tsx`, `hover-token-guard.test.ts`, `vitest.setup.ts`
+**Gói thêm:** `jsdom`, `@testing-library/react@^16`, `@testing-library/jest-dom@^6`, `@vitejs/plugin-react` (dev only — đã xác nhận `npm audit` sau khi cài: 12 lỗ hổng high vẫn y hệt trước, đều thuộc `eslint`/`next`/`postcss`/`sharp` có sẵn, không có lỗ hổng mới)
 
-Ưu tiên đúng những chỗ đã chứng minh là lọt lưới:
-- [ ] `ActivePlanSummary`: plan toàn buổi quá khứ **không** được hiện "Active"
-- [ ] `FieldError`: luôn render `role="alert"`
-- [ ] `Field` dùng chung: hiện lỗi đúng, liên kết label ↔ input đúng
-- [ ] Test kiểm tra **không component nào dùng `hover:bg-[#` hardcode** (test bảo vệ token)
+- [x] `ActivePlanSummary`: 3 test — toàn buổi quá khứ không hiện "Active", có buổi tương lai thì hiện đúng "Active", plan rỗng không bị gắn nhầm "Ended"
+- [x] `FieldError`: luôn `role="alert"` (cả dạng `<p>` mặc định lẫn `as="span"`), không dùng `-text` token cố định
+- [x] `Field` dùng chung: `getByLabelText` xác nhận liên kết label↔input đúng (label bọc input, không cần `htmlFor`/`id`), hiện lỗi đúng qua `FieldError`
+- [x] `hover-token-guard.test.ts`: quét toàn bộ `app/`+`components/` tìm `hover:bg-\[#`, phải ra đúng 0 kết quả
 
-**Tiêu chí chấp nhận:**
-- [ ] `npx vitest run` chạy được cả test component lẫn test rules trong một lệnh
-- [ ] Nếu cố tình đưa lỗi QA4-02 trở lại → **có test fail** (chứng minh lưới đã bịt được đúng lỗ hổng)
+> ⚠️ **2 lỗi tự bắt trong lúc viết test (không phải bug thật, lỗi ở cách viết test):** cả `FieldError.test.tsx` lẫn `Field.test.tsx` fail ở lần chạy đầu vì Testing Library **không tự cleanup DOM giữa các `it()`** — dự án dùng `import { describe, it } from "vitest"` tường minh thay vì `test.globals: true`, nên cơ chế auto-cleanup dựa vào `afterEach` toàn cục của RTL không tự đăng ký được. Sửa bằng cách gọi `cleanup()` tường minh trong `afterEach` ở `vitest.setup.ts`.
+
+**Tiêu chí chấp nhận — xác minh thật, không chỉ chạy 1 lần:**
+- [x] `npx vitest run` chạy chung test component lẫn test rules trong 1 lệnh: **191/191 xanh** (179 → 191, +12; 14 → 18 file test)
+- [x] **Chứng minh lưới bắt được QA4-02 nếu tái phát** — quy trình thật, không suy luận: tạm đưa `hover:bg-[#E6E2F2]` trở lại `AssignmentItem.tsx` → chạy `hover-token-guard.test.ts` → **fail đúng, chỉ đúng dòng `AssignmentItem.tsx:124`** → revert bằng bản sao lưu → `git diff` xác nhận 0 thay đổi sót lại → chạy lại test → xanh
+- [x] `npm run build` (production) vẫn sạch sau khi thêm 4 devDependencies mới
+- [x] Verify thật trên tài khoản demo: submit rỗng `AssignmentForm` vẫn hiện đúng 5 lỗi qua `Field`/`FieldError` đã gộp; mở `EventForm` xác nhận layout `min-w-0` không tràn; 0 page error
 
 ---
 
@@ -353,15 +358,17 @@ npx tsc --noEmit → npx eslint app components lib tests → npx vitest run
 | Phase | Nội dung | Giờ ước tính | Giờ thực tế | Mức | Trạng thái |
 |---|---|---|---|---|---|
 | **10** | Plan active trùng lặp + hover dark mode | ~3 | ~2.5 | 🔴 P0 | ✅ |
-| **11** | Vòng đời AI Planner | ~2.5 | — | 🟡 P1 | ⏳ chưa làm |
-| **12** | Gom form + test tầng component | ~2.5 | — | 🟡 P1 | ⏳ chưa làm |
+| **11** | Vòng đời AI Planner | ~2.5 | ~2 | 🟡 P1 | ✅ |
+| **12** | Gom form + test tầng component | ~2.5 | ~2 | 🟡 P1 | ✅ |
 
-**Tổng: ~8 giờ**
+**Tổng ước tính: ~8 giờ · Tổng thực tế: ~6.5 giờ** — cả 3 phase: **✅ Hoàn thành**
 
-### Nếu cần cắt phạm vi
-- **Bắt buộc:** Phase 10 — dữ liệu đang sai dần mỗi lần confirm plan, và chữ đang biến mất khi hover ở dark mode.
-- **Nên làm sớm:** 11.2 — chi phí thấp, sửa đúng điểm gây bối rối nhất cho người dùng.
-- **Có thể hoãn:** 12.1 (thuần refactor). Nhưng **12.2 thì không nên hoãn** — đó là thứ ngăn đợt review sau lại tìm ra một lỗi P0 "im lặng" nữa.
+### Kết quả cuối cùng
+- Unit + component test: **174 → 191** (bắt đầu đợt 4)
+- E2E: **21/21** xanh xuyên suốt cả 3 phase
+- 2 lỗi P0 (QA4-01 dữ liệu plan trùng lặp, QA4-02 chữ biến mất khi hover) — sửa tận gốc bằng ràng buộc DB (partial unique index) và token dùng chung, không chỉ vá triệu chứng
+- 1 lỗi P0 thứ 3 tự phát hiện trong lúc làm Phase 11 (`PlanCard` trên Dashboard bị đúng lỗi QA4-03 độc lập) — sửa luôn bằng cách dùng lại đúng 1 hàm logic, không viết lần hai
+- Lưới bảo vệ QA4-02 đã **chứng minh hoạt động thật** (không phải suy luận): cố tình tái tạo lỗi → test fail đúng dòng → revert → test xanh lại
 
 ### Đề xuất bắt đầu
 **10.1** — vì mỗi lần bạn bấm "Confirm plan" là dữ liệu lại sai thêm một bậc, và partial unique index sẽ chặn vĩnh viễn lớp lỗi này ở tầng DB chứ không phụ thuộc code viết đúng.
