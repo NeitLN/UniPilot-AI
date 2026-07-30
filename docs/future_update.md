@@ -294,3 +294,38 @@ npm test             # 121 unit test
 npm run test:e2e     # 7 E2E test (cần: npm run seed:e2e 1 lần đầu)
 npx tsc --noEmit     # typecheck
 ```
+
+---
+
+## 8. Trạng thái triển khai (30/07/2026)
+
+Cả 4 đợt ở §6 đã code, test, và commit xong, liên tục không dừng theo đúng yêu cầu:
+
+- **Đợt 1** (B-01/02/03, P-01/02, A-01/03) — đã làm ở phiên trước.
+- **Đợt 2** (F-05 PWA, F-01 break timer, F-02 pause, F-04 search, P-03 pagination) — đã làm ở phiên trước.
+- **Đợt 3**:
+  - **F-03** — `assignments.score` (migration 0009) + `predictedCourseScore()`/`estimateGradePoint()` (`lib/rules/gpa.ts`) → card "Predicted grades" trên trang GPA cho môn chưa có điểm chính thức.
+  - **F-06** — Dark mode toàn app qua CSS custom property runtime (`.dark` class trên `<html>`, script `beforeInteractive` chống chớp sáng/tối), toggle Light/Dark/System trong Settings. Chi tiết kỹ thuật + các cạm bẫy đã gặp ở §9 bên dưới.
+- **Đợt 4**:
+  - **F-01 (lặp lại)** — Assignment giờ dùng lại đúng `generateOccurrences()` của Schedule (daily/weekly/biweekly/monthly, trần 200 lần lặp), gắn `recurrence_group_id` (migration 0010).
+  - **Xuất dữ liệu** — `GET /api/export?format=json|csv&type=...` (`lib/export/csv.ts`), khu "Export your data" trong Settings.
+  - **Thống kê học tập** — biểu đồ giờ học 8 tuần gần nhất + bảng "môn nào tốn thời gian nhất kèm điểm" (`weeklyMinutesSeries()` trong `lib/rules/focus.ts`, component `LearningStats`).
+  - **Đồng bộ 2 chiều Google Calendar** — `confirmPlan()` giờ đẩy các buổi học đã confirm lên Google Calendar (`lib/calendar/push.ts`), gắn `gcal_event_id` (migration 0011). OAuth scope đổi từ `calendar.readonly` sang `calendar.events`; **người dùng đã kết nối Google trước đó sẽ cần connect lại** (Google yêu cầu consent mới khi scope mở rộng — không phải lỗi, là hành vi bắt buộc của OAuth incremental consent).
+
+Toàn bộ đã qua `npx tsc --noEmit` + `eslint` + `vitest run` (144 test, tăng từ 121) sau mỗi bước, cộng xác minh trực tiếp trên trình duyệt với tài khoản thật.
+
+## 9. Rà soát cấp senior (sau khi xong cả 4 đợt)
+
+**Lỗi thực sự tìm thấy và đã sửa trong lúc code Dark Mode** (không phải lý thuyết — bắt được qua screenshot, không phải đọc code):
+- `--ink` ban đầu được dùng vừa làm màu chữ chính (cần đổi màu theo theme) vừa làm màu nền đặc cho sidebar/nút/HUD (phải luôn tối, không đổi theo theme) — cùng một token cho hai vai trò xung đột nhau khiến sidebar/nút bị "biến mất" (chữ sáng trên nền sáng) khi bật dark mode. Sửa bằng cách tách `--ink` (cố định) khỏi `--foreground` (đổi theo theme), rồi rà lại từng chỗ `bg-lime`/`bg-mint` có chữ đè trực tiếp lên (không qua `bg-card` lồng bên trong) để đảm bảo dùng đúng token cố định.
+- Card "Required average" (`ForecastCard`) và ô "Focus" trong Workload Risk dùng cặp màu nhạt (`*-tint`) + chữ đậm (`*-text`) được tính contrast riêng cho nền sáng (Phase 11 a11y) — nếu chỉ làm tối riêng nền tint mà giữ nguyên màu chữ tối thì chữ gần như biến mất. Quyết định: nhóm màu accent (mint/coral/tangerine) giữ nguyên sắc thái sáng ở cả 2 theme thay vì cố tối hoá nửa vời.
+
+**Góp ý nên làm tiếp** (ưu tiên theo giá trị/công sức, chưa làm vì đã hết phạm vi 4 đợt):
+1. ⭐⭐⭐ **Test E2E cho các tính năng mới** — F-03/F-06/F-01/export/learning-stats/calendar-push hiện chỉ có unit test cho phần logic thuần + xác minh tay qua Playwright script một lần; chưa có trong bộ `tests/e2e/*.spec.ts` chính thức nên không tự động chạy lại ở CI.
+2. ⭐⭐ **`focus_sessions.assignment_id` nên là `ON DELETE SET NULL`** thay vì `CASCADE` (đã ghi nhận ở §7) — vẫn chưa sửa, và giờ có thêm rủi ro tương tự với `study_sessions.gcal_event_id`: xoá một assignment gắn với session đã push lên Google sẽ không tự xoá event bên Google, để lại một sự kiện "rác" vĩnh viễn trên lịch người dùng.
+3. ⭐⭐ **Google Calendar push chưa xử lý huỷ/xoá** — nếu người dùng xoá một `study_sessions` đã push (hiện tại chỉ có thể xoá khi plan còn `draft`, tức là trước khi push, nên chưa phải lỗi thật — nhưng nếu sau này thêm tính năng "huỷ 1 buổi học đã confirm" thì phải nhớ xoá event Google tương ứng bằng `gcal_event_id` đã lưu).
+4. ⭐ **CSV export không escape BOM cho Excel tiếng Việt** — file mở trực tiếp bằng Excel có thể hiển thị sai dấu tiếng Việt (thiếu UTF-8 BOM ở đầu file). Sửa nhanh: thêm `﻿` vào đầu response CSV.
+5. ⭐ **Learning stats' biểu đồ chỉ đọc được khi hover/nhìn số** — không có tooltip hiện số phút khi hover từng cột như `GpaTrendChart` (vốn hiện số ngay trên cột); nên đồng bộ hoá 2 chart cho nhất quán.
+6. ⭐ **Predicted grade chưa tính đến assignment quá hạn/archived đã có điểm** — `PredictedGrades` chỉ lấy assignment đang hoạt động (`archived_at is null`); nếu học kỳ kết thúc và mọi assignment đều bị archive, card này sẽ biến mất dù dữ liệu điểm vẫn còn ý nghĩa tổng kết.
+
+Không phát hiện lỗi runtime/console error nào mới trong toàn bộ 4 đợt (0 lỗi qua các lần xác minh Playwright).

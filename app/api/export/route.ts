@@ -85,7 +85,9 @@ export async function GET(request: NextRequest) {
       rows as unknown as Record<string, unknown>[],
       columns as unknown as string[],
     );
-    return new NextResponse(csv, {
+    // UTF-8 BOM: without it, Excel guesses the wrong codepage and mangles
+    // Vietnamese diacritics on open, even though the bytes are valid UTF-8.
+    return new NextResponse("﻿" + csv, {
       headers: {
         "Content-Type": "text/csv; charset=utf-8",
         "Content-Disposition": `attachment; filename="unipilot-${typeParam}.csv"`,
