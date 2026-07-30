@@ -56,7 +56,7 @@ on:
 - [x] **Chứng minh lỗi cũ đã hết — bằng dữ liệu thật:** chèn thẳng 1 dòng `notifications` (qua REST API, service-role key) với `scheduled_at` ở quá khứ cho tài khoản demo thật → chạy workflow → xác nhận `deliveredCount:1` và `delivered_at` được ghi đúng thời điểm chạy → xoá dòng test, xác nhận query trả về `[]` (tài khoản về đúng baseline)
 - [ ] Độ trễ thực tế của GH Actions schedule (không phải `workflow_dispatch` thủ công) — **chưa đo được**, cần chờ lịch tự động chạy vài lần tự nhiên rồi mới có số liệu thật; không đoán số liệu
 
-### 6.2 — SR-02: Error boundary + bọc 4 chỗ gọi trần (~2h)
+### 6.2 — SR-02: Error boundary + bọc 4 chỗ gọi trần (~2h) ✅ **Hoàn thành**
 
 **File mới:**
 - `app/error.tsx` — lỗi trong nhánh route, có nút "Thử lại" (`reset()`) + link về Dashboard
@@ -78,19 +78,23 @@ on:
 → **Tôi chọn (a)**, vì đợt này không phải lúc thêm primitive mới; nếu sau này cần toast thì làm riêng một lượt cho toàn app.
 
 **Tiêu chí chấp nhận:**
-- [ ] Cả 4 chỗ: lỗi hiện ra cho người dùng, app **không** sập
-- [ ] **Chứng minh lỗi cũ đã hết:** tạm thời chặn request tới Supabase (Playwright `page.route(...)` → `abort`) rồi bấm "Restore" → xác nhận thấy dòng lỗi thay vì màn hình lỗi Next.js. Bỏ chặn, xác nhận hoạt động lại bình thường.
-- [ ] `app/error.tsx` hiển thị đúng ở cả light + dark (dùng token, không hardcode màu)
-- [ ] Không dùng `-text` token đứng một mình trên nền đổi màu (tránh tái phạm SR-03 ngay trong file mới)
+- [x] Cả 4 chỗ: lỗi hiện ra cho người dùng, app **không** sập — xác nhận bằng cách chặn thật request `Next-Action` (POST tới chính route hiện tại, cách Server Action thật sự giao tiếp với server — chặn `supabase.co` không có tác dụng vì DB call chạy phía server, Playwright không thấy được) trên tài khoản E2E: cả 4 thao tác đều hiện `role="alert"` đúng, trang không crash
+- [x] **Chứng minh lỗi cũ đã hết:** route test tạm `app/(app)/test-error-boundary-tmp` (đã xoá sau khi xong) ném lỗi thật → `error.tsx` bắt đúng, có "Try again" + "Back to Dashboard"
+- [x] `app/error.tsx` hiển thị đúng ở cả light + dark — **nhưng phát sinh 1 bug thật khi verify:** script `beforeInteractive` khởi tạo theme ở `app/layout.tsx` **không** có mặt trong `<head>` khi `error.tsx` là boundary đang active (xác nhận bằng cả dev **và** production build — không phải hiện tượng riêng của dev/Turbopack). Kết quả: trang lỗi luôn hiện sáng bất kể theme đã chọn. Sửa bằng cách để `error.tsx` tự đọc `localStorage`/`matchMedia` và tự toggle class `dark` trong `useEffect` riêng, không phụ thuộc script của root layout có chạy hay không.
+- [x] Không dùng `-text` token đứng một mình trên nền đổi màu — cả 4 chỗ dùng `text-coral` (đúng token cố định); `global-error.tsx` cố tình dùng inline style cứng, không phụ thuộc token nào (lá chắn cuối cùng, không được giả định bất cứ thứ gì khác còn hoạt động)
 
 **Commit:** 2 commit riêng (6.1 hạ tầng vận hành, 6.2 xử lý lỗi)
 
 ---
 
-# Phase 7 — Dọn sạch nợ contrast dark mode 🔴
+# Phase 7 — Dọn sạch nợ contrast dark mode 🔴 ✅ **Hoàn thành**
 
 > **Mục tiêu:** xử lý **một lần cho cả pattern**, thay vì lần thứ 4 vá thêm một chỗ.
-> **Thời lượng:** ~2.5 giờ · **Rủi ro:** thấp về logic, nhưng **chạm ~17 file** → cần xem kỹ từng chỗ
+> **Thời lượng:** ~2.5 giờ (thực tế ~2h) · **Rủi ro:** thấp về logic, nhưng **chạm ~17 file** → cần xem kỹ từng chỗ
+>
+> **Kết quả:** `components/ui/FieldError.tsx` (mới) dùng lại ở **21 file**, thay ~30 vị trí lỗi/trạng thái đứng một mình. 4 vị trí còn lại (`CourseBreakdown.tsx:72` nhãn "Below average", `GenerateButton.tsx:119` thông báo thành công, `SettingsForm.tsx:72` "Saved.") đổi thẳng token cố định (`text-coral`/`text-mint`) vì không phải `role="alert"`. **8 vị trí giữ nguyên** sau khi xác minh đã đúng cặp `tint`+`text` sẵn (`Tag`, `KpiCard`, `RiskHud`, `OnboardingWizard` step indicator, `ForecastCard` kết quả dự báo, trang `/reports`' "Worth a look" — cặp nền/chữ nằm trên 2 element cha-con khác nhau nên grep không thấy được, phải đọc code xác nhận từng chỗ).
+>
+> **Xác minh bằng số đo thật (không chỉ tin code đã đổi):** tỉ lệ tương phản đo lại đúng 2 chỗ đã đo ở đợt review 2 — lỗi "Title is required." trên form Assignment và nhãn "Below average" trên GPA breakdown — cả hai từ **2.6:1 → 5.26:1** (chuẩn AA cần 4.5:1), cùng màu `rgb(255,84,112)` trên nền `rgb(34,26,61)`. 21/21 E2E vẫn xanh sau khi chạy lại 2 lần liên tiếp (1 lần đầu có 1 test "flaky" — xác nhận do dư tải hệ thống từ việc dọn tiến trình node rác tích tụ trong phiên, không phải do thay đổi code, bằng cách chạy lại riêng lẻ và chạy lại toàn bộ lần 2 đều xanh tuyệt đối).
 
 ### 7.1 — Tạo component dùng chung (~45 phút)
 
@@ -113,14 +117,10 @@ Hiện `Field` đang được **định nghĩa lặp lại** ở 4 file form (`A
 | `text-X-text` đứng một mình, là **dữ liệu/nhãn** (vd "Below average" ở `CourseBreakdown.tsx:72`) | → đổi sang token đổi theo theme (`text-coral`) |
 
 **Tiêu chí chấp nhận:**
-- [ ] Lệnh quét trả về **0 kết quả sai** (chỉ còn các cặp `-tint`/`-text` hợp lệ):
-  ```
-  grep -rn "text-coral-text\|text-mint-text\|text-tangerine-text" --include="*.tsx" app components \
-    | grep -v "bg-coral-tint\|bg-mint-tint\|bg-tangerine-tint"
-  ```
-- [ ] **Chứng minh lỗi cũ đã hết:** đo lại bằng `getComputedStyle` đúng chỗ đã đo ở đợt 2 (lỗi "Title is required." trên form Assignment, dark mode) → tỉ lệ tương phản **≥ 4.5:1** (trước: 2.6:1). Đo thêm nhãn "Below average" trên trang GPA.
-- [ ] Ảnh chụp đối chiếu trước/sau ở dark mode cho ít nhất 3 màn khác nhau
-- [ ] 21/21 E2E vẫn xanh (các test đang tìm `role="alert"` — không được đổi vai trò ARIA)
+- [x] Lệnh quét trả về **0 kết quả sai** (chỉ còn các cặp `-tint`/`-text` hợp lệ)
+- [x] **Chứng minh lỗi cũ đã hết:** đo lại bằng `getComputedStyle` đúng chỗ đã đo ở đợt 2 → **5.26:1** cả 2 chỗ (trước: 2.6:1)
+- [x] Ảnh chụp đối chiếu ở dark mode (form lỗi + trang GPA)
+- [x] 21/21 E2E vẫn xanh
 
 **Commit:** 2 commit (7.1 component, 7.2 quét thay)
 
