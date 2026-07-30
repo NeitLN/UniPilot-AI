@@ -76,6 +76,37 @@ export function gpaBySemester(
     .sort((a, b) => a.semester.localeCompare(b.semester));
 }
 
+export interface ChartDomain {
+  min: number;
+  max: number;
+}
+
+/**
+ * UX-01 (docs/PRODUCT_REVIEW.md): a trend chart scaled against the full
+ * 0-4.0 range makes a real 3.25 -> 3.57 improvement look like a flat line —
+ * only ~8% of the chart's height. Compressing the axis to just past the
+ * data (±0.3, clamped to the valid GPA range) makes the same swing fill
+ * most of the chart instead.
+ *
+ * Deliberately falls back to the full [0, 4] range — instead of
+ * compressing — whenever there's no real spread to show: one semester
+ * alone has no trend to exaggerate, and every semester landing on the same
+ * GPA would otherwise divide by a zero-width domain.
+ */
+export function gpaChartDomain(points: SemesterGpaPoint[]): ChartDomain {
+  if (points.length <= 1) return { min: 0, max: 4 };
+
+  const values = points.map((p) => p.gpa);
+  const rawMin = Math.min(...values);
+  const rawMax = Math.max(...values);
+  if (rawMin === rawMax) return { min: 0, max: 4 };
+
+  return {
+    min: Math.max(0, Number((rawMin - 0.3).toFixed(2))),
+    max: Math.min(4, Number((rawMax + 0.3).toFixed(2))),
+  };
+}
+
 // F-03 (future_update.md) — rolling an assignment's `weight` (previously
 // stored but never used anywhere) up into a predicted course grade.
 

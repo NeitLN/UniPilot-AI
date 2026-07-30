@@ -74,7 +74,7 @@ export async function GpaContent() {
         <CourseBreakdown grades={grades} courses={courses} overallGpa={overallGpa} />
 
         <div className="flex flex-col gap-3.5">
-          <GpaTrendChart points={trendPoints} />
+          <GpaTrendChart points={trendPoints} targetGpa={profile?.target_gpa ?? null} />
           <PredictedGrades courses={predictedCourses} />
           <ForecastCard
             initialTargetGpa={profile?.target_gpa ?? 3.6}

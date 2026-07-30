@@ -4,9 +4,10 @@ import { GpaTrendChart } from "@/components/gpa/GpaTrendChart";
 
 export async function GpaTrendCard() {
   const supabase = await createClient();
-  const { data } = await supabase
-    .from("grades")
-    .select("semester, grade_point, credit_hours");
+  const [{ data }, { data: profile }] = await Promise.all([
+    supabase.from("grades").select("semester, grade_point, credit_hours"),
+    supabase.from("profiles").select("target_gpa").maybeSingle(),
+  ]);
 
   const rows = (data ?? []).map((g) => ({
     semester: g.semester,
@@ -14,7 +15,7 @@ export async function GpaTrendCard() {
     creditHours: g.credit_hours,
   }));
 
-  return <GpaTrendChart points={gpaBySemester(rows)} />;
+  return <GpaTrendChart points={gpaBySemester(rows)} targetGpa={profile?.target_gpa ?? null} />;
 }
 
 export function GpaTrendCardSkeleton() {

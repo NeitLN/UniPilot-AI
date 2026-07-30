@@ -4,12 +4,14 @@ import {
   estimateGradePoint,
   gpa,
   gpaBySemester,
+  gpaChartDomain,
   gpaContribution,
   predictedCourseScore,
   qualityPoints,
   requiredAverage,
   validateGrade,
   type GradeLike,
+  type SemesterGpaPoint,
 } from "@/lib/rules/gpa";
 
 describe("qualityPoints", () => {
@@ -168,5 +170,35 @@ describe("estimateGradePoint", () => {
   it("clamps to the 0-4.0 range", () => {
     expect(estimateGradePoint(-10)).toBe(0);
     expect(estimateGradePoint(150)).toBe(4);
+  });
+});
+
+describe("gpaChartDomain", () => {
+  const point = (semester: string, gpaValue: number): SemesterGpaPoint => ({
+    semester,
+    gpa: gpaValue,
+    credits: 15,
+  });
+
+  it("compresses to ±0.3 around the real min/max when there's a spread", () => {
+    const domain = gpaChartDomain([point("242", 3.25), point("251", 3.49), point("252", 3.57)]);
+    expect(domain).toEqual({ min: 2.95, max: 3.87 });
+  });
+
+  it("clamps the compressed range to [0, 4]", () => {
+    expect(gpaChartDomain([point("242", 0.1), point("251", 0.2)])).toEqual({ min: 0, max: 0.5 });
+    expect(gpaChartDomain([point("242", 3.9), point("251", 3.95)])).toEqual({ min: 3.6, max: 4 });
+  });
+
+  it("falls back to the full range for a single semester — nothing to compress", () => {
+    expect(gpaChartDomain([point("253", 3.5)])).toEqual({ min: 0, max: 4 });
+  });
+
+  it("falls back to the full range when every semester has the same GPA", () => {
+    expect(gpaChartDomain([point("242", 3.5), point("251", 3.5)])).toEqual({ min: 0, max: 4 });
+  });
+
+  it("falls back to the full range for an empty list", () => {
+    expect(gpaChartDomain([])).toEqual({ min: 0, max: 4 });
   });
 });
