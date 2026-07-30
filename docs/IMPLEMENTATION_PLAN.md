@@ -1,8 +1,8 @@
 # Kế hoạch triển khai — từ PRODUCT_REVIEW.md
 
 **Nguồn:** [`docs/PRODUCT_REVIEW.md`](./PRODUCT_REVIEW.md) (30/07/2026)
-**Trạng thái nền:** `main` @ `97acc0e` — typecheck sạch, lint sạch, 144 unit test + 12 E2E test xanh
-**Tổng:** 5 phase, ~22 giờ · **Phase 1: ✅ Hoàn thành** (xem §Phase 1 để biết chi tiết + phát hiện phát sinh)
+**Trạng thái nền:** `main` @ `378098d` — typecheck sạch, lint sạch, 144 unit test + 14 E2E test xanh
+**Tổng:** 5 phase, ~22 giờ · **Phase 1 + 2: ✅ Hoàn thành** (xem §Phase tương ứng để biết chi tiết + phát hiện phát sinh)
 
 ---
 
@@ -81,8 +81,11 @@ Sau khi đọc kỹ code để lập kế hoạch, có 2 con số trong `PRODUCT
 
 > **Mục tiêu:** vá lỗ hổng chức năng lớn nhất. `courses` là thực thể xương sống nhưng chỉ tạo được, không sửa/xoá.
 > **Thời lượng:** ~4 giờ · **Rủi ro:** trung bình (đụng tới dữ liệu ảnh hưởng GPA)
-
-**Không cần migration** — bảng `courses` đã đủ cột.
+> **✅ Hoàn thành** — commit [`378098d`](https://github.com/NeitLN/UniPilot-AI/commit/378098d). 14/14 E2E, 144/144 unit test xanh; xác minh trực tiếp trên tài khoản demo (mobile bottom nav 8 cột vẫn đạt 45.5×44px, không tràn ngang, cả 2 theme).
+>
+> **Đính chính AC-5 sau khi đọc kỹ schema:** `grades.credit_hours` là trường **nhập riêng, độc lập hoàn toàn** với `courses.credits` — GPA hiện tại không hề đọc số tín chỉ của môn ở bất cứ đâu. Cảnh báo "GPA sẽ đổi từ X thành Y" như review đề xuất sẽ là **thông tin bịa** vì thay đổi đó không có thật. Đã thay bằng ghi chú trung thực: môn đã có điểm sẽ hiện "số tín chỉ ở đây không ảnh hưởng điểm đã ghi nhận" thay vì tính GPA giả.
+>
+> **Phát hiện phát sinh:** `grades.course_id` là `not null ... on delete cascade` ở tầng DB — xoá thẳng một môn đang có điểm sẽ **âm thầm xoá theo mọi điểm số** của môn đó. `deleteCourse` phải kiểm tra usage **trước khi** chạm tới lệnh xoá, không được dựa vào DB tự chặn. Ngoài ra, lúc xác minh dialog xoá-bị-chặn trên tài khoản thật, phát hiện `onClick={onClose}` trên các Link "Xem thêm" (điều hướng sang trang khác) đua với chính điều hướng của Link và **chặn mất navigation** — đã bỏ, vì điều hướng sang route khác thì cả dialog lẫn trang hiện tại tự unmount, không cần đóng dialog thủ công.
 
 ### 2.1 — Server actions
 
