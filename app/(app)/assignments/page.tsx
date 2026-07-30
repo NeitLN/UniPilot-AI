@@ -102,7 +102,7 @@ export default async function AssignmentsPage({
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-3xl font-semibold text-ink">
+          <h1 className="font-display text-3xl font-semibold text-foreground">
             Assignments
           </h1>
           <p className="mt-1 text-sm font-semibold text-ink-2">
@@ -116,7 +116,7 @@ export default async function AssignmentsPage({
         <AssignmentFilters courses={courses} />
       </div>
 
-      <div className="mt-4 rounded-card bg-white p-5">
+      <div className="mt-4 rounded-card bg-card p-5">
         {error && (
           <p className="text-sm font-semibold text-coral-text">
             Couldn&rsquo;t load assignments: {error.message}

@@ -1,8 +1,103 @@
 @import "tailwindcss";
 
+/* F-06 — dark mode. Every token below is a plain custom property in :root
+   (not baked into @theme), then re-pointed under `.dark`; `@theme inline`
+   tells Tailwind to keep referencing the runtime custom property instead of
+   inlining today's value, so every `bg-canvas`/`text-foreground`/etc. utility
+   already used across the app repaints for free — no `dark:` variant needed
+   on every element. The `.dark` class is applied to <html> by the
+   beforeInteractive script in app/layout.tsx (reads localStorage, falls
+   back to prefers-color-scheme) so there's no flash of the wrong theme. */
 :root {
   --background: #f2f0fb;
   --foreground: #1d1338;
+
+  --violet: #6c3cf5;
+  --violet-deep: #5a2fe0;
+  --violet-soft: #8b62ff;
+  --violet-tint: #ede7ff;
+
+  --lime: #d8ff4a;
+  --lime-deep: #b8e62e;
+  --lime-tint: #eafbcf;
+
+  /* --ink is a fixed dark-violet solid fill (buttons, HUD/sidebar panels
+     paired with white text) — it does NOT flip under `.dark`, unlike every
+     other token here. Primary body/heading text uses --foreground instead,
+     which does flip (`text-foreground`, not `text-ink`). */
+  --ink: #1d1338;
+  --ink-2: #4a4460;
+  /* Darkened from an earlier #8a83a3 — that only hit 3.58:1 on white,
+     below WCAG AA's 4.5:1 for normal text (Lighthouse a11y audit, Phase 11). */
+  --ink-3: #716b86;
+
+  --coral: #ff5470;
+  --coral-tint: #ffe7eb;
+  --coral-text: #c2003a;
+  /* Solid-fill companion to --coral for large surfaces carrying small
+     white text (KPI cards, badges) — plain white-on-coral only reaches
+     ~3.1:1 even at full opacity, never 4.5:1, regardless of text opacity. */
+  --coral-deep: #bf3f54;
+
+  --tangerine: #ffb020;
+  --tangerine-tint: #fff1d6;
+  /* Darkened from an earlier #8a5300 — that paired with solid --tangerine
+     was only 3.46:1 (below 4.5:1); still passes comfortably against
+     --tangerine-tint, which has far more headroom either way. */
+  --tangerine-text: #613a00;
+
+  --mint: #22dda6;
+  --mint-tint: #defbf1;
+  --mint-text: #08372a;
+
+  --sky: #45c2ff;
+
+  --canvas: #f2f0fb;
+  --card: #ffffff;
+  --line: #f0eef7;
+  --border-cb: #dcd8ec;
+  --border-subtle: rgb(0 0 0 / 10%);
+  --border-subtle-2: rgb(0 0 0 / 5%);
+
+  /* Dark-surface-only tones (sidebar, Risk HUD, Pilo's plan) — DESIGN.md §2.1.
+     These panels are deliberately dark in both themes, so they don't change
+     under `.dark`. */
+  --dusk-text: #b7acd8;
+  --dusk-muted: #9c90c4;
+  --dusk-label: #6c5f94;
+  --dusk-border: #33245c;
+  --dusk-panel: #2a1d4d;
+  --dusk-seg: #382a5e;
+  --dusk-hud: #a79ccb;
+  --dusk-btn: #c9bee8;
+}
+
+.dark {
+  --background: #150f28;
+  --foreground: #ece8fa;
+
+  /* violet-tint is safe to darken because its paired text (--violet, a
+     bright saturated purple) was never a dark "designed for light bg" shade
+     to begin with. --lime-tint/--coral-tint/--tangerine-tint/--mint-tint
+     stay at their light-mode values on purpose: their paired *-text tokens
+     (mint-text, coral-text, tangerine-text) are deliberately dark shades
+     picked for contrast against a light tint (Phase 11 a11y pass) — flipping
+     the tint alone without also redesigning the text color collapses that
+     contrast to near-zero, so these small badge/callout chips just stay
+     light pastel in both themes instead. */
+  --violet-tint: #2c2350;
+
+  /* --ink itself stays fixed (see :root comment below) — only the
+     secondary/tertiary text shades flip. */
+  --ink-2: #b7acd8;
+  --ink-3: #9c90c4;
+
+  --canvas: #150f28;
+  --card: #221a3d;
+  --line: #33285a;
+  --border-cb: #3a2c5e;
+  --border-subtle: rgb(255 255 255 / 12%);
+  --border-subtle-2: rgb(255 255 255 / 8%);
 }
 
 @theme inline {
@@ -13,56 +108,50 @@
   --font-sans: var(--font-nunito);
 
   /* UniPilot AI design tokens — see docs/ROADMAP.md §3 */
-  --color-violet: #6c3cf5;
-  --color-violet-deep: #5a2fe0;
-  --color-violet-soft: #8b62ff;
-  --color-violet-tint: #ede7ff;
+  --color-violet: var(--violet);
+  --color-violet-deep: var(--violet-deep);
+  --color-violet-soft: var(--violet-soft);
+  --color-violet-tint: var(--violet-tint);
 
-  --color-lime: #d8ff4a;
-  --color-lime-deep: #b8e62e;
-  --color-lime-tint: #eafbcf;
+  --color-lime: var(--lime);
+  --color-lime-deep: var(--lime-deep);
+  --color-lime-tint: var(--lime-tint);
 
-  --color-ink: #1d1338;
-  --color-ink-2: #4a4460;
-  /* Darkened from an earlier #8a83a3 — that only hit 3.58:1 on white,
-     below WCAG AA's 4.5:1 for normal text (Lighthouse a11y audit, Phase 11). */
-  --color-ink-3: #716b86;
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
 
-  --color-coral: #ff5470;
-  --color-coral-tint: #ffe7eb;
-  --color-coral-text: #c2003a;
-  /* Solid-fill companion to --color-coral for large surfaces carrying small
-     white text (KPI cards, badges) — plain white-on-coral only reaches
-     ~3.1:1 even at full opacity, never 4.5:1, regardless of text opacity. */
-  --color-coral-deep: #bf3f54;
+  --color-coral: var(--coral);
+  --color-coral-tint: var(--coral-tint);
+  --color-coral-text: var(--coral-text);
+  --color-coral-deep: var(--coral-deep);
 
-  --color-tangerine: #ffb020;
-  --color-tangerine-tint: #fff1d6;
-  /* Darkened from an earlier #8a5300 — that paired with solid --color-tangerine
-     was only 3.46:1 (below 4.5:1); still passes comfortably against
-     --color-tangerine-tint, which has far more headroom either way. */
-  --color-tangerine-text: #613a00;
+  --color-tangerine: var(--tangerine);
+  --color-tangerine-tint: var(--tangerine-tint);
+  --color-tangerine-text: var(--tangerine-text);
 
-  --color-mint: #22dda6;
-  --color-mint-tint: #defbf1;
-  --color-mint-text: #08372a;
+  --color-mint: var(--mint);
+  --color-mint-tint: var(--mint-tint);
+  --color-mint-text: var(--mint-text);
 
-  --color-sky: #45c2ff;
+  --color-sky: var(--sky);
 
-  --color-canvas: #f2f0fb;
-  --color-card: #ffffff;
-  --color-line: #f0eef7;
-  --color-border-cb: #dcd8ec;
+  --color-canvas: var(--canvas);
+  --color-card: var(--card);
+  --color-line: var(--line);
+  --color-border-cb: var(--border-cb);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-subtle-2: var(--border-subtle-2);
 
   /* Dark-surface-only tones (sidebar, Risk HUD, Pilo's plan) — DESIGN.md §2.1 */
-  --color-dusk-text: #b7acd8;
-  --color-dusk-muted: #9c90c4;
-  --color-dusk-label: #6c5f94;
-  --color-dusk-border: #33245c;
-  --color-dusk-panel: #2a1d4d;
-  --color-dusk-seg: #382a5e;
-  --color-dusk-hud: #a79ccb;
-  --color-dusk-btn: #c9bee8;
+  --color-dusk-text: var(--dusk-text);
+  --color-dusk-muted: var(--dusk-muted);
+  --color-dusk-label: var(--dusk-label);
+  --color-dusk-border: var(--dusk-border);
+  --color-dusk-panel: var(--dusk-panel);
+  --color-dusk-seg: var(--dusk-seg);
+  --color-dusk-hud: var(--dusk-hud);
+  --color-dusk-btn: var(--dusk-btn);
 
   --radius-card: 30px;
   --radius-ctl: 16px;

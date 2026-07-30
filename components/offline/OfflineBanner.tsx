@@ -81,7 +81,7 @@ export function OfflineBanner() {
   return (
     <div
       role="status"
-      className="border-b border-black/5 bg-tangerine-tint px-4 py-2 text-center text-[12.5px] font-bold text-tangerine-text"
+      className="border-b border-border-subtle-2 bg-tangerine-tint px-4 py-2 text-center text-[12.5px] font-bold text-tangerine-text"
     >
       {message}
     </div>

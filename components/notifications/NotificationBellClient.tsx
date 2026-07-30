@@ -58,7 +58,7 @@ export function NotificationBellClient({
           unreadCount > 0 ? `Notifications, ${unreadCount} unread` : "Notifications"
         }
         onClick={() => setOpen((v) => !v)}
-        className="relative flex h-11 w-11 items-center justify-center rounded-full bg-line text-ink hover:bg-[#E6E2F2]"
+        className="relative flex h-11 w-11 items-center justify-center rounded-full bg-line text-foreground hover:bg-[#E6E2F2]"
       >
         <BellIcon />
         {unreadCount > 0 && (
@@ -76,9 +76,9 @@ export function NotificationBellClient({
             onClick={() => setOpen(false)}
             className="fixed inset-0 z-40 cursor-default"
           />
-          <div className="absolute right-0 z-50 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-card bg-white p-3 shadow-xl">
+          <div className="absolute right-0 z-50 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-card bg-card p-3 shadow-xl">
             <div className="flex items-center justify-between px-1">
-              <p className="font-display text-sm font-bold text-ink">Notifications</p>
+              <p className="font-display text-sm font-bold text-foreground">Notifications</p>
               {unreadCount > 0 && (
                 <button
                   type="button"
@@ -105,7 +105,7 @@ export function NotificationBellClient({
                         n.readAt ? "bg-transparent" : "bg-violet-tint"
                       }`}
                     >
-                      <p className="truncate text-[12.5px] font-bold text-ink">{n.title}</p>
+                      <p className="truncate text-[12.5px] font-bold text-foreground">{n.title}</p>
                       {n.body && (
                         <p className="mt-0.5 truncate text-[11px] font-semibold text-ink-3">
                           {n.body}

@@ -117,7 +117,7 @@ export function AssignmentForm({
       onSubmit={handleSubmit}
       className="flex flex-col gap-3.5"
     >
-      <h2 className="font-display text-lg font-bold text-ink">
+      <h2 className="font-display text-lg font-bold text-foreground">
         {isEdit ? "Edit assignment" : "New assignment"}
       </h2>
 
@@ -281,8 +281,8 @@ export function AssignmentForm({
 }
 
 function inputClass(hasError: boolean) {
-  return `w-full rounded-ctl border px-3.5 py-2.5 text-sm text-ink outline-none focus-visible:ring-2 focus-visible:ring-violet ${
-    hasError ? "border-coral" : "border-black/10 focus:border-violet"
+  return `w-full rounded-ctl border px-3.5 py-2.5 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-violet ${
+    hasError ? "border-coral" : "border-border-subtle focus:border-violet"
   }`;
 }
 

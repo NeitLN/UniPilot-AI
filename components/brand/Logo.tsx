@@ -13,12 +13,12 @@ export interface LogoProps {
  */
 export function Logo({ tone = "light", size = 40, className }: LogoProps) {
   const aiColor = tone === "light" ? "text-lime" : "text-violet";
-  const wordColor = tone === "light" ? "text-white" : "text-ink";
+  const wordColor = tone === "light" ? "text-white" : "text-foreground";
 
   return (
     <div className={`flex items-center gap-2.5 ${className ?? ""}`}>
       <span
-        className="flex items-center justify-center rounded-2xl bg-white shrink-0"
+        className="flex items-center justify-center rounded-2xl bg-card shrink-0"
         style={{ width: size, height: size }}
       >
         <Image

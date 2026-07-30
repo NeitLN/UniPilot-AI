@@ -46,13 +46,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
       <div className="flex flex-1 flex-col min-w-0">
         <OfflineBanner />
-        <header className="flex items-center justify-between gap-3 border-b border-black/5 bg-card px-6 py-4 md:hidden">
+        <header className="flex items-center justify-between gap-3 border-b border-border-subtle-2 bg-card px-6 py-4 md:hidden">
           <Logo tone="dark" size={32} />
           <div className="flex items-center gap-2">
             <Link
               href="/settings"
               aria-label="Settings"
-              className="flex h-11 w-11 items-center justify-center rounded-full bg-line text-ink hover:bg-[#E6E2F2]"
+              className="flex h-11 w-11 items-center justify-center rounded-full bg-line text-foreground hover:bg-[#E6E2F2]"
             >
               <SettingsIcon />
             </Link>
@@ -62,7 +62,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </div>
         </header>
 
-        <div className="hidden items-center justify-end border-b border-black/5 bg-card px-7 py-3 md:flex">
+        <div className="hidden items-center justify-end border-b border-border-subtle-2 bg-card px-7 py-3 md:flex">
           <Suspense fallback={null}>
             <NotificationBell />
           </Suspense>
@@ -77,7 +77,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </main>
 
         <nav
-          className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-7 gap-0.5 border-t border-black/5 bg-card px-1.5 py-2 md:hidden"
+          className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-7 gap-0.5 border-t border-border-subtle-2 bg-card px-1.5 py-2 md:hidden"
           aria-label="Mobile"
         >
           <Link

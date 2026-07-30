@@ -21,8 +21,8 @@ export function PredictedGrades({ courses }: { courses: PredictedGradeCourse[] }
   if (rows.length === 0) return null;
 
   return (
-    <div className="rounded-card border border-black/5 bg-white p-4">
-      <h2 className="font-display text-sm font-bold text-ink">Predicted grades</h2>
+    <div className="rounded-card border border-border-subtle-2 bg-card p-4">
+      <h2 className="font-display text-sm font-bold text-foreground">Predicted grades</h2>
       <p className="mt-0.5 text-[11.5px] font-semibold text-ink-3">
         Rough estimate from graded assignments — not yet an official grade.
       </p>
@@ -30,7 +30,7 @@ export function PredictedGrades({ courses }: { courses: PredictedGradeCourse[] }
         {rows.map((r) => (
           <li key={r.id} className="flex items-center justify-between gap-3 text-sm">
             <span className="min-w-0 truncate font-semibold text-ink-2">{r.name}</span>
-            <span className="shrink-0 font-bold text-ink">
+            <span className="shrink-0 font-bold text-foreground">
               {r.predicted.toFixed(1)}% · ~{estimateGradePoint(r.predicted).toFixed(2)} GPA
             </span>
           </li>

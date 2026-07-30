@@ -46,7 +46,7 @@ export function Modal({ open, onClose, title, children, size = "md" }: ModalProp
         aria-label={title}
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
-        className={`w-full ${SIZE_CLASSES[size]} overscroll-contain rounded-card bg-white p-6 outline-none`}
+        className={`w-full ${SIZE_CLASSES[size]} overscroll-contain rounded-card bg-card p-6 outline-none`}
       >
         {children}
       </div>

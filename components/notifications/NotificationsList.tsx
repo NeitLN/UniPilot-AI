@@ -35,7 +35,7 @@ export function NotificationsList({
 
   if (notifications.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-2 rounded-card bg-white py-14 text-center">
+      <div className="flex flex-col items-center gap-2 rounded-card bg-card py-14 text-center">
         <Pilo mood="sleepy" size={72} />
         <p className="text-sm font-semibold text-ink-2">No notifications yet.</p>
         <p className="text-[12.5px] font-semibold text-ink-3">
@@ -47,7 +47,7 @@ export function NotificationsList({
   }
 
   return (
-    <div className="rounded-card bg-white p-4">
+    <div className="rounded-card bg-card p-4">
       {unreadCount > 0 && (
         <div className="flex items-center justify-between border-b border-line pb-3">
           <p className="text-[12.5px] font-semibold text-ink-2">
@@ -76,7 +76,7 @@ export function NotificationsList({
               }`}
             >
               <div className="flex items-start justify-between gap-3">
-                <p className="text-sm font-bold text-ink">{n.title}</p>
+                <p className="text-sm font-bold text-foreground">{n.title}</p>
                 {!n.readAt && (
                   <span className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-violet" />
                 )}

@@ -26,6 +26,8 @@ const TONE_TRACK: Record<KpiTone, string> = {
 };
 
 const TONE_FILL: Record<KpiTone, string> = {
+  // Solid white, not bg-card — these bars sit on a permanently-bright
+  // violet/coral card and must read as a light fill in both themes.
   violet: "bg-white",
   coral: "bg-white",
   mint: "bg-ink",

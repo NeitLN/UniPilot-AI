@@ -19,7 +19,7 @@ export async function GpaTrendCard() {
 
 export function GpaTrendCardSkeleton() {
   return (
-    <div className="animate-pulse rounded-card bg-white p-5">
+    <div className="animate-pulse rounded-card bg-card p-5">
       <div className="h-5 w-24 rounded-full bg-line" />
       <div className="mt-4 h-[120px] rounded-ctl bg-line" />
     </div>

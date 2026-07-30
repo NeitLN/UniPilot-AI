@@ -40,7 +40,7 @@ export function CourseForm({ onSaved, onCancel, compact }: CourseFormProps) {
   return (
     <form ref={formRef} action={formAction} className="flex flex-col gap-3.5">
       {!compact && (
-        <h2 className="font-display text-lg font-bold text-ink">New course</h2>
+        <h2 className="font-display text-lg font-bold text-foreground">New course</h2>
       )}
 
       <Field label="Course name" error={state.errors.name}>
@@ -117,8 +117,8 @@ export function CourseForm({ onSaved, onCancel, compact }: CourseFormProps) {
 }
 
 function inputClass(hasError: boolean) {
-  return `w-full rounded-ctl border px-3.5 py-2.5 text-sm text-ink outline-none focus-visible:ring-2 focus-visible:ring-violet ${
-    hasError ? "border-coral" : "border-black/10 focus:border-violet"
+  return `w-full rounded-ctl border px-3.5 py-2.5 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-violet ${
+    hasError ? "border-coral" : "border-border-subtle focus:border-violet"
   }`;
 }
 

@@ -42,8 +42,8 @@ export function CourseBreakdown({
   const hiddenCount = grades.length - visibleGrades.length;
 
   return (
-    <div className="rounded-card bg-white p-5">
-      <h2 className="font-display text-lg font-bold text-ink">Course breakdown</h2>
+    <div className="rounded-card bg-card p-5">
+      <h2 className="font-display text-lg font-bold text-foreground">Course breakdown</h2>
 
       {grades.length === 0 ? (
         <p className="mt-3 text-[12.5px] font-semibold text-ink-3">
@@ -69,7 +69,7 @@ export function CourseBreakdown({
                 return (
                   <tr key={g.id} className="border-b border-line last:border-b-0">
                     <td
-                      className={`py-2 pr-3 font-bold ${draggingDown ? "text-coral-text" : "text-ink"}`}
+                      className={`py-2 pr-3 font-bold ${draggingDown ? "text-coral-text" : "text-foreground"}`}
                     >
                       <span className="truncate">{g.courseName}</span>
                       {draggingDown && (
@@ -79,7 +79,7 @@ export function CourseBreakdown({
                       )}
                     </td>
                     <td className="py-2 pr-3 text-ink-3">{g.semester}</td>
-                    <td className="py-2 pr-3 text-right font-bold text-ink tabular-nums">
+                    <td className="py-2 pr-3 text-right font-bold text-foreground tabular-nums">
                       {g.gradePoint.toFixed(2)}
                     </td>
                     <td className="py-2 pr-3 text-right text-ink-3 tabular-nums">
@@ -181,7 +181,7 @@ function DeleteGradeDialog({
 
   return (
     <Modal open={open} onClose={onClose} title="Delete grade">
-      <h2 className="font-display text-lg font-bold text-ink">Delete this grade?</h2>
+      <h2 className="font-display text-lg font-bold text-foreground">Delete this grade?</h2>
       <p className="mt-2 text-sm font-semibold text-ink-2">
         {`"${grade.courseName}" (${grade.semester}) will be removed from your GPA calculation.`}
       </p>

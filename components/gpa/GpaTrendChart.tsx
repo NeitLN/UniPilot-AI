@@ -5,8 +5,8 @@ const CHART_HEIGHT = 120;
 export function GpaTrendChart({ points }: { points: SemesterGpaPoint[] }) {
   if (points.length === 0) {
     return (
-      <div className="rounded-card bg-white p-5">
-        <h2 className="font-display text-lg font-bold text-ink">GPA trend</h2>
+      <div className="rounded-card bg-card p-5">
+        <h2 className="font-display text-lg font-bold text-foreground">GPA trend</h2>
         <p className="mt-3 text-[12.5px] font-semibold text-ink-3">
           Enter grades across semesters to see your trend.
         </p>
@@ -15,8 +15,8 @@ export function GpaTrendChart({ points }: { points: SemesterGpaPoint[] }) {
   }
 
   return (
-    <div className="rounded-card bg-white p-5">
-      <h2 className="font-display text-lg font-bold text-ink">GPA trend</h2>
+    <div className="rounded-card bg-card p-5">
+      <h2 className="font-display text-lg font-bold text-foreground">GPA trend</h2>
       <div className="mt-4 flex items-end gap-3" style={{ height: CHART_HEIGHT }}>
         {points.map((p) => {
           const barHeight = Math.max(6, Math.round((p.gpa / 4) * CHART_HEIGHT));
@@ -26,7 +26,7 @@ export function GpaTrendChart({ points }: { points: SemesterGpaPoint[] }) {
               className="flex flex-1 flex-col items-center justify-end gap-1.5"
               style={{ height: CHART_HEIGHT }}
             >
-              <span className="text-[11px] font-bold text-ink tabular-nums">
+              <span className="text-[11px] font-bold text-foreground tabular-nums">
                 {p.gpa.toFixed(2)}
               </span>
               <div

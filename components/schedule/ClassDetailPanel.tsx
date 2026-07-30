@@ -71,7 +71,7 @@ export function ClassDetailPanel({
   return (
     <>
       <Modal open={open} onClose={onClose} title={block.title}>
-        <h2 className="font-display text-lg font-bold text-ink">{block.title}</h2>
+        <h2 className="font-display text-lg font-bold text-foreground">{block.title}</h2>
         <p className="mt-1 text-sm font-semibold text-ink-2">{timeRange}</p>
         <p className="mt-0.5 text-[12.5px] font-semibold text-ink-3">
           {block.location ?? "No location"} · {isManual ? "Manual" : "Google Calendar"}
@@ -98,7 +98,7 @@ export function ClassDetailPanel({
             defaultValue={block.courseId ?? ""}
             onChange={(e) => handleCourseChange(e.target.value)}
             disabled={pending}
-            className="w-full rounded-ctl border border-black/10 px-3.5 py-2.5 text-sm text-ink outline-none focus-visible:ring-2 focus-visible:ring-violet focus:border-violet disabled:opacity-60"
+            className="w-full rounded-ctl border border-border-subtle px-3.5 py-2.5 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-violet focus:border-violet disabled:opacity-60"
           >
             <option value="">No course linked</option>
             {courses.map((c) => (
@@ -126,7 +126,7 @@ export function ClassDetailPanel({
               {linkedAssignments.map((a) => (
                 <li
                   key={a.id}
-                  className="flex items-center justify-between rounded-ctl bg-line px-3 py-2 text-[12.5px] font-semibold text-ink"
+                  className="flex items-center justify-between rounded-ctl bg-line px-3 py-2 text-[12.5px] font-semibold text-foreground"
                 >
                   <span className="truncate">{a.title}</span>
                   <span className="shrink-0 text-ink-3">
@@ -217,7 +217,7 @@ function DeleteEventDialog({
 
   return (
     <Modal open={open} onClose={onClose} title="Delete event">
-      <h2 className="font-display text-lg font-bold text-ink">Delete event?</h2>
+      <h2 className="font-display text-lg font-bold text-foreground">Delete event?</h2>
       <p className="mt-2 text-sm font-semibold text-ink-2">
         {`"${block.title}" will be removed from your schedule. You can't undo this.`}
       </p>

@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { Fredoka, Nunito } from "next/font/google";
 import { TimezoneCookie } from "@/components/TimezoneCookie";
+import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 
 const fredoka = Fredoka({
@@ -46,8 +48,17 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${fredoka.variable} ${nunito.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col font-sans bg-canvas text-ink">
+      <head>
+        {/* F-06: must run before paint so the page never flashes light-then-dark. */}
+        <Script
+          id="theme-init"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }}
+        />
+      </head>
+      <body className="min-h-full flex flex-col font-sans bg-canvas text-foreground">
         <TimezoneCookie />
         {children}
       </body>

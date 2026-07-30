@@ -64,7 +64,7 @@ export async function GpaContent() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm font-semibold text-ink-2">
           Cumulative GPA:{" "}
-          <span className="font-bold text-ink">{overallGpa.toFixed(2)}</span> ·{" "}
+          <span className="font-bold text-foreground">{overallGpa.toFixed(2)}</span> ·{" "}
           {doneCredits} credits
         </p>
         <AddGradeButton courses={courses} />
@@ -95,10 +95,10 @@ export function GpaContentSkeleton() {
         <div className="h-11 w-32 animate-pulse rounded-ctl bg-ink/10" />
       </div>
       <div className="flex flex-col gap-3.5 lg:grid lg:grid-cols-[1.4fr_1fr] lg:items-start">
-        <div className="h-64 animate-pulse rounded-card bg-white" />
+        <div className="h-64 animate-pulse rounded-card bg-card" />
         <div className="flex flex-col gap-3.5">
-          <div className="h-40 animate-pulse rounded-card bg-white" />
-          <div className="h-40 animate-pulse rounded-card bg-white" />
+          <div className="h-40 animate-pulse rounded-card bg-card" />
+          <div className="h-40 animate-pulse rounded-card bg-card" />
         </div>
       </div>
     </>

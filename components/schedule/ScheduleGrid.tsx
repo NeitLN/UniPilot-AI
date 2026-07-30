@@ -65,7 +65,7 @@ function BlockCard({
       onClick={() => onSelect(block.id)}
       className="w-full rounded-ctl bg-line px-3 py-2 text-left hover:bg-[#E6E2F2]"
     >
-      <p className="truncate text-[12.5px] font-bold text-ink">{block.title}</p>
+      <p className="truncate text-[12.5px] font-bold text-foreground">{block.title}</p>
       {/* Formatted in the runtime's local timezone — expected to differ
           between SSR and hydration, not a real mismatch. */}
       <p
@@ -91,7 +91,7 @@ function DayList({
 }) {
   if (blocks.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-2 rounded-card bg-white py-10 text-center">
+      <div className="flex flex-col items-center gap-2 rounded-card bg-card py-10 text-center">
         <Pilo mood="sleepy" size={64} />
         <p className="text-[12.5px] font-semibold text-ink-2">
           No classes on this day.
@@ -101,7 +101,7 @@ function DayList({
   }
 
   return (
-    <div className="flex flex-col gap-2 rounded-card bg-white p-4">
+    <div className="flex flex-col gap-2 rounded-card bg-card p-4">
       {blocks.map((b) => (
         <button
           key={b.id}
@@ -121,7 +121,7 @@ function DayList({
             })}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-bold text-ink">{b.title}</p>
+            <p className="truncate text-sm font-bold text-foreground">{b.title}</p>
             <p className="truncate text-[11.5px] font-semibold text-ink-3">
               {b.location ?? "No location"}
               {b.courseName ? ` · ${b.courseName}` : ""}
@@ -155,7 +155,7 @@ function WeekColumns({
         const isToday = isSameDay(day, today);
 
         return (
-          <div key={day.toISOString()} className="rounded-card bg-white p-3">
+          <div key={day.toISOString()} className="rounded-card bg-card p-3">
             {/* Weekday/day-of-month reflect the runtime's local timezone —
                 expected to differ between SSR and hydration, not a real mismatch. */}
             <p
@@ -168,7 +168,7 @@ function WeekColumns({
             </p>
             <p
               className={`mx-auto mt-0.5 flex h-6 w-6 items-center justify-center rounded-full text-center text-[12.5px] font-bold ${
-                isToday ? "bg-violet text-white" : "text-ink"
+                isToday ? "bg-violet text-white" : "text-foreground"
               }`}
               suppressHydrationWarning
             >
@@ -203,7 +203,7 @@ function MonthGrid({
   const month = start.getMonth();
 
   return (
-    <div className="grid grid-cols-7 gap-1.5 rounded-card bg-white p-3">
+    <div className="grid grid-cols-7 gap-1.5 rounded-card bg-card p-3">
       {cells.map((day) => {
         const dayBlocks = blocks
           .filter((b) => isSameDay(new Date(b.startAt), day))
@@ -222,7 +222,7 @@ function MonthGrid({
                 to differ between SSR and hydration, not a real mismatch. */}
             <p
               className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold ${
-                isToday ? "bg-violet text-white" : inMonth ? "text-ink" : "text-ink-3"
+                isToday ? "bg-violet text-white" : inMonth ? "text-foreground" : "text-ink-3"
               }`}
               suppressHydrationWarning
             >

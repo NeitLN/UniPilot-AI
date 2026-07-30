@@ -13,9 +13,9 @@ export function ActivePlanSummary({
   confirmedAt: string | null;
 }) {
   return (
-    <div className="rounded-card bg-white p-5">
+    <div className="rounded-card bg-card p-5">
       <div className="flex items-center justify-between">
-        <h2 className="font-display text-lg font-bold text-ink">Active plan</h2>
+        <h2 className="font-display text-lg font-bold text-foreground">Active plan</h2>
         <span className="rounded-pill bg-mint-tint px-2.5 py-1 text-[10.5px] font-extrabold text-mint-text">
           Active
         </span>
@@ -40,7 +40,7 @@ export function ActivePlanSummary({
           {sessions.map((s) => (
             <li
               key={s.id}
-              className="flex items-center gap-3 rounded-ctl bg-line px-3 py-2 text-[12.5px] font-semibold text-ink"
+              className="flex items-center gap-3 rounded-ctl bg-line px-3 py-2 text-[12.5px] font-semibold text-foreground"
             >
               <span className="w-[130px] shrink-0 text-ink-3">
                 {new Date(s.startAt).toLocaleString(undefined, {

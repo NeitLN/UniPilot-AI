@@ -24,9 +24,9 @@ export function AssignmentSummaryCard({
   emptyMessage: string;
 }) {
   return (
-    <div className="rounded-card bg-white p-5">
+    <div className="rounded-card bg-card p-5">
       <div className="flex items-center justify-between">
-        <h2 className="font-display text-lg font-bold text-ink">{title}</h2>
+        <h2 className="font-display text-lg font-bold text-foreground">{title}</h2>
         <Link
           href="/assignments"
           className="flex min-h-11 items-center text-[12.5px] font-extrabold text-violet hover:underline"
@@ -50,7 +50,7 @@ export function AssignmentSummaryCard({
                 className="flex items-center gap-3 border-t border-line py-[11px] first:border-t-0 first:pt-3"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-bold text-ink">{a.title}</p>
+                  <p className="truncate text-sm font-bold text-foreground">{a.title}</p>
                   <p className="mt-0.5 truncate text-[11.5px] font-semibold text-ink-3">
                     {a.courseName ?? "No course"} ·{" "}
                     {new Date(a.dueAt).toLocaleString(undefined, {
@@ -79,8 +79,8 @@ export function AssignmentSummaryCard({
 
 export function AssignmentSummarySkeleton({ title }: { title: string }) {
   return (
-    <div className="animate-pulse rounded-card bg-white p-5">
-      <h2 className="font-display text-lg font-bold text-ink">{title}</h2>
+    <div className="animate-pulse rounded-card bg-card p-5">
+      <h2 className="font-display text-lg font-bold text-foreground">{title}</h2>
       <div className="mt-3 flex flex-col gap-2.5">
         {[0, 1, 2].map((i) => (
           <div key={i} className="h-10 rounded-ctl bg-line" />

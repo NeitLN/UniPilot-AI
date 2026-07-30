@@ -14,8 +14,8 @@ export function FocusStats({ data }: { data: FocusStatsData }) {
   const hasAnySession = data.completedCycles > 0 || data.partialSessions > 0;
 
   return (
-    <div className="rounded-card bg-white p-5">
-      <h2 className="font-display text-lg font-bold text-ink">This week</h2>
+    <div className="rounded-card bg-card p-5">
+      <h2 className="font-display text-lg font-bold text-foreground">This week</h2>
 
       <div className="mt-3 grid grid-cols-3 gap-3 border-b border-line pb-4">
         <Stat label="Streak" value={`${data.streak}d`} />
@@ -44,7 +44,7 @@ export function FocusStats({ data }: { data: FocusStatsData }) {
             {data.byCourse.map((c) => (
               <li
                 key={c.name}
-                className="flex items-center justify-between gap-3 text-[12.5px] font-semibold text-ink"
+                className="flex items-center justify-between gap-3 text-[12.5px] font-semibold text-foreground"
               >
                 <span className="min-w-0 truncate">{c.name}</span>
                 <span className="shrink-0 text-ink-3">{formatMinutes(c.minutes)}</span>
@@ -61,7 +61,7 @@ export function FocusStats({ data }: { data: FocusStatsData }) {
             {data.byAssignment.map((a) => (
               <li
                 key={a.id}
-                className="flex items-center justify-between gap-3 text-[12.5px] font-semibold text-ink"
+                className="flex items-center justify-between gap-3 text-[12.5px] font-semibold text-foreground"
               >
                 <span className="min-w-0 truncate">{a.title}</span>
                 <span className="shrink-0 text-ink-3">{formatMinutes(a.minutes)}</span>
@@ -77,7 +77,7 @@ export function FocusStats({ data }: { data: FocusStatsData }) {
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="text-center">
-      <p className="font-display text-xl font-bold text-ink tabular-nums">{value}</p>
+      <p className="font-display text-xl font-bold text-foreground tabular-nums">{value}</p>
       <p className="mt-0.5 text-[10.5px] font-bold uppercase tracking-wide text-ink-3">
         {label}
       </p>

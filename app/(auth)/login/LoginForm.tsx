@@ -27,7 +27,7 @@ export function LoginForm() {
           type="button"
           onClick={() => setMode("login")}
           className={`flex min-h-11 flex-1 items-center justify-center rounded-[12px] py-2 text-sm font-bold transition-colors ${
-            isLogin ? "bg-white text-ink" : "text-ink-3"
+            isLogin ? "bg-card text-foreground" : "text-ink-3"
           }`}
         >
           Sign in
@@ -36,7 +36,7 @@ export function LoginForm() {
           type="button"
           onClick={() => setMode("signup")}
           className={`flex min-h-11 flex-1 items-center justify-center rounded-[12px] py-2 text-sm font-bold transition-colors ${
-            !isLogin ? "bg-white text-ink" : "text-ink-3"
+            !isLogin ? "bg-card text-foreground" : "text-ink-3"
           }`}
         >
           Sign up
@@ -55,7 +55,7 @@ export function LoginForm() {
             type="email"
             required
             autoComplete="email"
-            className="mt-1 w-full rounded-ctl border border-black/10 px-3.5 py-2.5 text-sm text-ink outline-none focus:border-violet"
+            className="mt-1 w-full rounded-ctl border border-border-subtle px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-violet"
           />
         </label>
 
@@ -67,7 +67,7 @@ export function LoginForm() {
             required
             minLength={isLogin ? undefined : 8}
             autoComplete={isLogin ? "current-password" : "new-password"}
-            className="mt-1 w-full rounded-ctl border border-black/10 px-3.5 py-2.5 text-sm text-ink outline-none focus:border-violet"
+            className="mt-1 w-full rounded-ctl border border-border-subtle px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-violet"
           />
         </label>
 

@@ -43,14 +43,14 @@ export function AssignmentFilters({ courses }: { courses: CourseOption[] }) {
         placeholder="Search by title…"
         value={search}
         onChange={(e) => handleSearchChange(e.target.value)}
-        className="min-w-0 flex-1 rounded-ctl border border-black/10 bg-white px-3 py-2 text-xs font-bold text-ink-2 outline-none focus-visible:ring-2 focus-visible:ring-violet"
+        className="min-w-0 flex-1 rounded-ctl border border-border-subtle bg-card px-3 py-2 text-xs font-bold text-ink-2 outline-none focus-visible:ring-2 focus-visible:ring-violet"
       />
 
       <select
         aria-label="Filter by course"
         defaultValue={searchParams.get("course") ?? ""}
         onChange={(e) => update("course", e.target.value)}
-        className="rounded-ctl border border-black/10 bg-white px-3 py-2 text-xs font-bold text-ink-2 outline-none focus-visible:ring-2 focus-visible:ring-violet"
+        className="rounded-ctl border border-border-subtle bg-card px-3 py-2 text-xs font-bold text-ink-2 outline-none focus-visible:ring-2 focus-visible:ring-violet"
       >
         <option value="">All courses</option>
         {courses.map((c) => (
@@ -64,7 +64,7 @@ export function AssignmentFilters({ courses }: { courses: CourseOption[] }) {
         aria-label="Filter by status"
         defaultValue={searchParams.get("status") ?? ""}
         onChange={(e) => update("status", e.target.value)}
-        className="rounded-ctl border border-black/10 bg-white px-3 py-2 text-xs font-bold text-ink-2 outline-none focus-visible:ring-2 focus-visible:ring-violet"
+        className="rounded-ctl border border-border-subtle bg-card px-3 py-2 text-xs font-bold text-ink-2 outline-none focus-visible:ring-2 focus-visible:ring-violet"
       >
         <option value="">All statuses</option>
         <option value="not_started">Not started</option>

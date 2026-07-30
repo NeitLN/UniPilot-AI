@@ -8,6 +8,9 @@ import { WarningActions } from "@/components/risk/WarningActions";
 const FACTOR_TONE = {
   workload: "bg-tangerine-tint text-tangerine-text",
   overdue: "bg-coral-tint text-coral-text",
+  // bg-lime-tint deliberately never darkens (see globals.css) — pair it with
+  // the fixed --ink shade, not --foreground, or the text goes invisible
+  // once --foreground flips light under `.dark`.
   focus: "bg-lime-tint text-ink",
 } as const;
 
@@ -29,7 +32,7 @@ export default async function RiskPage() {
     return (
       <div className="flex flex-col gap-3.5">
         <Header />
-        <div className="flex flex-col items-center gap-3 rounded-card bg-white py-12 text-center">
+        <div className="flex flex-col items-center gap-3 rounded-card bg-card py-12 text-center">
           <Pilo mood="sleepy" size={72} />
           <p className="max-w-sm text-sm font-semibold text-ink-2">
             Not enough data yet — the score needs all three of these:
@@ -89,10 +92,10 @@ export default async function RiskPage() {
     <div className="flex flex-col gap-3.5">
       <Header />
 
-      <div className="rounded-card bg-white p-5">
+      <div className="rounded-card bg-card p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="font-display text-4xl font-bold text-ink tabular-nums">
+            <p className="font-display text-4xl font-bold text-foreground tabular-nums">
               {result.score}
             </p>
             <p className="mt-1 text-[11.5px] font-semibold text-ink-3">
@@ -133,7 +136,7 @@ export default async function RiskPage() {
 
       {result.warn && (
         <div className="rounded-card bg-tangerine-tint p-5">
-          <h2 className="font-display text-lg font-bold text-ink">Suggestion</h2>
+          <h2 className="font-display text-lg font-bold text-foreground">Suggestion</h2>
           <p className="mt-2 text-sm font-semibold text-ink-2">{suggestion.message}</p>
 
           {warning?.status === "open" && (
@@ -155,7 +158,7 @@ export default async function RiskPage() {
 function Header() {
   return (
     <div>
-      <h1 className="font-display text-3xl font-semibold text-ink">
+      <h1 className="font-display text-3xl font-semibold text-foreground">
         Workload risk
       </h1>
       <p className="mt-1 text-sm font-semibold text-ink-2">

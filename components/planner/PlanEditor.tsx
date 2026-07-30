@@ -62,7 +62,7 @@ export function PlanEditor({
   return (
     <div className="rounded-card bg-violet p-5 text-white">
       <div className="flex items-center gap-2.5">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-card">
           <Pilo mood="happy" size={34} />
         </span>
         <h2 className="font-display text-lg font-bold">Pilo&rsquo;s plan</h2>

@@ -46,7 +46,7 @@ export function WarningActions({
           type="button"
           onClick={handleDismiss}
           disabled={pending}
-          className="flex min-h-11 flex-1 items-center justify-center rounded-ctl bg-white py-2.5 text-sm font-bold text-ink-2 hover:bg-white/80 disabled:opacity-60"
+          className="flex min-h-11 flex-1 items-center justify-center rounded-ctl bg-card py-2.5 text-sm font-bold text-ink-2 hover:bg-white/80 disabled:opacity-60"
         >
           Not now
         </button>

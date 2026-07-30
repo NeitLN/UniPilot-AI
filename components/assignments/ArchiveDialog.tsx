@@ -34,7 +34,7 @@ export function ArchiveDialog({
 
   return (
     <Modal open={open} onClose={onClose} title="Archive assignment">
-      <h2 className="font-display text-lg font-bold text-ink">
+      <h2 className="font-display text-lg font-bold text-foreground">
         Archive assignment?
       </h2>
       <p className="mt-2 text-sm font-semibold text-ink-2">

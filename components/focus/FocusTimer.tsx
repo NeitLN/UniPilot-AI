@@ -236,7 +236,7 @@ export function FocusTimer({ assignments }: { assignments: FocusAssignmentOption
             value={selectedId}
             onChange={(e) => setSelectedId(e.target.value)}
             disabled={assignments.length === 0}
-            className="mt-1 w-full rounded-ctl border border-ink/15 bg-white px-3 py-2 text-sm text-ink outline-none focus-visible:ring-2 focus-visible:ring-violet disabled:opacity-60"
+            className="mt-1 w-full rounded-ctl border border-ink/15 bg-card px-3 py-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-violet disabled:opacity-60"
           >
             {assignments.length === 0 ? (
               <option value="">No active assignments</option>
@@ -294,7 +294,7 @@ export function FocusTimer({ assignments }: { assignments: FocusAssignmentOption
             type="button"
             onClick={handlePauseToggle}
             disabled={pending}
-            className="flex-1 rounded-ctl bg-white py-3 text-sm font-extrabold text-ink disabled:opacity-60"
+            className="flex-1 rounded-ctl bg-card py-3 text-sm font-extrabold text-foreground disabled:opacity-60"
           >
             {isPaused ? "Resume" : "Pause"}
           </button>
@@ -346,7 +346,7 @@ export function FocusTimer({ assignments }: { assignments: FocusAssignmentOption
 
       {finishedPhase && !isRunning && (
         <div className="mt-3 flex items-center justify-center gap-2">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-card">
             <Pilo mood="happy" size={24} />
           </span>
           <p className="text-[12.5px] font-bold text-ink">
@@ -362,7 +362,7 @@ export function FocusTimer({ assignments }: { assignments: FocusAssignmentOption
         onClose={() => setConfirmingStop(false)}
         title="Stop focus session"
       >
-        <h2 className="font-display text-lg font-bold text-ink">Stop this session?</h2>
+        <h2 className="font-display text-lg font-bold text-foreground">Stop this session?</h2>
         <p className="mt-2 text-sm font-semibold text-ink-2">
           {`This logs a partial session for ${formatClock(duration - displayRemaining)} — it won't count toward your streak.`}
         </p>

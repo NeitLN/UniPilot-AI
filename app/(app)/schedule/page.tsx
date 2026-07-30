@@ -27,7 +27,7 @@ export default async function SchedulePage({ searchParams }: SchedulePageProps) 
 
   return (
     <div className="flex flex-col gap-3.5">
-      <h1 className="font-display text-3xl font-semibold text-ink">Schedule</h1>
+      <h1 className="font-display text-3xl font-semibold text-foreground">Schedule</h1>
 
       <Suspense fallback={<ScheduleContentSkeleton />}>
         <ScheduleContent

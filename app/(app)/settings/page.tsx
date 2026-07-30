@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { SettingsForm } from "@/components/settings/SettingsForm";
+import { ThemeToggle } from "@/components/settings/ThemeToggle";
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -16,11 +17,13 @@ export default async function SettingsPage() {
   return (
     <div className="flex flex-col gap-3.5">
       <div>
-        <h1 className="font-display text-3xl font-semibold text-ink">Settings</h1>
+        <h1 className="font-display text-3xl font-semibold text-foreground">Settings</h1>
         <p className="mt-1 text-sm font-semibold text-ink-2">{user?.email}</p>
       </div>
 
-      <div className="max-w-md rounded-card bg-white p-5">
+      <div className="max-w-md rounded-card bg-card p-5">
+        <ThemeToggle />
+        <div className="my-4 border-t border-border-subtle-2" />
         <SettingsForm
           initialValues={{
             fullName: profile?.full_name ?? "",

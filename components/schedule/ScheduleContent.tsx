@@ -121,10 +121,10 @@ export function ScheduleContentSkeleton() {
           <div className="h-11 w-44 animate-pulse rounded-ctl bg-ink/10" />
         </div>
       </div>
-      <div className="h-14 animate-pulse rounded-card bg-white" />
+      <div className="h-14 animate-pulse rounded-card bg-card" />
       <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-7">
         {Array.from({ length: 7 }).map((_, i) => (
-          <div key={i} className="h-40 animate-pulse rounded-card bg-white" />
+          <div key={i} className="h-40 animate-pulse rounded-card bg-card" />
         ))}
       </div>
     </>

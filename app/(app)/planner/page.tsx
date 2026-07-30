@@ -87,7 +87,7 @@ export default async function PlannerPage() {
     <div className="flex flex-col gap-3.5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-3xl font-semibold text-ink">
+          <h1 className="font-display text-3xl font-semibold text-foreground">
             AI planner
           </h1>
           <p className="mt-1 text-sm font-semibold text-ink-2">
@@ -113,7 +113,7 @@ export default async function PlannerPage() {
       ) : activePlan ? (
         <ActivePlanSummary sessions={activeSessions} confirmedAt={activePlan.confirmed_at} />
       ) : (
-        <div className="flex flex-col items-center gap-3 rounded-card bg-white py-12 text-center">
+        <div className="flex flex-col items-center gap-3 rounded-card bg-card py-12 text-center">
           <Pilo mood="sleepy" size={72} />
           <p className="text-sm font-semibold text-ink-2">
             No plan yet — generate one whenever you&rsquo;re ready.

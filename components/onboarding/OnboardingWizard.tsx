@@ -65,12 +65,12 @@ export function OnboardingWizard() {
         })}
       </div>
 
-      <div className="rounded-card bg-white p-6">
+      <div className="rounded-card bg-card p-6">
         {step === 1 && (
           <form action={settingsAction} className="flex flex-col gap-3.5">
             <div className="flex flex-col items-center gap-2 pb-1 text-center">
               <Pilo mood="happy" size={64} />
-              <h2 className="font-display text-lg font-bold text-ink">
+              <h2 className="font-display text-lg font-bold text-foreground">
                 How much time can you study each week?
               </h2>
               <p className="text-[12.5px] font-semibold text-ink-3">
@@ -115,7 +115,7 @@ export function OnboardingWizard() {
           <form action={courseAction} className="flex flex-col gap-3.5">
             <div className="flex flex-col items-center gap-2 pb-1 text-center">
               <Pilo mood="happy" size={64} />
-              <h2 className="font-display text-lg font-bold text-ink">
+              <h2 className="font-display text-lg font-bold text-foreground">
                 Add your first course
               </h2>
               <p className="text-[12.5px] font-semibold text-ink-3">
@@ -201,7 +201,7 @@ export function OnboardingWizard() {
             <input type="hidden" name="priority" value="medium" />
             <div className="flex flex-col items-center gap-2 pb-1 text-center">
               <Pilo mood="happy" size={64} />
-              <h2 className="font-display text-lg font-bold text-ink">
+              <h2 className="font-display text-lg font-bold text-foreground">
                 Add your first assignment
               </h2>
               <p className="text-[12.5px] font-semibold text-ink-3">
@@ -266,7 +266,7 @@ export function OnboardingWizard() {
         {step === 4 && (
           <div className="flex flex-col items-center gap-3 py-2 text-center">
             <Pilo mood="happy" size={72} />
-            <h2 className="font-display text-lg font-bold text-ink">You&rsquo;re all set!</h2>
+            <h2 className="font-display text-lg font-bold text-foreground">You&rsquo;re all set!</h2>
             <p className="text-[12.5px] font-semibold text-ink-3">
               Try a 25-minute focus session on your new assignment, or generate
               an AI study plan whenever you&rsquo;re ready.
@@ -286,7 +286,7 @@ export function OnboardingWizard() {
 }
 
 function inputClass(hasError: boolean) {
-  return `w-full rounded-ctl border px-3.5 py-2.5 text-sm text-ink outline-none focus-visible:ring-2 focus-visible:ring-violet ${
-    hasError ? "border-coral" : "border-black/10 focus:border-violet"
+  return `w-full rounded-ctl border px-3.5 py-2.5 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-violet ${
+    hasError ? "border-coral" : "border-border-subtle focus:border-violet"
   }`;
 }

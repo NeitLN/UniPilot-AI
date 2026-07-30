@@ -75,7 +75,7 @@ export function EventForm({ courses, initialValues, onSaved, onCancel }: EventFo
 
   return (
     <form ref={formRef} action={formAction} className="flex flex-col gap-3.5">
-      <h2 className="font-display text-lg font-bold text-ink">
+      <h2 className="font-display text-lg font-bold text-foreground">
         {isEdit ? "Edit event" : "New event"}
       </h2>
 
@@ -98,7 +98,7 @@ export function EventForm({ courses, initialValues, onSaved, onCancel }: EventFo
           type="checkbox"
           checked={isAllDay}
           onChange={(e) => handleAllDayToggle(e.target.checked)}
-          className="relative h-5 w-9 shrink-0 cursor-pointer appearance-none rounded-pill bg-black/15 transition-colors before:absolute before:top-0.5 before:left-0.5 before:h-4 before:w-4 before:rounded-full before:bg-white before:transition-transform checked:bg-violet checked:before:translate-x-4"
+          className="relative h-5 w-9 shrink-0 cursor-pointer appearance-none rounded-pill bg-black/15 transition-colors before:absolute before:top-0.5 before:left-0.5 before:h-4 before:w-4 before:rounded-full before:bg-card before:transition-transform checked:bg-violet checked:before:translate-x-4"
         />
       </label>
 
@@ -166,7 +166,7 @@ export function EventForm({ courses, initialValues, onSaved, onCancel }: EventFo
       )}
 
       {addingCourse ? (
-        <div className="rounded-ctl border border-black/10 p-3.5">
+        <div className="rounded-ctl border border-border-subtle p-3.5">
           <CourseForm
             compact
             onSaved={handleCourseCreated}
@@ -276,8 +276,8 @@ function defaultEnd(start?: string): string {
 }
 
 function inputClass(hasError: boolean) {
-  return `w-full min-w-0 rounded-ctl border px-3.5 py-2.5 text-sm text-ink outline-none focus-visible:ring-2 focus-visible:ring-violet ${
-    hasError ? "border-coral" : "border-black/10 focus:border-violet"
+  return `w-full min-w-0 rounded-ctl border px-3.5 py-2.5 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-violet ${
+    hasError ? "border-coral" : "border-border-subtle focus:border-violet"
   }`;
 }
 
