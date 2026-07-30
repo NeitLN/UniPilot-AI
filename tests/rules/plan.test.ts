@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildSessionReminders,
   canGeneratePlan,
+  computePlanProgress,
   validateSessions,
   type StudySessionCandidate,
 } from "@/lib/rules/plan";
@@ -132,6 +133,52 @@ describe("validateSessions", () => {
       dailyAvailabilityHours: 4,
     });
     expect(result.valid).toBe(false);
+  });
+});
+
+describe("computePlanProgress", () => {
+  const now = new Date("2026-07-31T12:00:00.000Z");
+
+  it("is 'empty' with no sessions at all", () => {
+    const result = computePlanProgress([], now);
+    expect(result).toEqual({ lifecycle: "empty", pastCount: 0, totalCount: 0 });
+  });
+
+  it("is 'active' when at least one session is still upcoming", () => {
+    const result = computePlanProgress(
+      [
+        { startAt: "2026-07-30T09:00:00.000Z" }, // past
+        { startAt: "2026-08-01T09:00:00.000Z" }, // upcoming
+      ],
+      now,
+    );
+    expect(result).toEqual({ lifecycle: "active", pastCount: 1, totalCount: 2 });
+  });
+
+  it("is 'ended' once every session's startAt is in the past — QA4-03", () => {
+    const result = computePlanProgress(
+      [
+        { startAt: "2026-07-26T15:00:00.000Z" },
+        { startAt: "2026-07-27T10:00:00.000Z" },
+        { startAt: "2026-07-30T10:00:00.000Z" },
+      ],
+      now,
+    );
+    expect(result).toEqual({ lifecycle: "ended", pastCount: 3, totalCount: 3 });
+  });
+
+  it("is 'active' when every session is still upcoming", () => {
+    const result = computePlanProgress(
+      [{ startAt: "2026-08-01T09:00:00.000Z" }, { startAt: "2026-08-02T09:00:00.000Z" }],
+      now,
+    );
+    expect(result).toEqual({ lifecycle: "active", pastCount: 0, totalCount: 2 });
+  });
+
+  it("treats a session starting exactly at `now` as not yet past", () => {
+    const result = computePlanProgress([{ startAt: now.toISOString() }], now);
+    expect(result.pastCount).toBe(0);
+    expect(result.lifecycle).toBe("active");
   });
 });
 

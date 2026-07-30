@@ -109,6 +109,40 @@ export function validateSessions({
   });
 }
 
+// UX4-02 / QA4-03 (docs/PRODUCT_REVIEW_4.md) — the confirmed-plan card had
+// no concept of time at all: a plan whose every session was days in the
+// past still rendered with a mint "Active" badge, identical to a plan with
+// sessions still ahead. Deliberately only classifies "ended" vs "active" —
+// never "completed". A focus session isn't linked to the specific planned
+// slot it was (or wasn't) done during, so the app has no real way to know
+// whether a past session was actually studied; claiming otherwise would be
+// worse than saying nothing.
+export interface PlanSessionLike {
+  startAt: string;
+}
+
+export type PlanLifecycle = "empty" | "ended" | "active";
+
+export interface PlanProgress {
+  lifecycle: PlanLifecycle;
+  /** Sessions whose startAt is already in the past, relative to `now`. */
+  pastCount: number;
+  totalCount: number;
+}
+
+export function computePlanProgress(
+  sessions: PlanSessionLike[],
+  now: Date = new Date(),
+): PlanProgress {
+  const totalCount = sessions.length;
+  const pastCount = sessions.filter(
+    (s) => new Date(s.startAt).getTime() < now.getTime(),
+  ).length;
+  const lifecycle: PlanLifecycle =
+    totalCount === 0 ? "empty" : pastCount === totalCount ? "ended" : "active";
+  return { lifecycle, pastCount, totalCount };
+}
+
 export interface SessionReminderInput {
   assignmentTitle: string;
   startAt: string;
