@@ -178,9 +178,9 @@ Với một app tên là *"Student Life OS"* mà sinh viên muốn mở nhanh tr
 
 Kiểm tra: **0** class `dark:` trong toàn bộ DOM, **không có** media query `prefers-color-scheme`. Sinh viên học đêm khá nhiều.
 
-### F-07 — Giao diện **chỉ có tiếng Anh**
+### ~~F-07 — Giao diện chỉ có tiếng Anh~~ — **BỎ QUA (theo yêu cầu)**
 
-`<html lang="en">`, toàn bộ chữ tiếng Anh, không có nút đổi ngôn ngữ — trong khi người dùng là người Việt và tên môn học trong DB là tiếng Việt (*"Kỹ thuật lấy yêu cầu"*). Trộn lẫn Anh–Việt trên cùng màn hình.
+Giao diện tiếng Anh là chủ đích, không cần đa ngôn ngữ. Giữ lại mục này chỉ để ghi nhận đã cân nhắc và loại bỏ.
 
 ---
 
@@ -228,7 +228,6 @@ Xếp theo **giá trị / công sức**:
 | ⭐⭐⭐ | **Điểm assignment → điểm môn dự kiến** (F-03) | Tận dụng trường `weight` đã bắt nhập sẵn. Biến app từ ghi chép thành dự báo thật. Kết nối được 2 module đang rời rạc (Assignments ↔ GPA) |
 | ⭐⭐⭐ | **PWA manifest** (F-05) | Chỉ 1 file + icon. Đã có sẵn service worker, chỉ thiếu mảnh cuối để cài lên điện thoại |
 | ⭐⭐⭐ | **Break timer Pomodoro** (F-01) | Đúng định nghĩa trong chính SRS. Không có nó thì Pomodoro chưa trọn vẹn |
-| ⭐⭐ | **Giao diện tiếng Việt** (F-07) | Đúng đối tượng người dùng. Next.js có sẵn i18n routing |
 | ⭐⭐ | **Xem lại assignment đã archive** (B-03) | Dữ liệu đã có sẵn trong DB, chỉ cần thêm filter |
 | ⭐⭐ | **Dark mode** (F-06) | Tailwind hỗ trợ sẵn, chủ yếu là công thêm biến màu |
 | ⭐⭐ | **Đồng bộ 2 chiều Google Calendar** | Hiện chỉ đọc (`calendar.readonly`). Cho phép đẩy phiên học đã confirm sang Google Calendar sẽ khép kín vòng lặp |
@@ -259,10 +258,9 @@ Xếp theo **giá trị / công sức**:
 4. F-04 — Ô tìm kiếm Assignments
 5. P-03 — Phân trang
 
-### Đợt 3 — Tính năng lớn (~10–15 giờ)
+### Đợt 3 — Tính năng lớn (~8–12 giờ)
 1. F-03 — Điểm assignment → điểm môn dự kiến *(giá trị cao nhất)*
-2. F-07 — i18n tiếng Việt
-3. F-06 — Dark mode
+2. F-06 — Dark mode
 
 ### Đợt 4 — Mở rộng
 - Đồng bộ 2 chiều Google Calendar
@@ -275,7 +273,19 @@ Xếp theo **giá trị / công sức**:
 
 **Không tìm thấy lỗi runtime nào** trong toàn bộ đợt kiểm thử — 0 console error, 0 page error, 0 request thất bại trên cả 9 route.
 
-**Dữ liệu test còn lại trên tài khoản:** 1 assignment tên `QA Test Assignment` (đã trả về trạng thái `Not started` sau khi test xong), 1 draft plan của AI Planner chưa confirm, và một vài phiên focus ngắn. Có thể xoá thủ công trong app nếu không cần.
+**Dữ liệu mẫu đã nạp (30/07/2026):** Đã dọn sạch artifact test cũ (`QA Test Assignment`, draft plan thừa, block `Study English`) và nạp bộ dữ liệu thực tế cho sinh viên IT năm 2 kỳ 253:
+
+| Bảng | Số lượng | Nội dung |
+|---|---|---|
+| `courses` | 14 (+1 của bạn tự thêm) | 6 môn kỳ 253 đang học + 8 môn 3 kỳ trước (242/251/252) |
+| `assignments` | 10 | Đủ trạng thái: 1 quá hạn, 2 đang làm, 5 chưa bắt đầu, 2 đã xong |
+| `grades` | 8 | Điểm 3 kỳ trước → biểu đồ GPA trend có 3 mốc (3.25 → 3.49 → 3.57) |
+| `class_blocks` | 28 | Thời khoá biểu 7 buổi/tuần × 4 tuần, có phòng học |
+| `focus_sessions` | 18 | 10 ngày liên tiếp → streak 10 ngày, mở khoá Workload Risk |
+
+Kết quả: Dashboard hiện GPA **3.46**, 8 task đang mở, 12 cycle/300 phút tuần này, Workload Risk **9/100**.
+
+> ⚠️ Lưu ý: `focus_sessions.assignment_id` có `ON DELETE CASCADE` — xoá một assignment sẽ **xoá luôn toàn bộ lịch sử focus** gắn với nó (gặp thật khi dọn dữ liệu test: xoá 1 assignment làm mất 3 phiên focus và đứt streak). Cân nhắc đổi sang `ON DELETE SET NULL` để giữ lịch sử học tập, vì đây là dữ liệu thành tích người dùng không nên mất theo.
 
 **Lệnh kiểm thử lại:**
 ```bash
