@@ -2,10 +2,11 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { deliverDueNotifications } from "@/lib/push/deliver";
 
-/** Also called directly (not via fetch) from NotificationBell on each page
- * load, same pattern as risk compute — this route exists for an external
- * trigger (e.g. a future scheduled cron) per
- * docs/UniPilot/UniPilot_AI_ROADMAP.md §PHASE 9. */
+/** SR-04 (docs/PRODUCT_REVIEW_3.md): called from NotificationBellClient once
+ * per app session (client-side, non-blocking) so a due reminder still shows
+ * up promptly while the app is open — the scheduled delivery path
+ * (.github/workflows/notifications-cron.yml, every 15 min) is what actually
+ * reaches someone who isn't in the app at all. */
 export async function POST() {
   const supabase = await createClient();
   const {

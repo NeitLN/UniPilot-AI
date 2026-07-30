@@ -37,6 +37,27 @@ export function NotificationBellClient({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [open]);
 
+  useEffect(() => {
+    // SR-04: delivery used to happen synchronously inside NotificationBell's
+    // Server Component render, on every page load — moved off the render
+    // path entirely (the cron now owns it), but this keeps the same
+    // "still shows up promptly while the app is open" behavior, just as a
+    // non-blocking client call after mount instead. This component doesn't
+    // remount on client-side navigation within the (app) layout, so it
+    // fires once per app session rather than on every route change.
+    fetch("/api/push/send", { method: "POST" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((result: { deliveredCount?: number } | null) => {
+        if (result && result.deliveredCount && result.deliveredCount > 0) {
+          router.refresh();
+        }
+      })
+      .catch(() => {
+        // Best-effort — the cron delivers within 15 minutes regardless.
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per mount only
+  }, []);
+
   function handleMarkRead(id: string) {
     startTransition(async () => {
       try {

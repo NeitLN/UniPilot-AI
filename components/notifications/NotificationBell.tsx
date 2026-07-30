@@ -1,5 +1,4 @@
 import { createClient } from "@/lib/supabase/server";
-import { deliverDueNotifications } from "@/lib/push/deliver";
 import {
   NotificationBellClient,
   type NotificationItem,
@@ -12,11 +11,12 @@ export async function NotificationBell() {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  // Opportunistic, idempotent (same pattern as risk compute): a due
-  // reminder gets its in-app row stamped `delivered_at` on whichever page
-  // load happens to notice it first.
-  await deliverDueNotifications(supabase, user.id);
-
+  // SR-04 (docs/PRODUCT_REVIEW_3.md): this used to also call
+  // deliverDueNotifications() here — a write (push send + DB update) inside
+  // a Server Component's render, on every single page load. Delivery is now
+  // the cron's job alone (.github/workflows/notifications-cron.yml, every
+  // 15 min) plus NotificationBellClient's own client-side call below for
+  // the "still fresh while the app is open" case; this component only reads.
   const { data: rows } = await supabase
     .from("notifications")
     .select("id, title, body, scheduled_at, read_at")
