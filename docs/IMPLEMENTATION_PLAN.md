@@ -1,8 +1,8 @@
 # Kế hoạch triển khai — từ PRODUCT_REVIEW.md
 
 **Nguồn:** [`docs/PRODUCT_REVIEW.md`](./PRODUCT_REVIEW.md) (30/07/2026)
-**Trạng thái nền:** `main` @ `85e80b7` — typecheck sạch, lint sạch, 160 unit test + 16 E2E test xanh
-**Tổng:** 5 phase, ~22 giờ · **Phase 1 + 2 + 3 + 4: ✅ Hoàn thành** (xem §Phase tương ứng để biết chi tiết + phát hiện phát sinh)
+**Trạng thái nền:** `main` @ `a66b5c4` — typecheck sạch, lint sạch, 174 unit test + 21 E2E test xanh
+**Tổng:** 5 phase, ~22 giờ · **Phase 1 + 2 + 3 + 4 + 5: ✅ Hoàn thành** (xem §Phase tương ứng để biết chi tiết + phát hiện phát sinh)
 
 ---
 
@@ -249,38 +249,47 @@ Sửa xong flex-shrink thì 3.25 → 3.57 vẫn chỉ chênh 9px/120px. Vẫn kh
 
 > **Mục tiêu:** giảm ma sát khi dùng, và bắt đầu trả lại insight thay vì chỉ hiển thị số.
 > **Thời lượng:** ~7.5 giờ · **Rủi ro:** thấp
+> **✅ Hoàn thành** — 4 commit (`363d2eb` FR-24, `15d4287` QA-03, `f453698` FR-26, `a66b5c4` UX-05/06). 174/174 unit test, 21/21 E2E xanh; xác minh trực tiếp trên tài khoản demo ở cả 3 viewport + 2 theme.
+>
+> **Xác minh trên tài khoản demo thật (không phải chỉ tài khoản E2E):** trang `/reports` tính đúng trên dữ liệu thật — "Completed 2 (↑2), Study time 325 min (↓150), Streak 10d (↑7d), GPA 3.46 (No prior data), Plan adherence 100%" — và **AC-3 của FR-26 tự tìm ra đúng insight thật**: *"You spent 150 min on Kỹ thuật lấy yêu cầu but only 25 min on Kiểm thử phần mềm, even though Kiểm thử phần mềm has a submission due today"* — đúng hình dạng ví dụ trong review, trên dữ liệu thật chứ không phải fixture dựng sẵn. Dòng "Weekend — no schedule" (UX-06) cũng xuất hiện đúng trên lịch tuần thật ở mobile.
+>
+> **2 quyết định thiết kế cần ghi rõ (không có trong review gốc):**
+> - **FR-26 "Số bài hoàn thành":** không có cột `completed_at` trong schema — dùng `updated_at` + `status='done'` làm proxy. Sửa hạn/ghi chú của một bài **đã** done trong tuần sẽ bị đếm nhầm là "vừa hoàn thành". Thêm cột mới đúng nghĩa sẽ cần một migration, đi ngược lại xếp hạng "rủi ro thấp" của Phase 5 — chấp nhận đánh đổi, ghi rõ trong code thay vì giả vờ chính xác.
+> - **FR-26 điều hướng:** "Weekly report" chỉ có trong Sidebar (desktop) + 1 link trên Dashboard, **không** thêm vào bottom nav mobile — bottom nav đang đúng 8 mục, đã đo đạt chuẩn 44×44px ở đúng con số đó từ Phase 2; thêm mục thứ 9 nhiều khả năng làm rớt chuẩn.
+>
+> **1 phát hiện phát sinh, tự sửa trước khi commit (không cần xác minh trực tiếp mới thấy):** đọc lại `ClassDetailPanel.tsx` để tham chiếu pattern "this/following" của Schedule thì thấy `text-coral-text` đứng một mình trên `bg-card` — đúng lớp lỗi dark-mode contrast đã gặp ở Phase 3 và 4. **Không sửa** vì file đó nằm ngoài phạm vi Phase 5 (chỉ đọc để tham khảo, không phải file đang chỉnh) — ghi lại đây làm việc tồn đọng cho một đợt dọn dark-mode contrast riêng, thay vì tiện tay sửa lan ra ngoài phạm vi đã thống nhất.
 
 ### 5.1 — FR-24: Nhãn & nhóm assignment lặp lại (~1h)
 
 `recurrence_group_id` **đã có sẵn** trong DB (migration 0010) nhưng UI chưa dùng.
 
-- [ ] Badge *"Lặp hàng tuần"* trên assignment thuộc chuỗi
-- [ ] Sửa/Archive 1 mục trong chuỗi → hỏi *"Chỉ mục này"* / *"Mục này và các mục sau"* (dùng lại pattern của Schedule)
+- [x] Badge trên assignment thuộc chuỗi — dùng nhãn trung lập *"Recurring"* thay vì *"Lặp hàng tuần"* như review đề xuất: `repeat` có thể là daily/weekly/biweekly/monthly và chu kỳ cụ thể **không** được lưu lại sau khi các occurrence đã materialize (chỉ còn `recurrence_group_id` dùng chung), nên "hàng tuần" sẽ sai với 3/4 trường hợp còn lại.
+- [x] Archive 1 mục trong chuỗi → hỏi *"Archive this assignment"* / *"Archive this and following"* (dùng lại pattern `deleteEvent` của Schedule). **Sửa** thì chỉ áp dụng cho occurrence đang mở (khớp đúng hành vi `EventForm` đã có — Schedule cũng chưa từng hỗ trợ sửa hàng loạt), thêm ghi chú *"Editing this occurrence only"* thay vì để ngầm định.
 
 ### 5.2 — QA-03: Dùng validate của app thay tooltip trình duyệt (~1h)
 
 `required` của HTML chặn submit trước → bộ `validateAssignment` viết rất kỹ **không bao giờ chạy** ở nhánh thiếu trường.
 
-- [ ] Thêm `noValidate` cho form, để logic của app tiếp quản
-- [ ] Hiện **tất cả** lỗi cùng lúc, đúng style của app
-- [ ] Giữ nguyên hành vi focus vào trường lỗi đầu tiên (`FIELD_ORDER` đã có)
-- [ ] Áp dụng đồng bộ cho `AssignmentForm`, `EventForm`, `CourseForm`, `GradeForm`
+- [x] Thêm `noValidate` cho form, để logic của app tiếp quản
+- [x] Hiện **tất cả** lỗi cùng lúc, đúng style của app — đã đúng sẵn từ trước (`validateAssignment` và các hàm chị em vốn đã trả về toàn bộ field error, mỗi `Field` tự hiện lỗi của nó); vấn đề duy nhất là submit chưa bao giờ chạm tới action để state đó có cơ hội được set
+- [x] Giữ nguyên hành vi focus vào trường lỗi đầu tiên (`FIELD_ORDER` đã có) — không đổi gì, vốn đã đúng
+- [x] Áp dụng đồng bộ cho `AssignmentForm`, `EventForm`, `CourseForm`, `GradeForm`
 
 ### 5.3 — FR-26: Báo cáo tổng kết tuần (~4h)
 
-- [ ] Số bài hoàn thành, tổng giờ học, streak, thay đổi GPA, tỉ lệ bám kế hoạch
-- [ ] So sánh với tuần trước (↑/↓)
-- [ ] **AC-3 — phần giá trị nhất:** rút ra ít nhất **1 nhận định bằng lời**, ví dụ: *"Bạn dành 150 phút cho Kỹ thuật lấy yêu cầu nhưng chỉ 25 phút cho Kiểm thử phần mềm, trong khi Kiểm thử có bài nộp sớm hơn 6 ngày."*
-- [ ] Logic nhận định đặt trong `lib/rules/insights.ts` (thuần, có unit test — theo đúng nguyên tắc "quy tắc nghiệp vụ định nghĩa đúng một lần")
-- [ ] Empty state tử tế khi tuần chưa có dữ liệu
+- [x] Số bài hoàn thành, tổng giờ học, streak, thay đổi GPA, tỉ lệ bám kế hoạch
+- [x] So sánh với tuần trước (↑/↓)
+- [x] **AC-3 — phần giá trị nhất:** rút ra ít nhất **1 nhận định bằng lời** — xác nhận đúng trên dữ liệu thật của tài khoản demo, xem ghi chú xác minh phía trên
+- [x] Logic nhận định đặt trong `lib/rules/insights.ts` (thuần, có unit test — theo đúng nguyên tắc "quy tắc nghiệp vụ định nghĩa đúng một lần") — 14 test mới
+- [x] Empty state tử tế khi tuần chưa có dữ liệu
 
 ### 5.4 — UX-05 / UX-06: Gọn giao diện mobile (~1.5h)
 
-- [ ] Thẻ assignment thu gọn, Edit/Archive vào menu `⋯`
-- [ ] Gộp ngày cuối tuần trống thành 1 dòng *"Cuối tuần — không có lịch"*
-- [ ] Thêm tooltip/nhãn số phút cho chart `LearningStats` (đang thiếu, trong khi chart GPA có)
+- [x] Thẻ assignment thu gọn ở `< sm`, Edit/Archive vào menu `⋯` (mở lại `Modal` sẵn có thay vì viết mới một dropdown-neo-vị-trí — codebase chưa từng có pattern đó, và `Modal` đã có sẵn focus trap/Escape/click-outside được toàn app dùng lại)
+- [x] Gộp ngày cuối tuần trống thành 1 dòng *"Weekend — no schedule"* (chỉ ở `< sm`; desktop `sm:grid-cols-7` vẫn giữ đủ 7 cột, 2 ô cuối tuần chỉ `hidden sm:block` chứ không bỏ hẳn, tránh lệch lưới)
+- [x] Thêm nhãn số phút cho chart `LearningStats`, cùng cách `BAR_MAX_HEIGHT`/`LABEL_SPACE` với `GpaTrendChart` để không tái phát lỗi QA-01
 
-**Commit:** 4 commit theo mã.
+**Commit:** 4 commit theo hạng mục (`363d2eb`, `15d4287`, `f453698`, `a66b5c4`).
 
 ---
 
