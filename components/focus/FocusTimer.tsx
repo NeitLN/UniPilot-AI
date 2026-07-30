@@ -370,7 +370,7 @@ export function FocusTimer({ assignments }: { assignments: FocusAssignmentOption
           <button
             type="button"
             onClick={() => setConfirmingStop(false)}
-            className="flex min-h-11 flex-1 items-center justify-center rounded-ctl bg-line py-2.5 text-sm font-bold text-ink-2 hover:bg-[#E6E2F2]"
+            className="flex min-h-11 flex-1 items-center justify-center rounded-ctl bg-line py-2.5 text-sm font-bold text-ink-2 hover:bg-line-hover"
           >
             Keep going
           </button>

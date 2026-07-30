@@ -88,7 +88,7 @@ export function NotificationBellClient({
           unreadCount > 0 ? `Notifications, ${unreadCount} unread` : "Notifications"
         }
         onClick={() => setOpen((v) => !v)}
-        className="relative flex h-11 w-11 items-center justify-center rounded-full bg-line text-foreground hover:bg-[#E6E2F2]"
+        className="relative flex h-11 w-11 items-center justify-center rounded-full bg-line text-foreground hover:bg-line-hover"
       >
         <BellIcon />
         {unreadCount > 0 && (

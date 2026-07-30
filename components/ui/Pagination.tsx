@@ -39,7 +39,7 @@ export function Pagination({ page, pageSize, total }: PaginationProps) {
           type="button"
           onClick={() => goTo(page - 1)}
           disabled={page <= 1}
-          className="flex min-h-11 items-center rounded-ctl bg-line px-3.5 text-xs font-bold text-ink-2 hover:bg-[#E6E2F2] disabled:opacity-40"
+          className="flex min-h-11 items-center rounded-ctl bg-line px-3.5 text-xs font-bold text-ink-2 hover:bg-line-hover disabled:opacity-40"
         >
           Previous
         </button>
@@ -47,7 +47,7 @@ export function Pagination({ page, pageSize, total }: PaginationProps) {
           type="button"
           onClick={() => goTo(page + 1)}
           disabled={page >= totalPages}
-          className="flex min-h-11 items-center rounded-ctl bg-line px-3.5 text-xs font-bold text-ink-2 hover:bg-[#E6E2F2] disabled:opacity-40"
+          className="flex min-h-11 items-center rounded-ctl bg-line px-3.5 text-xs font-bold text-ink-2 hover:bg-line-hover disabled:opacity-40"
         >
           Next
         </button>

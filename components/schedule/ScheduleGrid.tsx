@@ -63,7 +63,7 @@ function BlockCard({
     <button
       type="button"
       onClick={() => onSelect(block.id)}
-      className="w-full rounded-ctl bg-line px-3 py-2 text-left hover:bg-[#E6E2F2]"
+      className="w-full rounded-ctl bg-line px-3 py-2 text-left hover:bg-line-hover"
     >
       <p className="truncate text-[12.5px] font-bold text-foreground">{block.title}</p>
       {/* Formatted in the runtime's local timezone — expected to differ

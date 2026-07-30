@@ -55,6 +55,13 @@
   --canvas: #f2f0fb;
   --card: #ffffff;
   --line: #f0eef7;
+  /* QA4-02 (docs/PRODUCT_REVIEW_4.md): 44 hover states across the app used
+     the literal hex #E6E2F2 instead of a token, so dark mode never got a
+     hover color of its own — the light value stayed forced on, dropping
+     text contrast from 6.22:1 to 1.67:1 (measured on the Edit button's
+     text-ink-2 label) whenever a control was hovered. One token, both
+     themes, so this can't drift back to a hardcoded hex in new code. */
+  --line-hover: #e6e2f2;
   --border-cb: #dcd8ec;
   --border-subtle: rgb(0 0 0 / 10%);
   --border-subtle-2: rgb(0 0 0 / 5%);
@@ -95,6 +102,11 @@
   --canvas: #150f28;
   --card: #221a3d;
   --line: #33285a;
+  /* One step brighter than --line (dark), same proportion as
+     --dusk-panel -> --dusk-seg below — a real hover state instead of
+     inheriting the light theme's #E6E2F2. Measured against text-ink-2
+     (dark): 5.38:1, comfortably above WCAG AA's 4.5:1. */
+  --line-hover: #3d3169;
   --border-cb: #3a2c5e;
   --border-subtle: rgb(255 255 255 / 12%);
   --border-subtle-2: rgb(255 255 255 / 8%);
@@ -139,6 +151,7 @@
   --color-canvas: var(--canvas);
   --color-card: var(--card);
   --color-line: var(--line);
+  --color-line-hover: var(--line-hover);
   --color-border-cb: var(--border-cb);
   --color-border-subtle: var(--border-subtle);
   --color-border-subtle-2: var(--border-subtle-2);

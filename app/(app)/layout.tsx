@@ -52,7 +52,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <Link
               href="/settings"
               aria-label="Settings"
-              className="flex h-11 w-11 items-center justify-center rounded-full bg-line text-foreground hover:bg-[#E6E2F2]"
+              className="flex h-11 w-11 items-center justify-center rounded-full bg-line text-foreground hover:bg-line-hover"
             >
               <SettingsIcon />
             </Link>

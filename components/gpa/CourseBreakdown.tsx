@@ -97,14 +97,14 @@ export function CourseBreakdown({
                         <button
                           type="button"
                           onClick={() => setEditing(g)}
-                          className="flex min-h-11 items-center rounded-ctl bg-line px-2.5 py-1.5 text-[11px] font-bold text-ink-2 hover:bg-[#E6E2F2]"
+                          className="flex min-h-11 items-center rounded-ctl bg-line px-2.5 py-1.5 text-[11px] font-bold text-ink-2 hover:bg-line-hover"
                         >
                           Edit
                         </button>
                         <button
                           type="button"
                           onClick={() => setDeleting(g)}
-                          className="flex min-h-11 items-center rounded-ctl bg-line px-2.5 py-1.5 text-[11px] font-bold text-ink-2 hover:bg-[#E6E2F2]"
+                          className="flex min-h-11 items-center rounded-ctl bg-line px-2.5 py-1.5 text-[11px] font-bold text-ink-2 hover:bg-line-hover"
                         >
                           Delete
                         </button>
@@ -122,7 +122,7 @@ export function CourseBreakdown({
         <button
           type="button"
           onClick={() => setShowAll(true)}
-          className="mt-3 flex min-h-11 w-full items-center justify-center rounded-ctl bg-line text-xs font-bold text-ink-2 hover:bg-[#E6E2F2]"
+          className="mt-3 flex min-h-11 w-full items-center justify-center rounded-ctl bg-line text-xs font-bold text-ink-2 hover:bg-line-hover"
         >
           Show all {grades.length} courses ({hiddenCount} more)
         </button>
@@ -193,7 +193,7 @@ function DeleteGradeDialog({
         <button
           type="button"
           onClick={onClose}
-          className="flex min-h-11 flex-1 items-center justify-center rounded-ctl bg-line py-2.5 text-sm font-bold text-ink-2 hover:bg-[#E6E2F2]"
+          className="flex min-h-11 flex-1 items-center justify-center rounded-ctl bg-line py-2.5 text-sm font-bold text-ink-2 hover:bg-line-hover"
         >
           Cancel
         </button>

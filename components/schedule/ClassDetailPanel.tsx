@@ -158,14 +158,14 @@ export function ClassDetailPanel({
             <button
               type="button"
               onClick={onClose}
-              className="flex min-h-11 flex-1 items-center justify-center rounded-ctl bg-line py-2.5 text-sm font-bold text-ink-2 hover:bg-[#E6E2F2]"
+              className="flex min-h-11 flex-1 items-center justify-center rounded-ctl bg-line py-2.5 text-sm font-bold text-ink-2 hover:bg-line-hover"
             >
               Close
             </button>
             <button
               type="button"
               onClick={() => setEditing(true)}
-              className="flex min-h-11 flex-1 items-center justify-center rounded-ctl bg-line py-2.5 text-sm font-bold text-ink-2 hover:bg-[#E6E2F2]"
+              className="flex min-h-11 flex-1 items-center justify-center rounded-ctl bg-line py-2.5 text-sm font-bold text-ink-2 hover:bg-line-hover"
             >
               Edit
             </button>
@@ -181,7 +181,7 @@ export function ClassDetailPanel({
           <button
             type="button"
             onClick={onClose}
-            className="mt-5 flex min-h-11 w-full items-center justify-center rounded-ctl bg-line py-2.5 text-sm font-bold text-ink-2 hover:bg-[#E6E2F2]"
+            className="mt-5 flex min-h-11 w-full items-center justify-center rounded-ctl bg-line py-2.5 text-sm font-bold text-ink-2 hover:bg-line-hover"
           >
             Close
           </button>
@@ -269,7 +269,7 @@ function DeleteEventDialog({
         <button
           type="button"
           onClick={onClose}
-          className="flex min-h-11 w-full items-center justify-center rounded-ctl bg-line py-2.5 text-sm font-bold text-ink-2 hover:bg-[#E6E2F2]"
+          className="flex min-h-11 w-full items-center justify-center rounded-ctl bg-line py-2.5 text-sm font-bold text-ink-2 hover:bg-line-hover"
         >
           Cancel
         </button>

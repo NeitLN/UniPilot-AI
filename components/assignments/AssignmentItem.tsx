@@ -121,14 +121,14 @@ export function AssignmentItem({
               type="button"
               onClick={handleRestore}
               disabled={restoring}
-              className="flex min-h-11 items-center rounded-ctl bg-line px-3 py-2 text-xs font-bold text-ink-2 hover:bg-[#E6E2F2] disabled:opacity-60"
+              className="flex min-h-11 items-center rounded-ctl bg-line px-3 py-2 text-xs font-bold text-ink-2 hover:bg-line-hover disabled:opacity-60"
             >
               {restoring ? "Restoring…" : "Restore"}
             </button>
             <button
               type="button"
               onClick={() => setDeleting(true)}
-              className="flex min-h-11 items-center rounded-ctl bg-line px-3 py-2 text-xs font-bold text-coral hover:bg-[#E6E2F2]"
+              className="flex min-h-11 items-center rounded-ctl bg-line px-3 py-2 text-xs font-bold text-coral hover:bg-line-hover"
             >
               Delete permanently
             </button>
@@ -138,14 +138,14 @@ export function AssignmentItem({
             <button
               type="button"
               onClick={() => setEditing(true)}
-              className="flex min-h-11 items-center rounded-ctl bg-line px-3 py-2 text-xs font-bold text-ink-2 hover:bg-[#E6E2F2]"
+              className="flex min-h-11 items-center rounded-ctl bg-line px-3 py-2 text-xs font-bold text-ink-2 hover:bg-line-hover"
             >
               Edit
             </button>
             <button
               type="button"
               onClick={() => setArchiving(true)}
-              className="flex min-h-11 items-center rounded-ctl bg-line px-3 py-2 text-xs font-bold text-ink-2 hover:bg-[#E6E2F2]"
+              className="flex min-h-11 items-center rounded-ctl bg-line px-3 py-2 text-xs font-bold text-ink-2 hover:bg-line-hover"
             >
               Archive
             </button>
@@ -157,7 +157,7 @@ export function AssignmentItem({
         type="button"
         onClick={() => setShowActions(true)}
         aria-label="Actions"
-        className="flex min-h-11 min-w-11 shrink-0 items-center justify-center self-end rounded-ctl bg-line text-lg font-bold text-ink-2 hover:bg-[#E6E2F2] sm:hidden"
+        className="flex min-h-11 min-w-11 shrink-0 items-center justify-center self-end rounded-ctl bg-line text-lg font-bold text-ink-2 hover:bg-line-hover sm:hidden"
       >
         ⋯
       </button>
@@ -174,7 +174,7 @@ export function AssignmentItem({
                   handleRestore();
                 }}
                 disabled={restoring}
-                className="flex min-h-11 w-full items-center justify-center rounded-ctl bg-line py-2.5 text-sm font-bold text-ink-2 hover:bg-[#E6E2F2] disabled:opacity-60"
+                className="flex min-h-11 w-full items-center justify-center rounded-ctl bg-line py-2.5 text-sm font-bold text-ink-2 hover:bg-line-hover disabled:opacity-60"
               >
                 {restoring ? "Restoring…" : "Restore"}
               </button>
@@ -184,7 +184,7 @@ export function AssignmentItem({
                   setShowActions(false);
                   setDeleting(true);
                 }}
-                className="flex min-h-11 w-full items-center justify-center rounded-ctl bg-line py-2.5 text-sm font-bold text-coral hover:bg-[#E6E2F2]"
+                className="flex min-h-11 w-full items-center justify-center rounded-ctl bg-line py-2.5 text-sm font-bold text-coral hover:bg-line-hover"
               >
                 Delete permanently
               </button>
@@ -197,7 +197,7 @@ export function AssignmentItem({
                   setShowActions(false);
                   setEditing(true);
                 }}
-                className="flex min-h-11 w-full items-center justify-center rounded-ctl bg-line py-2.5 text-sm font-bold text-ink-2 hover:bg-[#E6E2F2]"
+                className="flex min-h-11 w-full items-center justify-center rounded-ctl bg-line py-2.5 text-sm font-bold text-ink-2 hover:bg-line-hover"
               >
                 Edit
               </button>
@@ -207,7 +207,7 @@ export function AssignmentItem({
                   setShowActions(false);
                   setArchiving(true);
                 }}
-                className="flex min-h-11 w-full items-center justify-center rounded-ctl bg-line py-2.5 text-sm font-bold text-ink-2 hover:bg-[#E6E2F2]"
+                className="flex min-h-11 w-full items-center justify-center rounded-ctl bg-line py-2.5 text-sm font-bold text-ink-2 hover:bg-line-hover"
               >
                 Archive
               </button>

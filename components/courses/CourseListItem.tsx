@@ -38,14 +38,14 @@ export function CourseListItem({ course }: { course: CourseRow }) {
         <button
           type="button"
           onClick={() => setEditing(true)}
-          className="flex min-h-11 items-center rounded-ctl bg-line px-3 py-2 text-xs font-bold text-ink-2 hover:bg-[#E6E2F2]"
+          className="flex min-h-11 items-center rounded-ctl bg-line px-3 py-2 text-xs font-bold text-ink-2 hover:bg-line-hover"
         >
           Edit
         </button>
         <button
           type="button"
           onClick={() => setDeleting(true)}
-          className="flex min-h-11 items-center rounded-ctl bg-line px-3 py-2 text-xs font-bold text-ink-2 hover:bg-[#E6E2F2]"
+          className="flex min-h-11 items-center rounded-ctl bg-line px-3 py-2 text-xs font-bold text-ink-2 hover:bg-line-hover"
         >
           Delete
         </button>

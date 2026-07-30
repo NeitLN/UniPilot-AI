@@ -18,7 +18,7 @@ export function DeleteAccountSection({ userEmail }: { userEmail: string }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex min-h-11 items-center justify-center rounded-ctl bg-line px-3.5 text-sm font-bold text-coral hover:bg-[#E6E2F2]"
+        className="flex min-h-11 items-center justify-center rounded-ctl bg-line px-3.5 text-sm font-bold text-coral hover:bg-line-hover"
       >
         Delete account
       </button>

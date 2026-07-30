@@ -12,7 +12,7 @@ export function AddCourseButton() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex min-h-11 items-center rounded-ctl bg-line px-4 py-2.5 text-sm font-bold text-ink-2 hover:bg-[#E6E2F2]"
+        className="flex min-h-11 items-center rounded-ctl bg-line px-4 py-2.5 text-sm font-bold text-ink-2 hover:bg-line-hover"
       >
         Add course
       </button>
