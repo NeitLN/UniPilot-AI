@@ -1,8 +1,8 @@
 # Kế hoạch triển khai — từ PRODUCT_REVIEW.md
 
 **Nguồn:** [`docs/PRODUCT_REVIEW.md`](./PRODUCT_REVIEW.md) (30/07/2026)
-**Trạng thái nền:** `main` @ `97ef595` — typecheck sạch, lint sạch, 144 unit test xanh
-**Tổng:** 5 phase, ~22 giờ
+**Trạng thái nền:** `main` @ `97acc0e` — typecheck sạch, lint sạch, 144 unit test + 12 E2E test xanh
+**Tổng:** 5 phase, ~22 giờ · **Phase 1: ✅ Hoàn thành** (xem §Phase 1 để biết chi tiết + phát hiện phát sinh)
 
 ---
 
@@ -31,6 +31,9 @@ Sau khi đọc kỹ code để lập kế hoạch, có 2 con số trong `PRODUCT
 
 > **Mục tiêu:** hai tính năng đã hoàn thiện nhưng đang hỏng — sửa trước mọi thứ khác.
 > **Thời lượng:** ~1 giờ · **Rủi ro:** rất thấp
+> **✅ Hoàn thành** — commit [`97acc0e`](https://github.com/NeitLN/UniPilot-AI/commit/97acc0e). Xác minh bằng số đo thật trên tài khoản demo: bar chart giờ ra đúng **98/105/107px** (khớp GPA 3.25/3.49/3.57, trước đó cả 3 đều 98px); ô search **358px** ở 390px viewport và **466px** ở 768px (trước đó 49px/36px). 12/12 E2E test xanh, 144/144 unit test xanh.
+>
+> **Phát hiện phát sinh ngoài kế hoạch:** viết test `layout.spec.ts` (mục 1.3) phát hiện `gpa.spec.ts` **chưa bao giờ dọn dữ liệu** sau khi test — tài khoản E2E tích luỹ 9 dòng điểm rác qua nhiều lần chạy, đủ để **tự nó** làm tràn ngang biểu đồ GPA ở 390px, độc lập với lỗi QA-01. Đã dọn 9+4 dòng rác và bổ sung bước dọn dẹp vào cả `gpa.spec.ts` lẫn `layout.spec.ts` để không tích luỹ lại.
 
 ### 1.1 — QA-01: Biểu đồ GPA bị flex ép bằng nhau
 
