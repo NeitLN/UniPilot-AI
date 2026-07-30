@@ -47,7 +47,7 @@ export default async function AssignmentsPage({
   let query = supabase
     .from("assignments")
     .select(
-      "id, course_id, title, due_at, weight, priority, status, progress, notes, reminder_at, archived_at, updated_at",
+      "id, course_id, title, due_at, weight, score, priority, status, progress, notes, reminder_at, archived_at, updated_at",
       { count: "exact" },
     )
     .order("due_at", { ascending: true });
@@ -94,6 +94,7 @@ export default async function AssignmentsPage({
       reminderAt: r.reminder_at,
       archivedAt: r.archived_at,
       updatedAt: r.updated_at,
+      score: r.score,
     })),
   );
 

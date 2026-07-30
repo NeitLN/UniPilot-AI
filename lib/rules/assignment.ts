@@ -23,6 +23,8 @@ export interface AssignmentInput {
   progress: number;
   notes: string;
   reminderAt: string;
+  /** Achieved score 0-100, null until graded (F-03). */
+  score: number | null;
 }
 
 export const REQUIRED = [
@@ -34,7 +36,7 @@ export const REQUIRED = [
 ] as const;
 
 export type FieldErrors = Partial<
-  Record<"title" | "courseId" | "dueAt" | "weight" | "priority" | "progress", string>
+  Record<"title" | "courseId" | "dueAt" | "weight" | "priority" | "progress" | "score", string>
 >;
 
 export function validateAssignment(input: AssignmentInput): FieldErrors {
@@ -59,6 +61,9 @@ export function validateAssignment(input: AssignmentInput): FieldErrors {
   }
   if (input.progress < 0 || input.progress > 100) {
     errors.progress = "Progress must be between 0 and 100.";
+  }
+  if (input.score !== null && (Number.isNaN(input.score) || input.score < 0 || input.score > 100)) {
+    errors.score = "Score must be between 0 and 100.";
   }
 
   return errors;

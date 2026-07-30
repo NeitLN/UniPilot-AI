@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
   dragsGpaDown,
+  estimateGradePoint,
   gpa,
   gpaBySemester,
   gpaContribution,
+  predictedCourseScore,
   qualityPoints,
   requiredAverage,
   validateGrade,
@@ -133,5 +135,38 @@ describe("validateGrade", () => {
     const errors = validateGrade({ ...base, courseId: "", semester: "  " });
     expect(errors.courseId).toBeDefined();
     expect(errors.semester).toBeDefined();
+  });
+});
+
+describe("predictedCourseScore", () => {
+  it("weights graded assignments by their own weight, ignoring ungraded ones", () => {
+    // (90*30 + 80*20) / (30+20) = 4300/50 = 86
+    expect(
+      predictedCourseScore([
+        { weight: 30, score: 90 },
+        { weight: 20, score: 80 },
+        { weight: 50, score: null },
+      ]),
+    ).toBe(86);
+  });
+
+  it("returns null when nothing is graded yet", () => {
+    expect(predictedCourseScore([{ weight: 30, score: null }])).toBeNull();
+  });
+
+  it("returns null for an empty list", () => {
+    expect(predictedCourseScore([])).toBeNull();
+  });
+});
+
+describe("estimateGradePoint", () => {
+  it("maps 100% to 4.0 and 75% to 3.0", () => {
+    expect(estimateGradePoint(100)).toBe(4);
+    expect(estimateGradePoint(75)).toBe(3);
+  });
+
+  it("clamps to the 0-4.0 range", () => {
+    expect(estimateGradePoint(-10)).toBe(0);
+    expect(estimateGradePoint(150)).toBe(4);
   });
 });

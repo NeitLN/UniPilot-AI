@@ -82,6 +82,7 @@ export interface Database {
           title: string;
           due_at: string;
           weight: number;
+          score: number | null;
           priority: AssignmentPriority;
           status: AssignmentStatus;
           progress: number;
@@ -98,6 +99,7 @@ export interface Database {
           title: string;
           due_at: string;
           weight: number;
+          score?: number | null;
           priority: AssignmentPriority;
           status?: AssignmentStatus;
           progress?: number;
@@ -114,6 +116,7 @@ export interface Database {
           title?: string;
           due_at?: string;
           weight?: number;
+          score?: number | null;
           priority?: AssignmentPriority;
           status?: AssignmentStatus;
           progress?: number;

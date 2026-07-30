@@ -21,6 +21,7 @@ const baseInput: AssignmentInput = {
   progress: 0,
   notes: "",
   reminderAt: "",
+  score: null,
 };
 
 describe("validateAssignment", () => {
@@ -53,6 +54,17 @@ describe("validateAssignment", () => {
     expect(validateAssignment({ ...baseInput, progress: 101 }).progress).toBeDefined();
     expect(validateAssignment({ ...baseInput, progress: -1 }).progress).toBeDefined();
     expect(validateAssignment({ ...baseInput, progress: 100 }).progress).toBeUndefined();
+  });
+
+  it("allows a null score (not graded yet)", () => {
+    expect(validateAssignment({ ...baseInput, score: null }).score).toBeUndefined();
+  });
+
+  it("rejects score outside 0-100 but accepts the boundaries", () => {
+    expect(validateAssignment({ ...baseInput, score: 101 }).score).toBeDefined();
+    expect(validateAssignment({ ...baseInput, score: -1 }).score).toBeDefined();
+    expect(validateAssignment({ ...baseInput, score: 0 }).score).toBeUndefined();
+    expect(validateAssignment({ ...baseInput, score: 100 }).score).toBeUndefined();
   });
 });
 

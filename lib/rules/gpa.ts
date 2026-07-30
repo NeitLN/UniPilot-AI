@@ -76,6 +76,41 @@ export function gpaBySemester(
     .sort((a, b) => a.semester.localeCompare(b.semester));
 }
 
+// F-03 (future_update.md) — rolling an assignment's `weight` (previously
+// stored but never used anywhere) up into a predicted course grade.
+
+export interface ScoredAssignmentLike {
+  weight: number;
+  score: number | null;
+}
+
+/**
+ * Weighted average of only the *graded* assignments (score !== null),
+ * normalized by their own weight sum rather than a full 100 — so a course
+ * with 2 of 5 assignments graded still shows a real number instead of one
+ * artificially dragged toward 0 by ungraded work. Returns null when
+ * nothing is graded yet (there's nothing to predict from).
+ */
+export function predictedCourseScore(assignments: ScoredAssignmentLike[]): number | null {
+  const graded = assignments.filter(
+    (a): a is ScoredAssignmentLike & { score: number } => a.score !== null,
+  );
+  const totalWeight = graded.reduce((s, a) => s + a.weight, 0);
+  if (graded.length === 0 || totalWeight === 0) return null;
+  const weighted = graded.reduce((s, a) => s + a.score * a.weight, 0);
+  return Number((weighted / totalWeight).toFixed(2));
+}
+
+/**
+ * Rough percent-to-4.0 linear estimate (100% -> 4.0, 75% -> 3.0, ...).
+ * This is intentionally a straight line, not the registrar's actual
+ * letter-grade curve — it exists to give a *directional* GPA estimate from
+ * in-progress coursework, not a guaranteed final grade point.
+ */
+export function estimateGradePoint(percentScore: number): number {
+  return Number(Math.max(0, Math.min(4, percentScore / 25)).toFixed(2));
+}
+
 export interface GradeInput {
   courseId: string;
   semester: string;

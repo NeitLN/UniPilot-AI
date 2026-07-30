@@ -30,6 +30,7 @@ export interface AssignmentRow {
   reminderAt: string | null;
   archivedAt: string | null;
   updatedAt: string;
+  score: number | null;
 }
 
 export function AssignmentItem({
@@ -80,6 +81,9 @@ export function AssignmentItem({
           )}
           {assignment.priority === "high" && (
             <Tag tone="tangerine">{priorityLabel(assignment)}</Tag>
+          )}
+          {assignment.score !== null && (
+            <Tag tone="violet">Score {assignment.score}%</Tag>
           )}
         </div>
       </div>
@@ -133,6 +137,7 @@ export function AssignmentItem({
               ? toLocalInputValue(assignment.reminderAt)
               : "",
             updatedAt: assignment.updatedAt,
+            score: assignment.score,
           }}
           onSaved={() => setEditing(false)}
           onCancel={() => setEditing(false)}

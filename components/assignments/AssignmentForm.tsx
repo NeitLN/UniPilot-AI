@@ -34,6 +34,7 @@ export interface AssignmentFormValues {
   notes: string;
   reminderAt: string;
   updatedAt: string;
+  score: number | null;
 }
 
 export interface AssignmentFormProps {
@@ -216,6 +217,20 @@ export function AssignmentForm({
           value={progress}
           onChange={(e) => setProgress(Number(e.target.value))}
           className="w-full accent-violet"
+        />
+      </Field>
+
+      <Field label="Score % — optional, once graded" error={state.errors.score}>
+        <input
+          name="score"
+          type="number"
+          inputMode="decimal"
+          min={0}
+          max={100}
+          step={0.5}
+          placeholder="e.g. 92"
+          defaultValue={initialValues?.score ?? undefined}
+          className={inputClass(Boolean(state.errors.score))}
         />
       </Field>
 

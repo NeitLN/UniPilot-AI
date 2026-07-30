@@ -28,6 +28,7 @@ function readInput(formData: FormData): AssignmentInput {
     progress: Number(formData.get("progress") ?? 0),
     notes: String(formData.get("notes") ?? "").trim(),
     reminderAt: String(formData.get("reminderAt") ?? ""),
+    score: formData.get("score") ? Number(formData.get("score")) : null,
   };
 }
 
@@ -42,6 +43,7 @@ function toRow(input: AssignmentInput) {
     progress: input.progress,
     notes: input.notes || null,
     reminder_at: input.reminderAt ? new Date(input.reminderAt).toISOString() : null,
+    score: input.score,
   };
 }
 
