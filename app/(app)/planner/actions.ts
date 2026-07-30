@@ -141,6 +141,21 @@ export async function confirmPlan(planId: string): Promise<ConfirmPlanResult> {
       })),
   );
 
+  // QA4-01 (docs/PRODUCT_REVIEW_4.md): only one plan may be "active" at a
+  // time. This used to just activate the new one, leaving whatever was
+  // already active untouched — /planner and /reports' own
+  // .limit(1).maybeSingle() then silently picked an arbitrary one of
+  // several "active" rows, and each confirm re-inserted a full set of
+  // reminders on top of the previous plan's (see migration 0014 for the
+  // one-time cleanup and the DB-level constraint that makes this
+  // unrepresentable going forward, not just code-level best-effort).
+  const { error: demoteError } = await supabase
+    .from("study_plans")
+    .update({ status: "cancelled" })
+    .eq("user_id", user.id)
+    .eq("status", "active");
+  if (demoteError) throw new Error(demoteError.message);
+
   const { error: planError } = await supabase
     .from("study_plans")
     .update({ status: "active", confirmed_at: new Date().toISOString() })
