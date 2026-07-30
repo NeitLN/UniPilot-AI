@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import Link from "next/link";
 import { login, signup, type AuthFormState } from "./actions";
 
 const initialState: AuthFormState = {};
@@ -70,6 +71,15 @@ export function LoginForm() {
             className="mt-1 w-full rounded-ctl border border-border-subtle px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-violet"
           />
         </label>
+
+        {isLogin && (
+          <Link
+            href="/forgot-password"
+            className="-mt-1 self-end text-xs font-bold text-violet hover:underline"
+          >
+            Forgot password?
+          </Link>
+        )}
 
         {state?.error && (
           <p

@@ -1,7 +1,17 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PUBLIC_ROUTES = ["/login"];
+const PUBLIC_ROUTES = ["/login", "/forgot-password"];
+
+// FR-21 (docs/PRODUCT_REVIEW.md): distinct from PUBLIC_ROUTES on purpose.
+// /auth/confirm exchanges a recovery link's token_hash for a session
+// *during* this exact request — it must be reachable while `user` is still
+// null, before that exchange has happened. /reset-password then needs the
+// opposite guarantee PUBLIC_ROUTES gives /login: PUBLIC_ROUTES redirects a
+// signed-in user *away*, which would boot someone who just followed their
+// reset link off the page the instant their recovery session takes effect,
+// before they ever get to set a new password.
+const ALWAYS_ACCESSIBLE_ROUTES = ["/reset-password", "/auth/confirm"];
 
 /**
  * Refreshes the Supabase auth session on every request and redirects
@@ -45,8 +55,11 @@ export async function updateSession(request: NextRequest) {
   const isPublicRoute = PUBLIC_ROUTES.some((route) =>
     pathname.startsWith(route),
   );
+  const isAlwaysAccessible = ALWAYS_ACCESSIBLE_ROUTES.some((route) =>
+    pathname.startsWith(route),
+  );
 
-  if (!user && !isPublicRoute) {
+  if (!user && !isPublicRoute && !isAlwaysAccessible) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
