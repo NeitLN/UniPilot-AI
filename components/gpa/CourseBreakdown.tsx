@@ -43,7 +43,7 @@ export function CourseBreakdown({
   const hiddenCount = grades.length - visibleGrades.length;
 
   return (
-    <div className="rounded-card bg-card p-5">
+    <div className="min-w-0 rounded-card bg-card p-5">
       <h2 className="font-display text-lg font-bold text-foreground">Course breakdown</h2>
 
       {grades.length === 0 ? (

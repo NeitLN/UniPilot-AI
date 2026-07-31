@@ -26,7 +26,7 @@ export async function RiskHud() {
   const result = computation.status === "ok" ? computation.result : null;
 
   return (
-    <div className="flex flex-col gap-4 rounded-card bg-ink px-6 py-5 text-white sm:flex-row sm:items-center">
+    <div className="flex flex-col gap-4 rounded-card bg-ink px-6 py-5 text-white lg:flex-row lg:items-center">
       <div className="flex-1">
         <div className="flex flex-wrap items-center gap-2.5">
           <h2 className="font-display text-[19px] font-bold">Workload risk</h2>
@@ -76,7 +76,7 @@ export async function RiskHud() {
       {result && (
         <Link
           href="/risk"
-          className="flex min-h-11 shrink-0 items-center justify-center rounded-ctl bg-lime px-4 py-2.5 text-center text-[13px] font-extrabold text-ink hover:bg-lime-deep sm:self-center"
+          className="flex min-h-11 shrink-0 items-center justify-center rounded-ctl bg-lime px-4 py-2.5 text-center text-[13px] font-extrabold text-ink hover:bg-lime-deep lg:self-center"
         >
           View report
         </Link>

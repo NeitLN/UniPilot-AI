@@ -60,7 +60,7 @@ export default function DashboardPage() {
       </Suspense>
 
       <div className="flex flex-col gap-3.5 lg:grid lg:grid-cols-[1.4fr_1fr] lg:items-start">
-        <div className="flex flex-col gap-3.5">
+        <div className="flex min-w-0 flex-col gap-3.5">
           <Suspense fallback={<AssignmentSummarySkeleton title="Due soon" />}>
             <DueSoonSection />
           </Suspense>
@@ -69,7 +69,7 @@ export default function DashboardPage() {
           </Suspense>
         </div>
 
-        <div className="flex flex-col gap-3.5">
+        <div className="flex min-w-0 flex-col gap-3.5">
           <Suspense fallback={<FocusCardSkeleton />}>
             <FocusCard />
           </Suspense>

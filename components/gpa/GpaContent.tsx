@@ -73,7 +73,7 @@ export async function GpaContent() {
       <div className="flex flex-col gap-3.5 lg:grid lg:grid-cols-[1.4fr_1fr] lg:items-start">
         <CourseBreakdown grades={grades} courses={courses} overallGpa={overallGpa} />
 
-        <div className="flex flex-col gap-3.5">
+        <div className="flex min-w-0 flex-col gap-3.5">
           <GpaTrendChart points={trendPoints} targetGpa={profile?.target_gpa ?? null} />
           <PredictedGrades courses={predictedCourses} />
           <ForecastCard
@@ -95,8 +95,8 @@ export function GpaContentSkeleton() {
         <div className="h-11 w-32 animate-pulse rounded-ctl bg-ink/10" />
       </div>
       <div className="flex flex-col gap-3.5 lg:grid lg:grid-cols-[1.4fr_1fr] lg:items-start">
-        <div className="h-64 animate-pulse rounded-card bg-card" />
-        <div className="flex flex-col gap-3.5">
+        <div className="h-64 min-w-0 animate-pulse rounded-card bg-card" />
+        <div className="flex min-w-0 flex-col gap-3.5">
           <div className="h-40 animate-pulse rounded-card bg-card" />
           <div className="h-40 animate-pulse rounded-card bg-card" />
         </div>

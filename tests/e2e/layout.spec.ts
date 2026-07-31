@@ -19,8 +19,16 @@ const ROUTES = [
   "/gpa",
   "/risk",
   "/reports",
+  "/notifications",
   "/settings",
 ];
+
+// D-01 (docs/UIUX_REVIEW.md): this used to only check 390px, which is
+// exactly why /gpa's desktop overflow (+96px at 1280, +352px at 1024)
+// survived three prior review rounds — nothing ever loaded it wider than
+// a phone. 768/1024 also catch the sidebar-plus-row-layout crunch zone
+// (RiskHud) that neither a pure-mobile nor a pure-desktop width exposes.
+const OVERFLOW_WIDTHS = [390, 768, 1024, 1280, 1440];
 
 test.describe("Layout regressions (docs/PRODUCT_REVIEW.md)", () => {
   // QA-01 — GPA trend bars used to all render at the same height regardless
@@ -91,16 +99,18 @@ test.describe("Layout regressions (docs/PRODUCT_REVIEW.md)", () => {
     });
   }
 
-  test("no route overflows horizontally at 390px", async ({ page }) => {
-    await page.setViewportSize({ width: 390, height: 844 });
-    for (const route of ROUTES) {
-      await page.goto(route);
-      await page.waitForLoadState("networkidle");
-      const overflowing = await page.evaluate(() => {
-        const de = document.documentElement;
-        return de.scrollWidth > de.clientWidth + 1;
-      });
-      expect(overflowing, `${route} overflows horizontally at 390px`).toBe(false);
-    }
-  });
+  for (const width of OVERFLOW_WIDTHS) {
+    test(`no route overflows horizontally at ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      for (const route of ROUTES) {
+        await page.goto(route);
+        await page.waitForLoadState("networkidle");
+        const overflowing = await page.evaluate(() => {
+          const de = document.documentElement;
+          return de.scrollWidth > de.clientWidth + 1;
+        });
+        expect(overflowing, `${route} overflows horizontally at ${width}px`).toBe(false);
+      }
+    });
+  }
 });

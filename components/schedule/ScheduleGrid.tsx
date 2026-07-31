@@ -65,11 +65,11 @@ function BlockCard({
       onClick={() => onSelect(block.id)}
       className="w-full rounded-ctl bg-line px-3 py-2 text-left hover:bg-line-hover"
     >
-      <p className="truncate text-[12.5px] font-bold text-foreground">{block.title}</p>
+      <p className="break-words text-[12.5px] font-bold text-foreground">{block.title}</p>
       {/* Formatted in the runtime's local timezone — expected to differ
           between SSR and hydration, not a real mismatch. */}
       <p
-        className="mt-0.5 truncate text-[11px] font-semibold text-ink-3"
+        className="mt-0.5 break-words text-[11px] font-semibold text-ink-3"
         suppressHydrationWarning
       >
         {blockSubtitle(block)}
@@ -171,9 +171,13 @@ function WeekColumns({
 
   // UX-06 (docs/PRODUCT_REVIEW.md): a bare weekend usually adds 2 empty
   // cards to scroll past on mobile's stacked grid-cols-1 layout — collapsed
-  // into one row there when neither day has anything. Desktop's
-  // sm:grid-cols-7 keeps both individual cells (hidden only on mobile) so
-  // the 7-column grid alignment never shifts.
+  // into one row there when neither day has anything.
+  // D-02 (docs/UIUX_REVIEW.md): desktop's sm:grid-cols-7 used to keep both
+  // individual empty cells instead, so a bare weekend went from one clear
+  // message on mobile to two silent blank columns on desktop. The weekend
+  // is always the last two columns (week starts Monday), so the collapsed
+  // message spans them with sm:col-span-2 instead of only ever showing on
+  // mobile's single-column stack.
   const isWeekend = (day: Date) => day.getDay() === 0 || day.getDay() === 6;
   const weekendEntries = dayEntries.filter((e) => isWeekend(e.day));
   const weekendEmpty =
@@ -188,11 +192,11 @@ function WeekColumns({
           dayBlocks={dayBlocks}
           isToday={isSameDay(day, today)}
           onSelect={onSelect}
-          className={weekendEmpty && isWeekend(day) ? "hidden sm:block" : undefined}
+          className={weekendEmpty && isWeekend(day) ? "hidden" : undefined}
         />
       ))}
       {weekendEmpty && (
-        <div className="rounded-card bg-card p-3 text-center sm:hidden">
+        <div className="rounded-card bg-card p-3 text-center sm:col-span-2">
           <p className="text-[11.5px] font-semibold text-ink-3">Weekend — no schedule</p>
         </div>
       )}
