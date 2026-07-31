@@ -44,9 +44,9 @@ self.addEventListener("fetch", (event) => {
 });
 
 self.addEventListener("push", (event) => {
-  let data = { title: "UniPilot AI", body: "" };
+  let data = { title: "UniPilot AI", body: "", url: "/" };
   try {
-    if (event.data) data = event.data.json();
+    if (event.data) data = { ...data, ...event.data.json() };
   } catch {
     // Malformed payload — fall back to a generic notification rather than
     // silently dropping it.
@@ -57,18 +57,31 @@ self.addEventListener("push", (event) => {
       body: data.body || "",
       icon: "/pilo-icon.svg",
       badge: "/pilo-icon.svg",
+      data: { url: data.url || "/" },
     }),
   );
 });
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
+
+  const requestedPath = event.notification.data?.url || "/";
+  const destination = new URL(requestedPath, self.location.origin);
+  // A push payload is server-controlled data, not user input, but this
+  // still guards against ever navigating a client to another origin.
+  const safeUrl =
+    destination.origin === self.location.origin ? destination.href : self.location.origin + "/";
+
   event.waitUntil(
     self.clients.matchAll({ type: "window" }).then((clients) => {
       for (const client of clients) {
-        if ("focus" in client) return client.focus();
+        if ("focus" in client) {
+          return "navigate" in client
+            ? client.navigate(safeUrl).then(() => client.focus())
+            : client.focus();
+        }
       }
-      if (self.clients.openWindow) return self.clients.openWindow("/");
+      if (self.clients.openWindow) return self.clients.openWindow(safeUrl);
       return undefined;
     }),
   );

@@ -20,6 +20,8 @@ export interface PushSubscriptionRecord {
 export interface PushPayload {
   title: string;
   body: string;
+  /** Same-origin path the click should open — sw.js falls back to "/" if omitted. */
+  url?: string;
 }
 
 /** Sends to a single subscription; throws on failure (e.g. a dead endpoint)

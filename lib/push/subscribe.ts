@@ -53,3 +53,43 @@ export async function ensurePushSubscription(): Promise<PushPermissionResult> {
 
   return "granted";
 }
+
+export type PushSubscriptionState = "unsupported" | "default" | "enabled" | "denied";
+
+/** Read-only status check for UI (e.g. Settings) — never prompts. */
+export async function getPushSubscriptionState(): Promise<PushSubscriptionState> {
+  if (typeof window === "undefined") return "unsupported";
+  if (
+    !("serviceWorker" in navigator) ||
+    !("PushManager" in window) ||
+    !("Notification" in window)
+  ) {
+    return "unsupported";
+  }
+  if (Notification.permission === "denied") return "denied";
+
+  const registration = await navigator.serviceWorker.getRegistration();
+  if (!registration) return "default";
+  const subscription = await registration.pushManager.getSubscription();
+  return subscription ? "enabled" : "default";
+}
+
+/** Unsubscribes this device and removes its server-side record. Browser
+ * permission itself can't be revoked from script — if the user wants to
+ * re-enable later they'll just get prompted again (permission is still
+ * "granted", so ensurePushSubscription won't even need to re-ask). */
+export async function disablePushSubscription(): Promise<void> {
+  if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
+
+  const registration = await navigator.serviceWorker.getRegistration();
+  if (!registration) return;
+  const subscription = await registration.pushManager.getSubscription();
+  if (!subscription) return;
+
+  await fetch("/api/push/subscribe", {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ endpoint: subscription.endpoint }),
+  });
+  await subscription.unsubscribe();
+}

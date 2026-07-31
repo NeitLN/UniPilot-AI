@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { SettingsForm } from "@/components/settings/SettingsForm";
 import { ThemeToggle } from "@/components/settings/ThemeToggle";
+import { PushNotificationSettings } from "@/components/settings/PushNotificationSettings";
 import { ExportData } from "@/components/settings/ExportData";
 import { DeleteAccountSection } from "@/components/settings/DeleteAccountSection";
 
@@ -33,6 +34,10 @@ export default async function SettingsPage() {
             targetGpa: profile?.target_gpa ?? null,
           }}
         />
+      </div>
+
+      <div className="max-w-md rounded-card bg-card p-5">
+        <PushNotificationSettings />
       </div>
 
       <div className="max-w-md rounded-card bg-card p-5">

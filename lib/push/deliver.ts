@@ -2,38 +2,56 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
 import { sendPushNotification } from "./send";
+import { notificationTargetUrl } from "@/lib/notifications/target-url";
 
 export interface DeliverResult {
   deliveredCount: number;
 }
 
 type PushStatus = "sent" | "failed" | "no_subscription";
-type PushSubscriptionRow = { endpoint: string; p256dh: string; auth: string };
+type PushSubscriptionRow = { id: string; endpoint: string; p256dh: string; auth: string };
+
+function pushErrorStatusCode(cause: unknown): number | null {
+  if (typeof cause === "object" && cause !== null && "statusCode" in cause) {
+    const raw = (cause as { statusCode: unknown }).statusCode;
+    return typeof raw === "number" ? raw : null;
+  }
+  return null;
+}
 
 /** Attempts a push across every one of the user's subscribed devices.
  * TC-05: the caller always stamps `delivered_at` regardless of this
  * result — the in-app list must never depend on push actually working
  * (permission declined, no subscription yet, or a failed send all still
- * count as "delivered to the in-app list"). */
+ * count as "delivered to the in-app list"). Also reports back which
+ * subscriptions came back 404/410 (the push service confirming the
+ * endpoint is gone) so the caller can delete them — otherwise a dead
+ * device's subscription gets retried forever on every cron tick. */
 async function pushToSubscriptions(
   subscriptions: PushSubscriptionRow[],
-  notification: { title: string; body: string | null },
-): Promise<PushStatus> {
-  if (subscriptions.length === 0) return "no_subscription";
+  notification: { kind: string; title: string; body: string | null },
+): Promise<{ status: PushStatus; deadSubscriptionIds: string[] }> {
+  if (subscriptions.length === 0) return { status: "no_subscription", deadSubscriptionIds: [] };
 
   let status: PushStatus = "failed";
+  const deadSubscriptionIds: string[] = [];
   for (const sub of subscriptions) {
     try {
       await sendPushNotification(sub, {
         title: notification.title,
         body: notification.body ?? "",
+        url: notificationTargetUrl(notification.kind),
       });
       status = "sent";
-    } catch {
+    } catch (cause) {
       // One dead endpoint (e.g. an old device) shouldn't stop the others.
+      const statusCode = pushErrorStatusCode(cause);
+      if (statusCode === 404 || statusCode === 410) {
+        deadSubscriptionIds.push(sub.id);
+      }
     }
   }
-  return status;
+  return { status, deadSubscriptionIds };
 }
 
 /**
@@ -51,7 +69,7 @@ export async function deliverDueNotifications(
 
   const { data: due } = await supabase
     .from("notifications")
-    .select("id, title, body")
+    .select("id, kind, title, body")
     .eq("user_id", userId)
     .is("delivered_at", null)
     .lte("scheduled_at", now);
@@ -60,15 +78,24 @@ export async function deliverDueNotifications(
 
   const { data: subscriptions } = await supabase
     .from("push_subscriptions")
-    .select("endpoint, p256dh, auth")
+    .select("id, endpoint, p256dh, auth")
     .eq("user_id", userId);
 
+  const deadSubscriptionIds = new Set<string>();
   for (const notification of due) {
-    const pushStatus = await pushToSubscriptions(subscriptions ?? [], notification);
+    const { status, deadSubscriptionIds: dead } = await pushToSubscriptions(
+      subscriptions ?? [],
+      notification,
+    );
+    for (const id of dead) deadSubscriptionIds.add(id);
     await supabase
       .from("notifications")
-      .update({ delivered_at: now, push_status: pushStatus })
+      .update({ delivered_at: now, push_status: status })
       .eq("id", notification.id);
+  }
+
+  if (deadSubscriptionIds.size > 0) {
+    await supabase.from("push_subscriptions").delete().in("id", [...deadSubscriptionIds]);
   }
 
   return { deliveredCount: due.length };
@@ -97,7 +124,7 @@ export async function deliverAllDueNotifications(
 
   const { data: due } = await supabase
     .from("notifications")
-    .select("id, user_id, title, body")
+    .select("id, user_id, kind, title, body")
     .is("delivered_at", null)
     .lte("scheduled_at", now);
 
@@ -106,13 +133,13 @@ export async function deliverAllDueNotifications(
   const userIds = [...new Set(due.map((n) => n.user_id))];
   const { data: subscriptionRows } = await supabase
     .from("push_subscriptions")
-    .select("user_id, endpoint, p256dh, auth")
+    .select("id, user_id, endpoint, p256dh, auth")
     .in("user_id", userIds);
 
   const subscriptionsByUser = new Map<string, PushSubscriptionRow[]>();
   for (const s of subscriptionRows ?? []) {
     const list = subscriptionsByUser.get(s.user_id) ?? [];
-    list.push({ endpoint: s.endpoint, p256dh: s.p256dh, auth: s.auth });
+    list.push({ id: s.id, endpoint: s.endpoint, p256dh: s.p256dh, auth: s.auth });
     subscriptionsByUser.set(s.user_id, list);
   }
 
@@ -121,12 +148,18 @@ export async function deliverAllDueNotifications(
     failed: [],
     no_subscription: [],
   };
+  const deadSubscriptionIds = new Set<string>();
   for (const notification of due) {
-    const status = await pushToSubscriptions(
+    const { status, deadSubscriptionIds: dead } = await pushToSubscriptions(
       subscriptionsByUser.get(notification.user_id) ?? [],
       notification,
     );
     idsByStatus[status].push(notification.id);
+    for (const id of dead) deadSubscriptionIds.add(id);
+  }
+
+  if (deadSubscriptionIds.size > 0) {
+    await supabase.from("push_subscriptions").delete().in("id", [...deadSubscriptionIds]);
   }
 
   for (const [status, ids] of Object.entries(idsByStatus) as [PushStatus, string[]][]) {
