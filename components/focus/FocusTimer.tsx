@@ -228,134 +228,151 @@ export function FocusTimer({ assignments }: { assignments: FocusAssignmentOption
   );
 
   return (
-    <div className={`rounded-card p-5 text-center ${isBreak ? "bg-mint" : "bg-lime"}`}>
-      {!isRunning && (
-        <label className="mb-3 block text-left text-xs font-bold text-ink/70">
-          Assignment
-          <select
-            value={selectedId}
-            onChange={(e) => setSelectedId(e.target.value)}
-            disabled={assignments.length === 0}
-            className="mt-1 w-full rounded-ctl border border-ink/15 bg-card px-3 py-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-violet disabled:opacity-60"
-          >
-            {assignments.length === 0 ? (
-              <option value="">No active assignments</option>
-            ) : (
-              assignments.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.title}
-                </option>
-              ))
-            )}
-          </select>
-        </label>
-      )}
+    <div
+      className={`flex h-full flex-col rounded-card p-5 text-center ${isBreak ? "bg-mint" : "bg-lime"}`}
+    >
+      {/* Top: assignment picker (idle) or the running/break title — height
+          varies with content, unlike the timer block below it. */}
+      <div>
+        {!isRunning && (
+          <label className="mb-3 block text-left text-xs font-bold text-ink/70">
+            Assignment
+            <select
+              value={selectedId}
+              onChange={(e) => setSelectedId(e.target.value)}
+              disabled={assignments.length === 0}
+              className="mt-1 w-full rounded-ctl border border-ink/15 bg-card px-3 py-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-violet disabled:opacity-60"
+            >
+              {assignments.length === 0 ? (
+                <option value="">No active assignments</option>
+              ) : (
+                assignments.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.title}
+                  </option>
+                ))
+              )}
+            </select>
+          </label>
+        )}
 
-      {isRunning && isBreak && (
-        <p className="mb-2 text-[12.5px] font-bold text-ink/70">
-          {session.breakKind === "long" ? "Long break" : "Short break"} — nice work
-          on {activeAssignment?.title ?? "that cycle"}
-        </p>
-      )}
-      {isRunning && !isBreak && activeAssignment && (
-        <p className="mb-2 truncate text-[12.5px] font-bold text-ink/70">
-          {activeAssignment.title}
-        </p>
-      )}
+        {isRunning && isBreak && (
+          <p className="mb-2 text-[12.5px] font-bold text-ink/70">
+            {session.breakKind === "long" ? "Long break" : "Short break"} — nice work
+            on {activeAssignment?.title ?? "that cycle"}
+          </p>
+        )}
+        {isRunning && !isBreak && activeAssignment && (
+          <p className="mb-2 truncate text-[12.5px] font-bold text-ink/70">
+            {activeAssignment.title}
+          </p>
+        )}
+      </div>
 
-      <div className="relative mx-auto flex h-[150px] w-[150px] items-center justify-center">
-        <svg viewBox="0 0 150 150" className="absolute inset-0 -rotate-90">
-          <circle cx="75" cy="75" r={RADIUS} fill="none" strokeWidth="12" className="stroke-ink/15" />
-          <circle
-            cx="75"
-            cy="75"
-            r={RADIUS}
-            fill="none"
-            strokeWidth="12"
-            strokeLinecap="round"
-            strokeDasharray={CIRCUMFERENCE}
-            strokeDashoffset={dashOffset}
-            className="stroke-ink motion-safe:transition-[stroke-dashoffset] motion-safe:duration-200 motion-safe:ease-linear"
-          />
-        </svg>
-        <p className="font-display text-4xl font-bold text-ink tabular-nums">
-          {formatClock(displayRemaining)}
+      {/* Middle: the timer itself, vertically centered in whatever height
+          this card ends up with — on the /focus page it sits next to a
+          taller "This week" card (docs/PRODUCT_REVIEW_4.md, dashboard-gap
+          feedback), and h-full above stretches this card to match instead
+          of leaving canvas-colored space beneath a short card. */}
+      <div className="flex flex-1 flex-col items-center justify-center">
+        <div className="relative mx-auto flex h-[190px] w-[190px] items-center justify-center">
+          <svg viewBox="0 0 150 150" className="absolute inset-0 -rotate-90">
+            <circle cx="75" cy="75" r={RADIUS} fill="none" strokeWidth="12" className="stroke-ink/15" />
+            <circle
+              cx="75"
+              cy="75"
+              r={RADIUS}
+              fill="none"
+              strokeWidth="12"
+              strokeLinecap="round"
+              strokeDasharray={CIRCUMFERENCE}
+              strokeDashoffset={dashOffset}
+              className="stroke-ink motion-safe:transition-[stroke-dashoffset] motion-safe:duration-200 motion-safe:ease-linear"
+            />
+          </svg>
+          <p className="font-display text-5xl font-bold text-ink tabular-nums">
+            {formatClock(displayRemaining)}
+          </p>
+        </div>
+
+        <p className="mt-3 text-[10.5px] font-extrabold uppercase tracking-[0.14em] text-ink/60">
+          {isBreak ? "Break" : "Focus timer"}
+          {isPaused ? " · Paused" : ""}
         </p>
       </div>
 
-      <p className="mt-3 text-[10.5px] font-extrabold uppercase tracking-[0.14em] text-ink/60">
-        {isBreak ? "Break" : "Focus timer"}
-        {isPaused ? " · Paused" : ""}
-      </p>
-
-      {isRunning ? (
-        <div className="mt-4 flex gap-2">
-          <button
-            type="button"
-            onClick={handlePauseToggle}
-            disabled={pending}
-            className="flex-1 rounded-ctl bg-card py-3 text-sm font-extrabold text-foreground disabled:opacity-60"
-          >
-            {isPaused ? "Resume" : "Pause"}
-          </button>
-          {isBreak ? (
+      {/* Bottom: actions, pinned to the card's bottom edge regardless of
+          how much extra height the middle section absorbed above. */}
+      <div>
+        {isRunning ? (
+          <div className="mt-4 flex gap-2">
             <button
               type="button"
-              onClick={skipBreak}
-              className="flex-1 rounded-ctl bg-ink py-3 text-sm font-extrabold text-white"
-            >
-              Skip break
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setConfirmingStop(true)}
+              onClick={handlePauseToggle}
               disabled={pending}
-              className="flex-1 rounded-ctl bg-ink py-3 text-sm font-extrabold text-white disabled:opacity-60"
+              className="flex-1 rounded-ctl bg-card py-3 text-sm font-extrabold text-foreground disabled:opacity-60"
             >
-              Stop
+              {isPaused ? "Resume" : "Pause"}
             </button>
-          )}
-        </div>
-      ) : (
-        <>
-          <button
-            type="button"
-            onClick={handleStart}
-            disabled={!selectedId}
-            className="mt-4 w-full rounded-ctl bg-ink py-3 text-sm font-extrabold text-white disabled:opacity-45"
-          >
-            Start
-          </button>
-          {!selectedId && (
-            <p className="mt-2 text-[11.5px] font-semibold text-ink/70">
-              {assignments.length === 0 ? (
-                <>
-                  Add an assignment first — Pomodoro needs one to log against.{" "}
-                  <Link href="/assignments" className="font-extrabold text-violet hover:underline">
-                    Add one now →
-                  </Link>
-                </>
-              ) : (
-                "Pick an assignment first."
-              )}
-            </p>
-          )}
-        </>
-      )}
+            {isBreak ? (
+              <button
+                type="button"
+                onClick={skipBreak}
+                className="flex-1 rounded-ctl bg-ink py-3 text-sm font-extrabold text-white"
+              >
+                Skip break
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setConfirmingStop(true)}
+                disabled={pending}
+                className="flex-1 rounded-ctl bg-ink py-3 text-sm font-extrabold text-white disabled:opacity-60"
+              >
+                Stop
+              </button>
+            )}
+          </div>
+        ) : (
+          <>
+            <button
+              type="button"
+              onClick={handleStart}
+              disabled={!selectedId}
+              className="mt-4 w-full rounded-ctl bg-ink py-3 text-sm font-extrabold text-white disabled:opacity-45"
+            >
+              Start
+            </button>
+            {!selectedId && (
+              <p className="mt-2 text-[11.5px] font-semibold text-ink/70">
+                {assignments.length === 0 ? (
+                  <>
+                    Add an assignment first — Pomodoro needs one to log against.{" "}
+                    <Link href="/assignments" className="font-extrabold text-violet hover:underline">
+                      Add one now →
+                    </Link>
+                  </>
+                ) : (
+                  "Pick an assignment first."
+                )}
+              </p>
+            )}
+          </>
+        )}
 
-      {finishedPhase && !isRunning && (
-        <div className="mt-3 flex items-center justify-center gap-2">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-card">
-            <Pilo mood="happy" size={24} />
-          </span>
-          <p className="text-[12.5px] font-bold text-ink">
-            {finishedPhase === "work"
-              ? "Cycle logged — break started."
-              : "Break's over — ready for another cycle?"}
-          </p>
-        </div>
-      )}
+        {finishedPhase && !isRunning && (
+          <div className="mt-3 flex items-center justify-center gap-2">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-card">
+              <Pilo mood="happy" size={24} />
+            </span>
+            <p className="text-[12.5px] font-bold text-ink">
+              {finishedPhase === "work"
+                ? "Cycle logged — break started."
+                : "Break's over — ready for another cycle?"}
+            </p>
+          </div>
+        )}
+      </div>
 
       <Modal
         open={confirmingStop}

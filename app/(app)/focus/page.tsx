@@ -144,7 +144,7 @@ export default async function FocusPage() {
         />
       </div>
 
-      <div className="flex flex-col gap-3.5 lg:grid lg:grid-cols-[1fr_1.4fr] lg:items-start">
+      <div className="flex flex-col gap-3.5 lg:grid lg:grid-cols-[1fr_1.4fr] lg:items-stretch">
         <FocusTimer
           assignments={activeAssignments.map((a) => ({ id: a.id, title: a.title }))}
         />
