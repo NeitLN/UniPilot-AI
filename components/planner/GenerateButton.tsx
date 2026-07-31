@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useOnlineStatus } from "@/lib/offline/useOnlineStatus";
 import { FieldError } from "@/components/ui/FieldError";
+import { FieldSuccess } from "@/components/ui/FieldSuccess";
 
 export interface GenerateButtonProps {
   disabled: boolean;
@@ -115,12 +116,12 @@ export function GenerateButton({ disabled, disabledReasons, label }: GenerateBut
       )}
 
       {result && (
-        <p className="text-[11.5px] font-semibold text-mint">
+        <FieldSuccess className="text-[11.5px]">
           Scheduled {result.sessionCount} session{result.sessionCount === 1 ? "" : "s"}
           {result.rejectedCount > 0
             ? `, ${result.rejectedCount} didn't fit and ${result.rejectedCount === 1 ? "was" : "were"} left out.`
             : "."}
-        </p>
+        </FieldSuccess>
       )}
     </div>
   );

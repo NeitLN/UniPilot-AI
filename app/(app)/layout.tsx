@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
 import { SidebarNav } from "@/components/dashboard/SidebarNav";
+import { MobileBottomNav } from "@/components/dashboard/MobileBottomNav";
 import { UserFooter } from "@/components/dashboard/UserFooter";
 import { SemesterLabel, SemesterLabelSkeleton } from "@/components/dashboard/SemesterLabel";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
@@ -76,59 +77,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           {children}
         </main>
 
-        <nav
-          className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-8 gap-0.5 border-t border-border-subtle-2 bg-card px-1.5 py-2 md:hidden"
-          aria-label="Mobile"
-        >
-          <Link
-            href="/"
-            className="flex min-h-11 flex-col items-center justify-center rounded-ctl px-0.5 text-center text-[9.5px] font-bold text-ink-2"
-          >
-            Home
-          </Link>
-          <Link
-            href="/assignments"
-            className="flex min-h-11 flex-col items-center justify-center rounded-ctl px-0.5 text-center text-[9.5px] font-bold text-ink-2"
-          >
-            Tasks
-          </Link>
-          <Link
-            href="/planner"
-            className="flex min-h-11 flex-col items-center justify-center rounded-ctl px-0.5 text-center text-[9.5px] font-bold text-ink-2"
-          >
-            Plan
-          </Link>
-          <Link
-            href="/schedule"
-            className="flex min-h-11 flex-col items-center justify-center rounded-ctl px-0.5 text-center text-[9.5px] font-bold text-ink-2"
-          >
-            Sched
-          </Link>
-          <Link
-            href="/courses"
-            className="flex min-h-11 flex-col items-center justify-center rounded-ctl px-0.5 text-center text-[9.5px] font-bold text-ink-2"
-          >
-            Course
-          </Link>
-          <Link
-            href="/focus"
-            className="flex min-h-11 flex-col items-center justify-center rounded-ctl px-0.5 text-center text-[9.5px] font-bold text-ink-2"
-          >
-            Focus
-          </Link>
-          <Link
-            href="/gpa"
-            className="flex min-h-11 flex-col items-center justify-center rounded-ctl px-0.5 text-center text-[9.5px] font-bold text-ink-2"
-          >
-            GPA
-          </Link>
-          <Link
-            href="/risk"
-            className="flex min-h-11 flex-col items-center justify-center rounded-ctl px-0.5 text-center text-[9.5px] font-bold text-ink-2"
-          >
-            Risk
-          </Link>
-        </nav>
+        <MobileBottomNav />
       </div>
     </div>
   );

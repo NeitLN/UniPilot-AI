@@ -58,7 +58,7 @@ export function AssignmentFilters({ courses }: { courses: CourseOption[] }) {
         aria-label="Filter by course"
         defaultValue={searchParams.get("course") ?? ""}
         onChange={(e) => update("course", e.target.value)}
-        className="min-w-0 max-w-[45%] truncate rounded-ctl border border-border-subtle bg-card px-3 py-2 text-xs font-bold text-ink-2 outline-none focus-visible:ring-2 focus-visible:ring-violet lg:max-w-none"
+        className="min-h-11 min-w-0 max-w-[45%] truncate rounded-ctl border border-border-subtle bg-card px-3 py-2 text-xs font-bold text-ink-2 outline-none focus-visible:ring-2 focus-visible:ring-violet lg:max-w-none"
       >
         <option value="">All courses</option>
         {courses.map((c) => (
@@ -72,7 +72,7 @@ export function AssignmentFilters({ courses }: { courses: CourseOption[] }) {
         aria-label="Filter by status"
         defaultValue={searchParams.get("status") ?? ""}
         onChange={(e) => update("status", e.target.value)}
-        className="min-w-0 max-w-[45%] truncate rounded-ctl border border-border-subtle bg-card px-3 py-2 text-xs font-bold text-ink-2 outline-none focus-visible:ring-2 focus-visible:ring-violet lg:max-w-none"
+        className="min-h-11 min-w-0 max-w-[45%] truncate rounded-ctl border border-border-subtle bg-card px-3 py-2 text-xs font-bold text-ink-2 outline-none focus-visible:ring-2 focus-visible:ring-violet lg:max-w-none"
       >
         <option value="">All statuses</option>
         <option value="not_started">Not started</option>

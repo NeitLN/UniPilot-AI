@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { FieldError } from "@/components/ui/FieldError";
 import {
   disablePushSubscription,
   ensurePushSubscription,
@@ -85,11 +86,7 @@ export function PushNotificationSettings() {
         </button>
       )}
 
-      {error && (
-        <p role="alert" className="text-[11px] font-semibold text-coral">
-          {error}
-        </p>
-      )}
+      {error && <FieldError className="text-[11px]">{error}</FieldError>}
 
       <p aria-live="polite" className="sr-only">
         {state === "enabled" ? "Push notifications are on for this device." : ""}

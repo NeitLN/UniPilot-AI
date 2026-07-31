@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { FieldError } from "@/components/ui/FieldError";
 import { updatePassword, type ResetPasswordState } from "./actions";
 
 const initialState: ResetPasswordState = {};
@@ -22,11 +23,7 @@ export function ResetPasswordForm() {
         />
       </label>
 
-      {state.error && (
-        <p role="alert" className="text-left text-xs font-semibold text-coral">
-          {state.error}
-        </p>
-      )}
+      {state.error && <FieldError className="text-left text-xs">{state.error}</FieldError>}
 
       <button
         type="submit"

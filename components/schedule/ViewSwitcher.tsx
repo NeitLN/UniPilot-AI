@@ -46,7 +46,7 @@ export function ViewSwitcher({
             onClick={() => navigate(v.value, date)}
             aria-pressed={view === v.value}
             className={`flex min-h-11 items-center rounded-[12px] px-3 py-1.5 text-xs font-bold transition-colors ${
-              view === v.value ? "bg-card text-foreground" : "text-ink-3"
+              view === v.value ? "bg-card text-foreground" : "text-ink-2"
             }`}
           >
             {v.label}

@@ -293,8 +293,10 @@ function ReportStat({
       <p className="mt-1 font-display text-2xl font-bold text-foreground">{value}</p>
       {delta && delta.direction !== "flat" && (
         <p
-          className={`mt-1 text-[11px] font-extrabold ${
-            delta.direction === "up" ? "text-mint" : "text-coral"
+          className={`mt-1 inline-flex items-center rounded-pill px-2 py-0.5 text-[11px] font-extrabold ${
+            delta.direction === "up"
+              ? "bg-mint-tint text-mint-text"
+              : "bg-coral-tint text-coral-text"
           }`}
         >
           {delta.direction === "up" ? "↑" : "↓"} {Math.abs(delta.delta)}

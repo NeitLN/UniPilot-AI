@@ -92,7 +92,17 @@ export function ForecastCard({
         <div
           className={`mt-4 rounded-ctl p-4 ${result.achievable ? "bg-mint-tint" : "bg-coral-tint"}`}
         >
-          <p className="text-[11px] font-bold uppercase tracking-wide text-ink-3">
+          {/* D-03 (docs/UIUX_REVIEW.md): text-ink-3 measured 2.66:1 here in
+              dark mode — it flips light-colored for dark backgrounds, but
+              this badge's bg-mint-tint/bg-coral-tint stay light in both
+              themes. Matching the label to the badge's own already-safe
+              tone (like the value and hint lines below already do) fixes
+              it instead of introducing a third color rule. */}
+          <p
+            className={`text-[11px] font-bold uppercase tracking-wide ${
+              result.achievable ? "text-mint-text" : "text-coral-text"
+            }`}
+          >
             Required average
           </p>
           <p

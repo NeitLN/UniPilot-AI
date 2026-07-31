@@ -1,4 +1,5 @@
 import { Logo } from "@/components/brand/Logo";
+import { FieldSuccess } from "@/components/ui/FieldSuccess";
 import { LoginForm } from "./LoginForm";
 
 export default async function LoginPage({
@@ -21,9 +22,9 @@ export default async function LoginPage({
             reset flow — doesn't confirm which account existed or was
             deleted, just that the action completed. */}
         {deleted && (
-          <p role="status" className="mb-6 text-sm font-semibold text-mint">
+          <FieldSuccess className="mb-6 text-sm">
             Account deleted. Thanks for using UniPilot AI.
-          </p>
+          </FieldSuccess>
         )}
         <LoginForm />
       </div>

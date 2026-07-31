@@ -68,8 +68,12 @@ function BlockCard({
       <p className="break-words text-[12.5px] font-bold text-foreground">{block.title}</p>
       {/* Formatted in the runtime's local timezone — expected to differ
           between SSR and hydration, not a real mismatch. */}
+      {/* D-03 (docs/UIUX_REVIEW.md): text-ink-3 measured 4.4:1 on this
+          card's bg-line background — just under the 4.5:1 AA floor.
+          text-ink-2 clears it comfortably in both themes (8.0:1 light,
+          6.22:1 dark). */}
       <p
-        className="mt-0.5 break-words text-[11px] font-semibold text-ink-3"
+        className="mt-0.5 break-words text-[11px] font-semibold text-ink-2"
         suppressHydrationWarning
       >
         {blockSubtitle(block)}

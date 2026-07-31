@@ -34,10 +34,10 @@ export function ThemeToggle() {
             onClick={() => choose(opt.value)}
             aria-pressed={pref === opt.value}
             suppressHydrationWarning
-            className={`flex min-h-9 flex-1 items-center justify-center rounded-[calc(var(--radius-ctl)-4px)] text-xs font-bold transition-colors ${
+            className={`flex min-h-11 flex-1 items-center justify-center rounded-[calc(var(--radius-ctl)-4px)] text-xs font-bold transition-colors ${
               pref === opt.value
                 ? "bg-card text-foreground shadow-sm"
-                : "text-ink-3 hover:text-ink-2"
+                : "text-ink-2 hover:text-foreground"
             }`}
           >
             {opt.label}

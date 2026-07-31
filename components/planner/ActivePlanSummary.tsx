@@ -65,10 +65,10 @@ export function ActivePlanSummary({
                 key={s.id}
                 className="flex items-center gap-3 rounded-ctl bg-line px-3 py-2 text-[12.5px] font-semibold text-foreground"
               >
-                <span aria-hidden="true" className="shrink-0 text-ink-3">
+                <span aria-hidden="true" className="shrink-0 text-ink-2">
                   {isPast ? "○" : "●"}
                 </span>
-                <span className="w-[130px] shrink-0 text-ink-3">
+                <span className="w-[130px] shrink-0 text-ink-2">
                   {new Date(s.startAt).toLocaleString(undefined, {
                     month: "short",
                     day: "numeric",
@@ -76,14 +76,14 @@ export function ActivePlanSummary({
                     minute: "2-digit",
                   })}
                 </span>
-                {/* De-emphasized via the same text-ink-3 token already used
-                    for secondary text elsewhere, not opacity — a flat
-                    opacity on this row measured at 3.97:1 in dark mode,
-                    under the 4.5:1 AA floor QA4-02 exists to enforce
-                    (docs/PRODUCT_REVIEW_4.md). text-ink-3 on bg-line is an
-                    already-proven pairing (used one column over on this
-                    same row) that measures 4.52:1. */}
-                <span className={`min-w-0 flex-1 truncate ${isPast ? "text-ink-3" : ""}`}>
+                {/* De-emphasized via a token, not opacity — a flat opacity on
+                    this row measured at 3.97:1 in dark mode, under the
+                    4.5:1 AA floor QA4-02 exists to enforce (docs/PRODUCT_REVIEW_4.md).
+                    Originally text-ink-3, which does clear AA in dark mode
+                    (6.22:1) but measured 4.4:1 in light mode — just under
+                    the floor it was meant to satisfy (D-03, docs/UIUX_REVIEW.md).
+                    text-ink-2 on bg-line clears both (8.0:1 light, 6.22:1 dark). */}
+                <span className={`min-w-0 flex-1 truncate ${isPast ? "text-ink-2" : ""}`}>
                   {s.assignmentTitle}
                 </span>
               </li>

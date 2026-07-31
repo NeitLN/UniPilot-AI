@@ -47,8 +47,10 @@ export async function WeeklyReportTeaser() {
         <p className="text-sm font-bold text-foreground">See your weekly report</p>
         {minutesDelta.direction !== "flat" && (
           <span
-            className={`text-[11px] font-extrabold ${
-              minutesDelta.direction === "up" ? "text-mint" : "text-coral"
+            className={`rounded-pill px-2 py-0.5 text-[11px] font-extrabold ${
+              minutesDelta.direction === "up"
+                ? "bg-mint-tint text-mint-text"
+                : "bg-coral-tint text-coral-text"
             }`}
           >
             {minutesDelta.direction === "up" ? "↑" : "↓"}{" "}

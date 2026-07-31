@@ -241,7 +241,7 @@ export function FocusTimer({ assignments }: { assignments: FocusAssignmentOption
               value={selectedId}
               onChange={(e) => setSelectedId(e.target.value)}
               disabled={assignments.length === 0}
-              className="mt-1 w-full rounded-ctl border border-ink/15 bg-card px-3 py-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-violet disabled:opacity-60"
+              className="mt-1 min-h-11 w-full rounded-ctl border border-ink/15 bg-card px-3 py-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-violet disabled:opacity-60"
             >
               {assignments.length === 0 ? (
                 <option value="">No active assignments</option>

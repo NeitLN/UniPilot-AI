@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import Link from "next/link";
+import { FieldError } from "@/components/ui/FieldError";
 import { requestPasswordReset, type ForgotPasswordState } from "./actions";
 
 const initialState: ForgotPasswordState = {};
@@ -39,11 +40,7 @@ export function ForgotPasswordForm() {
         />
       </label>
 
-      {state.error && (
-        <p role="alert" className="text-left text-xs font-semibold text-coral">
-          {state.error}
-        </p>
-      )}
+      {state.error && <FieldError className="text-left text-xs">{state.error}</FieldError>}
 
       <button
         type="submit"

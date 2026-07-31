@@ -5,10 +5,18 @@
  * to pair with their own light `-tint` background (Tag, KpiCard's solid
  * fills), not to stand alone on `bg-card`/`bg-line`/the page background,
  * which flips dark. Measured ~2.6:1 contrast in dark mode against a 4.5:1
- * AA requirement. `text-coral` (the vivid, theme-fixed accent — same one
- * LoginForm's error text already used correctly) reads fine in both themes
- * standalone. One component instead of ~30 copies of this same class string
- * so the fix can't silently drift back to `-text` in new code.
+ * AA requirement.
+ *
+ * D-03 (docs/UIUX_REVIEW.md): the follow-up fix here, `text-coral` standalone,
+ * turned out to only clear AA in dark mode (~5.3:1 on bg-card) — light mode
+ * measured 3.11:1, still below 4.5:1. Neither `--coral` nor `--coral-text`
+ * passes both themes standalone (the former is dark-safe/light-unsafe, the
+ * latter is the reverse), so this now uses the same tint+text pairing that
+ * already works correctly for badges/tags — `--coral-tint`/`--coral-text`
+ * are deliberately theme-invariant (always light bg + always dark text),
+ * which sidesteps the flip entirely instead of chasing a single shade that
+ * survives both themes. One component instead of ~30 copies of this pattern
+ * so the fix can't silently drift back to a bare color in new code.
  */
 export function FieldError({
   children,
@@ -21,7 +29,10 @@ export function FieldError({
   as?: "p" | "span";
 }) {
   return (
-    <Tag role="alert" className={`font-semibold text-coral ${className ?? "text-xs"}`}>
+    <Tag
+      role="alert"
+      className={`inline-block rounded-pill bg-coral-tint px-2 py-0.5 font-semibold text-coral-text ${className ?? "text-xs"}`}
+    >
       {children}
     </Tag>
   );

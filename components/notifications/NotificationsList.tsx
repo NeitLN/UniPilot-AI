@@ -7,6 +7,7 @@ import {
   markAllNotificationsRead,
 } from "@/app/(app)/notifications/actions";
 import { Pilo } from "@/components/brand/Pilo";
+import { FieldError } from "@/components/ui/FieldError";
 import type { NotificationItem } from "./NotificationBellClient";
 
 export function NotificationsList({
@@ -57,11 +58,7 @@ export function NotificationsList({
 
   return (
     <div className="rounded-card bg-card p-4">
-      {error && (
-        <p role="alert" className="mb-3 text-[12.5px] font-semibold text-coral">
-          {error}
-        </p>
-      )}
+      {error && <FieldError className="mb-3 text-[12.5px]">{error}</FieldError>}
 
       {unreadCount > 0 && (
         <div className="flex items-center justify-between border-b border-line pb-3">
@@ -72,7 +69,7 @@ export function NotificationsList({
             type="button"
             onClick={handleMarkAll}
             disabled={pending}
-            className="text-[12.5px] font-bold text-violet hover:underline disabled:opacity-60"
+            className="flex min-h-11 items-center text-[12.5px] font-bold text-violet hover:underline disabled:opacity-60"
           >
             Mark all read
           </button>
@@ -96,13 +93,17 @@ export function NotificationsList({
                   <span className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-violet" />
                 )}
               </div>
+              {/* D-03 (docs/UIUX_REVIEW.md): text-ink-3 measured 4.21:1 on
+                  the unread row's bg-violet-tint in light mode. text-ink-2
+                  clears both themes (7.64:1 light, 6.76:1 dark) and still
+                  reads fine on read rows' plain bg-transparent. */}
               {n.body && (
-                <p className="mt-0.5 text-[12.5px] font-semibold text-ink-3">
+                <p className="mt-0.5 text-[12.5px] font-semibold text-ink-2">
                   {n.body}
                 </p>
               )}
               {n.scheduledAt && (
-                <p className="mt-1 text-[11px] font-bold text-ink-3">
+                <p className="mt-1 text-[11px] font-bold text-ink-2">
                   {new Date(n.scheduledAt).toLocaleString(undefined, {
                     month: "short",
                     day: "numeric",

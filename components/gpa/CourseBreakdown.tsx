@@ -69,9 +69,7 @@ export function CourseBreakdown({
                 const draggingDown = dragsGpaDown(g, overallGpa);
                 return (
                   <tr key={g.id} className="border-b border-line last:border-b-0">
-                    <td
-                      className={`py-2 pr-3 font-bold ${draggingDown ? "text-coral" : "text-foreground"}`}
-                    >
+                    <td className="py-2 pr-3 font-bold text-foreground">
                       <span className="truncate">{g.courseName}</span>
                       {draggingDown && (
                         <span className="ml-1.5 inline-block rounded-pill bg-coral-tint px-2 py-0.5 text-[10px] font-extrabold text-coral-text">
@@ -97,14 +95,14 @@ export function CourseBreakdown({
                         <button
                           type="button"
                           onClick={() => setEditing(g)}
-                          className="flex min-h-11 items-center rounded-ctl bg-line px-2.5 py-1.5 text-[11px] font-bold text-ink-2 hover:bg-line-hover"
+                          className="flex min-h-11 min-w-11 items-center justify-center rounded-ctl bg-line px-2.5 py-1.5 text-[11px] font-bold text-ink-2 hover:bg-line-hover"
                         >
                           Edit
                         </button>
                         <button
                           type="button"
                           onClick={() => setDeleting(g)}
-                          className="flex min-h-11 items-center rounded-ctl bg-line px-2.5 py-1.5 text-[11px] font-bold text-ink-2 hover:bg-line-hover"
+                          className="flex min-h-11 min-w-11 items-center justify-center rounded-ctl bg-line px-2.5 py-1.5 text-[11px] font-bold text-ink-2 hover:bg-line-hover"
                         >
                           Delete
                         </button>

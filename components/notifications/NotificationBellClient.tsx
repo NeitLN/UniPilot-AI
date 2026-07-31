@@ -3,6 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { FieldError } from "@/components/ui/FieldError";
 import {
   markNotificationRead,
   markAllNotificationsRead,
@@ -120,11 +121,7 @@ export function NotificationBellClient({
               )}
             </div>
 
-            {error && (
-              <p role="alert" className="mt-1.5 px-1 text-[11px] font-semibold text-coral">
-                {error}
-              </p>
-            )}
+            {error && <FieldError className="mt-1.5 ml-1 text-[11px]">{error}</FieldError>}
 
             {notifications.length === 0 ? (
               <p className="px-1 py-6 text-center text-[12.5px] font-semibold text-ink-3">

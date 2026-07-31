@@ -23,7 +23,7 @@ export function ExportData() {
           <a
             key={r.type}
             href={`/api/export?format=csv&type=${r.type}`}
-            className="rounded-pill bg-line px-3 py-1.5 text-[11.5px] font-bold text-ink-2 hover:bg-line-hover"
+            className="flex min-h-11 items-center rounded-pill bg-line px-3 text-[11.5px] font-bold text-ink-2 hover:bg-line-hover"
           >
             {r.label} (CSV)
           </a>

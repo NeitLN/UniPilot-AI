@@ -12,6 +12,7 @@ import {
 import { Tag } from "@/components/ui/Tag";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Modal } from "@/components/ui/Modal";
+import { FieldError } from "@/components/ui/FieldError";
 import { AssignmentForm, type CourseOption } from "./AssignmentForm";
 import { ArchiveDialog } from "./ArchiveDialog";
 import { DeleteAssignmentDialog } from "./DeleteAssignmentDialog";
@@ -100,11 +101,7 @@ export function AssignmentItem({
             <Tag tone="neutral">Recurring</Tag>
           )}
         </div>
-        {restoreError && (
-          <p role="alert" className="mt-1.5 text-[11px] font-semibold text-coral">
-            {restoreError}
-          </p>
-        )}
+        {restoreError && <FieldError className="mt-1.5 text-[11px]">{restoreError}</FieldError>}
       </div>
 
       <ProgressBar value={assignment.progress} tone={tone} className="sm:w-[92px]" />

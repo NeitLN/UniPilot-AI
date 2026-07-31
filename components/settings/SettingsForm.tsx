@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { updateProfile, type SettingsFormState } from "@/app/(app)/settings/actions";
 import { FieldError } from "@/components/ui/FieldError";
+import { FieldSuccess } from "@/components/ui/FieldSuccess";
 import { Field, inputClass } from "@/components/ui/Field";
 
 const INITIAL_STATE: SettingsFormState = { errors: {} };
@@ -66,11 +67,7 @@ export function SettingsForm({ initialValues }: { initialValues: SettingsFormVal
       </Field>
 
       {state.formError && <FieldError>{state.formError}</FieldError>}
-      {state.ok && (
-        <p role="status" className="text-xs font-semibold text-mint">
-          Saved.
-        </p>
-      )}
+      {state.ok && <FieldSuccess>Saved.</FieldSuccess>}
 
       <button
         type="submit"
