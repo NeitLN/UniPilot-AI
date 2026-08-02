@@ -14,7 +14,11 @@ const BAR_MAX_HEIGHT = 120;
 const LABEL_SPACE = 22;
 const CHART_HEIGHT = BAR_MAX_HEIGHT + LABEL_SPACE;
 
-function scaleToHeight(value: number, domain: { min: number; max: number }, maxHeight: number): number {
+function scaleToHeight(
+  value: number,
+  domain: { min: number; max: number },
+  maxHeight: number,
+): number {
   const span = domain.max - domain.min;
   if (span <= 0) return 0;
   const clamped = Math.max(domain.min, Math.min(domain.max, value));
@@ -32,7 +36,9 @@ export function GpaTrendChart({ points, targetGpa }: GpaTrendChartProps) {
   if (points.length === 0) {
     return (
       <div className="rounded-card bg-card p-5">
-        <h2 className="font-display text-lg font-bold text-foreground">GPA trend</h2>
+        <h2 className="font-display text-lg font-bold text-foreground">
+          GPA trend
+        </h2>
         <p className="mt-3 text-[12.5px] font-semibold text-ink-3">
           Enter grades across semesters to see your trend.
         </p>
@@ -52,7 +58,9 @@ export function GpaTrendChart({ points, targetGpa }: GpaTrendChartProps) {
 
   return (
     <div className="rounded-card bg-card p-5">
-      <h2 className="font-display text-lg font-bold text-foreground">GPA trend</h2>
+      <h2 className="font-display text-lg font-bold text-foreground">
+        GPA trend
+      </h2>
       {isCompressed && (
         <p className="mt-0.5 text-[10.5px] font-semibold text-ink-3">
           Axis runs {domain.min.toFixed(2)}–{domain.max.toFixed(2)}, not 0–4.0.
@@ -88,7 +96,10 @@ export function GpaTrendChart({ points, targetGpa }: GpaTrendChartProps) {
 
         <div className="flex h-full items-end gap-3">
           {points.map((p) => {
-            const barHeight = Math.max(6, scaleToHeight(p.gpa, domain, BAR_MAX_HEIGHT));
+            const barHeight = Math.max(
+              6,
+              scaleToHeight(p.gpa, domain, BAR_MAX_HEIGHT),
+            );
             return (
               <div
                 key={p.semester}
@@ -98,8 +109,16 @@ export function GpaTrendChart({ points, targetGpa }: GpaTrendChartProps) {
                 <span className="text-[11px] font-bold text-foreground tabular-nums">
                   {p.gpa.toFixed(2)}
                 </span>
+                {/* Height, not transform, for the same reason as
+                    ProgressBar — no way to represent "value scaled to
+                    domain" as a transform without also faking the layout
+                    box. Only visibly animates when data genuinely changes
+                    (a grade added/edited triggers router.refresh(), which
+                    patches this element's height in place); the very first
+                    paint has no prior state to transition from, so initial
+                    load never "grows from zero." */}
                 <div
-                  className="w-full shrink-0 rounded-t-[6px] bg-violet"
+                  className="w-full shrink-0 rounded-t-[6px] bg-violet motion-safe:transition-[height] motion-safe:duration-300 motion-safe:ease-out"
                   style={{ height: barHeight }}
                 />
               </div>

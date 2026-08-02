@@ -3,8 +3,14 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Pilo } from "@/components/brand/Pilo";
+import { FadeIn } from "@/components/motion/FadeIn";
 import type { CourseOption } from "@/components/assignments/AssignmentForm";
-import { addDays, isSameDay, toDateParam, type ScheduleView } from "@/lib/calendar/view";
+import {
+  addDays,
+  isSameDay,
+  toDateParam,
+  type ScheduleView,
+} from "@/lib/calendar/view";
 import { ClassDetailPanel } from "./ClassDetailPanel";
 import type { AssignmentLink, ClassBlockData } from "./types";
 
@@ -32,10 +38,20 @@ export function ScheduleGrid({
     <>
       {view === "day" && <DayList blocks={blocks} onSelect={setSelectedId} />}
       {view === "week" && (
-        <WeekColumns start={start} today={today} blocks={blocks} onSelect={setSelectedId} />
+        <WeekColumns
+          start={start}
+          today={today}
+          blocks={blocks}
+          onSelect={setSelectedId}
+        />
       )}
       {view === "month" && (
-        <MonthGrid start={start} today={today} blocks={blocks} onSelect={setSelectedId} />
+        <MonthGrid
+          start={start}
+          today={today}
+          blocks={blocks}
+          onSelect={setSelectedId}
+        />
       )}
 
       <ClassDetailPanel
@@ -45,7 +61,9 @@ export function ScheduleGrid({
         onClose={() => setSelectedId(null)}
         courses={courses}
         linkedAssignments={
-          selected?.courseId ? (assignmentsByCourse[selected.courseId] ?? []) : []
+          selected?.courseId
+            ? (assignmentsByCourse[selected.courseId] ?? [])
+            : []
         }
       />
     </>
@@ -65,7 +83,9 @@ function BlockCard({
       onClick={() => onSelect(block.id)}
       className="w-full rounded-ctl bg-line px-3 py-2 text-left hover:bg-line-hover"
     >
-      <p className="break-words text-[12.5px] font-bold text-foreground">{block.title}</p>
+      <p className="break-words text-[12.5px] font-bold text-foreground">
+        {block.title}
+      </p>
       {/* Formatted in the runtime's local timezone — expected to differ
           between SSR and hydration, not a real mismatch. */}
       {/* D-03 (docs/UIUX_REVIEW.md): text-ink-3 measured 4.4:1 on this
@@ -87,7 +107,12 @@ function BlockCard({
 // (the common case — class blocks are usually titled after their course),
 // which read as the same text printed twice. Also never showed an end
 // time, so there was no way to tell a class's length from the grid alone.
-function blockSubtitle(block: Pick<ClassBlockData, "startAt" | "endAt" | "isAllDay" | "title" | "courseName">): string {
+function blockSubtitle(
+  block: Pick<
+    ClassBlockData,
+    "startAt" | "endAt" | "isAllDay" | "title" | "courseName"
+  >,
+): string {
   const timeRange = block.isAllDay
     ? "All day"
     : `${formatTime(block.startAt)}–${formatTime(block.endAt)}`;
@@ -96,7 +121,10 @@ function blockSubtitle(block: Pick<ClassBlockData, "startAt" | "endAt" | "isAllD
 }
 
 function formatTime(iso: string): string {
-  return new Date(iso).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+  return new Date(iso).toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
 
 function DayList({
@@ -108,12 +136,12 @@ function DayList({
 }) {
   if (blocks.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-2 rounded-card bg-card py-10 text-center">
+      <FadeIn className="flex flex-col items-center gap-2 rounded-card bg-card py-10 text-center">
         <Pilo mood="sleepy" size={64} />
         <p className="text-[12.5px] font-semibold text-ink-2">
           No classes on this day.
         </p>
-      </div>
+      </FadeIn>
     );
   }
 
@@ -142,10 +170,14 @@ function DayList({
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-bold text-foreground">{b.title}</p>
+            <p className="truncate text-sm font-bold text-foreground">
+              {b.title}
+            </p>
             <p className="truncate text-[11.5px] font-semibold text-ink-3">
               {b.location ?? "No location"}
-              {b.courseName && b.courseName !== b.title ? ` · ${b.courseName}` : ""}
+              {b.courseName && b.courseName !== b.title
+                ? ` · ${b.courseName}`
+                : ""}
             </p>
           </div>
         </button>
@@ -185,7 +217,8 @@ function WeekColumns({
   const isWeekend = (day: Date) => day.getDay() === 0 || day.getDay() === 6;
   const weekendEntries = dayEntries.filter((e) => isWeekend(e.day));
   const weekendEmpty =
-    weekendEntries.length === 2 && weekendEntries.every((e) => e.dayBlocks.length === 0);
+    weekendEntries.length === 2 &&
+    weekendEntries.every((e) => e.dayBlocks.length === 0);
 
   return (
     <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-7">
@@ -201,7 +234,9 @@ function WeekColumns({
       ))}
       {weekendEmpty && (
         <div className="rounded-card bg-card p-3 text-center sm:col-span-2">
-          <p className="text-[11.5px] font-semibold text-ink-3">Weekend — no schedule</p>
+          <p className="text-[11.5px] font-semibold text-ink-3">
+            Weekend — no schedule
+          </p>
         </div>
       )}
     </div>
@@ -286,7 +321,11 @@ function MonthGrid({
                 to differ between SSR and hydration, not a real mismatch. */}
             <p
               className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold ${
-                isToday ? "bg-violet text-white" : inMonth ? "text-foreground" : "text-ink-3"
+                isToday
+                  ? "bg-violet text-white"
+                  : inMonth
+                    ? "text-foreground"
+                    : "text-ink-3"
               }`}
               suppressHydrationWarning
             >

@@ -17,7 +17,9 @@ export function ProgressBar({ value, tone, className }: ProgressBarProps) {
   const pct = Math.max(0, Math.min(100, Math.round(value)));
 
   return (
-    <div className={`flex w-full items-center gap-2 sm:w-[92px] ${className ?? ""}`}>
+    <div
+      className={`flex w-full items-center gap-2 sm:w-[92px] ${className ?? ""}`}
+    >
       <div
         role="progressbar"
         aria-valuenow={pct}
@@ -25,8 +27,13 @@ export function ProgressBar({ value, tone, className }: ProgressBarProps) {
         aria-valuemax={100}
         className="h-[7px] flex-1 overflow-hidden rounded-full bg-line"
       >
+        {/* Width is the one CSS property this project intentionally
+            transitions despite the general transform/opacity preference —
+            there's no equivalent way to represent "percent filled" for a
+            simple bar without it. motion-safe: keeps this instant under
+            prefers-reduced-motion. */}
         <div
-          className={`h-full rounded-full ${FILL_CLASSES[tone]}`}
+          className={`h-full rounded-full motion-safe:transition-[width] motion-safe:duration-300 motion-safe:ease-out ${FILL_CLASSES[tone]}`}
           style={{ width: `${pct}%` }}
         />
       </div>

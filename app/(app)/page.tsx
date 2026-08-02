@@ -1,11 +1,15 @@
 import { Suspense } from "react";
+import { StaggerList, StaggerItem } from "@/components/motion/StaggerList";
 import { WelcomeBanner } from "@/components/dashboard/WelcomeBanner";
 import {
   WeeklyReportTeaser,
   WeeklyReportTeaserSkeleton,
 } from "@/components/dashboard/WeeklyReportTeaser";
 import { KpiCardSkeleton } from "@/components/dashboard/KpiCard";
-import { SemesterLabel, SemesterLabelSkeleton } from "@/components/dashboard/SemesterLabel";
+import {
+  SemesterLabel,
+  SemesterLabelSkeleton,
+} from "@/components/dashboard/SemesterLabel";
 import { GpaKpi } from "@/components/dashboard/GpaKpi";
 import { ActiveTasksKpi } from "@/components/dashboard/ActiveTasksKpi";
 import { FocusWeekKpi } from "@/components/dashboard/FocusWeekKpi";
@@ -16,7 +20,10 @@ import { RiskHud, RiskHudSkeleton } from "@/components/dashboard/RiskHud";
 import { WorkloadRiskKpi } from "@/components/dashboard/WorkloadRiskKpi";
 import { FocusCard, FocusCardSkeleton } from "@/components/dashboard/FocusCard";
 import { PlanCard, PlanCardSkeleton } from "@/components/dashboard/PlanCard";
-import { GpaTrendCard, GpaTrendCardSkeleton } from "@/components/dashboard/GpaTrendCard";
+import {
+  GpaTrendCard,
+  GpaTrendCardSkeleton,
+} from "@/components/dashboard/GpaTrendCard";
 
 export default function DashboardPage() {
   return (
@@ -26,7 +33,9 @@ export default function DashboardPage() {
           Dashboard
         </h1>
         <Suspense
-          fallback={<SemesterLabelSkeleton className="mt-1 h-4 w-28 rounded-full bg-ink/10" />}
+          fallback={
+            <SemesterLabelSkeleton className="mt-1 h-4 w-28 rounded-full bg-ink/10" />
+          }
         >
           <SemesterLabel className="mt-1 text-sm font-semibold text-ink-2" />
         </Suspense>
@@ -36,20 +45,35 @@ export default function DashboardPage() {
         <WelcomeBanner />
       </Suspense>
 
-      <div className="grid grid-cols-2 gap-3.5 md:grid-cols-4">
-        <Suspense fallback={<KpiCardSkeleton tone="violet" />}>
-          <GpaKpi />
-        </Suspense>
-        <Suspense fallback={<KpiCardSkeleton tone="coral" />}>
-          <ActiveTasksKpi />
-        </Suspense>
-        <Suspense fallback={<KpiCardSkeleton tone="mint" />}>
-          <FocusWeekKpi />
-        </Suspense>
-        <Suspense fallback={<KpiCardSkeleton tone="tangerine" />}>
-          <WorkloadRiskKpi />
-        </Suspense>
-      </div>
+      {/* P1 (docs/ANIMATION_SYSTEM.md): a restrained, one-time-per-session
+          stagger for these 4 cards. sessionKey guards against replaying it
+          every time the user navigates back to "/" — Next.js remounts a
+          page's tree on each visit, only the (app) layout persists. */}
+      <StaggerList
+        sessionKey="dashboard-kpis"
+        className="grid grid-cols-2 gap-3.5 md:grid-cols-4"
+      >
+        <StaggerItem>
+          <Suspense fallback={<KpiCardSkeleton tone="violet" />}>
+            <GpaKpi />
+          </Suspense>
+        </StaggerItem>
+        <StaggerItem>
+          <Suspense fallback={<KpiCardSkeleton tone="coral" />}>
+            <ActiveTasksKpi />
+          </Suspense>
+        </StaggerItem>
+        <StaggerItem>
+          <Suspense fallback={<KpiCardSkeleton tone="mint" />}>
+            <FocusWeekKpi />
+          </Suspense>
+        </StaggerItem>
+        <StaggerItem>
+          <Suspense fallback={<KpiCardSkeleton tone="tangerine" />}>
+            <WorkloadRiskKpi />
+          </Suspense>
+        </StaggerItem>
+      </StaggerList>
 
       <Suspense fallback={<RiskHudSkeleton />}>
         <RiskHud />

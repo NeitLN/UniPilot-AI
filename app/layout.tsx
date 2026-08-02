@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { Fredoka, Nunito } from "next/font/google";
 import { TimezoneCookie } from "@/components/TimezoneCookie";
+import { MotionProvider } from "@/components/motion/MotionProvider";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 
@@ -77,7 +78,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col font-sans bg-canvas text-foreground">
         <TimezoneCookie />
-        {children}
+        <MotionProvider>{children}</MotionProvider>
       </body>
     </html>
   );

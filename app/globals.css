@@ -181,3 +181,22 @@ body {
     animation: none;
   }
 }
+
+/* Motion system — P0 button press feedback (docs/ANIMATION_SYSTEM.md).
+   Global, not per-component: this codebase has no shared <Button>
+   primitive (every button is an ad-hoc `<button className="...">`), so a
+   single base-layer rule is the only way to cover every button app-wide
+   without migrating dozens of call sites just to add a press state.
+   Scoped to real <button> elements only, not <a>/<Link> — links navigate
+   away almost immediately, where a press animation has less value and
+   risks reading as stutter right before the page changes. Disabled
+   buttons are excluded so a press-scale never implies an action that
+   can't actually happen. */
+@media (prefers-reduced-motion: no-preference) {
+  button:not(:disabled) {
+    transition: transform 100ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  button:not(:disabled):active {
+    transform: scale(0.98);
+  }
+}

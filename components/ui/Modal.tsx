@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { backdropVariants, modalPanelVariants } from "@/lib/motion/variants";
 
 export interface ModalProps {
   open: boolean;
@@ -18,7 +20,13 @@ const SIZE_CLASSES: Record<"md" | "lg", string> = {
   lg: "max-w-xl",
 };
 
-export function Modal({ open, onClose, title, children, size = "md" }: ModalProps) {
+export function Modal({
+  open,
+  onClose,
+  title,
+  children,
+  size = "md",
+}: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -32,24 +40,32 @@ export function Modal({ open, onClose, title, children, size = "md" }: ModalProp
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [open, onClose]);
 
-  if (!open) return null;
-
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 px-4"
-      onClick={onClose}
-    >
-      <div
-        ref={panelRef}
-        role="dialog"
-        aria-modal="true"
-        aria-label={title}
-        tabIndex={-1}
-        onClick={(e) => e.stopPropagation()}
-        className={`w-full ${SIZE_CLASSES[size]} overscroll-contain rounded-card bg-card p-6 outline-none`}
-      >
-        {children}
-      </div>
-    </div>
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          key={title}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 px-4"
+          onClick={onClose}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          variants={backdropVariants}
+        >
+          <motion.div
+            ref={panelRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label={title}
+            tabIndex={-1}
+            onClick={(e) => e.stopPropagation()}
+            variants={modalPanelVariants}
+            className={`w-full ${SIZE_CLASSES[size]} overscroll-contain rounded-card bg-card p-6 outline-none`}
+          >
+            {children}
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

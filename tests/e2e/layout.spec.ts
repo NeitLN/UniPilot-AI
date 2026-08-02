@@ -35,9 +35,13 @@ test.describe("Layout regressions (docs/PRODUCT_REVIEW.md)", () => {
   // of GPA, because the per-bar column's fixed height didn't reserve room
   // for the value label above the bar, so flexbox silently clamped every
   // bar to the same leftover space.
-  test("QA-01: GPA trend bars render at different heights for different GPAs", async ({ page }) => {
+  test("QA-01: GPA trend bars render at different heights for different GPAs", async ({
+    page,
+  }) => {
     await page.goto("/gpa");
-    await expect(page.getByRole("heading", { name: "GPA tracker" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "GPA tracker" }),
+    ).toBeVisible();
 
     const semesterLow = `E2E${Date.now() % 90000}A`;
     const semesterHigh = `E2E${Date.now() % 90000}B`;
@@ -46,21 +50,34 @@ test.describe("Layout regressions (docs/PRODUCT_REVIEW.md)", () => {
       [semesterLow, "2.0"],
       [semesterHigh, "4.0"],
     ] as const) {
-      await page.getByRole("button", { name: "Add grade", exact: true }).click();
+      await page
+        .getByRole("button", { name: "Add grade", exact: true })
+        .click();
       await page.locator('select[name="courseId"]').selectOption({ index: 1 });
       await page.locator('input[name="semester"]').fill(semester);
       await page.locator('input[name="gradePoint"]').fill(gradePoint);
       await page.locator('input[name="creditHours"]').fill("3");
-      await page.getByRole("button", { name: "Add grade", exact: true }).last().click();
-      await expect(page.getByRole("cell", { name: semester })).toBeVisible({ timeout: 10_000 });
+      await page
+        .getByRole("button", { name: "Add grade", exact: true })
+        .last()
+        .click();
+      await expect(page.getByRole("cell", { name: semester })).toBeVisible({
+        timeout: 10_000,
+      });
+      // The modal now animates closed instead of unmounting on the same
+      // tick (docs/ANIMATION_SYSTEM.md) — without waiting for it, the next
+      // loop iteration's "Add grade" locator can still match the still-
+      // fading-out submit button, hitting a strict-mode violation against
+      // the freshly reopened dialog's own "Add grade" trigger.
+      await expect(page.getByRole("dialog")).not.toBeVisible();
     }
 
     // Bars are the violet, rounded-top fill divs inside the trend chart —
     // read their *rendered* height, not the inline style value, since the
     // whole point of the bug was those two disagreeing.
-    const heights = await page.locator('div.bg-violet[class*="rounded-t"]').evaluateAll(
-      (els) => els.map((el) => el.getBoundingClientRect().height),
-    );
+    const heights = await page
+      .locator('div.bg-violet[class*="rounded-t"]')
+      .evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height));
     expect(heights.length).toBeGreaterThanOrEqual(2);
 
     const distinctHeights = new Set(heights.map((h) => Math.round(h)));
@@ -76,8 +93,13 @@ test.describe("Layout regressions (docs/PRODUCT_REVIEW.md)", () => {
     for (const semester of [semesterLow, semesterHigh]) {
       const row = page.locator("tr").filter({ hasText: semester });
       await row.getByRole("button", { name: "Delete", exact: true }).click();
-      await page.getByRole("dialog").getByRole("button", { name: "Delete", exact: true }).click();
-      await expect(page.getByRole("cell", { name: semester })).not.toBeVisible({ timeout: 10_000 });
+      await page
+        .getByRole("dialog")
+        .getByRole("button", { name: "Delete", exact: true })
+        .click();
+      await expect(page.getByRole("cell", { name: semester })).not.toBeVisible({
+        timeout: 10_000,
+      });
     }
   });
 
@@ -85,10 +107,14 @@ test.describe("Layout regressions (docs/PRODUCT_REVIEW.md)", () => {
   // from their longest option and refuse to shrink, so a plain flex-1
   // search input got squeezed to ~36-49px below desktop widths.
   for (const width of [390, 768, 1280]) {
-    test(`QA-02: assignment search stays usable at ${width}px wide`, async ({ page }) => {
+    test(`QA-02: assignment search stays usable at ${width}px wide`, async ({
+      page,
+    }) => {
       await page.setViewportSize({ width, height: 900 });
       await page.goto("/assignments");
-      await expect(page.getByRole("heading", { name: "Assignments" })).toBeVisible();
+      await expect(
+        page.getByRole("heading", { name: "Assignments" }),
+      ).toBeVisible();
 
       const box = await page.getByLabel("Search assignments").boundingBox();
       expect(box).not.toBeNull();
@@ -109,7 +135,10 @@ test.describe("Layout regressions (docs/PRODUCT_REVIEW.md)", () => {
           const de = document.documentElement;
           return de.scrollWidth > de.clientWidth + 1;
         });
-        expect(overflowing, `${route} overflows horizontally at ${width}px`).toBe(false);
+        expect(
+          overflowing,
+          `${route} overflows horizontally at ${width}px`,
+        ).toBe(false);
       }
     });
   }

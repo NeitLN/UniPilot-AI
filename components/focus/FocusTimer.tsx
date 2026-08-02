@@ -3,8 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { AnimatePresence, motion } from "motion/react";
 import { Pilo } from "@/components/brand/Pilo";
 import { Modal } from "@/components/ui/Modal";
+import { confirmVariants } from "@/lib/motion/variants";
 import { logFocusSession } from "@/app/(app)/focus/actions";
 import {
   breakKindForCycle,
@@ -60,9 +62,13 @@ function readCycleCount(): number {
   return Number(window.localStorage.getItem(CYCLE_COUNT_KEY) ?? "0") || 0;
 }
 
-function phaseDuration(session: Pick<StoredSession, "phase" | "breakKind">): number {
+function phaseDuration(
+  session: Pick<StoredSession, "phase" | "breakKind">,
+): number {
   if (session.phase === "work") return POMODORO_SECONDS;
-  return session.breakKind === "long" ? LONG_BREAK_SECONDS : SHORT_BREAK_SECONDS;
+  return session.breakKind === "long"
+    ? LONG_BREAK_SECONDS
+    : SHORT_BREAK_SECONDS;
 }
 
 function formatClock(seconds: number): string {
@@ -72,7 +78,11 @@ function formatClock(seconds: number): string {
   return `${m}:${String(rem).padStart(2, "0")}`;
 }
 
-export function FocusTimer({ assignments }: { assignments: FocusAssignmentOption[] }) {
+export function FocusTimer({
+  assignments,
+}: {
+  assignments: FocusAssignmentOption[];
+}) {
   const router = useRouter();
   const [session, setSession] = useState<StoredSession | null>(null);
   const [selectedId, setSelectedId] = useState(assignments[0]?.id ?? "");
@@ -152,7 +162,8 @@ export function FocusTimer({ assignments }: { assignments: FocusAssignmentOption
 
     function tick() {
       const duration = phaseDuration(session!);
-      const elapsed = (Date.now() - new Date(session!.startedAt).getTime()) / 1000;
+      const elapsed =
+        (Date.now() - new Date(session!.startedAt).getTime()) / 1000;
       const left = duration - elapsed;
       setRemaining(left);
       if (left <= 0 && !finishedRef.current) {
@@ -218,7 +229,9 @@ export function FocusTimer({ assignments }: { assignments: FocusAssignmentOption
   const displayRemaining = session
     ? session.pausedAt
       ? duration -
-        (new Date(session.pausedAt).getTime() - new Date(session.startedAt).getTime()) / 1000
+        (new Date(session.pausedAt).getTime() -
+          new Date(session.startedAt).getTime()) /
+          1000
       : remaining
     : POMODORO_SECONDS;
   const progress = Math.max(0, Math.min(1, displayRemaining / duration));
@@ -258,8 +271,8 @@ export function FocusTimer({ assignments }: { assignments: FocusAssignmentOption
 
         {isRunning && isBreak && (
           <p className="mb-2 text-[12.5px] font-bold text-ink/70">
-            {session.breakKind === "long" ? "Long break" : "Short break"} — nice work
-            on {activeAssignment?.title ?? "that cycle"}
+            {session.breakKind === "long" ? "Long break" : "Short break"} — nice
+            work on {activeAssignment?.title ?? "that cycle"}
           </p>
         )}
         {isRunning && !isBreak && activeAssignment && (
@@ -277,7 +290,14 @@ export function FocusTimer({ assignments }: { assignments: FocusAssignmentOption
       <div className="flex flex-1 flex-col items-center justify-center">
         <div className="relative mx-auto flex h-[190px] w-[190px] items-center justify-center">
           <svg viewBox="0 0 150 150" className="absolute inset-0 -rotate-90">
-            <circle cx="75" cy="75" r={RADIUS} fill="none" strokeWidth="12" className="stroke-ink/15" />
+            <circle
+              cx="75"
+              cy="75"
+              r={RADIUS}
+              fill="none"
+              strokeWidth="12"
+              className="stroke-ink/15"
+            />
             <circle
               cx="75"
               cy="75"
@@ -348,7 +368,10 @@ export function FocusTimer({ assignments }: { assignments: FocusAssignmentOption
                 {assignments.length === 0 ? (
                   <>
                     Add an assignment first — Pomodoro needs one to log against.{" "}
-                    <Link href="/assignments" className="font-extrabold text-violet hover:underline">
+                    <Link
+                      href="/assignments"
+                      className="font-extrabold text-violet hover:underline"
+                    >
                       Add one now →
                     </Link>
                   </>
@@ -360,18 +383,33 @@ export function FocusTimer({ assignments }: { assignments: FocusAssignmentOption
           </>
         )}
 
-        {finishedPhase && !isRunning && (
-          <div className="mt-3 flex items-center justify-center gap-2">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-card">
-              <Pilo mood="happy" size={24} />
-            </span>
-            <p className="text-[12.5px] font-bold text-ink">
-              {finishedPhase === "work"
-                ? "Cycle logged — break started."
-                : "Break's over — ready for another cycle?"}
-            </p>
-          </div>
-        )}
+        {/* Restrained completion confirmation, not a celebration — a
+            Pomodoro cycle finishing is routine, not a milestone. Fades +
+            settles in once; AnimatePresence lets it fade back out cleanly
+            if the user immediately starts the next cycle instead of
+            popping away mid-read. */}
+        <AnimatePresence>
+          {finishedPhase && !isRunning && (
+            <motion.div
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              variants={confirmVariants}
+              role="status"
+              aria-live="polite"
+              className="mt-3 flex items-center justify-center gap-2"
+            >
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-card">
+                <Pilo mood="happy" size={24} />
+              </span>
+              <p className="text-[12.5px] font-bold text-ink">
+                {finishedPhase === "work"
+                  ? "Cycle logged — break started."
+                  : "Break's over — ready for another cycle?"}
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       <Modal
@@ -379,7 +417,9 @@ export function FocusTimer({ assignments }: { assignments: FocusAssignmentOption
         onClose={() => setConfirmingStop(false)}
         title="Stop focus session"
       >
-        <h2 className="font-display text-lg font-bold text-foreground">Stop this session?</h2>
+        <h2 className="font-display text-lg font-bold text-foreground">
+          Stop this session?
+        </h2>
         <p className="mt-2 text-sm font-semibold text-ink-2">
           {`This logs a partial session for ${formatClock(duration - displayRemaining)} — it won't count toward your streak.`}
         </p>
