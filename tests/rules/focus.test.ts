@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  activityTone,
   breakKindForCycle,
   classify,
+  completedCyclesToday,
+  dailyActivity,
   formatMinutes,
   streakDays,
   weeklyStats,
@@ -28,6 +31,65 @@ describe("classify", () => {
 
   it("classifies 0 seconds as partial", () => {
     expect(classify(0)).toBe("partial");
+  });
+
+  it("classifies against a variable target duration (45/60 min sessions)", () => {
+    const FORTY_FIVE_MIN = 45 * 60;
+    // Stopped at 30:00 during a chosen 45-min session — must not read as
+    // "completed" just because it beats the old fixed 25:00 default.
+    expect(classify(30 * 60, FORTY_FIVE_MIN)).toBe("partial");
+    expect(classify(FORTY_FIVE_MIN, FORTY_FIVE_MIN)).toBe("completed");
+  });
+});
+
+describe("dailyActivity / activityTone / completedCyclesToday", () => {
+  const now = new Date("2026-08-03T12:00:00.000Z"); // Monday
+
+  function session(startedAt: string, result: "completed" | "partial", minutes = 25): FocusSessionLike {
+    return { assignmentId: "a1", startedAt, durationSeconds: minutes * 60, result };
+  }
+
+  it("returns one bucket per day, oldest first, today last", () => {
+    const days = dailyActivity([], now, "UTC", 7);
+    expect(days).toHaveLength(7);
+    expect(days[6].dayKey).toBe("2026-08-03");
+    expect(days[0].dayKey).toBe("2026-07-28");
+  });
+
+  it("tallies completed cycles and minutes per day", () => {
+    const sessions = [
+      session("2026-08-03T09:00:00.000Z", "completed"),
+      session("2026-08-03T14:00:00.000Z", "partial", 10),
+      session("2026-08-02T09:00:00.000Z", "completed"),
+    ];
+    const days = dailyActivity(sessions, now, "UTC", 7);
+    const today = days.find((d) => d.dayKey === "2026-08-03")!;
+    expect(today.completedCycles).toBe(1);
+    expect(today.minutes).toBe(35);
+    const yesterday = days.find((d) => d.dayKey === "2026-08-02")!;
+    expect(yesterday.completedCycles).toBe(1);
+  });
+
+  it("activityTone is relative to the viewer's own goal, not an absolute count", () => {
+    expect(activityTone(0, 4)).toBe("rest");
+    expect(activityTone(1, 4)).toBe("light"); // under half
+    expect(activityTone(2, 4)).toBe("good"); // half
+    expect(activityTone(4, 4)).toBe("great"); // met goal
+    expect(activityTone(6, 4)).toBe("heavy"); // 1.5x goal
+  });
+
+  it("activityTone falls back sanely when no real goal is set", () => {
+    expect(activityTone(0, 0)).toBe("rest");
+    expect(activityTone(2, 0)).toBe("good");
+  });
+
+  it("completedCyclesToday counts only completed sessions on the viewer's today", () => {
+    const sessions = [
+      session("2026-08-03T09:00:00.000Z", "completed"),
+      session("2026-08-03T10:00:00.000Z", "partial"),
+      session("2026-08-02T09:00:00.000Z", "completed"),
+    ];
+    expect(completedCyclesToday(sessions, now, "UTC")).toBe(1);
   });
 });
 

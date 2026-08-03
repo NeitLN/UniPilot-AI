@@ -142,6 +142,110 @@ export function estimateGradePoint(percentScore: number): number {
   return Number(Math.max(0, Math.min(4, percentScore / 25)).toFixed(2));
 }
 
+export interface ScenarioCourse {
+  courseId: string;
+  courseName: string;
+  creditHours: number;
+  assignments: ScoredAssignmentLike[];
+}
+
+export interface GpaScenarios {
+  worst: number;
+  likely: number;
+  best: number;
+}
+
+/**
+ * Three directional GPA projections for in-progress (not-yet-officially-
+ * graded) courses, combined with the *fixed* official grades already on the
+ * books. UNIPILOT_8_SCREENS Step 5.4 requires every assumption to be
+ * documented, not a random number:
+ *  - Worst case: every ungraded assignment assumed at 60% (a conservative,
+ *    C-range assumption — not a catastrophic one).
+ *  - Likely: ungraded weight assumed to score the same as the course's own
+ *    already-graded average (neutral "if performance stays the same").
+ *  - Best case: every ungraded assignment assumed at 100%.
+ * Returns null when there's no in-progress course with any scored (or
+ * scorable) assignment at all — nothing to project, so no scenario cards
+ * should render instead of showing three copies of the same official GPA.
+ */
+export function projectGpaScenarios(
+  officialGrades: GradeLike[],
+  inProgressCourses: ScenarioCourse[],
+): GpaScenarios | null {
+  const officialQP = officialGrades.reduce((s, g) => s + qualityPoints(g.gradePoint, g.creditHours), 0);
+  const officialCredits = officialGrades.reduce((s, g) => s + g.creditHours, 0);
+
+  function courseScenarioPct(assignments: ScoredAssignmentLike[], unscoredAssumptionPct: number | null): number | null {
+    const totalWeight = assignments.reduce((s, a) => s + a.weight, 0);
+    if (totalWeight === 0) return null;
+    const scored = assignments.filter((a): a is ScoredAssignmentLike & { score: number } => a.score !== null);
+    const scoredWeight = scored.reduce((s, a) => s + a.weight, 0);
+    const scoredPoints = scored.reduce((s, a) => s + a.score * a.weight, 0);
+    const unscoredWeight = totalWeight - scoredWeight;
+    if (unscoredWeight === 0) return scoredPoints / totalWeight;
+    // "Likely" (unscoredAssumptionPct === null) has no neutral fallback to
+    // assume when literally nothing in the course is graded yet — assuming
+    // 0% would read as a real, alarming prediction instead of "no signal".
+    // Worst/best still apply their fixed assumption regardless, since those
+    // are deliberate hypotheticals, not an attempt at a neutral estimate.
+    if (unscoredAssumptionPct === null && scoredWeight === 0) return null;
+    const assumedPct = unscoredAssumptionPct ?? scoredPoints / scoredWeight;
+    return (scoredPoints + unscoredWeight * assumedPct) / totalWeight;
+  }
+
+  function scenario(unscoredAssumptionPct: number | null): number | null {
+    let qp = officialQP;
+    let credits = officialCredits;
+    for (const c of inProgressCourses) {
+      const pct = courseScenarioPct(c.assignments, unscoredAssumptionPct);
+      if (pct === null) continue;
+      qp += estimateGradePoint(pct) * c.creditHours;
+      credits += c.creditHours;
+    }
+    // null only when there's truly nothing — no official grades AND no
+    // in-progress course contributed a projection for this scenario.
+    if (credits === 0) return null;
+    return Number((qp / credits).toFixed(2));
+  }
+
+  const hasProjectableCourse = inProgressCourses.some(
+    (c) => c.assignments.reduce((s, a) => s + a.weight, 0) > 0,
+  );
+  if (!hasProjectableCourse) return null;
+
+  const worst = scenario(60);
+  const likely = scenario(null);
+  const best = scenario(100);
+  if (worst === null || likely === null || best === null) return null;
+  return { worst, likely, best };
+}
+
+export interface GpaInsight {
+  courseName: string;
+  basis: "official" | "predicted";
+}
+
+/**
+ * "Your strongest course is X" — never invented. Prefers the highest
+ * *official* grade point; only falls back to a predicted course when no
+ * official grades exist yet, and only among courses with enough scored
+ * weight (>=30%) to be a meaningful signal, not a single quiz.
+ */
+export function strongestCourseInsight(
+  officialGrades: { courseName: string; gradePoint: number }[],
+  predictedCourses: { courseName: string; predictedScore: number; scoredWeight: number }[],
+): GpaInsight | null {
+  if (officialGrades.length > 0) {
+    const top = [...officialGrades].sort((a, b) => b.gradePoint - a.gradePoint)[0];
+    return { courseName: top.courseName, basis: "official" };
+  }
+  const sufficient = predictedCourses.filter((c) => c.scoredWeight >= 30);
+  if (sufficient.length === 0) return null;
+  const top = [...sufficient].sort((a, b) => b.predictedScore - a.predictedScore)[0];
+  return { courseName: top.courseName, basis: "predicted" };
+}
+
 export interface GradeInput {
   courseId: string;
   semester: string;

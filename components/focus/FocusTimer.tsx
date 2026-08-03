@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { Pilo } from "@/components/brand/Pilo";
 import { Modal } from "@/components/ui/Modal";
@@ -34,8 +34,19 @@ interface StoredSession {
   startedAt: string;
   phase: Phase;
   breakKind?: BreakKind;
+  /** Work-phase duration in seconds (Step 4.1: 25/45/60 min picker) — absent
+   * on sessions stored before this field existed, or during a break (which
+   * derives its own duration from breakKind instead). */
+  workDurationSeconds?: number;
   /** Set while paused; timer freezes at the remaining time it had then. */
   pausedAt: string | null;
+}
+
+const DURATION_OPTIONS_MIN = [25, 45, 60] as const;
+type DurationMinutes = (typeof DURATION_OPTIONS_MIN)[number];
+
+function isDurationMinutes(n: number): n is DurationMinutes {
+  return (DURATION_OPTIONS_MIN as readonly number[]).includes(n);
 }
 
 function readStoredSession(): StoredSession | null {
@@ -50,6 +61,7 @@ function readStoredSession(): StoredSession | null {
       startedAt: parsed.startedAt,
       phase: parsed.phase,
       breakKind: parsed.breakKind,
+      workDurationSeconds: parsed.workDurationSeconds,
       pausedAt: parsed.pausedAt ?? null,
     };
   } catch {
@@ -63,9 +75,9 @@ function readCycleCount(): number {
 }
 
 function phaseDuration(
-  session: Pick<StoredSession, "phase" | "breakKind">,
+  session: Pick<StoredSession, "phase" | "breakKind" | "workDurationSeconds">,
 ): number {
-  if (session.phase === "work") return POMODORO_SECONDS;
+  if (session.phase === "work") return session.workDurationSeconds ?? POMODORO_SECONDS;
   return session.breakKind === "long"
     ? LONG_BREAK_SECONDS
     : SHORT_BREAK_SECONDS;
@@ -80,12 +92,27 @@ function formatClock(seconds: number): string {
 
 export function FocusTimer({
   assignments,
+  defaultDurationMinutes = 25,
 }: {
   assignments: FocusAssignmentOption[];
+  /** From profiles.default_focus_minutes (Settings' Study preferences,
+   * Step 4.1) — the picker below still lets a session override it. */
+  defaultDurationMinutes?: number;
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [session, setSession] = useState<StoredSession | null>(null);
-  const [selectedId, setSelectedId] = useState(assignments[0]?.id ?? "");
+  const [selectedDurationMinutes, setSelectedDurationMinutes] = useState<DurationMinutes>(
+    isDurationMinutes(defaultDurationMinutes) ? defaultDurationMinutes : 25,
+  );
+  // Pilo's pick "Focus now" CTA (brief §6.4) deep-links here with
+  // ?assignment=<id> — only honored when it names one of this viewer's own
+  // active assignments, otherwise falls back to the ordinary default.
+  const [selectedId, setSelectedId] = useState(() => {
+    const fromQuery = searchParams.get("assignment");
+    if (fromQuery && assignments.some((a) => a.id === fromQuery)) return fromQuery;
+    return assignments[0]?.id ?? "";
+  });
   const [remaining, setRemaining] = useState(POMODORO_SECONDS);
   const [finishedPhase, setFinishedPhase] = useState<Phase | null>(null);
   const [confirmingStop, setConfirmingStop] = useState(false);
@@ -114,15 +141,16 @@ export function FocusTimer({
     setSession(next);
   }
 
-  // Only a WORK phase reaching a full 25:00 (auto-timeout or the ordinary
-  // finish path) logs anything to the server — breaks are pure local timer
-  // state, never sent as a focus_sessions row.
+  // Only a WORK phase reaching its full chosen duration (auto-timeout or
+  // the ordinary finish path) logs anything to the server — breaks are pure
+  // local timer state, never sent as a focus_sessions row.
   async function finishWorkSession(current: StoredSession) {
     setPending(true);
     const input = {
       assignmentId: current.assignmentId,
       startedAt: current.startedAt,
       endedAt: new Date().toISOString(),
+      targetDurationSeconds: current.workDurationSeconds ?? POMODORO_SECONDS,
     };
     if (navigator.onLine) {
       await logFocusSession(input);
@@ -186,6 +214,7 @@ export function FocusTimer({
       assignmentId: selectedId,
       startedAt: new Date().toISOString(),
       phase: "work",
+      workDurationSeconds: selectedDurationMinutes * 60,
       pausedAt: null,
     });
   }
@@ -225,7 +254,7 @@ export function FocusTimer({
   const isRunning = session !== null;
   const isPaused = Boolean(session?.pausedAt);
   const isBreak = session?.phase === "break";
-  const duration = session ? phaseDuration(session) : POMODORO_SECONDS;
+  const duration = session ? phaseDuration(session) : selectedDurationMinutes * 60;
   const displayRemaining = session
     ? session.pausedAt
       ? duration -
@@ -233,7 +262,7 @@ export function FocusTimer({
           new Date(session.startedAt).getTime()) /
           1000
       : remaining
-    : POMODORO_SECONDS;
+    : selectedDurationMinutes * 60;
   const progress = Math.max(0, Math.min(1, displayRemaining / duration));
   const dashOffset = CIRCUMFERENCE * (1 - progress);
   const activeAssignment = assignments.find(
@@ -248,25 +277,47 @@ export function FocusTimer({
           varies with content, unlike the timer block below it. */}
       <div>
         {!isRunning && (
-          <label className="mb-3 block text-left text-xs font-bold text-ink/70">
-            Assignment
-            <select
-              value={selectedId}
-              onChange={(e) => setSelectedId(e.target.value)}
-              disabled={assignments.length === 0}
-              className="mt-1 min-h-11 w-full rounded-ctl border border-ink/15 bg-card px-3 py-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-violet disabled:opacity-60"
-            >
-              {assignments.length === 0 ? (
-                <option value="">No active assignments</option>
-              ) : (
-                assignments.map((a) => (
-                  <option key={a.id} value={a.id}>
-                    {a.title}
-                  </option>
-                ))
-              )}
-            </select>
-          </label>
+          <>
+            <label className="mb-3 block text-left text-xs font-bold text-ink/70">
+              Assignment
+              <select
+                value={selectedId}
+                onChange={(e) => setSelectedId(e.target.value)}
+                disabled={assignments.length === 0}
+                className="mt-1 min-h-11 w-full rounded-ctl border border-ink/15 bg-card px-3 py-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-violet disabled:opacity-60"
+              >
+                {assignments.length === 0 ? (
+                  <option value="">No active assignments</option>
+                ) : (
+                  assignments.map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.title}
+                    </option>
+                  ))
+                )}
+              </select>
+            </label>
+
+            <div className="mb-3 text-left">
+              <span className="block text-xs font-bold text-ink/70">Duration</span>
+              <div role="radiogroup" aria-label="Focus session duration" className="mt-1 flex gap-1.5">
+                {DURATION_OPTIONS_MIN.map((mins) => (
+                  <button
+                    key={mins}
+                    type="button"
+                    role="radio"
+                    aria-checked={selectedDurationMinutes === mins}
+                    onClick={() => setSelectedDurationMinutes(mins)}
+                    className={`flex min-h-11 flex-1 items-center justify-center rounded-ctl text-sm font-extrabold motion-safe:transition-colors motion-safe:duration-200 ${
+                      selectedDurationMinutes === mins ? "bg-ink text-white" : "bg-card text-ink-2 hover:bg-card/70"
+                    }`}
+                  >
+                    {mins}m
+                  </button>
+                ))}
+              </div>
+            </div>
+          </>
         )}
 
         {isRunning && isBreak && (
@@ -287,8 +338,8 @@ export function FocusTimer({
           taller "This week" card (docs/PRODUCT_REVIEW_4.md, dashboard-gap
           feedback), and h-full above stretches this card to match instead
           of leaving canvas-colored space beneath a short card. */}
-      <div className="flex flex-1 flex-col items-center justify-center">
-        <div className="relative mx-auto flex h-[190px] w-[190px] items-center justify-center">
+      <div className="flex flex-1 flex-col items-center justify-center gap-2 sm:flex-row sm:gap-5">
+        <div className="relative mx-auto flex h-[190px] w-[190px] shrink-0 items-center justify-center">
           <svg viewBox="0 0 150 150" className="absolute inset-0 -rotate-90">
             <circle
               cx="75"
@@ -315,11 +366,15 @@ export function FocusTimer({
           </p>
         </div>
 
-        <p className="mt-3 text-[10.5px] font-extrabold uppercase tracking-[0.14em] text-ink/60">
-          {isBreak ? "Break" : "Focus timer"}
-          {isPaused ? " · Paused" : ""}
-        </p>
+        {/* Companion, not decoration on every card (brief §5.3) — restrained
+            to this one timer surface, mood tied to real state. */}
+        <Pilo mood={isPaused ? "sleepy" : isBreak ? "happy" : "ready"} size={72} className="hidden sm:block" />
       </div>
+
+      <p className="mt-3 text-center text-[10.5px] font-extrabold uppercase tracking-[0.14em] text-ink/60">
+        {isBreak ? "Break" : "Focus timer"}
+        {isPaused ? " · Paused" : ""}
+      </p>
 
       {/* Bottom: actions, pinned to the card's bottom edge regardless of
           how much extra height the middle section absorbed above. */}

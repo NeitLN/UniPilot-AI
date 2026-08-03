@@ -15,7 +15,10 @@ test.describe("Review workload-risk warning", () => {
       test.skip(true, "Seed data was reset — rerun scripts/_seed_e2e (see tests/e2e/README).");
     }
 
-    await expect(page.getByText("Warning threshold: 60")).toBeVisible();
+    // Redesign (UNIPILOT_8_SCREENS_GENZ_UI_BUILD_ROADMAP.md Phase 6): the
+    // score's range now shows as a pill ("Above threshold"/"Within a
+    // healthy range") on RiskBalanceHero, not a "Warning threshold: 60" line.
+    await expect(page.getByText(/Above threshold|Within a healthy range/)).toBeVisible();
     await expect(page.getByText("Workload ×0.40")).toBeVisible();
     await expect(page.getByText("Overdue ×0.35")).toBeVisible();
     await expect(page.getByText("Focus ×0.25")).toBeVisible();

@@ -51,6 +51,14 @@
   --mint-text: #08372a;
 
   --sky: #45c2ff;
+  /* Added for the 8-screen course-tone palette (course-tone.ts) — every
+     other hue here already has a *-tint/*-text pair for badge/card text,
+     sky didn't. Same derivation pattern as mint/coral/tangerine: a very
+     light pastel tint paired with a dark, same-hue text color. Computed
+     contrast of --sky-text on --sky-tint ≈ 6.7:1, comfortably above
+     WCAG AA's 4.5:1 for normal text. */
+  --sky-tint: #e3f6ff;
+  --sky-text: #0c5a86;
 
   --canvas: #f2f0fb;
   --card: #ffffff;
@@ -147,6 +155,8 @@
   --color-mint-text: var(--mint-text);
 
   --color-sky: var(--sky);
+  --color-sky-tint: var(--sky-tint);
+  --color-sky-text: var(--sky-text);
 
   --color-canvas: var(--canvas);
   --color-card: var(--card);
@@ -167,6 +177,10 @@
   --color-dusk-btn: var(--dusk-btn);
 
   --radius-card: 30px;
+  /* Assignments redesign (UNIPILOT_ASSIGNMENTS_GENZ_DESIGN_BRIEF.md §5):
+     a mid-tier between hero bento cards (--radius-card, 30px) and controls
+     (--radius-ctl, 16px) — content-level cards like AssignmentSection. */
+  --radius-card-sm: 22px;
   --radius-ctl: 16px;
   --radius-pill: 20px;
 }

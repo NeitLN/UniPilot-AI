@@ -27,6 +27,10 @@ export interface Database {
           full_name: string | null;
           target_gpa: number | null;
           weekly_availability_hours: number;
+          // 0015_profile_ui_preferences.sql
+          default_focus_minutes: number;
+          daily_focus_goal_cycles: number;
+          preferred_study_days: number[];
           created_at: string;
         };
         Insert: {
@@ -34,6 +38,9 @@ export interface Database {
           full_name?: string | null;
           target_gpa?: number | null;
           weekly_availability_hours?: number;
+          default_focus_minutes?: number;
+          daily_focus_goal_cycles?: number;
+          preferred_study_days?: number[];
           created_at?: string;
         };
         Update: {
@@ -41,6 +48,9 @@ export interface Database {
           full_name?: string | null;
           target_gpa?: number | null;
           weekly_availability_hours?: number;
+          default_focus_minutes?: number;
+          daily_focus_goal_cycles?: number;
+          preferred_study_days?: number[];
           created_at?: string;
         };
         Relationships: [];
@@ -93,6 +103,10 @@ export interface Database {
           recurrence_group_id: string | null;
           created_at: string;
           updated_at: string;
+          // 0017_assignment_completed_at.sql — exact moment status last
+          // transitioned to 'done'; app-layer owned (see actions.ts), not a
+          // trigger. null whenever status isn't 'done'.
+          completed_at: string | null;
         };
         Insert: {
           id?: string;
@@ -111,6 +125,7 @@ export interface Database {
           recurrence_group_id?: string | null;
           created_at?: string;
           updated_at?: string;
+          completed_at?: string | null;
         };
         Update: {
           id?: string;
@@ -129,6 +144,7 @@ export interface Database {
           recurrence_group_id?: string | null;
           created_at?: string;
           updated_at?: string;
+          completed_at?: string | null;
         };
         Relationships: [];
       };
@@ -405,6 +421,36 @@ export interface Database {
           push_status?: string | null;
           assignment_id?: string | null;
           class_block_id?: string | null;
+        };
+        Relationships: [];
+      };
+      // 0016_notification_preferences.sql — per-category delivery
+      // preferences, distinct from push_subscriptions (which is the
+      // browser/device's push endpoint, not category opt-in/out).
+      notification_preferences: {
+        Row: {
+          user_id: string;
+          assignment_reminders: boolean;
+          workload_warnings: boolean;
+          weekly_report: boolean;
+          focus_reminders: boolean;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          assignment_reminders?: boolean;
+          workload_warnings?: boolean;
+          weekly_report?: boolean;
+          focus_reminders?: boolean;
+          updated_at?: string;
+        };
+        Update: {
+          user_id?: string;
+          assignment_reminders?: boolean;
+          workload_warnings?: boolean;
+          weekly_report?: boolean;
+          focus_reminders?: boolean;
+          updated_at?: string;
         };
         Relationships: [];
       };

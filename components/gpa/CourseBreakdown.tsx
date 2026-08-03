@@ -11,6 +11,7 @@ import {
   qualityPoints,
   type GradeLike,
 } from "@/lib/rules/gpa";
+import { courseTone, COURSE_TONE_CLASSES } from "@/lib/ui/course-tone";
 import type { CourseOption } from "@/components/assignments/AssignmentForm";
 
 export interface GradeRow extends GradeLike {
@@ -35,6 +36,7 @@ export function CourseBreakdown({
   courses: CourseOption[];
   overallGpa: number;
 }) {
+  const [actionsFor, setActionsFor] = useState<GradeRow | null>(null);
   const [editing, setEditing] = useState<GradeRow | null>(null);
   const [deleting, setDeleting] = useState<GradeRow | null>(null);
   const [showAll, setShowAll] = useState(false);
@@ -67,12 +69,16 @@ export function CourseBreakdown({
             <tbody>
               {visibleGrades.map((g) => {
                 const draggingDown = dragsGpaDown(g, overallGpa);
+                const tone = COURSE_TONE_CLASSES[courseTone(g.courseId)];
                 return (
                   <tr key={g.id} className="border-b border-line last:border-b-0">
                     <td className="py-2 pr-3 font-bold text-foreground">
-                      <span className="truncate">{g.courseName}</span>
+                      <span className="flex items-center gap-2">
+                        <span aria-hidden="true" className={`h-2 w-2 shrink-0 rounded-full ${tone.solid}`} />
+                        <span className="truncate">{g.courseName}</span>
+                      </span>
                       {draggingDown && (
-                        <span className="ml-1.5 inline-block rounded-pill bg-coral-tint px-2 py-0.5 text-[10px] font-extrabold text-coral-text">
+                        <span className="ml-4 mt-1 inline-block rounded-pill bg-coral-tint px-2 py-0.5 text-[10px] font-extrabold text-coral-text">
                           Below average
                         </span>
                       )}
@@ -91,22 +97,14 @@ export function CourseBreakdown({
                       {gpaContribution(g, grades).toFixed(2)}
                     </td>
                     <td className="py-2 text-right">
-                      <div className="flex justify-end gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => setEditing(g)}
-                          className="flex min-h-11 min-w-11 items-center justify-center rounded-ctl bg-line px-2.5 py-1.5 text-[11px] font-bold text-ink-2 hover:bg-line-hover"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setDeleting(g)}
-                          className="flex min-h-11 min-w-11 items-center justify-center rounded-ctl bg-line px-2.5 py-1.5 text-[11px] font-bold text-ink-2 hover:bg-line-hover"
-                        >
-                          Delete
-                        </button>
-                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setActionsFor(g)}
+                        aria-label={`Actions for ${g.courseName}`}
+                        className="flex min-h-11 min-w-11 items-center justify-center rounded-ctl bg-line text-sm font-bold text-ink-2 hover:bg-line-hover"
+                      >
+                        ⋯
+                      </button>
                     </td>
                   </tr>
                 );
@@ -125,6 +123,43 @@ export function CourseBreakdown({
           Show all {grades.length} courses ({hiddenCount} more)
         </button>
       )}
+
+      <Modal open={actionsFor !== null} onClose={() => setActionsFor(null)} title="Actions">
+        {actionsFor && (
+          <>
+            <h2 className="font-display text-lg font-bold text-foreground">{actionsFor.courseName}</h2>
+            <div className="mt-4 flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setEditing(actionsFor);
+                  setActionsFor(null);
+                }}
+                className="flex min-h-11 w-full items-center justify-center rounded-ctl bg-line py-2.5 text-sm font-bold text-ink-2 hover:bg-line-hover"
+              >
+                Edit
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setDeleting(actionsFor);
+                  setActionsFor(null);
+                }}
+                className="flex min-h-11 w-full items-center justify-center rounded-ctl bg-coral-tint py-2.5 text-sm font-bold text-coral-text hover:bg-coral-tint/80"
+              >
+                Delete
+              </button>
+              <button
+                type="button"
+                onClick={() => setActionsFor(null)}
+                className="flex min-h-11 w-full items-center justify-center rounded-ctl py-2.5 text-sm font-bold text-ink-3 hover:bg-line"
+              >
+                Cancel
+              </button>
+            </div>
+          </>
+        )}
+      </Modal>
 
       <Modal open={editing !== null} onClose={() => setEditing(null)} title="Edit grade">
         {editing && (

@@ -1,17 +1,27 @@
 import { createClient } from "@/lib/supabase/server";
-import { gpa, gpaBySemester, qualityPoints } from "@/lib/rules/gpa";
+import {
+  gpa,
+  gpaBySemester,
+  projectGpaScenarios,
+  qualityPoints,
+  strongestCourseInsight,
+  type ScenarioCourse,
+} from "@/lib/rules/gpa";
 import { AddGradeButton } from "@/components/gpa/AddGradeButton";
+import { GpaHero } from "@/components/gpa/GpaHero";
 import { CourseBreakdown, type GradeRow } from "@/components/gpa/CourseBreakdown";
 import { GpaTrendChart } from "@/components/gpa/GpaTrendChart";
 import { ForecastCard } from "@/components/gpa/ForecastCard";
 import { PredictedGrades, type PredictedGradeCourse } from "@/components/gpa/PredictedGrades";
+import { PredictedScenarios } from "@/components/gpa/PredictedScenarios";
+import { PiloGpaInsight } from "@/components/gpa/PiloGpaInsight";
 
 export async function GpaContent() {
   const supabase = await createClient();
 
   const [{ data: courseRows }, { data: gradeRows }, { data: profile }, { data: assignmentRows }] =
     await Promise.all([
-      supabase.from("courses").select("id, name, code").order("name"),
+      supabase.from("courses").select("id, name, code, credits").order("name"),
       supabase
         .from("grades")
         .select("id, course_id, semester, grade_point, credit_hours")
@@ -49,32 +59,61 @@ export async function GpaContent() {
   // F-03: only courses with no official grade yet are candidates — once a
   // real grade exists, the prediction would just be a confusing duplicate.
   const gradedCourseIds = new Set(grades.map((g) => g.courseId));
-  const predictedCourses: PredictedGradeCourse[] = courses
-    .filter((c) => !gradedCourseIds.has(c.id))
+  const inProgressCourses = courses.filter((c) => !gradedCourseIds.has(c.id));
+  const predictedCourses: PredictedGradeCourse[] = inProgressCourses.map((c) => ({
+    id: c.id,
+    name: c.code ? `${c.code} — ${c.name}` : c.name,
+    assignments: (assignmentRows ?? [])
+      .filter((a) => a.course_id === c.id)
+      .map((a) => ({ weight: a.weight, score: a.score })),
+  }));
+
+  const scenarioCourses: ScenarioCourse[] = inProgressCourses
     .map((c) => ({
-      id: c.id,
-      name: c.code ? `${c.code} — ${c.name}` : c.name,
+      courseId: c.id,
+      courseName: c.code ? `${c.code} — ${c.name}` : c.name,
+      creditHours: c.credits,
       assignments: (assignmentRows ?? [])
         .filter((a) => a.course_id === c.id)
         .map((a) => ({ weight: a.weight, score: a.score })),
-    }));
+    }))
+    .filter((c) => c.creditHours > 0);
+  const scenarios = projectGpaScenarios(grades, scenarioCourses);
+
+  const insight = strongestCourseInsight(
+    grades.map((g) => ({ courseName: g.courseName, gradePoint: g.gradePoint })),
+    predictedCourses
+      .map((c) => {
+        const scoredWeight = c.assignments.filter((a) => a.score !== null).reduce((s, a) => s + a.weight, 0);
+        const totalWeight = c.assignments.reduce((s, a) => s + a.weight, 0);
+        const scoredPoints = c.assignments.reduce((s, a) => s + (a.score ?? 0) * (a.score !== null ? a.weight : 0), 0);
+        return {
+          courseName: c.name,
+          predictedScore: scoredWeight > 0 ? scoredPoints / scoredWeight : 0,
+          scoredWeight: totalWeight > 0 ? (scoredWeight / totalWeight) * 100 : 0,
+        };
+      })
+      .filter((c) => c.scoredWeight > 0),
+  );
 
   return (
     <>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm font-semibold text-ink-2">
-          Cumulative GPA:{" "}
-          <span className="font-bold text-foreground">{overallGpa.toFixed(2)}</span> ·{" "}
-          {doneCredits} credits
-        </p>
+        <p className="text-sm font-semibold text-ink-2">Know where you stand — and where you&rsquo;re headed.</p>
         <AddGradeButton courses={courses} />
       </div>
 
+      <GpaHero overallGpa={overallGpa} doneCredits={doneCredits} targetGpa={profile?.target_gpa ?? null} />
+
       <div className="flex flex-col gap-3.5 lg:grid lg:grid-cols-[1.4fr_1fr] lg:items-start">
-        <CourseBreakdown grades={grades} courses={courses} overallGpa={overallGpa} />
+        <div className="flex min-w-0 flex-col gap-3.5">
+          <CourseBreakdown grades={grades} courses={courses} overallGpa={overallGpa} />
+          <PiloGpaInsight insight={insight} />
+        </div>
 
         <div className="flex min-w-0 flex-col gap-3.5">
           <GpaTrendChart points={trendPoints} targetGpa={profile?.target_gpa ?? null} />
+          <PredictedScenarios scenarios={scenarios} />
           <PredictedGrades courses={predictedCourses} />
           <ForecastCard
             initialTargetGpa={profile?.target_gpa ?? 3.6}
@@ -94,6 +133,7 @@ export function GpaContentSkeleton() {
         <div className="h-4 w-40 animate-pulse rounded-full bg-ink/10" />
         <div className="h-11 w-32 animate-pulse rounded-ctl bg-ink/10" />
       </div>
+      <div className="h-32 animate-pulse rounded-card bg-card" />
       <div className="flex flex-col gap-3.5 lg:grid lg:grid-cols-[1.4fr_1fr] lg:items-start">
         <div className="h-64 min-w-0 animate-pulse rounded-card bg-card" />
         <div className="flex min-w-0 flex-col gap-3.5">

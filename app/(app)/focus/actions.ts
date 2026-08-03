@@ -9,6 +9,11 @@ export interface LogFocusSessionInput {
   assignmentId: string;
   startedAt: string; // ISO
   endedAt: string; // ISO
+  /** The work-phase duration the timer was actually running toward
+   * (25/45/60 min in seconds — Step 4.1). Optional and defaults to the
+   * classic 25:00 inside classify() for any caller that predates the
+   * duration picker (old queued offline mutations, manual entries). */
+  targetDurationSeconds?: number;
 }
 
 export interface LogFocusSessionResult {
@@ -37,7 +42,7 @@ export async function logFocusSession(
     1,
     Math.round((ended.getTime() - started.getTime()) / 1000),
   );
-  const result = classify(durationSeconds);
+  const result = classify(durationSeconds, input.targetDurationSeconds);
 
   const { error } = await supabase.from("focus_sessions").insert({
     user_id: user.id,

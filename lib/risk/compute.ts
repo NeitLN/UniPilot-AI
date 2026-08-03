@@ -9,9 +9,21 @@ import {
   type RiskResult,
 } from "@/lib/rules/risk";
 
+/** Raw inputs behind the score — never a second definition of the formula,
+ * just the same numbers already computed below, surfaced so the "What's
+ * shaping your score" evidence card (Step 6.3) can cite them directly. */
+export interface RiskEvidence {
+  availableHours: number;
+  plannedHours: number;
+  pendingCount: number;
+  overdueCount: number;
+  completedCycles7d: number;
+  completedFocusMinutes7d: number;
+}
+
 export type RiskComputeResult =
   | { status: "insufficient_data"; gate: RiskGateInput }
-  | { status: "ok"; result: RiskResult; scoreId: string };
+  | { status: "ok"; result: RiskResult; scoreId: string; evidence: RiskEvidence };
 
 function todayDateString(): string {
   const d = new Date();
@@ -68,7 +80,7 @@ export const computeAndStoreRisk = cache(async function computeAndStoreRisk(
       .gte("started_at", thirtyDaysAgo.toISOString()),
     supabase
       .from("focus_sessions")
-      .select("result")
+      .select("result, duration_seconds")
       .gte("started_at", sevenDaysAgo.toISOString()),
     supabase
       .from("study_plans")
@@ -85,9 +97,11 @@ export const computeAndStoreRisk = cache(async function computeAndStoreRisk(
   const focusHistoryDays = new Set(
     (focusHistoryRows ?? []).map((r) => r.started_at.slice(0, 10)),
   ).size;
-  const completedCycles7d = (recentFocusSessions ?? []).filter(
-    (s) => s.result === "completed",
-  ).length;
+  const completedFocusSessions7d = (recentFocusSessions ?? []).filter((s) => s.result === "completed");
+  const completedCycles7d = completedFocusSessions7d.length;
+  const completedFocusMinutes7d = Math.round(
+    completedFocusSessions7d.reduce((sum, s) => sum + s.duration_seconds / 60, 0),
+  );
 
   let plannedHours = 0;
   if (activePlan) {
@@ -160,15 +174,31 @@ export const computeAndStoreRisk = cache(async function computeAndStoreRisk(
     // Only the very first time this score crosses the threshold today —
     // ignoreDuplicates means `insertedWarning` is empty on every later call.
     if (insertedWarning && insertedWarning.length > 0) {
-      await supabase.from("notifications").insert({
-        user_id: userId,
-        kind: "risk_warning",
-        title: "Workload risk is elevated",
-        body: `Today's score is ${result.score} — see the Workload risk page for suggestions.`,
-        scheduled_at: now.toISOString(),
-      });
+      // Settings → Notifications → "Workload warnings" (notification_preferences,
+      // migration 0016). The risk_warnings row itself is still created above
+      // regardless — that's what drives the in-app warning banner/dismiss
+      // flow (FR-16) — only the notification (push/in-app bell) is gated.
+      const { data: prefs } = await supabase
+        .from("notification_preferences")
+        .select("workload_warnings")
+        .eq("user_id", userId)
+        .maybeSingle();
+      if (prefs?.workload_warnings !== false) {
+        await supabase.from("notifications").insert({
+          user_id: userId,
+          kind: "risk_warning",
+          title: "Workload risk is elevated",
+          body: `Today's score is ${result.score} — see the Workload risk page for suggestions.`,
+          scheduled_at: now.toISOString(),
+        });
+      }
     }
   }
 
-  return { status: "ok", result, scoreId: scoreRow.id };
+  return {
+    status: "ok",
+    result,
+    scoreId: scoreRow.id,
+    evidence: { availableHours, plannedHours, pendingCount, overdueCount, completedCycles7d, completedFocusMinutes7d },
+  };
 });

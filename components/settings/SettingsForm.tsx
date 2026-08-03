@@ -8,13 +8,7 @@ import { Field, inputClass } from "@/components/ui/Field";
 
 const INITIAL_STATE: SettingsFormState = { errors: {} };
 
-export interface SettingsFormValues {
-  fullName: string;
-  weeklyAvailabilityHours: number;
-  targetGpa: number | null;
-}
-
-export function SettingsForm({ initialValues }: { initialValues: SettingsFormValues }) {
+export function SettingsForm({ initialFullName }: { initialFullName: string }) {
   const [state, formAction, pending] = useActionState<SettingsFormState, FormData>(
     updateProfile,
     INITIAL_STATE,
@@ -28,41 +22,8 @@ export function SettingsForm({ initialValues }: { initialValues: SettingsFormVal
           type="text"
           autoComplete="name"
           placeholder="e.g. Vo Viet Tien"
-          defaultValue={initialValues.fullName}
+          defaultValue={initialFullName}
           className={inputClass(false)}
-        />
-      </Field>
-
-      <Field
-        label="Weekly availability (hours)"
-        error={state.errors.weeklyAvailabilityHours}
-      >
-        <input
-          name="weeklyAvailabilityHours"
-          type="number"
-          inputMode="decimal"
-          min={0}
-          step={0.5}
-          required
-          defaultValue={initialValues.weeklyAvailabilityHours}
-          className={inputClass(Boolean(state.errors.weeklyAvailabilityHours))}
-        />
-        <span className="mt-1 text-[11px] font-semibold text-ink-3">
-          How many hours a week you can realistically study — this gates the AI
-          Planner and Workload Risk score.
-        </span>
-      </Field>
-
-      <Field label="Target GPA" error={state.errors.targetGpa}>
-        <input
-          name="targetGpa"
-          type="number"
-          inputMode="decimal"
-          min={0}
-          max={4}
-          step={0.1}
-          defaultValue={initialValues.targetGpa ?? undefined}
-          className={inputClass(Boolean(state.errors.targetGpa))}
         />
       </Field>
 
@@ -72,11 +33,10 @@ export function SettingsForm({ initialValues }: { initialValues: SettingsFormVal
       <button
         type="submit"
         disabled={pending}
-        className="mt-1 flex min-h-11 items-center justify-center rounded-ctl bg-violet px-4 py-2.5 text-sm font-bold text-white hover:bg-violet-deep disabled:opacity-60"
+        className="mt-1 flex min-h-11 w-fit items-center justify-center rounded-ctl bg-violet px-4 py-2.5 text-sm font-bold text-white hover:bg-violet-deep disabled:opacity-60"
       >
         {pending ? "Saving…" : "Save changes"}
       </button>
     </form>
   );
 }
-

@@ -15,6 +15,19 @@ function startOfWeek(d = new Date()): Date {
   return day;
 }
 
+/** `Date.toISOString().slice(0, 10)` converts through UTC first, which
+ * shifts the calendar date backward by a day for any positive-UTC-offset
+ * server timezone (e.g. a midnight-local `startOfWeek()` in UTC+7 becomes
+ * 17:00 the previous day in UTC) — caught via the AI Planner redesign's day
+ * tabs, which visibly showed Sunday before Monday once `week_start` was
+ * rendered directly instead of only being used for less-visible date-math
+ * comparisons. `startOfWeek()`'s Date is already local-midnight, so this
+ * reads its Y/M/D components directly rather than round-tripping through UTC. */
+function toLocalDateString(d: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
 export async function POST() {
   const supabase = await createClient();
   const {
@@ -60,7 +73,7 @@ export async function POST() {
   });
 
   const promptInput = {
-    weekStart: weekStart.toISOString().slice(0, 10),
+    weekStart: toLocalDateString(weekStart),
     weeklyAvailabilityHours,
     targetGpa: profile?.target_gpa ?? null,
     assignments: assignments.map((a) => ({

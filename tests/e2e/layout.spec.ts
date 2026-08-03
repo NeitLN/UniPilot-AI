@@ -89,12 +89,18 @@ test.describe("Layout regressions (docs/PRODUCT_REVIEW.md)", () => {
     // Clean up both grades — left in place, they're exactly the kind of
     // accumulating test-only semester row that previously overflowed the
     // trend chart at mobile widths (9 stray rows found and removed while
-    // writing this test).
+    // writing this test). Edit/Delete moved behind a "…" Actions menu in
+    // the GPA Tracker redesign (Phase 5, brief §5.2) — this used to target
+    // a row-level "Delete" button directly, which no longer exists, so
+    // cleanup silently timed out and left every run's rows behind.
     for (const semester of [semesterLow, semesterHigh]) {
       const row = page.locator("tr").filter({ hasText: semester });
-      await row.getByRole("button", { name: "Delete", exact: true }).click();
+      await row.getByRole("button", { name: "Actions for", exact: false }).click();
+      const menu = page.getByRole("dialog", { name: "Actions" });
+      await expect(menu).toBeVisible();
+      await menu.getByRole("button", { name: "Delete", exact: true }).click();
       await page
-        .getByRole("dialog")
+        .getByRole("dialog", { name: "Delete grade" })
         .getByRole("button", { name: "Delete", exact: true })
         .click();
       await expect(page.getByRole("cell", { name: semester })).not.toBeVisible({

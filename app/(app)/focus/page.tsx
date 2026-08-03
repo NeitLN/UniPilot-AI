@@ -1,20 +1,29 @@
 import { createClient } from "@/lib/supabase/server";
-import { streakDays, weeklyStats, weeklyMinutesSeries, ORPHANED_SESSION_KEY } from "@/lib/rules/focus";
+import {
+  streakDays,
+  weeklyStats,
+  weeklyMinutesSeries,
+  dailyActivity,
+  completedCyclesToday,
+} from "@/lib/rules/focus";
 import { getViewerTimeZone } from "@/lib/timezone";
 import { FocusTimer } from "@/components/focus/FocusTimer";
 import { FocusStats, type FocusStatsData } from "@/components/focus/FocusStats";
+import { DailyGoalCard } from "@/components/focus/DailyGoalCard";
 import { LearningStats, type CourseTimeGrade } from "@/components/focus/LearningStats";
 import { LogSessionDialog } from "@/components/focus/LogSessionDialog";
 
 export default async function FocusPage() {
   const supabase = await createClient();
   const timeZone = await getViewerTimeZone();
+  const now = new Date();
   const sixtyDaysAgo = new Date();
   sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
   const sixtyDaysAgoIso = sixtyDaysAgo.toISOString();
 
-  const [{ data: assignmentRows }, { data: courseRows }, { data: sessionRows }, { data: gradeRows }] =
+  const [{ data: profile }, { data: assignmentRows }, { data: courseRows }, { data: sessionRows }, { data: gradeRows }] =
     await Promise.all([
+      supabase.from("profiles").select("default_focus_minutes, daily_focus_goal_cycles").maybeSingle(),
       // Unfiltered on purpose: past focus sessions can point at assignments
       // that are now done or archived, and those still need a real title/
       // course for the stats breakdown below (see the picker filter further
@@ -66,23 +75,8 @@ export default async function FocusPage() {
     }))
     .sort((a, b) => b.minutes - a.minutes);
 
-  const courseMinutes = new Map<string, number>();
-  for (const [assignmentId, minutes] of Object.entries(stats.minutesByAssignment)) {
-    // Phase 4.1: an orphaned session (its assignment was deleted) has no
-    // course to look up at all — distinct from a real assignment that
-    // simply never had a course_id set ("No course").
-    let courseName: string;
-    if (assignmentId === ORPHANED_SESSION_KEY) {
-      courseName = "Unknown course";
-    } else {
-      const courseId = assignmentCourseById.get(assignmentId);
-      courseName = courseId ? (courseNameById.get(courseId) ?? "Unknown course") : "No course";
-    }
-    courseMinutes.set(courseName, (courseMinutes.get(courseName) ?? 0) + minutes);
-  }
-  const byCourse = Array.from(courseMinutes.entries())
-    .map(([name, minutes]) => ({ name, minutes }))
-    .sort((a, b) => b.minutes - a.minutes);
+  const dailyGoalCycles = profile?.daily_focus_goal_cycles ?? 4;
+  const defaultFocusMinutes = profile?.default_focus_minutes ?? 25;
 
   const statsData: FocusStatsData = {
     completedCycles: stats.completedCycles,
@@ -92,7 +86,8 @@ export default async function FocusPage() {
     manualMinutes: stats.manualMinutes,
     streak,
     byAssignment,
-    byCourse,
+    dailyActivity: dailyActivity(sessions, now, timeZone, 7),
+    dailyGoalCycles,
   };
 
   const weeklySeries = weeklyMinutesSeries(sessions, { timeZone, weeks: 8 });
@@ -136,7 +131,7 @@ export default async function FocusPage() {
             Focus timer
           </h1>
           <p className="mt-1 text-sm font-semibold text-ink-2">
-            25 minutes, one assignment at a time.
+            One session at a time.
           </p>
         </div>
         <LogSessionDialog
@@ -147,8 +142,12 @@ export default async function FocusPage() {
       <div className="flex flex-col gap-3.5 lg:grid lg:grid-cols-[1fr_1.4fr] lg:items-stretch">
         <FocusTimer
           assignments={activeAssignments.map((a) => ({ id: a.id, title: a.title }))}
+          defaultDurationMinutes={defaultFocusMinutes}
         />
-        <FocusStats data={statsData} />
+        <div className="flex flex-col gap-3.5">
+          <FocusStats data={statsData} />
+          <DailyGoalCard completed={completedCyclesToday(sessions, now, timeZone)} goal={dailyGoalCycles} />
+        </div>
       </div>
 
       <LearningStats weeklySeries={weeklySeries} byCourse={courseTimeGrades} />

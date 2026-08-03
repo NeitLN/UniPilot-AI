@@ -31,6 +31,22 @@ export async function syncAssignmentReminder(
     return;
   }
 
+  // Settings → Notifications → "Assignment reminders" (notification_preferences,
+  // migration 0016): the reminder_at input still saves on the assignment
+  // itself either way (it drives other UI), but no notification row is
+  // created/kept while this category is off.
+  const { data: prefs } = await supabase
+    .from("notification_preferences")
+    .select("assignment_reminders")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (prefs?.assignment_reminders === false) {
+    if (existing) {
+      await supabase.from("notifications").delete().eq("id", existing.id);
+    }
+    return;
+  }
+
   if (existing) {
     await supabase
       .from("notifications")

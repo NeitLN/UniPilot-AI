@@ -2,17 +2,14 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { computeAndStoreRisk } from "@/lib/risk/compute";
 import { riskGateReasons, topSuggestion } from "@/lib/rules/risk";
+import { pickPiloAssignment } from "@/lib/rules/assignment";
 import { Pilo } from "@/components/brand/Pilo";
 import { WarningActions } from "@/components/risk/WarningActions";
-
-const FACTOR_TONE = {
-  workload: "bg-tangerine-tint text-tangerine-text",
-  overdue: "bg-coral-tint text-coral-text",
-  // bg-lime-tint deliberately never darkens (see globals.css) — pair it with
-  // the fixed --ink shade, not --foreground, or the text goes invisible
-  // once --foreground flips light under `.dark`.
-  focus: "bg-lime-tint text-ink",
-} as const;
+import { RiskBalanceHero } from "@/components/risk/RiskBalanceHero";
+import { EvidenceCard } from "@/components/risk/EvidenceCard";
+import { RiskTrendChart, type RiskTrendPoint } from "@/components/risk/RiskTrendChart";
+import { PiloSuggestionCard } from "@/components/risk/PiloSuggestionCard";
+import { ALighterWeek, type LighterWeekAction } from "@/components/risk/ALighterWeek";
 
 export default async function RiskPage() {
   const supabase = await createClient();
@@ -29,45 +26,48 @@ export default async function RiskPage() {
 
   if (computation.status !== "ok") {
     const reasons = riskGateReasons(computation.gate);
+    const metCount = 3 - reasons.length;
     return (
       <div className="flex flex-col gap-3.5">
         <Header />
         <div className="flex flex-col items-center gap-3 rounded-card bg-card py-12 text-center">
           <Pilo mood="sleepy" size={72} />
           <p className="max-w-sm text-sm font-semibold text-ink-2">
-            Not enough data yet — the score needs all three of these:
+            Not enough data yet — {metCount} of 3 requirements met:
           </p>
-          <ul className="flex flex-col gap-1.5 text-[12.5px] font-semibold text-ink-3">
+          <ul className="flex w-full max-w-sm flex-col gap-1.5 text-left text-[12.5px] font-semibold text-ink-3">
             {reasons.map((r) => (
-              <li key={r}>
-                {r}
-                {r.includes("weekly availability") && (
-                  <>
-                    {" "}
-                    <Link href="/settings" className="font-extrabold text-violet hover:underline">
-                      Set it now →
-                    </Link>
-                  </>
-                )}
-                {r.includes("Add at least one assignment") && (
-                  <>
-                    {" "}
-                    <Link
-                      href="/assignments"
-                      className="font-extrabold text-violet hover:underline"
-                    >
-                      Add one now →
-                    </Link>
-                  </>
-                )}
-                {r.includes("Log focus sessions") && (
-                  <>
-                    {" "}
-                    <Link href="/focus" className="font-extrabold text-violet hover:underline">
-                      Start a session →
-                    </Link>
-                  </>
-                )}
+              <li key={r} className="flex items-start gap-2 rounded-ctl bg-line px-3 py-2">
+                <span aria-hidden="true" className="mt-0.5 shrink-0 text-ink-3">
+                  ○
+                </span>
+                <span>
+                  {r}
+                  {r.includes("weekly availability") && (
+                    <>
+                      {" "}
+                      <Link href="/settings" className="font-extrabold text-violet hover:underline">
+                        Set it now →
+                      </Link>
+                    </>
+                  )}
+                  {r.includes("Add at least one assignment") && (
+                    <>
+                      {" "}
+                      <Link href="/assignments" className="font-extrabold text-violet hover:underline">
+                        Add one now →
+                      </Link>
+                    </>
+                  )}
+                  {r.includes("Log focus sessions") && (
+                    <>
+                      {" "}
+                      <Link href="/focus" className="font-extrabold text-violet hover:underline">
+                        Start a session →
+                      </Link>
+                    </>
+                  )}
+                </span>
               </li>
             ))}
           </ul>
@@ -76,81 +76,87 @@ export default async function RiskPage() {
     );
   }
 
-  const { result, scoreId } = computation;
+  const { result, scoreId, evidence } = computation;
   const suggestion = topSuggestion(result);
 
-  const [{ data: scoreRow }, { data: warning }] = await Promise.all([
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+  const sevenDaysAgoKey = sevenDaysAgo.toISOString().slice(0, 10);
+
+  const [{ data: scoreRow }, { data: warning }, { data: trendRows }, { data: activeAssignments }] = await Promise.all([
     supabase.from("risk_scores").select("computed_at").eq("id", scoreId).single(),
     supabase
       .from("risk_warnings")
       .select("id, status")
       .eq("risk_score_id", scoreId)
       .maybeSingle(),
+    supabase
+      .from("risk_scores")
+      .select("score_date, score")
+      .gte("score_date", sevenDaysAgoKey)
+      .order("score_date", { ascending: true }),
+    supabase
+      .from("assignments")
+      .select("id, title, due_at, priority, status, archived_at")
+      .is("archived_at", null)
+      .neq("status", "done"),
   ]);
+
+  const trendPoints: RiskTrendPoint[] = (trendRows ?? []).map((r) => ({ scoreDate: r.score_date, score: r.score }));
+
+  const suggestionTarget = pickPiloAssignment(
+    (activeAssignments ?? []).map((a) => ({
+      id: a.id,
+      title: a.title,
+      dueAt: a.due_at,
+      priority: a.priority,
+      status: a.status,
+      archivedAt: a.archived_at,
+    })),
+    new Date(),
+  );
+
+  const lighterWeekActions: LighterWeekAction[] = [];
+  if (evidence.overdueCount > 0) {
+    lighterWeekActions.push({
+      icon: "✅",
+      label: suggestionTarget ? `Clear "${suggestionTarget.title}"` : `Clear ${evidence.overdueCount} overdue task${evidence.overdueCount === 1 ? "" : "s"}`,
+      href: suggestionTarget ? `/focus?assignment=${suggestionTarget.id}` : "/assignments",
+    });
+  }
+  if (evidence.plannedHours < evidence.availableHours * 0.5) {
+    lighterWeekActions.push({ icon: "🛡", label: "Protect focus blocks with a study plan", href: "/planner" });
+  }
+  lighterWeekActions.push({ icon: "⚙", label: "Adjust your weekly availability", href: "/settings" });
 
   return (
     <div className="flex flex-col gap-3.5">
       <Header />
 
-      <div className="rounded-card bg-card p-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="font-display text-4xl font-bold text-foreground tabular-nums">
-              {result.score}
-            </p>
-            <p className="mt-1 text-[11.5px] font-semibold text-ink-3">
-              Warning threshold: 60 · computed{" "}
-              {scoreRow?.computed_at
-                ? new Date(scoreRow.computed_at).toLocaleString(undefined, {
-                    month: "short",
-                    day: "numeric",
-                    hour: "numeric",
-                    minute: "2-digit",
-                  })
-                : "just now"}
-            </p>
-          </div>
-          <span
-            className={`rounded-pill px-3 py-1.5 text-[12px] font-extrabold ${
-              result.warn
-                ? "bg-coral-tint text-coral-text"
-                : "bg-mint-tint text-mint-text"
-            }`}
-          >
-            {result.warn ? "Above threshold" : "Within range"}
-          </span>
+      <RiskBalanceHero result={result} computedAt={scoreRow?.computed_at ?? null} />
+
+      <div className="flex flex-col gap-3.5 lg:grid lg:grid-cols-[1.4fr_1fr] lg:items-start">
+        <div className="flex min-w-0 flex-col gap-3.5">
+          <EvidenceCard result={result} evidence={evidence} />
+          <RiskTrendChart points={trendPoints} />
         </div>
 
-        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <FactorCard label="Workload" weight="×0.40" value={result.workload} tone="workload" />
-          <FactorCard label="Overdue" weight="×0.35" value={result.overdue} tone="overdue" />
-          <FactorCard label="Focus" weight="×0.25" value={result.focus} tone="focus" />
-        </div>
-
-        <p className="mt-4 text-[12.5px] font-semibold text-ink-3">
-          Based on this week&rsquo;s planned hours vs. your availability,
-          currently overdue assignments, and completed focus cycles from the
-          last 7 days.
-        </p>
-      </div>
-
-      {result.warn && (
-        <div className="rounded-card bg-tangerine-tint p-5">
-          <h2 className="font-display text-lg font-bold text-foreground">Suggestion</h2>
-          <p className="mt-2 text-sm font-semibold text-ink-2">{suggestion.message}</p>
-
+        <div className="flex min-w-0 flex-col gap-3.5">
+          <PiloSuggestionCard suggestion={suggestion} target={suggestionTarget} />
           {warning?.status === "open" && (
-            <WarningActions warningId={warning.id} actionTaken={suggestion.message} />
+            <div className="rounded-card-sm bg-card p-4">
+              <p className="text-[12.5px] font-semibold text-ink-2">Handled this already?</p>
+              <WarningActions warningId={warning.id} actionTaken={suggestion.message} />
+            </div>
           )}
           {warning && warning.status !== "open" && (
-            <p className="mt-3 text-[12.5px] font-bold text-ink-3">
-              {warning.status === "handled"
-                ? "Marked as handled."
-                : "Dismissed for now."}
+            <p className="text-center text-[12.5px] font-bold text-ink-3">
+              {warning.status === "handled" ? "Marked as handled." : "Dismissed for now."}
             </p>
           )}
+          <ALighterWeek actions={lighterWeekActions} />
         </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -164,27 +170,6 @@ function Header() {
       <p className="mt-1 text-sm font-semibold text-ink-2">
         Planning aid, not a medical or psychological assessment.
       </p>
-    </div>
-  );
-}
-
-function FactorCard({
-  label,
-  weight,
-  value,
-  tone,
-}: {
-  label: string;
-  weight: string;
-  value: number;
-  tone: keyof typeof FACTOR_TONE;
-}) {
-  return (
-    <div className={`rounded-ctl p-3 ${FACTOR_TONE[tone]}`}>
-      <p className="text-[11px] font-bold uppercase tracking-wide opacity-75">
-        {label} {weight}
-      </p>
-      <p className="mt-1 font-display text-2xl font-bold tabular-nums">{value}</p>
     </div>
   );
 }

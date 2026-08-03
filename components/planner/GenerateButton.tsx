@@ -11,6 +11,10 @@ export interface GenerateButtonProps {
   disabled: boolean;
   disabledReasons: string[];
   label: string;
+  /** "violet" (default) fits the page header on the canvas background;
+   * "lime" fits when embedded inside PlannerHero's violet card (Ended/Empty
+   * states) where a violet button would have too little contrast. */
+  variant?: "violet" | "lime";
 }
 
 interface GenerateResponse {
@@ -20,7 +24,7 @@ interface GenerateResponse {
   rejectedSessions?: unknown[];
 }
 
-export function GenerateButton({ disabled, disabledReasons, label }: GenerateButtonProps) {
+export function GenerateButton({ disabled, disabledReasons, label, variant = "violet" }: GenerateButtonProps) {
   const router = useRouter();
   const isOnline = useOnlineStatus();
   const [pending, setPending] = useState(false);
@@ -59,6 +63,11 @@ export function GenerateButton({ disabled, disabledReasons, label }: GenerateBut
   const reasons = !isOnline
     ? ["AI Planner needs a connection — reconnect and try again.", ...disabledReasons]
     : disabledReasons;
+  const buttonClass =
+    variant === "lime"
+      ? "bg-lime text-ink hover:bg-lime-deep"
+      : "bg-violet text-white hover:bg-violet-deep";
+  const reasonsClass = variant === "lime" ? "text-white/75" : "text-ink-3";
 
   return (
     <div className="flex flex-col items-end gap-1.5">
@@ -66,20 +75,23 @@ export function GenerateButton({ disabled, disabledReasons, label }: GenerateBut
         type="button"
         onClick={handleGenerate}
         disabled={blocked || pending}
-        className="flex min-h-11 items-center rounded-ctl bg-violet px-4 py-2.5 text-sm font-bold text-white hover:bg-violet-deep disabled:opacity-45"
+        className={`flex min-h-11 items-center rounded-ctl px-4 py-2.5 text-sm font-bold disabled:opacity-45 ${buttonClass}`}
       >
         {pending ? "Generating…" : label}
       </button>
 
       {blocked && reasons.length > 0 && (
-        <ul className="text-right text-[11.5px] font-semibold text-ink-3">
+        <ul className={`text-right text-[11.5px] font-semibold ${reasonsClass}`}>
           {reasons.map((r) => (
             <li key={r}>
               {r}
               {r.includes("weekly availability") && (
                 <>
                   {" "}
-                  <Link href="/settings" className="font-extrabold text-violet hover:underline">
+                  <Link
+                    href="/settings"
+                    className={`font-extrabold hover:underline ${variant === "lime" ? "text-white" : "text-violet"}`}
+                  >
                     Set it now →
                   </Link>
                 </>
@@ -89,7 +101,7 @@ export function GenerateButton({ disabled, disabledReasons, label }: GenerateBut
                   {" "}
                   <Link
                     href="/assignments"
-                    className="font-extrabold text-violet hover:underline"
+                    className={`font-extrabold hover:underline ${variant === "lime" ? "text-white" : "text-violet"}`}
                   >
                     Add one now →
                   </Link>

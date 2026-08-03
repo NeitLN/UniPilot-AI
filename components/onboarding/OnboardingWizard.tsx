@@ -2,7 +2,10 @@
 
 import { useActionState, useState } from "react";
 import { useRouter } from "next/navigation";
-import { updateProfile, type SettingsFormState } from "@/app/(app)/settings/actions";
+import {
+  updateStudyPreferences,
+  type StudyPreferencesFormState,
+} from "@/app/(app)/settings/actions";
 import { createCourse, type CourseFormState } from "@/app/(app)/schedule/actions";
 import {
   createAssignment,
@@ -12,7 +15,7 @@ import { Pilo } from "@/components/brand/Pilo";
 import { FieldError } from "@/components/ui/FieldError";
 import { inputClass } from "@/components/ui/Field";
 
-const SETTINGS_INITIAL: SettingsFormState = { errors: {} };
+const SETTINGS_INITIAL: StudyPreferencesFormState = { errors: {} };
 const COURSE_INITIAL: CourseFormState = { errors: {} };
 const ASSIGNMENT_INITIAL: AssignmentFormState = { errors: {} };
 
@@ -23,9 +26,9 @@ export function OnboardingWizard() {
   const [courseName, setCourseName] = useState("");
 
   const [settingsState, settingsAction, settingsPending] = useActionState<
-    SettingsFormState,
+    StudyPreferencesFormState,
     FormData
-  >(updateProfile, SETTINGS_INITIAL);
+  >(updateStudyPreferences, SETTINGS_INITIAL);
   const [courseState, courseAction, coursePending] = useActionState<
     CourseFormState,
     FormData
@@ -98,6 +101,14 @@ export function OnboardingWizard() {
                 </FieldError>
               )}
             </label>
+            {/* Onboarding only asks about availability — the rest of the
+                study-preferences row is written with the same defaults
+                Settings itself uses, editable later from there. */}
+            <input type="hidden" name="defaultFocusMinutes" value={25} />
+            <input type="hidden" name="dailyFocusGoalCycles" value={4} />
+            {[1, 2, 3, 4, 5].map((day) => (
+              <input key={day} type="hidden" name="preferredStudyDays" value={day} />
+            ))}
             {settingsState.formError && (
               <FieldError>{settingsState.formError}</FieldError>
             )}

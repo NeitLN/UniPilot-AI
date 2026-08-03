@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { courseBelongsToCaller } from "@/lib/supabase/ownership";
 import { syncAssignmentReminder, cancelAssignmentReminder } from "@/lib/notifications/sync";
 import {
+  completedAtForTransition,
   validateAssignment,
   type AssignmentInput,
   type FieldErrors,
@@ -78,6 +79,8 @@ export async function createAssignment(
   const occurrences = generateOccurrences(dueAt, dueAt, input.repeat, until);
   const recurrenceGroupId = occurrences.length > 1 ? crypto.randomUUID() : null;
   const baseRow = toRow(input);
+  // A brand-new row has no prior status to transition from.
+  const completedAt = completedAtForTransition({ status: "not_started", completedAt: null }, input.status);
 
   const { data: created, error } = await supabase
     .from("assignments")
@@ -88,6 +91,7 @@ export async function createAssignment(
         due_at: o.start.toISOString(),
         reminder_at: i === 0 ? baseRow.reminder_at : null,
         recurrence_group_id: recurrenceGroupId,
+        completed_at: completedAt,
       })),
     )
     .select("id");
@@ -127,9 +131,18 @@ export async function updateAssignment(
     return { errors: { courseId: "Pick a course from the list." } };
   }
 
+  const { data: current } = await supabase
+    .from("assignments")
+    .select("status, completed_at")
+    .eq("id", id)
+    .maybeSingle();
+  const completedAt = current
+    ? completedAtForTransition({ status: current.status, completedAt: current.completed_at }, input.status)
+    : completedAtForTransition({ status: "not_started", completedAt: null }, input.status);
+
   const { error } = await supabase
     .from("assignments")
-    .update(toRow(input))
+    .update({ ...toRow(input), completed_at: completedAt })
     .eq("id", id);
 
   if (error) return { errors: {}, formError: error.message };
@@ -144,6 +157,30 @@ export async function updateAssignment(
 
   revalidatePath("/assignments");
   return { errors: {}, ok: true };
+}
+
+/** Quick-complete toggle for the card's completion control (design brief
+ * §6.3 "Anatomy") — a lightweight partial update, distinct from the full
+ * `updateAssignment` form flow which requires every required field.
+ * Checking always lands on "done"; unchecking reverts to "in_progress"
+ * (never "not_started", so any progress already tracked isn't implied lost). */
+export async function setAssignmentStatus(id: string, status: AssignmentStatus) {
+  const supabase = await createClient();
+  const { data: current } = await supabase
+    .from("assignments")
+    .select("status, completed_at")
+    .eq("id", id)
+    .maybeSingle();
+  const completedAt = current
+    ? completedAtForTransition({ status: current.status, completedAt: current.completed_at }, status)
+    : null;
+  const { error } = await supabase
+    .from("assignments")
+    .update({ status, completed_at: completedAt })
+    .eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/assignments");
+  revalidatePath("/");
 }
 
 /** Used by the offline mutation queue to detect a server-side edit that

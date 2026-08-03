@@ -46,11 +46,11 @@ export function ForecastCard({
       : null;
 
   return (
-    <div className="rounded-card bg-card p-5">
-      <h2 className="font-display text-lg font-bold text-foreground">Forecast</h2>
+    <div className="rounded-card bg-lime p-5">
+      <h2 className="font-display text-lg font-bold text-ink">What-if? GPA simulator</h2>
 
       <div className="mt-3 flex gap-3">
-        <label className="flex-1 text-xs font-bold text-ink-2">
+        <label className="flex-1 text-xs font-bold text-ink/70">
           Target GPA
           <input
             type="number"
@@ -61,10 +61,10 @@ export function ForecastCard({
             onChange={(e) => setTarget(Number(e.target.value))}
             onBlur={handleTargetBlur}
             disabled={pending}
-            className="mt-1 w-full rounded-ctl border border-border-subtle px-3 py-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-violet disabled:opacity-60"
+            className="mt-1 w-full rounded-ctl border border-ink/15 bg-card px-3 py-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-violet disabled:opacity-60"
           />
         </label>
-        <label className="flex-1 text-xs font-bold text-ink-2">
+        <label className="flex-1 text-xs font-bold text-ink/70">
           Remaining credits
           <input
             type="number"
@@ -72,7 +72,7 @@ export function ForecastCard({
             step={1}
             value={remainingCredits}
             onChange={(e) => setRemainingCredits(Number(e.target.value))}
-            className="mt-1 w-full rounded-ctl border border-border-subtle px-3 py-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-violet"
+            className="mt-1 w-full rounded-ctl border border-ink/15 bg-card px-3 py-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-violet"
           />
         </label>
       </div>
@@ -80,7 +80,7 @@ export function ForecastCard({
       {saveError && <FieldError className="mt-2 text-[11.5px]">{saveError}</FieldError>}
 
       {!hasGrades && (
-        <div className="mt-4 rounded-ctl bg-line p-4">
+        <div className="mt-4 rounded-ctl bg-card p-4">
           <p className="text-[12.5px] font-semibold text-ink-2">
             Add a grade first — the forecast needs at least one completed
             course to weigh your target against.

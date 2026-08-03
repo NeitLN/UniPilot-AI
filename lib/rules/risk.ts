@@ -61,6 +61,20 @@ export function computeRisk(i: RiskComputeInput): RiskResult {
   };
 }
 
+export type RiskRange = "balanced" | "moderate" | "overloaded";
+
+/**
+ * Presentation-only categorization of the same score computeRisk() already
+ * produces — the formula and the 60-point warn threshold are untouched
+ * (UNIPILOT_8_SCREENS Step 6.2 explicitly forbids changing either). 40 is a
+ * new, documented midpoint purely for the hero gauge's 3-way label.
+ */
+export function riskRange(score: number): RiskRange {
+  if (score >= 60) return "overloaded";
+  if (score >= 40) return "moderate";
+  return "balanced";
+}
+
 export type SuggestionType = "workload" | "overdue" | "focus";
 
 export interface Suggestion {
@@ -82,6 +96,25 @@ const MESSAGES: Record<SuggestionType, string> = {
   focus:
     "Your focus habit has slipped this week — try a Pomodoro session to rebuild momentum.",
 };
+
+export type ImpactLevel = "strong" | "moderate" | "protective";
+
+/**
+ * Evidence card impact badge (Step 6.3) — derived purely from the factor's
+ * own value, never hard-coded per card. `focus` is inverted: a *low* focus
+ * factor means a healthy focus habit (protective), the opposite of
+ * workload/overdue where high is bad.
+ */
+export function evidenceImpact(type: SuggestionType, value: number): ImpactLevel {
+  if (type === "focus") {
+    if (value <= 30) return "protective";
+    if (value <= 60) return "moderate";
+    return "strong";
+  }
+  if (value >= 70) return "strong";
+  if (value >= 40) return "moderate";
+  return "protective";
+}
 
 /** Ranked by each factor's actual contribution to the score (value × weight). */
 export function topSuggestion(

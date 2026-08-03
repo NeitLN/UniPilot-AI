@@ -17,9 +17,14 @@ export function breakKindForCycle(completedCycleNumber: number): "short" | "long
   return completedCycleNumber % CYCLES_BEFORE_LONG_BREAK === 0 ? "long" : "short";
 }
 
-/** Only a full 25:00 counts as `completed` — anything shorter is `partial` (BR-04). */
-export function classify(elapsedSeconds: number): FocusResult {
-  return elapsedSeconds >= POMODORO_SECONDS ? "completed" : "partial";
+/** Only reaching the full chosen duration counts as `completed` — anything
+ * shorter is `partial` (BR-04). `targetSeconds` defaults to the classic
+ * 25:00 Pomodoro for callers that don't have a variable duration to pass
+ * (manual entries, pre-Phase-4-redesign stored sessions) — UNIPILOT_8_SCREENS
+ * Step 4.1 adds 45/60 min options, so a 45-min session stopped at 30:00 must
+ * not misclassify as "completed" just because it beat the old fixed 25:00. */
+export function classify(elapsedSeconds: number, targetSeconds: number = POMODORO_SECONDS): FocusResult {
+  return elapsedSeconds >= targetSeconds ? "completed" : "partial";
 }
 
 // FR-22 (docs/PRODUCT_REVIEW.md) — logging a past session by hand, for
@@ -107,7 +112,7 @@ export function dayKey(d: Date, timeZone: string): string {
 
 /** Shifts a `YYYY-MM-DD` key by whole days. Date.UTC here is just a calendar
  * calculator (no real instant/timezone involved), so it's DST-safe. */
-function shiftDayKey(key: string, days: number): string {
+export function shiftDayKey(key: string, days: number): string {
   const [y, m, d] = key.split("-").map(Number);
   const dt = new Date(Date.UTC(y, m - 1, d));
   dt.setUTCDate(dt.getUTCDate() + days);
@@ -216,6 +221,71 @@ export function weeklyStats(
   // seconds" apart from "genuinely nothing" instead of both showing "0 min".
   stats.completedMinutes = Math.round(stats.completedMinutes);
   return stats;
+}
+
+export interface DayActivity {
+  /** `YYYY-MM-DD`. */
+  dayKey: string;
+  completedCycles: number;
+  minutes: number;
+}
+
+/** Per-day totals for the last `days` days (today inclusive) — backs the
+ * Focus Timer's weekly activity strip (UNIPILOT_8_SCREENS Step 4.4). Always
+ * returns one bucket per day, including days with zero sessions — a day
+ * that's genuinely empty is "Rest", not an absent data point. */
+export function dailyActivity(
+  sessions: Pick<FocusSessionLike, "startedAt" | "durationSeconds" | "result">[],
+  now: Date = new Date(),
+  timeZone: string = defaultTimeZone(),
+  days = 7,
+): DayActivity[] {
+  const todayKey = dayKey(now, timeZone);
+  const buckets: DayActivity[] = Array.from({ length: days }, (_, i) => ({
+    dayKey: shiftDayKey(todayKey, -(days - 1 - i)),
+    completedCycles: 0,
+    minutes: 0,
+  }));
+  const byKey = new Map(buckets.map((b) => [b.dayKey, b]));
+
+  for (const s of sessions) {
+    const bucket = byKey.get(dayKey(new Date(s.startedAt), timeZone));
+    if (!bucket) continue;
+    bucket.minutes += s.durationSeconds / 60;
+    if (s.result === "completed") bucket.completedCycles++;
+  }
+
+  return buckets.map((b) => ({ ...b, minutes: Math.round(b.minutes) }));
+}
+
+export type ActivityTone = "great" | "good" | "heavy" | "light" | "rest";
+
+/**
+ * Classifies a day's load *relative to the viewer's own daily goal* — never
+ * an absolute judgment ("3 cycles" means different things to different
+ * students). `goalCycles <= 0` (no real goal set) can only ever distinguish
+ * Rest from "did something", since there's nothing real to compare against.
+ */
+export function activityTone(completedCycles: number, goalCycles: number): ActivityTone {
+  if (completedCycles === 0) return "rest";
+  if (goalCycles <= 0) return "good";
+  if (completedCycles >= goalCycles * 1.5) return "heavy";
+  if (completedCycles >= goalCycles) return "great";
+  if (completedCycles >= goalCycles / 2) return "good";
+  return "light";
+}
+
+/** Completed work cycles that started on the viewer's *today* — the Daily
+ * goal card's numerator (Step 4.3). Only full "completed" cycles count;
+ * partial/manual entries don't silently inflate progress toward the goal. */
+export function completedCyclesToday(
+  sessions: Pick<FocusSessionLike, "startedAt" | "result">[],
+  now: Date = new Date(),
+  timeZone: string = defaultTimeZone(),
+): number {
+  const todayKey = dayKey(now, timeZone);
+  return sessions.filter((s) => s.result === "completed" && dayKey(new Date(s.startedAt), timeZone) === todayKey)
+    .length;
 }
 
 /** B-02: a sub-minute session used to render as a flat "0 min", reading as

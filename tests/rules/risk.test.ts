@@ -1,5 +1,40 @@
 import { describe, expect, it } from "vitest";
-import { canCompute, computeRisk, riskGateReasons, topSuggestion } from "@/lib/rules/risk";
+import {
+  canCompute,
+  computeRisk,
+  evidenceImpact,
+  riskGateReasons,
+  riskRange,
+  topSuggestion,
+} from "@/lib/rules/risk";
+
+describe("riskRange", () => {
+  it("never disagrees with the existing warn threshold at 60", () => {
+    expect(riskRange(59)).toBe("moderate");
+    expect(riskRange(60)).toBe("overloaded");
+  });
+
+  it("classifies balanced below 40", () => {
+    expect(riskRange(0)).toBe("balanced");
+    expect(riskRange(39)).toBe("balanced");
+  });
+});
+
+describe("evidenceImpact", () => {
+  it("treats high workload/overdue values as strong impact", () => {
+    expect(evidenceImpact("overdue", 75)).toBe("strong");
+    expect(evidenceImpact("workload", 90)).toBe("strong");
+  });
+
+  it("treats low workload/overdue values as protective", () => {
+    expect(evidenceImpact("workload", 10)).toBe("protective");
+  });
+
+  it("inverts for focus — a low focus factor is protective, a high one is strong", () => {
+    expect(evidenceImpact("focus", 20)).toBe("protective");
+    expect(evidenceImpact("focus", 90)).toBe("strong");
+  });
+});
 
 describe("canCompute", () => {
   it("requires availability > 0", () => {

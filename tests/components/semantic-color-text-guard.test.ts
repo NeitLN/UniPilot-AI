@@ -15,15 +15,15 @@ import { join } from "node:path";
 const ROOTS = ["app", "components"];
 const BARE_SEMANTIC_TEXT = /text-(mint|coral|tangerine)(?![-a-zA-Z])/;
 
-// AssignmentItem's "Delete permanently"/"Archive" and DeleteAccountSection's
-// "Delete account" buttons still use bare text-coral on bg-line — a
-// deliberate, tracked exception. Their contrast fix intersects the Phase
-// 16.2 "de-emphasize destructive actions" visual-hierarchy decision (they
-// may not even keep this bg-line + colored-text treatment), so fixing the
-// color in isolation now risked being redone. Not a silent gap: flagged in
-// the Phase 14 commit and left for that phase.
+// DeleteAccountSection's "Delete account" button still uses bare text-coral
+// on bg-line — a deliberate, tracked exception. Its contrast fix intersects
+// the Phase 16.2 "de-emphasize destructive actions" visual-hierarchy
+// decision (it may not even keep this bg-line + colored-text treatment), so
+// fixing the color in isolation now risked being redone. Not a silent gap:
+// flagged in the Phase 14 commit and left for that phase.
+// (AssignmentItem.tsx's own instance of this was fixed in the Assignments
+// redesign — AssignmentCard.tsx now pairs bg-coral-tint/text-coral-text.)
 const KNOWN_EXCEPTIONS = new Set([
-  "components/assignments/AssignmentItem.tsx",
   "components/settings/DeleteAccountSection.tsx",
 ]);
 

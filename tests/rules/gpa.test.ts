@@ -7,12 +7,125 @@ import {
   gpaChartDomain,
   gpaContribution,
   predictedCourseScore,
+  projectGpaScenarios,
   qualityPoints,
   requiredAverage,
+  strongestCourseInsight,
   validateGrade,
   type GradeLike,
   type SemesterGpaPoint,
 } from "@/lib/rules/gpa";
+
+describe("projectGpaScenarios", () => {
+  it("returns null when no in-progress course has any assignment weight", () => {
+    expect(projectGpaScenarios([], [{ courseId: "c1", courseName: "A", creditHours: 3, assignments: [] }])).toBeNull();
+  });
+
+  it("worst <= likely <= best for a partially-scored course", () => {
+    const result = projectGpaScenarios(
+      [],
+      [
+        {
+          courseId: "c1",
+          courseName: "Database",
+          creditHours: 3,
+          assignments: [
+            { weight: 40, score: 90 },
+            { weight: 60, score: null },
+          ],
+        },
+      ],
+    );
+    expect(result).not.toBeNull();
+    expect(result!.worst).toBeLessThanOrEqual(result!.likely);
+    expect(result!.likely).toBeLessThanOrEqual(result!.best);
+  });
+
+  it("all three scenarios agree when every assignment is already scored", () => {
+    const result = projectGpaScenarios(
+      [],
+      [
+        {
+          courseId: "c1",
+          courseName: "Web Programming",
+          creditHours: 3,
+          assignments: [{ weight: 100, score: 88 }],
+        },
+      ],
+    );
+    expect(result!.worst).toBe(result!.likely);
+    expect(result!.likely).toBe(result!.best);
+  });
+
+  it("excludes an entirely-unscored course from 'likely' instead of assuming 0%", () => {
+    const official: GradeLike[] = [{ gradePoint: 3.0, creditHours: 3 }];
+    const result = projectGpaScenarios(official, [
+      {
+        courseId: "c1",
+        courseName: "Brand New Course",
+        creditHours: 3,
+        assignments: [{ weight: 100, score: null }], // nothing graded at all
+      },
+    ]);
+    expect(result).not.toBeNull();
+    // "Likely" should fall back to just the official grade (3.0) since the
+    // ungraded course has no real signal to project — not a 0.00 dragging
+    // the whole GPA down.
+    expect(result!.likely).toBe(3.0);
+    // Worst/best still apply their fixed hypothetical regardless.
+    expect(result!.worst).toBeLessThan(result!.likely);
+    expect(result!.best).toBeGreaterThan(result!.likely);
+  });
+
+  it("folds in fixed official grades alongside the projected course", () => {
+    const official: GradeLike[] = [{ gradePoint: 4.0, creditHours: 3 }];
+    const result = projectGpaScenarios(official, [
+      {
+        courseId: "c1",
+        courseName: "Requirements Engineering",
+        creditHours: 3,
+        assignments: [{ weight: 100, score: 0 }],
+      },
+    ]);
+    // 4.0 official course pulls every scenario above the projected course's
+    // own 0-point grade, but never above 4.0.
+    expect(result!.worst).toBeGreaterThan(0);
+    expect(result!.best).toBeLessThanOrEqual(4.0);
+  });
+});
+
+describe("strongestCourseInsight", () => {
+  it("prefers the highest official grade when any official grades exist", () => {
+    const insight = strongestCourseInsight(
+      [
+        { courseName: "Web Programming", gradePoint: 4.0 },
+        { courseName: "Artificial Intelligence", gradePoint: 3.0 },
+      ],
+      [{ courseName: "Database", predictedScore: 99, scoredWeight: 100 }],
+    );
+    expect(insight).toEqual({ courseName: "Web Programming", basis: "official" });
+  });
+
+  it("falls back to a sufficiently-scored predicted course when no official grades exist", () => {
+    const insight = strongestCourseInsight(
+      [],
+      [
+        { courseName: "Database", predictedScore: 92, scoredWeight: 50 },
+        { courseName: "AI", predictedScore: 70, scoredWeight: 40 },
+      ],
+    );
+    expect(insight).toEqual({ courseName: "Database", basis: "predicted" });
+  });
+
+  it("ignores predicted courses with too little scored weight to be meaningful", () => {
+    const insight = strongestCourseInsight([], [{ courseName: "Database", predictedScore: 100, scoredWeight: 5 }]);
+    expect(insight).toBeNull();
+  });
+
+  it("returns null when there's no official or sufficiently-scored predicted data at all", () => {
+    expect(strongestCourseInsight([], [])).toBeNull();
+  });
+});
 
 describe("qualityPoints", () => {
   it("multiplies grade point by credit hours", () => {

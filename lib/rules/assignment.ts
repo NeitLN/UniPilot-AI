@@ -6,6 +6,7 @@ import type {
   AssignmentStatus,
 } from "@/lib/supabase/types";
 import type { EventRepeat } from "@/lib/rules/event";
+import { dayKey, defaultTimeZone, shiftDayKey } from "@/lib/rules/focus";
 
 export interface AssignmentLike {
   dueAt: string;
@@ -90,6 +91,21 @@ export function validateAssignment(input: AssignmentInput): FieldErrors {
   return errors;
 }
 
+/** 0017_assignment_completed_at.sql: `completed_at` is app-owned, not a DB
+ * trigger — this is the one place that decides its value on any status
+ * transition, called from every code path that can change status
+ * (updateAssignment, setAssignmentStatus, createAssignment). Editing a
+ * still-done assignment must not bump its completion timestamp back to
+ * "now" on every save, so an already-done row keeps its existing value. */
+export function completedAtForTransition(
+  from: { status: AssignmentStatus; completedAt: string | null },
+  toStatus: AssignmentStatus,
+  now: Date = new Date(),
+): string | null {
+  if (toStatus !== "done") return null;
+  return from.status === "done" ? from.completedAt : now.toISOString();
+}
+
 /** Overdue only applies to work that isn't done and isn't archived. */
 export function isOverdue(a: AssignmentLike, now = new Date()): boolean {
   if (a.archivedAt) return false;
@@ -162,4 +178,89 @@ export function progressTone(a: AssignmentLike, now = new Date()): ProgressTone 
   if (a.priority === "high") return "tangerine";
   if (a.status === "in_progress") return "violet";
   return "muted";
+}
+
+/** True when `dueAt`'s local calendar day (in `timeZone`) falls within the
+ * 7-day window starting today — the Assignments page's definition of "this
+ * week" (forward-looking from now, unlike focus.ts's trailing-7-day
+ * "week"). Timezone-aware per the UNIPILOT_ASSIGNMENTS_GENZ_DESIGN_BRIEF
+ * requirement that day grouping never default to the server's zone. */
+export function isDueThisWeek(
+  dueAt: string,
+  now = new Date(),
+  timeZone: string = defaultTimeZone(),
+): boolean {
+  const todayKey = dayKey(now, timeZone);
+  const weekEndKey = shiftDayKey(todayKey, 6);
+  const dueKey = dayKey(new Date(dueAt), timeZone);
+  return dueKey >= todayKey && dueKey <= weekEndKey;
+}
+
+/** True when `dueAt`'s local calendar day (in `timeZone`) is today. Used by
+ * the "Today" quick filter — deliberately its own function rather than
+ * `isDueThisWeek(...) && ...` so both stay simple, direct day-key compares. */
+export function isDueToday(
+  dueAt: string,
+  now = new Date(),
+  timeZone: string = defaultTimeZone(),
+): boolean {
+  return dayKey(new Date(dueAt), timeZone) === dayKey(now, timeZone);
+}
+
+export type AssignmentSection = "attention" | "thisWeek" | "later" | "completed";
+
+/**
+ * Priority-bucket for the Assignments page's left column (replaces a flat
+ * list — brief §6.3). Only meaningful for non-archived work; callers should
+ * filter archived rows out before calling this.
+ */
+export function sectionForAssignment(
+  a: AssignmentLike,
+  now = new Date(),
+  timeZone: string = defaultTimeZone(),
+): AssignmentSection {
+  if (a.status === "done") return "completed";
+
+  const overdue = isOverdue(a, now);
+  const todayKey = dayKey(now, timeZone);
+  const dueSoonKey = shiftDayKey(todayKey, 1);
+  const dueKey = dayKey(new Date(a.dueAt), timeZone);
+  const dueVerySoon = dueKey <= dueSoonKey;
+
+  if (overdue || (a.priority === "high" && dueVerySoon)) return "attention";
+  if (isDueThisWeek(a.dueAt, now, timeZone)) return "thisWeek";
+  return "later";
+}
+
+/**
+ * Deterministic "what should I work on next" pick for Pilo's card (brief
+ * §6.4) — pure and unit-testable, no randomness. Only considers active work
+ * (not done, not archived) even if the caller passes a mixed list.
+ *
+ * Tier order:
+ *  1. Overdue + high priority (closest to now among these).
+ *  2. Overdue, any priority (closest to now).
+ *  3. High priority, not yet due (soonest deadline).
+ *  4. Soonest deadline overall.
+ */
+export function pickPiloAssignment<T extends AssignmentLike & { id: string }>(
+  list: T[],
+  now = new Date(),
+): T | null {
+  const active = list.filter((a) => !a.archivedAt && a.status !== "done");
+  if (active.length === 0) return null;
+
+  const byDueDateDesc = (x: T, y: T) =>
+    new Date(y.dueAt).getTime() - new Date(x.dueAt).getTime();
+
+  const overdue = active.filter((a) => isOverdue(a, now));
+  const overdueHigh = overdue.filter((a) => a.priority === "high");
+  if (overdueHigh.length > 0) return [...overdueHigh].sort(byDueDateDesc)[0];
+  if (overdue.length > 0) return [...overdue].sort(byDueDateDesc)[0];
+
+  const upcoming = sortByDueDate(active.filter((a) => !isOverdue(a, now)));
+  const upcomingHigh = upcoming.filter((a) => a.priority === "high");
+  if (upcomingHigh.length > 0) return upcomingHigh[0];
+
+  return upcoming[0] ?? null;
 }

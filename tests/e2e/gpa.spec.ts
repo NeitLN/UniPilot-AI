@@ -14,7 +14,10 @@ test.describe("Track GPA", () => {
     await page.locator('input[name="creditHours"]').fill("3");
     await page.getByRole("button", { name: "Add grade", exact: true }).last().click();
 
-    await expect(page.getByText("Cumulative GPA: 3.70")).toBeVisible({ timeout: 10_000 });
+    // GPA redesign (UNIPILOT_8_SCREENS_GENZ_UI_BUILD_ROADMAP.md Phase 5): the
+    // cumulative figure now lives in GpaHero's ring, not a "Cumulative GPA: X"
+    // text line — an aria-label on the ring itself states the same fact.
+    await expect(page.getByLabel("Cumulative GPA 3.70 out of 4.0")).toBeVisible({ timeout: 10_000 });
     // Scoped to the breakdown table — the same semester text also appears
     // as a trend-chart axis label, which would otherwise be a second match.
     await expect(page.getByRole("cell", { name: semester })).toBeVisible();
@@ -31,9 +34,17 @@ test.describe("Track GPA", () => {
     // this random left sitting in the shared E2E account is exactly what
     // previously accumulated into 9 stray rows wide enough to overflow the
     // GPA trend chart at mobile widths (see tests/e2e/layout.spec.ts).
+    // Edit/Delete now live behind a single "…" menu per row (brief §5.2),
+    // same pattern as AssignmentCard/CourseCard.
     const row = page.locator("tr").filter({ hasText: semester });
-    await row.getByRole("button", { name: "Delete", exact: true }).click();
-    await page.getByRole("dialog").getByRole("button", { name: "Delete", exact: true }).click();
+    await row.getByRole("button", { name: "Actions for", exact: false }).click();
+    const menu = page.getByRole("dialog", { name: "Actions" });
+    await expect(menu).toBeVisible();
+    await menu.getByRole("button", { name: "Delete", exact: true }).click();
+    await page
+      .getByRole("dialog", { name: "Delete grade" })
+      .getByRole("button", { name: "Delete", exact: true })
+      .click();
     await expect(page.getByRole("cell", { name: semester })).not.toBeVisible({ timeout: 10_000 });
   });
 });
