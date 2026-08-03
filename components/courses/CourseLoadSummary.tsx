@@ -1,3 +1,5 @@
+import { BarChart3 } from "lucide-react";
+import { IconChip } from "@/components/ui/IconChip";
 import { COURSE_TONE_CLASSES, courseTone } from "@/lib/ui/course-tone";
 import type { CourseLoadSummary as CourseLoadSummaryData } from "@/lib/rules/course-presentation";
 
@@ -7,22 +9,17 @@ export function CourseLoadSummary({ summary }: { summary: CourseLoadSummaryData 
   return (
     <div className="flex flex-col gap-3 rounded-card bg-card p-4 sm:flex-row sm:items-center sm:gap-6">
       <div className="flex items-center gap-2 shrink-0">
-        <span
-          aria-hidden="true"
-          className="flex h-10 w-10 items-center justify-center rounded-2xl bg-violet-tint text-lg"
-        >
-          📊
-        </span>
+        <IconChip icon={<BarChart3 className="h-[18px] w-[18px]" aria-hidden="true" />} tone="violet" />
         <h2 className="font-display text-sm font-bold text-foreground">Course load</h2>
       </div>
 
       <div className="flex shrink-0 gap-6">
         <div>
-          <p className="font-display text-xl font-bold text-foreground">{totalAssignments}</p>
+          <p className="font-display text-2xl font-bold text-foreground">{totalAssignments}</p>
           <p className="text-[11px] font-semibold text-ink-3">assignments total</p>
         </div>
         <div>
-          <p className="font-display text-xl font-bold text-foreground">{dueThisWeek}</p>
+          <p className="font-display text-2xl font-bold text-foreground">{dueThisWeek}</p>
           <p className="text-[11px] font-semibold text-ink-3">due this week</p>
         </div>
       </div>

@@ -22,7 +22,16 @@ export function GpaHero({
   const ringValue = hasGrades ? (overallGpa / 4) * 100 : 0;
 
   return (
-    <div className="flex items-center gap-5 rounded-card bg-violet p-5 text-white">
+    <div className="flex items-center justify-between gap-5 rounded-card bg-violet p-5 text-white">
+      <div className="min-w-0">
+        <p className="text-[11px] font-bold uppercase tracking-wide text-white/70">Cumulative GPA</p>
+        <p className="mt-1 font-display text-4xl font-bold tabular-nums">
+          {hasGrades ? overallGpa.toFixed(2) : "—"} <span className="text-lg font-semibold text-white/70">/4.0</span>
+        </p>
+        <p className="mt-1 text-[12.5px] font-semibold text-white/80">
+          {hasGrades ? `${doneCredits} credit${doneCredits === 1 ? "" : "s"} completed` : "Add a grade to see your GPA"}
+        </p>
+      </div>
       <ProgressRing
         value={ringValue}
         size={120}
@@ -37,15 +46,6 @@ export function GpaHero({
           )}
         </div>
       </ProgressRing>
-      <div className="min-w-0">
-        <p className="text-[11px] font-bold uppercase tracking-wide text-white/70">Cumulative GPA</p>
-        <p className="mt-1 font-display text-4xl font-bold tabular-nums">
-          {hasGrades ? overallGpa.toFixed(2) : "—"} <span className="text-lg font-semibold text-white/70">/4.0</span>
-        </p>
-        <p className="mt-1 text-[12.5px] font-semibold text-white/80">
-          {hasGrades ? `${doneCredits} credit${doneCredits === 1 ? "" : "s"} completed` : "Add a grade to see your GPA"}
-        </p>
-      </div>
     </div>
   );
 }

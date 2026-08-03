@@ -2,7 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { CalendarDays, CheckCircle2 } from "lucide-react";
 import { syncNow } from "@/app/(app)/schedule/actions";
+import { IconChip } from "@/components/ui/IconChip";
 import { useOnlineStatus } from "@/lib/offline/useOnlineStatus";
 import type { CalendarSyncStatus } from "@/lib/supabase/types";
 
@@ -52,25 +54,32 @@ export function SyncStatusBar({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-card bg-card px-5 py-3.5">
-        {/* Formatted in the runtime's local timezone — expected to differ
-            between SSR and hydration, not a real mismatch. */}
-        <div className="text-[12.5px] font-semibold text-ink-2" suppressHydrationWarning>
-          {!connected ? (
-            "Google Calendar isn't connected yet."
-          ) : lastSyncedAt ? (
-            <>
-              Last synced{" "}
-              {new Date(lastSyncedAt).toLocaleString(undefined, {
-                month: "short",
-                day: "numeric",
-                hour: "numeric",
-                minute: "2-digit",
-              })}
-            </>
-          ) : (
-            "Connected — not synced yet."
-          )}
+        <div className="flex min-w-0 items-center gap-3">
+          <IconChip icon={<CalendarDays className="h-[18px] w-[18px]" aria-hidden="true" />} tone="sky" size="sm" />
+          {/* Formatted in the runtime's local timezone — expected to differ
+              between SSR and hydration, not a real mismatch. */}
+          <div className="text-[12.5px] font-semibold text-ink-2" suppressHydrationWarning>
+            {!connected ? (
+              "Google Calendar isn't connected yet."
+            ) : lastSyncedAt ? (
+              <>
+                Last synced{" "}
+                {new Date(lastSyncedAt).toLocaleString(undefined, {
+                  month: "short",
+                  day: "numeric",
+                  hour: "numeric",
+                  minute: "2-digit",
+                })}
+              </>
+            ) : (
+              "Connected — not synced yet."
+            )}
+          </div>
         </div>
+
+        {connected && lastSyncStatus === "ok" && (
+          <CheckCircle2 className="h-5 w-5 shrink-0 text-mint-text" aria-hidden="true" />
+        )}
 
         {connected ? (
           <button

@@ -1,4 +1,4 @@
-import { Pilo } from "@/components/brand/Pilo";
+import Image from "next/image";
 import { Tag } from "@/components/ui/Tag";
 
 /** `note` is produced by the pure, unit-tested `derivePiloPlanNote` — this
@@ -6,7 +6,13 @@ import { Tag } from "@/components/ui/Tag";
 export function PiloPlanNote({ note, isDraft }: { note: string; isDraft: boolean }) {
   return (
     <div className="flex items-start gap-3 rounded-card-sm bg-card p-4">
-      <Pilo mood="ready" size={40} className="shrink-0" />
+      <Image
+        src="/mascots/pilo-ai-planner.png"
+        alt=""
+        width={68}
+        height={68}
+        className="h-[68px] w-[68px] shrink-0 object-contain"
+      />
       <div className="min-w-0">
         <div className="flex items-center gap-2">
           <h3 className="font-display text-sm font-bold text-foreground">Pilo&rsquo;s note</h3>

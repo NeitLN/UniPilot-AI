@@ -1,3 +1,4 @@
+import { Check } from "lucide-react";
 import { COURSE_TONE_CLASSES, courseTone } from "@/lib/ui/course-tone";
 
 export interface CompletedRow {
@@ -23,7 +24,7 @@ export function CompletedRows({ rows }: { rows: CompletedRow[] }) {
           return (
             <li key={r.id} className="flex items-center gap-3 border-t border-line py-2.5 first:border-t-0 first:pt-0">
               <span aria-hidden="true" className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-mint-tint text-mint-text">
-                ✓
+                <Check className="h-3.5 w-3.5" strokeWidth={3} />
               </span>
               <span className="min-w-0 flex-1 truncate text-sm font-bold text-foreground">{r.title}</span>
               {tone && (
@@ -33,6 +34,9 @@ export function CompletedRows({ rows }: { rows: CompletedRow[] }) {
               )}
               <span className="shrink-0 text-[11.5px] font-semibold text-ink-3">
                 {new Date(r.completedAt).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+              </span>
+              <span className="shrink-0 text-ink-3" aria-hidden="true">
+                ›
               </span>
             </li>
           );

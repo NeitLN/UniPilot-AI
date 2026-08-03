@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Pilo } from "@/components/brand/Pilo";
+import Image from "next/image";
 
 export interface PiloPickAssignment {
   id: string;
@@ -30,30 +30,36 @@ export function PiloPickCard({
 }) {
   return (
     <div className="rounded-card bg-violet p-5 text-white">
-      <div className="flex items-center gap-2.5">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-card">
-          <Pilo mood={pick ? "ready" : "happy"} size={34} />
-        </span>
-        <h2 className="font-display text-lg font-bold">Pilo&rsquo;s pick</h2>
+      <div className="flex items-start gap-3.5">
+        <Image
+          src="/mascots/pilo-assignments.png"
+          alt=""
+          width={110}
+          height={110}
+          className="h-[86px] w-[86px] shrink-0 object-contain"
+        />
+        <div className="min-w-0 flex-1 pt-1">
+          <h2 className="font-display text-lg font-bold">Pilo&rsquo;s pick</h2>
+          {pick ? (
+            <p className="mt-1.5 text-[13px] font-medium leading-relaxed text-white/88">
+              Start with <span className="font-bold text-white">{pick.title}</span> — it&rsquo;s
+              due {relativeDueLabel(pick.dueAt, now)}.
+            </p>
+          ) : (
+            <p className="mt-1.5 text-[13px] font-medium leading-relaxed text-white/88">
+              All clear — add your next assignment when you&rsquo;re ready.
+            </p>
+          )}
+        </div>
       </div>
 
-      {pick ? (
-        <>
-          <p className="mt-3 text-[13px] font-medium leading-relaxed text-white/88">
-            Start with <span className="font-bold text-white">{pick.title}</span> — it&rsquo;s
-            due {relativeDueLabel(pick.dueAt, now)}.
-          </p>
-          <Link
-            href={`/focus?assignment=${pick.id}`}
-            className="mt-4 block w-full rounded-ctl bg-lime py-3 text-center text-sm font-extrabold text-ink hover:bg-lime-deep"
-          >
-            Focus now
-          </Link>
-        </>
-      ) : (
-        <p className="mt-3 text-[13px] font-medium leading-relaxed text-white/88">
-          All clear — add your next assignment when you&rsquo;re ready.
-        </p>
+      {pick && (
+        <Link
+          href={`/focus?assignment=${pick.id}`}
+          className="mt-4 block w-full rounded-ctl bg-lime py-3 text-center text-sm font-extrabold text-ink hover:bg-lime-deep"
+        >
+          Focus now
+        </Link>
       )}
     </div>
   );

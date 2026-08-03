@@ -2,8 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
+import { Play, Coffee, Sofa } from "lucide-react";
 import { Pilo } from "@/components/brand/Pilo";
 import { Modal } from "@/components/ui/Modal";
 import { confirmVariants } from "@/lib/motion/variants";
@@ -40,6 +42,11 @@ interface StoredSession {
   workDurationSeconds?: number;
   /** Set while paused; timer freezes at the remaining time it had then. */
   pausedAt: string | null;
+  /** True when the viewer started this break directly from the idle
+   * picker (the Short/Long break pills) rather than earning it by
+   * finishing a work cycle — changes the banner copy so it never claims a
+   * cycle was completed when one wasn't. */
+  manualBreak?: boolean;
 }
 
 const DURATION_OPTIONS_MIN = [25, 45, 60] as const;
@@ -63,6 +70,7 @@ function readStoredSession(): StoredSession | null {
       breakKind: parsed.breakKind,
       workDurationSeconds: parsed.workDurationSeconds,
       pausedAt: parsed.pausedAt ?? null,
+      manualBreak: parsed.manualBreak,
     };
   } catch {
     return null;
@@ -219,6 +227,21 @@ export function FocusTimer({
     });
   }
 
+  /** Short/Long break pills — a real break the viewer chose to take now,
+   * distinct from the one auto-granted after a completed work cycle
+   * (completeWork above). Never logged to the server, same as any break. */
+  function handleStartBreak(kind: BreakKind) {
+    setFinishedPhase(null);
+    persist({
+      assignmentId: selectedId,
+      startedAt: new Date().toISOString(),
+      phase: "break",
+      breakKind: kind,
+      pausedAt: null,
+      manualBreak: true,
+    });
+  }
+
   function handlePauseToggle() {
     if (!session) return;
     if (session.pausedAt) {
@@ -279,7 +302,7 @@ export function FocusTimer({
         {!isRunning && (
           <>
             <label className="mb-3 block text-left text-xs font-bold text-ink/70">
-              Assignment
+              What are you working on?
               <select
                 value={selectedId}
                 onChange={(e) => setSelectedId(e.target.value)}
@@ -322,8 +345,10 @@ export function FocusTimer({
 
         {isRunning && isBreak && (
           <p className="mb-2 text-[12.5px] font-bold text-ink/70">
-            {session.breakKind === "long" ? "Long break" : "Short break"} — nice
-            work on {activeAssignment?.title ?? "that cycle"}
+            {session.breakKind === "long" ? "Long break" : "Short break"}
+            {session.manualBreak
+              ? " — take a breather."
+              : ` — nice work on ${activeAssignment?.title ?? "that cycle"}`}
           </p>
         )}
         {isRunning && !isBreak && activeAssignment && (
@@ -367,12 +392,19 @@ export function FocusTimer({
         </div>
 
         {/* Companion, not decoration on every card (brief §5.3) — restrained
-            to this one timer surface, mood tied to real state. */}
-        <Pilo mood={isPaused ? "sleepy" : isBreak ? "happy" : "ready"} size={72} className="hidden sm:block" />
+            to this one timer surface. Headphones + laptop pose regardless of
+            state (the dedicated Focus Timer asset has no mood variants). */}
+        <Image
+          src="/mascots/pilo-focus-timer.png"
+          alt=""
+          width={170}
+          height={170}
+          className="hidden h-auto w-[170px] object-contain sm:block"
+        />
       </div>
 
       <p className="mt-3 text-center text-[10.5px] font-extrabold uppercase tracking-[0.14em] text-ink/60">
-        {isBreak ? "Break" : "Focus timer"}
+        {isBreak ? "Break" : "Focus session"}
         {isPaused ? " · Paused" : ""}
       </p>
 
@@ -414,10 +446,30 @@ export function FocusTimer({
               type="button"
               onClick={handleStart}
               disabled={!selectedId}
-              className="mt-4 w-full rounded-ctl bg-ink py-3 text-sm font-extrabold text-white disabled:opacity-45"
+              className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-ctl bg-ink py-3 text-sm font-extrabold text-white disabled:opacity-45"
             >
-              Start
+              <Play className="h-4 w-4" aria-hidden="true" fill="currentColor" />
+              Start focus
             </button>
+
+            <div className="mt-2 flex gap-1.5">
+              <button
+                type="button"
+                onClick={() => handleStartBreak("short")}
+                className="flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-ctl bg-card text-xs font-extrabold text-ink hover:bg-card/70"
+              >
+                <Coffee className="h-3.5 w-3.5" aria-hidden="true" />
+                Short break {Math.round(SHORT_BREAK_SECONDS / 60)}m
+              </button>
+              <button
+                type="button"
+                onClick={() => handleStartBreak("long")}
+                className="flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-ctl bg-card text-xs font-extrabold text-ink hover:bg-card/70"
+              >
+                <Sofa className="h-3.5 w-3.5" aria-hidden="true" />
+                Long break {Math.round(LONG_BREAK_SECONDS / 60)}m
+              </button>
+            </div>
             {!selectedId && (
               <p className="mt-2 text-[11.5px] font-semibold text-ink/70">
                 {assignments.length === 0 ? (

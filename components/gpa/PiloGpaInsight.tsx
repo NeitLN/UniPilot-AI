@@ -1,4 +1,4 @@
-import { Pilo } from "@/components/brand/Pilo";
+import Image from "next/image";
 import type { GpaInsight } from "@/lib/rules/gpa";
 
 /** `insight` comes from the pure `strongestCourseInsight` — null means
@@ -9,7 +9,13 @@ export function PiloGpaInsight({ insight }: { insight: GpaInsight | null }) {
 
   return (
     <div className="flex items-center gap-3 rounded-card-sm bg-card p-4">
-      <Pilo mood="happy" size={48} className="shrink-0" />
+      <Image
+        src="/mascots/pilo-gpa-tracker.png"
+        alt=""
+        width={90}
+        height={90}
+        className="h-[90px] w-[90px] shrink-0 object-contain"
+      />
       <div className="min-w-0">
         <h2 className="font-display text-sm font-bold text-violet">Pilo insight</h2>
         <p className="mt-0.5 text-[12.5px] font-semibold text-ink-2">

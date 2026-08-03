@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { CalendarDays, CheckCircle2 } from "lucide-react";
+import { IconChip } from "@/components/ui/IconChip";
 import type { CalendarSyncStatus } from "@/lib/supabase/types";
 
 export interface ConnectionsCardProps {
@@ -19,8 +21,9 @@ export function ConnectionsCard({
   lastSyncError,
 }: ConnectionsCardProps) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-ctl bg-line px-4 py-3.5">
-      <div>
+    <div className="flex items-center gap-3 rounded-ctl bg-line px-4 py-3.5">
+      <IconChip icon={<CalendarDays className="h-[18px] w-[18px]" aria-hidden="true" />} tone="sky" square />
+      <div className="min-w-0 flex-1">
         <p className="text-sm font-bold text-foreground">Google Calendar</p>
         <p className="mt-0.5 text-[12.5px] font-semibold text-ink-3" suppressHydrationWarning>
           {!connected
@@ -39,16 +42,24 @@ export function ConnectionsCard({
       </div>
 
       {connected ? (
-        <Link
-          href="/schedule"
-          className="flex min-h-11 items-center rounded-ctl bg-card px-3.5 text-xs font-bold text-foreground hover:bg-line-hover"
-        >
-          Manage
-        </Link>
+        <div className="flex shrink-0 items-center gap-2">
+          {lastSyncStatus !== "error" && (
+            <span className="flex items-center gap-1 rounded-pill bg-mint-tint px-2 py-1 text-[10.5px] font-extrabold text-mint-text">
+              <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
+              Connected
+            </span>
+          )}
+          <Link
+            href="/schedule"
+            className="flex min-h-11 items-center rounded-ctl border border-violet/30 bg-card px-3.5 text-xs font-bold text-violet hover:bg-violet-tint"
+          >
+            Manage
+          </Link>
+        </div>
       ) : (
         <a
           href="/api/calendar/oauth/start"
-          className="flex min-h-11 items-center rounded-ctl bg-violet px-3.5 text-xs font-bold text-white hover:bg-violet-deep"
+          className="flex min-h-11 shrink-0 items-center rounded-ctl bg-violet px-3.5 text-xs font-bold text-white hover:bg-violet-deep"
         >
           Connect
         </a>

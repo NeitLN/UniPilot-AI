@@ -1,8 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { AlertTriangle, CalendarDays } from "lucide-react";
+import { IconChip } from "@/components/ui/IconChip";
 
 export type AssignmentSectionTone = "attention" | "neutral" | "muted";
+
+const TONE_ICON: Record<AssignmentSectionTone, React.ReactNode> = {
+  attention: <AlertTriangle className="h-4 w-4" aria-hidden="true" />,
+  neutral: <CalendarDays className="h-4 w-4" aria-hidden="true" />,
+  muted: <CalendarDays className="h-4 w-4" aria-hidden="true" />,
+};
 
 const TONE_WRAPPER: Record<AssignmentSectionTone, string> = {
   // Brief §6.3: "coral tint rất nhẹ" for the panel, never a solid coral
@@ -41,9 +49,14 @@ export function AssignmentSection({
   return (
     <div className={TONE_WRAPPER[tone]}>
       <div className="flex items-center justify-between gap-2 px-0.5">
-        <h2 className={`font-display text-base font-bold ${TONE_HEADING[tone]}`}>
+        <h2 className={`flex items-center gap-2 font-display text-base font-bold ${TONE_HEADING[tone]}`}>
+          <IconChip
+            icon={TONE_ICON[tone]}
+            size="sm"
+            tone={tone === "attention" ? "coral" : "violet"}
+          />
           {title}
-          <span className="ml-2 text-[12px] font-semibold text-ink-3">{count}</span>
+          <span className="text-[12px] font-semibold text-ink-3">{count}</span>
         </h2>
         {collapsible && (
           <button

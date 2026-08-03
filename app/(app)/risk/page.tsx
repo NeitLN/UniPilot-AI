@@ -3,9 +3,11 @@ import { createClient } from "@/lib/supabase/server";
 import { computeAndStoreRisk } from "@/lib/risk/compute";
 import { riskGateReasons, topSuggestion } from "@/lib/rules/risk";
 import { pickPiloAssignment } from "@/lib/rules/assignment";
+import { CheckCircle2, ShieldCheck, Settings2 } from "lucide-react";
 import { Pilo } from "@/components/brand/Pilo";
 import { WarningActions } from "@/components/risk/WarningActions";
 import { RiskBalanceHero } from "@/components/risk/RiskBalanceHero";
+import { RefreshScoreButton } from "@/components/risk/RefreshScoreButton";
 import { EvidenceCard } from "@/components/risk/EvidenceCard";
 import { RiskTrendChart, type RiskTrendPoint } from "@/components/risk/RiskTrendChart";
 import { PiloSuggestionCard } from "@/components/risk/PiloSuggestionCard";
@@ -119,19 +121,30 @@ export default async function RiskPage() {
   const lighterWeekActions: LighterWeekAction[] = [];
   if (evidence.overdueCount > 0) {
     lighterWeekActions.push({
-      icon: "✅",
+      icon: <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />,
       label: suggestionTarget ? `Clear "${suggestionTarget.title}"` : `Clear ${evidence.overdueCount} overdue task${evidence.overdueCount === 1 ? "" : "s"}`,
       href: suggestionTarget ? `/focus?assignment=${suggestionTarget.id}` : "/assignments",
     });
   }
   if (evidence.plannedHours < evidence.availableHours * 0.5) {
-    lighterWeekActions.push({ icon: "🛡", label: "Protect focus blocks with a study plan", href: "/planner" });
+    lighterWeekActions.push({
+      icon: <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />,
+      label: "Protect focus blocks with a study plan",
+      href: "/planner",
+    });
   }
-  lighterWeekActions.push({ icon: "⚙", label: "Adjust your weekly availability", href: "/settings" });
+  lighterWeekActions.push({
+    icon: <Settings2 className="h-3.5 w-3.5" aria-hidden="true" />,
+    label: "Adjust your weekly availability",
+    href: "/settings",
+  });
 
   return (
     <div className="flex flex-col gap-3.5">
-      <Header />
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <Header />
+        <RefreshScoreButton />
+      </div>
 
       <RiskBalanceHero result={result} computedAt={scoreRow?.computed_at ?? null} />
 

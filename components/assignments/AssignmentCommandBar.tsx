@@ -2,13 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Search, CalendarDays, CalendarRange, CheckCircle2, SlidersHorizontal } from "lucide-react";
 import type { CourseOption } from "./AssignmentForm";
 
 const SEGMENTS = [
-  { key: "all", label: "All tasks" },
-  { key: "today", label: "Today" },
-  { key: "week", label: "This week" },
-  { key: "completed", label: "Completed" },
+  { key: "all", label: "All tasks", icon: CalendarDays },
+  { key: "today", label: "Today", icon: CalendarDays },
+  { key: "week", label: "This week", icon: CalendarRange },
+  { key: "completed", label: "Completed", icon: CheckCircle2 },
 ] as const;
 
 type SegmentKey = (typeof SEGMENTS)[number]["key"];
@@ -80,14 +81,17 @@ export function AssignmentCommandBar({ courses }: { courses: CourseOption[] }) {
   return (
     <div className="flex flex-col gap-3 rounded-card-sm bg-card p-3.5">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-        <input
-          type="search"
-          aria-label="Search assignments"
-          placeholder="Search assignments…"
-          value={search}
-          onChange={(e) => handleSearchChange(e.target.value)}
-          className="min-h-11 min-w-0 flex-1 rounded-ctl border border-border-subtle bg-canvas px-4 text-sm font-semibold text-ink-2 outline-none focus-visible:ring-2 focus-visible:ring-violet"
-        />
+        <div className="relative min-w-0 flex-1">
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-3" aria-hidden="true" />
+          <input
+            type="search"
+            aria-label="Search assignments"
+            placeholder="Search assignments…"
+            value={search}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            className="min-h-11 w-full rounded-ctl border border-border-subtle bg-canvas pl-10 pr-4 text-sm font-semibold text-ink-2 outline-none focus-visible:ring-2 focus-visible:ring-violet"
+          />
+        </div>
 
         <div className="flex items-center gap-2">
           {/* Segmented control — scrolls horizontally on narrow screens
@@ -95,10 +99,11 @@ export function AssignmentCommandBar({ courses }: { courses: CourseOption[] }) {
           <div
             role="tablist"
             aria-label="Quick filters"
-            className="flex min-w-0 flex-1 gap-1 overflow-x-auto rounded-ctl bg-line p-1 lg:flex-none"
+            className="flex min-w-0 flex-1 gap-1 overflow-x-auto rounded-ctl bg-canvas p-1 lg:flex-none"
           >
             {SEGMENTS.map((s) => {
               const isActive = current === s.key;
+              const Icon = s.icon;
               return (
                 <button
                   key={s.key}
@@ -106,12 +111,13 @@ export function AssignmentCommandBar({ courses }: { courses: CourseOption[] }) {
                   role="tab"
                   aria-selected={isActive}
                   onClick={() => selectSegment(s.key)}
-                  className={`flex min-h-9 shrink-0 items-center whitespace-nowrap rounded-[calc(var(--radius-ctl)-4px)] px-3 text-[12.5px] font-extrabold motion-safe:transition-colors motion-safe:duration-200 ${
+                  className={`flex min-h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-[calc(var(--radius-ctl)-4px)] border px-3 text-[12.5px] font-extrabold motion-safe:transition-colors motion-safe:duration-200 ${
                     isActive
-                      ? "bg-violet text-white"
-                      : "text-ink-2 hover:bg-line-hover"
+                      ? "border-violet bg-violet-tint text-violet"
+                      : "border-transparent text-ink-2 hover:bg-line"
                   }`}
                 >
+                  <Icon className="h-3.5 w-3.5" aria-hidden="true" />
                   {s.label}
                 </button>
               );
@@ -122,8 +128,9 @@ export function AssignmentCommandBar({ courses }: { courses: CourseOption[] }) {
             type="button"
             onClick={() => setAdvancedOpen((v) => !v)}
             aria-expanded={advancedOpen}
-            className="flex min-h-11 shrink-0 items-center rounded-ctl bg-line px-3.5 text-xs font-bold text-ink-2 hover:bg-line-hover"
+            className="flex min-h-11 shrink-0 items-center gap-1.5 rounded-ctl border border-border-cb bg-card px-3.5 text-xs font-bold text-ink-2 hover:bg-line"
           >
+            <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden="true" />
             Filter
           </button>
         </div>

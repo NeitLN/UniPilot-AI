@@ -22,10 +22,11 @@ export function Logo({ tone = "light", size = 40, className }: LogoProps) {
         style={{ width: size, height: size }}
       >
         <Image
-          src="/pilo-icon.svg"
+          src="/mascots/pilo-logo.png"
           alt="UniPilot AI"
           width={size * 0.78}
           height={size * 0.78}
+          className="object-contain"
         />
       </span>
       <span

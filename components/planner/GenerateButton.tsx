@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Sparkles } from "lucide-react";
 import { useOnlineStatus } from "@/lib/offline/useOnlineStatus";
 import { FieldError } from "@/components/ui/FieldError";
 import { FieldSuccess } from "@/components/ui/FieldSuccess";
@@ -75,8 +76,9 @@ export function GenerateButton({ disabled, disabledReasons, label, variant = "vi
         type="button"
         onClick={handleGenerate}
         disabled={blocked || pending}
-        className={`flex min-h-11 items-center rounded-ctl px-4 py-2.5 text-sm font-bold disabled:opacity-45 ${buttonClass}`}
+        className={`flex min-h-11 items-center gap-1.5 rounded-ctl px-4 py-2.5 text-sm font-bold disabled:opacity-45 ${buttonClass}`}
       >
+        <Sparkles className="h-4 w-4" aria-hidden="true" />
         {pending ? "Generating…" : label}
       </button>
 

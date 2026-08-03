@@ -1,14 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { User, BookOpen, Palette, Bell, Link2, Shield } from "lucide-react";
 
 const ITEMS = [
-  { id: "profile", label: "Profile" },
-  { id: "study-preferences", label: "Study preferences" },
-  { id: "appearance", label: "Appearance" },
-  { id: "notifications", label: "Notifications" },
-  { id: "connections", label: "Connections" },
-  { id: "data-privacy", label: "Data & privacy" },
+  { id: "profile", label: "Profile", icon: User },
+  { id: "study-preferences", label: "Study preferences", icon: BookOpen },
+  { id: "appearance", label: "Appearance", icon: Palette },
+  { id: "notifications", label: "Notifications", icon: Bell },
+  { id: "connections", label: "Connections", icon: Link2 },
+  { id: "data-privacy", label: "Data & privacy", icon: Shield },
 ];
 
 /** Step 8.1 — internal nav with a real scroll-spy (IntersectionObserver),
@@ -56,21 +57,26 @@ export function SettingsNav() {
         aria-label="Settings sections"
         className="sticky top-4 hidden flex-col gap-1 md:flex"
       >
-        {ITEMS.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() => goTo(item.id)}
-            aria-current={active === item.id ? "true" : undefined}
-            className={`flex min-h-11 items-center rounded-ctl px-3.5 text-left text-sm font-bold transition-colors ${
-              active === item.id
-                ? "bg-violet text-white"
-                : "text-ink-2 hover:bg-line"
-            }`}
-          >
-            {item.label}
-          </button>
-        ))}
+        {ITEMS.map((item) => {
+          const Icon = item.icon;
+          const isActive = active === item.id;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => goTo(item.id)}
+              aria-current={isActive ? "true" : undefined}
+              className={`flex min-h-11 items-center gap-2.5 rounded-ctl border-l-[3px] px-3 text-left text-sm font-bold transition-colors ${
+                isActive
+                  ? "border-violet bg-violet-tint text-violet"
+                  : "border-transparent text-ink-2 hover:bg-line"
+              }`}
+            >
+              <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+              {item.label}
+            </button>
+          );
+        })}
       </nav>
 
       {/* Mobile: horizontal scrolling tabs. */}

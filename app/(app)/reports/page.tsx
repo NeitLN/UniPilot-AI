@@ -21,7 +21,9 @@ import {
   type EarlyCompletion,
 } from "@/lib/rules/insights";
 import { mondayOf, nextWeek, parseWeekParam, previousWeek, weekRangeForMonday, isFutureWeek } from "@/lib/rules/report-range";
+import { CheckCircle2, Clock, Flame, LineChart as LineChartIcon, AlertTriangle } from "lucide-react";
 import { Pilo } from "@/components/brand/Pilo";
+import { IconChip, type IconChipTone } from "@/components/ui/IconChip";
 import { WeekNav } from "@/components/reports/WeekNav";
 import { WeeklyRecapHero } from "@/components/reports/WeeklyRecapHero";
 import { StudyRhythmChart } from "@/components/reports/StudyRhythmChart";
@@ -212,18 +214,17 @@ export default async function WeeklyReportPage({ searchParams }: ReportsPageProp
 
   return (
     <div className="flex flex-col gap-3.5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="font-display text-3xl font-semibold text-foreground">Weekly report</h1>
+          <p className="mt-1 text-sm font-semibold text-ink-2">{weekLabel}</p>
         </div>
+        <WeekNav
+          previousWeekKey={prevWeekKey}
+          nextWeekKey={canGoNext ? nextWeek(weekKey) : null}
+          isCurrentWeek={isCurrentWeek}
+        />
       </div>
-
-      <WeekNav
-        weekLabel={weekLabel}
-        previousWeekKey={prevWeekKey}
-        nextWeekKey={canGoNext ? nextWeek(weekKey) : null}
-        isCurrentWeek={isCurrentWeek}
-      />
 
       {!hasAnyActivity ? (
         <div className="flex flex-col items-center gap-3 rounded-card bg-card p-10 text-center">
@@ -242,20 +243,45 @@ export default async function WeeklyReportPage({ searchParams }: ReportsPageProp
           />
 
           <div className="grid grid-cols-2 gap-3.5 md:grid-cols-4">
-            <ReportStat label="Completed" value={String(completedThisWeek.length)} delta={completedDelta} unit="" />
-            <ReportStat label="Study time" value={formatMinutes(currentWeekStats.completedMinutes)} delta={minutesDelta} unit=" min" />
-            <ReportStat label="Streak" value={`${currentStreak}d`} delta={streakDelta} unit="d" />
-            <ReportStat label="GPA" value={currentGpa !== null ? currentGpa.toFixed(2) : "—"} delta={gpaDelta} unit="" />
+            <ReportStat
+              label="Completed"
+              value={String(completedThisWeek.length)}
+              delta={completedDelta}
+              unit=""
+              tone="mint"
+              icon={<CheckCircle2 className="h-[18px] w-[18px]" aria-hidden="true" />}
+            />
+            <ReportStat
+              label="Study time"
+              value={formatMinutes(currentWeekStats.completedMinutes)}
+              delta={minutesDelta}
+              unit=" min"
+              tone="coral"
+              icon={<Clock className="h-[18px] w-[18px]" aria-hidden="true" />}
+            />
+            <ReportStat
+              label="Streak"
+              value={`${currentStreak}d`}
+              delta={streakDelta}
+              unit="d"
+              tone="lime"
+              icon={<Flame className="h-[18px] w-[18px]" aria-hidden="true" />}
+            />
+            <ReportStat
+              label="GPA"
+              value={currentGpa !== null ? currentGpa.toFixed(2) : "—"}
+              delta={gpaDelta}
+              unit=""
+              tone="violet"
+              icon={<LineChartIcon className="h-[18px] w-[18px]" aria-hidden="true" />}
+            />
           </div>
 
           <div className="flex flex-col gap-3.5 lg:grid lg:grid-cols-[1.4fr_1fr] lg:items-start">
             <div className="flex min-w-0 flex-col gap-3.5">
-              <StudyRhythmChart thisWeek={dailyThisWeek} lastWeek={dailyLastWeek} />
-              {courseTimeBreakdown.length > 0 && (
-                <div className="rounded-card bg-card p-5">
-                  <CourseTimeBreakdown courses={courseTimeBreakdown} />
-                </div>
-              )}
+              <StudyRhythmChart thisWeek={dailyThisWeek} lastWeek={dailyLastWeek}>
+                {courseTimeBreakdown.length > 0 && <CourseTimeBreakdown courses={courseTimeBreakdown} />}
+              </StudyRhythmChart>
               <CompletedRows
                 rows={completedThisWeek.slice(0, 3).map((a) => ({
                   id: a.id,
@@ -271,9 +297,19 @@ export default async function WeeklyReportPage({ searchParams }: ReportsPageProp
               <PlanAdherenceCard adherence={adherence} elapsed={elapsedPlanned.length} kept={keptPlanned.length} />
               <WeeklyWinCard win={weeklyWin} />
               {insight && (
-                <div className="rounded-card border border-tangerine/30 bg-tangerine-tint p-5">
-                  <h2 className="font-display text-sm font-extrabold text-tangerine-text">Worth a look</h2>
-                  <p className="mt-1.5 text-sm font-semibold text-tangerine-text">{insight}</p>
+                <div className="flex items-start gap-3 rounded-card border border-tangerine/30 bg-tangerine-tint p-5">
+                  <IconChip
+                    icon={<AlertTriangle className="h-[18px] w-[18px]" aria-hidden="true" />}
+                    tone="tangerine"
+                    className="bg-tangerine text-white"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <h2 className="font-display text-sm font-extrabold text-tangerine-text">Worth a look</h2>
+                    <p className="mt-1 text-sm font-semibold text-tangerine-text">{insight}</p>
+                  </div>
+                  <span className="mt-1 shrink-0 text-tangerine-text" aria-hidden="true">
+                    ›
+                  </span>
                 </div>
               )}
             </div>
@@ -284,27 +320,48 @@ export default async function WeeklyReportPage({ searchParams }: ReportsPageProp
   );
 }
 
+const REPORT_STAT_BG: Record<IconChipTone, string> = {
+  mint: "bg-mint-tint",
+  coral: "bg-coral-tint",
+  lime: "bg-lime",
+  violet: "bg-violet text-white",
+  tangerine: "bg-tangerine-tint",
+  sky: "bg-sky-tint",
+  ink: "bg-ink text-white",
+  white: "bg-card",
+};
+
 function ReportStat({
   label,
   value,
   delta,
   unit,
+  tone,
+  icon,
 }: {
   label: string;
   value: string;
   delta: WeekOverWeek | null;
   unit: string;
+  tone: IconChipTone;
+  icon: React.ReactNode;
 }) {
+  const onDark = tone === "violet";
   return (
-    <div className="rounded-card bg-card p-4">
-      <p className="text-[11px] font-bold uppercase tracking-wide text-ink-3">{label}</p>
-      <p className="mt-1 font-display text-2xl font-bold text-foreground">{value}</p>
+    <div className={`rounded-card p-4 ${REPORT_STAT_BG[tone]}`}>
+      <IconChip icon={icon} tone="white" size="sm" className="mb-2" />
+      <p className={`text-[11px] font-bold uppercase tracking-wide ${onDark ? "text-white/70" : "text-ink-3"}`}>{label}</p>
+      <p className={`mt-1 font-display text-[28px] font-bold leading-none ${onDark ? "text-white" : "text-foreground"}`}>{value}</p>
       {delta && delta.direction !== "flat" && (
         <p
-          className={`mt-1 inline-flex items-center rounded-pill px-2 py-0.5 text-[11px] font-extrabold ${
+          className={`mt-2 inline-flex items-center rounded-pill px-2 py-0.5 text-[11px] font-extrabold ${
             delta.direction === "up"
-              ? "bg-mint-tint text-mint-text"
-              : "bg-coral-tint text-coral-text"
+              ? onDark
+                ? "bg-white/15 text-white"
+                : "bg-mint-tint text-mint-text"
+              : onDark
+                ? "bg-white/15 text-white"
+                : "bg-coral-tint text-coral-text"
           }`}
         >
           {delta.direction === "up" ? "↑" : "↓"} {Math.abs(delta.delta)}
@@ -312,9 +369,9 @@ function ReportStat({
         </p>
       )}
       {delta && delta.direction === "flat" && (
-        <p className="mt-1 text-[11px] font-bold text-ink-3">No change vs last week</p>
+        <p className={`mt-2 text-[11px] font-bold ${onDark ? "text-white/70" : "text-ink-3"}`}>No change vs last week</p>
       )}
-      {!delta && <p className="mt-1 text-[11px] font-bold text-ink-3">No prior data</p>}
+      {!delta && <p className={`mt-2 text-[11px] font-bold ${onDark ? "text-white/70" : "text-ink-3"}`}>No prior data</p>}
     </div>
   );
 }

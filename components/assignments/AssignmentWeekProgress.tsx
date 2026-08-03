@@ -1,3 +1,5 @@
+import { ProgressRing } from "@/components/ui/ProgressRing";
+
 /** Right column's "This week" card — `total`/`completed` must come from a
  * dataset covering the viewer's whole account, not just the current page of
  * results (brief §13), so this stays a pure display component fed real
@@ -20,27 +22,28 @@ export function AssignmentWeekProgress({
           Nothing due this week — you&rsquo;re ahead.
         </p>
       ) : (
-        <>
-          <p className="mt-1 text-[12.5px] font-semibold text-ink/70">
-            {completed} of {total} done
-          </p>
-          <div
-            role="progressbar"
-            aria-valuenow={pct}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-label="This week's completion"
-            className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-ink/10"
-          >
-            <div
-              className="h-full rounded-full bg-ink motion-safe:transition-[width] motion-safe:duration-300 motion-safe:ease-out"
-              style={{ width: `${pct}%` }}
-            />
+        <div className="mt-3 flex items-center justify-between gap-3">
+          <div className="flex gap-5">
+            <div>
+              <p className="font-display text-3xl font-bold leading-none text-ink">{total}</p>
+              <p className="mt-1.5 text-[11.5px] font-bold text-ink/70">tasks</p>
+            </div>
+            <div>
+              <p className="font-display text-3xl font-bold leading-none text-ink">{completed}</p>
+              <p className="mt-1.5 text-[11.5px] font-bold text-ink/70">completed</p>
+            </div>
           </div>
-          <p className="mt-1.5 text-right text-[11px] font-bold tabular-nums text-ink/70">
-            {pct}%
-          </p>
-        </>
+          <ProgressRing
+            value={pct}
+            size={72}
+            strokeWidth={8}
+            tone="ink"
+            track="light"
+            label={`This week's completion, ${pct}%`}
+          >
+            <span className="font-display text-base font-bold text-ink">{pct}%</span>
+          </ProgressRing>
+        </div>
       )}
     </div>
   );

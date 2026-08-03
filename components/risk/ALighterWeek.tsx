@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 export interface LighterWeekAction {
-  icon: string;
+  icon: React.ReactNode;
   label: string;
   href: string;
 }
@@ -22,7 +22,7 @@ export function ALighterWeek({ actions }: { actions: LighterWeekAction[] }) {
             href={a.href}
             className="flex items-center gap-3 rounded-ctl bg-card px-4 py-3 text-sm font-bold text-foreground hover:bg-card/80"
           >
-            <span aria-hidden="true" className="text-base">
+            <span aria-hidden="true" className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 border-ink/15 text-ink-2">
               {a.icon}
             </span>
             <span className="min-w-0 flex-1 truncate">{a.label}</span>

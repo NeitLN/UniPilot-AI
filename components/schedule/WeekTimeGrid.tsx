@@ -53,7 +53,7 @@ export function WeekTimeGrid({
   const allDayBlocks = blocks.filter((b) => b.isAllDay);
 
   return (
-    <div className="overflow-x-auto rounded-card bg-card p-4">
+    <div className="overflow-x-auto">
       <div className="min-w-[720px]">
         {allDayBlocks.length > 0 && (
           <div className="mb-2 grid grid-cols-[48px_repeat(7,1fr)] gap-1.5">

@@ -136,7 +136,7 @@ function DayList({
 }) {
   if (blocks.length === 0) {
     return (
-      <FadeIn className="flex flex-col items-center gap-2 rounded-card bg-card py-10 text-center">
+      <FadeIn className="flex flex-col items-center gap-2 py-10 text-center">
         <Pilo mood="sleepy" size={64} />
         <p className="text-[12.5px] font-semibold text-ink-2">
           No classes on this day.
@@ -146,7 +146,7 @@ function DayList({
   }
 
   return (
-    <div className="flex flex-col gap-2 rounded-card bg-card p-4">
+    <div className="flex flex-col gap-2">
       {blocks.map((b) => (
         <button
           key={b.id}
@@ -302,7 +302,7 @@ function MonthGrid({
   const month = start.getMonth();
 
   return (
-    <div className="grid grid-cols-7 gap-1.5 rounded-card bg-card p-3">
+    <div className="grid grid-cols-7 gap-1.5">
       {cells.map((day) => {
         const dayBlocks = blocks
           .filter((b) => isSameDay(new Date(b.startAt), day))

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -141,11 +142,17 @@ export function PlannerHero({
 
   return (
     <div className={`rounded-card p-5 sm:p-6 ${lifecycle === "ended" || lifecycle === "empty" ? "bg-violet/70" : "bg-violet"} text-white`}>
-      <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-3xl bg-card">
-            <Pilo mood={lifecycle === "empty" ? "sleepy" : "happy"} size={50} />
-          </span>
+      <div className="flex flex-col gap-5 lg:flex-row lg:items-center">
+        <Image
+          src="/mascots/pilo-ai-planner.png"
+          alt=""
+          width={205}
+          height={205}
+          className="mx-auto h-[160px] w-[160px] shrink-0 object-contain lg:mx-0 lg:h-[205px] lg:w-[205px]"
+          priority
+        />
+
+        <div className="flex flex-1 flex-col gap-4">
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="font-display text-2xl font-bold">Pilo&rsquo;s plan</h2>
@@ -153,32 +160,32 @@ export function PlannerHero({
             </div>
             <p className="mt-1.5 max-w-md text-[13px] font-medium text-white/88">{description}</p>
           </div>
-        </div>
 
-        <div className="shrink-0">
-          {lifecycle === "draft" && (
-            <div className="flex flex-col items-stretch gap-2 sm:items-end">
-              <button
-                type="button"
-                onClick={handleConfirm}
-                disabled={pending || sessionCount === 0}
-                className="flex min-h-11 items-center justify-center rounded-ctl bg-lime px-5 py-2.5 text-sm font-extrabold text-ink hover:bg-lime-deep disabled:opacity-60"
-              >
-                {pending ? "Working…" : "Review & confirm"}
-              </button>
-              <button
-                type="button"
-                onClick={handleCancel}
-                disabled={pending}
-                className="text-[12px] font-bold text-white/75 hover:text-white disabled:opacity-60"
-              >
-                Cancel draft
-              </button>
-            </div>
-          )}
-          {(lifecycle === "ended" || lifecycle === "empty") && (
-            <GenerateButton {...generateProps} variant="lime" />
-          )}
+          <div className="shrink-0">
+            {lifecycle === "draft" && (
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={handleConfirm}
+                  disabled={pending || sessionCount === 0}
+                  className="flex min-h-11 items-center justify-center rounded-ctl bg-lime px-5 py-2.5 text-sm font-extrabold text-ink hover:bg-lime-deep disabled:opacity-60"
+                >
+                  {pending ? "Working…" : "Review & confirm"}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  disabled={pending}
+                  className="text-[12px] font-bold text-white/75 hover:text-white disabled:opacity-60"
+                >
+                  Cancel draft
+                </button>
+              </div>
+            )}
+            {(lifecycle === "ended" || lifecycle === "empty") && (
+              <GenerateButton {...generateProps} variant="lime" />
+            )}
+          </div>
         </div>
       </div>
 

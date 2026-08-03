@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { CalendarDays } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
-import { ProgressBar } from "@/components/ui/ProgressBar";
 import { CourseForm } from "./CourseForm";
 import { DeleteCourseDialog } from "./DeleteCourseDialog";
 import { COURSE_TONE_CLASSES, type CourseTone } from "@/lib/ui/course-tone";
@@ -36,10 +36,10 @@ export function CourseCard({ course }: { course: CourseCardData }) {
   const tone = COURSE_TONE_CLASSES[course.tone];
 
   return (
-    <div data-testid="course-card" className={`flex flex-col gap-3 rounded-card-sm border ${tone.border}/40 bg-card p-4`}>
+    <div data-testid="course-card" className={`flex flex-col gap-3 rounded-card-sm border-2 ${tone.border}/70 ${tone.tint} p-4`}>
       <div className="flex items-start justify-between gap-2">
         {course.code ? (
-          <span className={`rounded-pill px-2.5 py-1 text-[10.5px] font-extrabold ${tone.tint} ${tone.text}`}>
+          <span className={`rounded-pill bg-card px-2.5 py-1 text-[10.5px] font-extrabold ${tone.text}`}>
             {course.code}
           </span>
         ) : (
@@ -49,7 +49,7 @@ export function CourseCard({ course }: { course: CourseCardData }) {
           type="button"
           onClick={() => setShowActions(true)}
           aria-label={`Actions for ${course.name}`}
-          className="flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-ctl bg-line text-lg font-bold text-ink-2 hover:bg-line-hover"
+          className="flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-ctl bg-card text-lg font-bold text-ink-2 hover:bg-card/70"
         >
           ⋯
         </button>
@@ -61,7 +61,7 @@ export function CourseCard({ course }: { course: CourseCardData }) {
           <span>
             {course.credits} credit{course.credits === 1 ? "" : "s"}
           </span>
-          <span className={`inline-flex items-center gap-1 rounded-pill px-2 py-0.5 text-[10.5px] font-extrabold ${tone.tint} ${tone.text}`}>
+          <span className={`inline-flex items-center gap-1 rounded-pill bg-card px-2 py-0.5 text-[10.5px] font-extrabold ${tone.text}`}>
             {course.usage.assignmentCount} assignment{course.usage.assignmentCount === 1 ? "" : "s"}
           </span>
         </p>
@@ -70,9 +70,24 @@ export function CourseCard({ course }: { course: CourseCardData }) {
       {course.progress === null ? (
         <p className="text-[11.5px] font-semibold text-ink-3">No assignments yet</p>
       ) : (
-        <div className="flex items-center gap-2">
-          <span className="text-[11px] font-bold text-ink-3">Progress</span>
-          <ProgressBar value={course.progress} tone="violet" className="flex-1" />
+        <div className="flex w-full items-center gap-2">
+          <span className="shrink-0 text-[11px] font-bold text-ink-3">Progress</span>
+          <div
+            role="progressbar"
+            aria-valuenow={Math.round(course.progress)}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label={`${course.name} progress`}
+            className="h-[7px] flex-1 overflow-hidden rounded-full bg-line"
+          >
+            <div
+              className={`h-full rounded-full motion-safe:transition-[width] motion-safe:duration-300 motion-safe:ease-out ${tone.solid}`}
+              style={{ width: `${Math.max(0, Math.min(100, Math.round(course.progress)))}%` }}
+            />
+          </div>
+          <span className="w-8 shrink-0 text-right text-[10.5px] font-bold tabular-nums text-ink-2">
+            {Math.round(course.progress)}%
+          </span>
         </div>
       )}
 
@@ -81,7 +96,7 @@ export function CourseCard({ course }: { course: CourseCardData }) {
           course.nextDeadline?.overdue ? "text-coral-text" : "text-ink-2"
         }`}
       >
-        <span aria-hidden="true">📅</span>
+        <CalendarDays className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
         {course.nextDeadline ? (
           <span className="truncate">
             Next: {course.nextDeadline.title} · {formatDeadline(course.nextDeadline)}

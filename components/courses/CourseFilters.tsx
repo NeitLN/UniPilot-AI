@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Search } from "lucide-react";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 
 const STATUS_OPTIONS = [
@@ -39,14 +40,17 @@ export function CourseFilters({ semesters }: { semesters: string[] }) {
 
   return (
     <div className="flex flex-col gap-3 rounded-card-sm bg-card p-3.5 lg:flex-row lg:items-center">
-      <input
-        type="search"
-        aria-label="Search courses"
-        placeholder="Search courses…"
-        value={search}
-        onChange={(e) => handleSearchChange(e.target.value)}
-        className="min-h-11 min-w-0 flex-1 rounded-ctl border border-border-subtle bg-canvas px-4 text-sm font-semibold text-ink-2 outline-none focus-visible:ring-2 focus-visible:ring-violet"
-      />
+      <div className="relative min-w-0 flex-1">
+        <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-3" aria-hidden="true" />
+        <input
+          type="search"
+          aria-label="Search courses"
+          placeholder="Search courses…"
+          value={search}
+          onChange={(e) => handleSearchChange(e.target.value)}
+          className="min-h-11 w-full rounded-ctl border border-border-subtle bg-canvas pl-10 pr-4 text-sm font-semibold text-ink-2 outline-none focus-visible:ring-2 focus-visible:ring-violet"
+        />
+      </div>
 
       <div className="flex flex-wrap items-center gap-2">
         <SegmentedControl

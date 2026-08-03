@@ -98,8 +98,7 @@ export async function GpaContent() {
 
   return (
     <>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm font-semibold text-ink-2">Know where you stand — and where you&rsquo;re headed.</p>
+      <div className="flex justify-end">
         <AddGradeButton courses={courses} />
       </div>
 
@@ -129,8 +128,7 @@ export async function GpaContent() {
 export function GpaContentSkeleton() {
   return (
     <>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="h-4 w-40 animate-pulse rounded-full bg-ink/10" />
+      <div className="flex justify-end">
         <div className="h-11 w-32 animate-pulse rounded-ctl bg-ink/10" />
       </div>
       <div className="h-32 animate-pulse rounded-card bg-card" />

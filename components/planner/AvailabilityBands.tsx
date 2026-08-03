@@ -5,6 +5,7 @@ import {
   type BusyRange,
 } from "@/lib/rules/plan-presentation";
 import type { DayTab } from "@/lib/rules/plan-presentation";
+import { dayKey } from "@/lib/rules/focus";
 
 const HOUR_MARKS = [8, 12, 16, 20];
 const WINDOW_MINUTES = AVAILABILITY_WINDOW_END_MIN - AVAILABILITY_WINDOW_START_MIN;
@@ -45,9 +46,17 @@ export function AvailabilityBands({
       <div className="mt-4 flex flex-col gap-2">
         {days.map((day) => {
           const bands = freeAvailabilityBands(day.dayKey, busyRanges, timeZone);
+          const isToday = day.dayKey === dayKey(new Date(), timeZone);
           return (
             <div key={day.dayKey} className="flex items-center gap-2">
-              <span className="w-12 shrink-0 text-[11px] font-bold text-ink-2">{day.shortLabel}</span>
+              <span className="flex w-12 shrink-0 items-center gap-1 text-[11px] font-bold text-ink-2">
+                {day.shortLabel}
+                {isToday && (
+                  <span className="rounded-pill border border-violet/40 bg-violet-tint px-1.5 py-0.5 text-[8.5px] font-extrabold text-violet">
+                    Today
+                  </span>
+                )}
+              </span>
               <div className="relative h-3 flex-1 rounded-full bg-line">
                 {bands.map((b, i) => (
                   <div

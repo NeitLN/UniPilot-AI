@@ -1,3 +1,5 @@
+import { ClipboardList, CalendarClock, Timer } from "lucide-react";
+import { IconChip, type IconChipTone } from "@/components/ui/IconChip";
 import { evidenceImpact, type RiskResult, type SuggestionType } from "@/lib/rules/risk";
 import type { RiskEvidence } from "@/lib/risk/compute";
 
@@ -7,10 +9,25 @@ const IMPACT_CLASSES = {
   moderate: "bg-tangerine-tint text-tangerine-text",
   protective: "bg-mint-tint text-mint-text",
 };
+const IMPACT_HEADLINE_CLASSES = {
+  strong: "text-coral-text",
+  moderate: "text-tangerine-text",
+  protective: "text-mint-text",
+};
+const IMPACT_CHIP_TONE: Record<keyof typeof IMPACT_CLASSES, IconChipTone> = {
+  strong: "coral",
+  moderate: "tangerine",
+  protective: "mint",
+};
+const IMPACT_CHIP_DOT: Record<keyof typeof IMPACT_CLASSES, string> = {
+  strong: "bg-coral",
+  moderate: "bg-tangerine",
+  protective: "bg-mint",
+};
 
 interface EvidenceItem {
   type: SuggestionType;
-  icon: string;
+  icon: React.ReactNode;
   headline: string;
   detail: string;
 }
@@ -19,7 +36,7 @@ export function EvidenceCard({ result, evidence }: { result: RiskResult; evidenc
   const items: EvidenceItem[] = [
     {
       type: "overdue",
-      icon: "📋",
+      icon: <ClipboardList className="h-[18px] w-[18px]" aria-hidden="true" />,
       headline:
         evidence.overdueCount === 0
           ? "No overdue assignments"
@@ -31,7 +48,7 @@ export function EvidenceCard({ result, evidence }: { result: RiskResult; evidenc
     },
     {
       type: "workload",
-      icon: "🗓",
+      icon: <CalendarClock className="h-[18px] w-[18px]" aria-hidden="true" />,
       headline: `${Math.round(evidence.plannedHours)}h planned of ${Math.round(evidence.availableHours)}h available`,
       detail:
         evidence.plannedHours > evidence.availableHours
@@ -40,7 +57,7 @@ export function EvidenceCard({ result, evidence }: { result: RiskResult; evidenc
     },
     {
       type: "focus",
-      icon: "⏱",
+      icon: <Timer className="h-[18px] w-[18px]" aria-hidden="true" />,
       headline: `${evidence.completedFocusMinutes7d} focused minutes`,
       detail:
         evidence.completedCycles7d > 0
@@ -55,18 +72,27 @@ export function EvidenceCard({ result, evidence }: { result: RiskResult; evidenc
       <ul className="mt-3 flex flex-col gap-2.5">
         {items.map((item) => {
           const impact = evidenceImpact(item.type, result[item.type]);
+          const strength = impact === "strong" ? 5 : impact === "moderate" ? 3 : 1;
           return (
             <li key={item.type} className="flex items-center gap-3 rounded-ctl bg-line p-3">
-              <span aria-hidden="true" className="text-lg">
-                {item.icon}
-              </span>
+              <IconChip icon={item.icon} tone={IMPACT_CHIP_TONE[impact]} />
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-bold text-foreground">{item.headline}</p>
+                <p className={`text-sm font-bold ${IMPACT_HEADLINE_CLASSES[impact]}`}>{item.headline}</p>
                 <p className="text-[11.5px] font-semibold text-ink-3">{item.detail}</p>
               </div>
-              <span className={`shrink-0 rounded-pill px-2.5 py-1 text-[10.5px] font-extrabold ${IMPACT_CLASSES[impact]}`}>
-                {IMPACT_LABEL[impact]}
-              </span>
+              <div className="flex shrink-0 flex-col items-end gap-1">
+                <span className={`rounded-pill px-2.5 py-1 text-[10.5px] font-extrabold ${IMPACT_CLASSES[impact]}`}>
+                  {IMPACT_LABEL[impact]}
+                </span>
+                <span className="flex gap-0.5" aria-hidden="true">
+                  {Array.from({ length: 5 }, (_, i) => (
+                    <span
+                      key={i}
+                      className={`h-1.5 w-1.5 rounded-full ${i < strength ? IMPACT_CHIP_DOT[impact] : "bg-ink/10"}`}
+                    />
+                  ))}
+                </span>
+              </div>
             </li>
           );
         })}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { Sun, Moon, Monitor, CheckCircle2 } from "lucide-react";
 import {
   applyTheme,
   getServerTheme,
@@ -9,10 +10,10 @@ import {
   type ThemePreference,
 } from "@/lib/theme";
 
-const OPTIONS: { value: ThemePreference; label: string }[] = [
-  { value: "light", label: "Light" },
-  { value: "dark", label: "Dark" },
-  { value: "system", label: "System" },
+const OPTIONS: { value: ThemePreference; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+  { value: "light", label: "Light", icon: Sun },
+  { value: "dark", label: "Dark", icon: Moon },
+  { value: "system", label: "System", icon: Monitor },
 ];
 
 export function ThemeToggle() {
@@ -33,24 +34,34 @@ export function ThemeToggle() {
 
   return (
     <div className="flex flex-col gap-1.5 text-xs font-bold text-ink-2">
-      Appearance
-      <div className="flex gap-1.5 rounded-ctl bg-line p-1">
-        {OPTIONS.map((opt) => (
-          <button
-            key={opt.value}
-            type="button"
-            onClick={() => choose(opt.value)}
-            aria-pressed={pref === opt.value}
-            className={`flex min-h-11 flex-1 items-center justify-center rounded-[calc(var(--radius-ctl)-4px)] text-xs font-bold transition-colors ${
-              pref === opt.value
-                ? "bg-card text-foreground shadow-sm"
-                : "text-ink-2 hover:text-foreground"
-            }`}
-          >
-            {opt.label}
-          </button>
-        ))}
+      Choose your visual theme
+      <div role="radiogroup" aria-label="Appearance" className="grid grid-cols-3 gap-2.5">
+        {OPTIONS.map((opt) => {
+          const Icon = opt.icon;
+          const isActive = pref === opt.value;
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              role="radio"
+              onClick={() => choose(opt.value)}
+              aria-checked={isActive}
+              className={`relative flex min-h-[76px] flex-col items-center justify-center gap-1.5 rounded-ctl border-2 transition-colors ${
+                isActive ? "border-violet bg-violet-tint" : "border-border-subtle bg-card hover:bg-line"
+              }`}
+            >
+              {isActive && (
+                <CheckCircle2 className="absolute right-1.5 top-1.5 h-4 w-4 text-violet" aria-hidden="true" fill="currentColor" />
+              )}
+              <Icon className={`h-5 w-5 ${isActive ? "text-violet" : "text-ink-2"}`} aria-hidden="true" />
+              <span className={`text-xs font-bold ${isActive ? "text-violet" : "text-ink-2"}`}>{opt.label}</span>
+            </button>
+          );
+        })}
       </div>
+      <p className="mt-1 text-[11px] font-semibold text-ink-3">
+        {pref === "system" ? "System will match your device settings." : `Always use ${pref} theme.`}
+      </p>
     </div>
   );
 }

@@ -2,17 +2,24 @@ import { createClient } from "@/lib/supabase/server";
 import { getViewerTimeZone } from "@/lib/timezone";
 import { dayKey, defaultTimeZone } from "@/lib/rules/focus";
 import { pickPiloAssignment } from "@/lib/rules/assignment";
-import { freeMinutesForDay, nextClass, todayBlocks } from "@/lib/rules/schedule-presentation";
+import {
+  SCHEDULE_WINDOW_END_MIN,
+  SCHEDULE_WINDOW_START_MIN,
+  freeMinutesForDay,
+  nextClass,
+  todayBlocks,
+} from "@/lib/rules/schedule-presentation";
 import { ViewSwitcher } from "@/components/schedule/ViewSwitcher";
 import { SyncStatusBar } from "@/components/schedule/SyncStatusBar";
 import { ScheduleGrid } from "@/components/schedule/ScheduleGrid";
 import { WeekTimeGrid } from "@/components/schedule/WeekTimeGrid";
 import { ScheduleSummaryStrip } from "@/components/schedule/ScheduleSummaryStrip";
 import { TodayAgendaCard } from "@/components/schedule/TodayAgendaCard";
+import { FreeTimeCard } from "@/components/schedule/FreeTimeCard";
 import { AddEventButton } from "@/components/schedule/AddEventButton";
 import { AddCourseButton } from "@/components/courses/AddCourseButton";
 import type { ScheduleView } from "@/lib/calendar/view";
-import { toDateParam } from "@/lib/calendar/view";
+import { addDays, toDateParam } from "@/lib/calendar/view";
 import type { AssignmentLink, ClassBlockData } from "@/components/schedule/types";
 
 export async function ScheduleContent({
@@ -124,6 +131,18 @@ export async function ScheduleContent({
   const nextClassBlock = nextClass(todaysBlocksSource, now);
   const { freeMinutes, blockCount } = freeMinutesForDay(dayKey(now, timeZone), todaysBlocksSource, timeZone);
 
+  // Week-total free time for the right-rail FreeTimeCard — same per-day
+  // computation as the "free blocks" stat above, summed across the 7 days
+  // currently loaded in `blocks` rather than introducing a second notion
+  // of "free".
+  const weekDayCount = Math.min(7, Math.round((end.getTime() - start.getTime()) / 86_400_000));
+  const weekFreeTotals = Array.from({ length: weekDayCount }, (_, i) =>
+    freeMinutesForDay(dayKey(addDays(start, i), timeZone), blocks, timeZone),
+  );
+  const weekFreeMinutes = weekFreeTotals.reduce((sum, d) => sum + d.freeMinutes, 0);
+  const weekFreeBlockCount = weekFreeTotals.reduce((sum, d) => sum + d.blockCount, 0);
+  const weekAvailableMinutes = weekDayCount * (SCHEDULE_WINDOW_END_MIN - SCHEDULE_WINDOW_START_MIN);
+
   const focusPick = pickPiloAssignment(
     (activeAssignmentRows ?? []).map((a) => ({
       id: a.id,
@@ -139,11 +158,11 @@ export async function ScheduleContent({
   return (
     <>
       <div className="flex flex-wrap items-center justify-between gap-3">
+        <AddCourseButton />
         <div className="flex flex-wrap items-center gap-2">
-          <AddCourseButton />
           <AddEventButton courses={courses} />
+          <SyncNowInline connected={Boolean(connection)} />
         </div>
-        <ViewSwitcher view={view} date={toDateParam(anchorDate)} />
       </div>
 
       <ScheduleSummaryStrip
@@ -155,7 +174,8 @@ export async function ScheduleContent({
       />
 
       <div className="flex flex-col gap-3.5 lg:grid lg:grid-cols-[1.7fr_1fr] lg:items-start">
-        <div className="flex min-w-0 flex-col gap-3.5">
+        <div className="flex min-w-0 flex-col gap-3.5 rounded-card bg-card p-4">
+          <ViewSwitcher view={view} date={toDateParam(anchorDate)} />
           {view === "week" ? (
             <WeekTimeGrid
               rangeStart={start}
@@ -177,6 +197,11 @@ export async function ScheduleContent({
 
         <div className="flex min-w-0 flex-col gap-3.5">
           <TodayAgendaCard blocks={todaysAgenda} focusAssignmentId={focusPick?.id ?? null} />
+          <FreeTimeCard
+            freeMinutesTotal={weekFreeMinutes}
+            freeBlockCount={weekFreeBlockCount}
+            availableMinutesTotal={weekAvailableMinutes}
+          />
           <SyncStatusBar
             connected={Boolean(connection)}
             lastSyncedAt={connection?.last_synced_at ?? null}
@@ -187,6 +212,22 @@ export async function ScheduleContent({
         </div>
       </div>
     </>
+  );
+}
+
+/** Header-row "Sync Google Calendar" affordance (concept §8) — links to the
+ * connect flow when there's no connection yet; once connected, the real
+ * sync control already lives in SyncStatusBar below, so this becomes a
+ * quiet status link instead of a second, competing sync button. */
+function SyncNowInline({ connected }: { connected: boolean }) {
+  if (connected) return null;
+  return (
+    <a
+      href="/api/calendar/oauth/start"
+      className="flex min-h-11 items-center rounded-ctl border border-border-cb bg-card px-3.5 text-xs font-bold text-ink-2 hover:bg-line"
+    >
+      Sync Google Calendar
+    </a>
   );
 }
 

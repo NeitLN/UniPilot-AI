@@ -1,34 +1,50 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { ClipboardList, AlertTriangle, FileBarChart, Clock } from "lucide-react";
 import {
   updateNotificationPreference,
   type NotificationCategory,
   type NotificationCategoryKey,
 } from "@/app/(app)/settings/actions";
 import { PushNotificationSettings } from "@/components/settings/PushNotificationSettings";
+import { IconChip, type IconChipTone } from "@/components/ui/IconChip";
 import { FieldError } from "@/components/ui/FieldError";
 
-const CATEGORIES: { key: NotificationCategoryKey; label: string; hint: string }[] = [
+const CATEGORIES: {
+  key: NotificationCategoryKey;
+  label: string;
+  hint: string;
+  icon: React.ComponentType<{ className?: string }>;
+  tone: IconChipTone;
+}[] = [
   {
     key: "assignment_reminders",
     label: "Assignment reminders",
     hint: "Nudges before something is due.",
+    icon: ClipboardList,
+    tone: "violet",
   },
   {
     key: "workload_warnings",
     label: "Workload warnings",
     hint: "When your weekly balance score crosses the threshold.",
+    icon: AlertTriangle,
+    tone: "tangerine",
   },
   {
     key: "weekly_report",
     label: "Weekly report",
     hint: "A recap of your week, once it's ready.",
+    icon: FileBarChart,
+    tone: "mint",
   },
   {
     key: "focus_reminders",
     label: "Focus reminders",
     hint: "Gentle prompts to start a focus session.",
+    icon: Clock,
+    tone: "sky",
   },
 ];
 
@@ -66,8 +82,14 @@ export function NotificationPreferencesCard({ initial }: { initial: Notification
       <div className="flex flex-col gap-2.5">
         <p className="text-xs font-bold text-ink-2">Notify me about</p>
         {CATEGORIES.map((cat) => (
-          <div key={cat.key} className="flex items-center justify-between gap-3">
-            <div>
+          <div key={cat.key} className="flex items-center gap-3">
+            <IconChip
+              icon={<cat.icon className="h-4 w-4" aria-hidden="true" />}
+              tone={cat.tone}
+              size="sm"
+              square
+            />
+            <div className="min-w-0 flex-1">
               <p className="text-sm font-bold text-foreground">{cat.label}</p>
               <p className="text-[11.5px] font-semibold text-ink-3">{cat.hint}</p>
             </div>

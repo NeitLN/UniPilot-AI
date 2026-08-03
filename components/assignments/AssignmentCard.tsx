@@ -167,14 +167,18 @@ export function AssignmentCard({
             })}
             {assignment.score !== null && ` · Score ${assignment.score}%`}
           </p>
-          <div className="mt-1.5">
+          <div className="mt-1.5 sm:hidden">
             <Tag tone={badge.tone}>{badge.label}</Tag>
           </div>
           {restoreError && <FieldError className="mt-1.5 text-[11px]">{restoreError}</FieldError>}
           {toggleError && <FieldError className="mt-1.5 text-[11px]">{toggleError}</FieldError>}
         </div>
 
-        <ProgressBar value={assignment.progress} tone={tone} className="hidden sm:flex sm:w-[92px]" />
+        <div className="hidden shrink-0 sm:block">
+          <Tag tone={badge.tone}>{badge.label}</Tag>
+        </div>
+
+        <ProgressBar value={assignment.progress} tone={tone} emphasizePercent className="hidden sm:flex sm:w-[130px]" />
 
         <button
           type="button"
@@ -187,7 +191,7 @@ export function AssignmentCard({
       </div>
 
       <div className="mt-2.5 sm:hidden">
-        <ProgressBar value={assignment.progress} tone={tone} />
+        <ProgressBar value={assignment.progress} tone={tone} emphasizePercent />
       </div>
 
       <Modal open={showActions} onClose={() => setShowActions(false)} title="Actions">

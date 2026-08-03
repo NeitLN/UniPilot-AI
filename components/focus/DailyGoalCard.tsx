@@ -1,3 +1,6 @@
+import { Flag } from "lucide-react";
+import { IconChip } from "@/components/ui/IconChip";
+
 export function DailyGoalCard({ completed, goal }: { completed: number; goal: number }) {
   // Clamp the *visual* bar at 100%, but the number itself always shows the
   // real count even past goal — never hides that the viewer over-delivered.
@@ -8,9 +11,9 @@ export function DailyGoalCard({ completed, goal }: { completed: number; goal: nu
     <div className="rounded-card bg-violet p-5 text-white">
       <div className="flex items-center justify-between">
         <h2 className="font-display text-sm font-bold">Today&rsquo;s goal</h2>
-        <span aria-hidden="true">🚩</span>
+        <IconChip icon={<Flag className="h-4 w-4" aria-hidden="true" fill="currentColor" />} tone="ink" size="sm" />
       </div>
-      <p className="mt-2 font-display text-3xl font-bold">
+      <p className="mt-2 font-display text-4xl font-bold">
         {completed} <span className="text-lg font-semibold text-white/70">of {goal} cycles</span>
       </p>
       <div

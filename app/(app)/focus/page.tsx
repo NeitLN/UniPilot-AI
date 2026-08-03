@@ -11,6 +11,7 @@ import { FocusTimer } from "@/components/focus/FocusTimer";
 import { FocusStats, type FocusStatsData } from "@/components/focus/FocusStats";
 import { DailyGoalCard } from "@/components/focus/DailyGoalCard";
 import { LearningStats, type CourseTimeGrade } from "@/components/focus/LearningStats";
+import { FocusHistoryCard, type FocusHistoryEntry } from "@/components/focus/FocusHistoryCard";
 import { LogSessionDialog } from "@/components/focus/LogSessionDialog";
 
 export default async function FocusPage() {
@@ -35,7 +36,7 @@ export default async function FocusPage() {
       supabase.from("courses").select("id, name"),
       supabase
         .from("focus_sessions")
-        .select("assignment_id, started_at, duration_seconds, result, source")
+        .select("id, assignment_id, started_at, duration_seconds, result, source")
         .gte("started_at", sixtyDaysAgoIso)
         .order("started_at", { ascending: false }),
       // §5 learning stats: most recent grade per course, to line focus time
@@ -58,6 +59,17 @@ export default async function FocusPage() {
 
   const sessions = (sessionRows ?? []).map((s) => ({
     assignmentId: s.assignment_id,
+    startedAt: s.started_at,
+    durationSeconds: s.duration_seconds,
+    result: s.result,
+    source: s.source,
+  }));
+
+  // Already sorted most-recent-first by the query above.
+  const focusHistory: FocusHistoryEntry[] = (sessionRows ?? []).map((s) => ({
+    id: s.id,
+    assignmentTitle: s.assignment_id ? (assignmentTitleById.get(s.assignment_id) ?? "Deleted assignment") : "Unassigned",
+    courseId: s.assignment_id ? (assignmentCourseById.get(s.assignment_id) ?? null) : null,
     startedAt: s.started_at,
     durationSeconds: s.duration_seconds,
     result: s.result,
@@ -149,6 +161,8 @@ export default async function FocusPage() {
           <DailyGoalCard completed={completedCyclesToday(sessions, now, timeZone)} goal={dailyGoalCycles} />
         </div>
       </div>
+
+      <FocusHistoryCard entries={focusHistory} />
 
       <LearningStats weeklySeries={weeklySeries} byCourse={courseTimeGrades} />
     </div>

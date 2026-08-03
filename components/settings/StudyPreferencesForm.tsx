@@ -33,6 +33,7 @@ export function StudyPreferencesForm({
   );
   const [focusMinutes, setFocusMinutes] = useState(initialValues.defaultFocusMinutes);
   const [days, setDays] = useState(new Set(initialValues.preferredStudyDays));
+  const [availabilityHours, setAvailabilityHours] = useState(initialValues.weeklyAvailabilityHours);
 
   function toggleDay(day: number) {
     setDays((prev) => {
@@ -46,9 +47,12 @@ export function StudyPreferencesForm({
   return (
     <form action={formAction} className="flex flex-col gap-3.5">
       <Field
-        label="Weekly availability (hours)"
+        label="Weekly availability"
         error={state.errors.weeklyAvailabilityHours}
       >
+        <p className="font-display text-3xl font-bold text-violet tabular-nums">
+          {availabilityHours || 0} <span className="text-base font-semibold text-ink-3">hours</span>
+        </p>
         <input
           name="weeklyAvailabilityHours"
           type="number"
@@ -56,8 +60,9 @@ export function StudyPreferencesForm({
           min={0}
           step={0.5}
           required
-          defaultValue={initialValues.weeklyAvailabilityHours}
-          className={inputClass(Boolean(state.errors.weeklyAvailabilityHours))}
+          value={availabilityHours}
+          onChange={(e) => setAvailabilityHours(Number(e.target.value))}
+          className={`mt-2 ${inputClass(Boolean(state.errors.weeklyAvailabilityHours))}`}
         />
         <span className="mt-1 text-[11px] font-semibold text-ink-3">
           How many hours a week you can realistically study — this gates the AI

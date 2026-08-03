@@ -7,13 +7,23 @@ const FILL_CLASSES: Record<ProgressTone, string> = {
   muted: "bg-ink-3",
 };
 
+const TEXT_CLASSES: Record<ProgressTone, string> = {
+  coral: "text-coral-text",
+  tangerine: "text-tangerine-text",
+  violet: "text-violet",
+  muted: "text-ink-2",
+};
+
 export interface ProgressBarProps {
   value: number;
   tone: ProgressTone;
   className?: string;
+  /** Larger, tone-colored percent readout — the concept's row style, where
+   * the number is the primary signal instead of a small neutral caption. */
+  emphasizePercent?: boolean;
 }
 
-export function ProgressBar({ value, tone, className }: ProgressBarProps) {
+export function ProgressBar({ value, tone, className, emphasizePercent = false }: ProgressBarProps) {
   const pct = Math.max(0, Math.min(100, Math.round(value)));
 
   return (
@@ -37,7 +47,11 @@ export function ProgressBar({ value, tone, className }: ProgressBarProps) {
           style={{ width: `${pct}%` }}
         />
       </div>
-      <span className="w-8 shrink-0 text-right text-[10.5px] font-bold tabular-nums text-ink-2">
+      <span
+        className={`shrink-0 text-right font-bold tabular-nums ${
+          emphasizePercent ? `w-10 text-sm ${TEXT_CLASSES[tone]}` : "w-8 text-[10.5px] text-ink-2"
+        }`}
+      >
         {pct}%
       </span>
     </div>

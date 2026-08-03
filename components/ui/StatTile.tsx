@@ -39,10 +39,10 @@ export function StatTile({
 }) {
   return (
     <div className={`rounded-ctl p-4 ${TONE_CLASSES[tone]} ${className ?? ""}`}>
-      {icon && <div className="mb-1.5 flex h-8 w-8 items-center justify-center">{icon}</div>}
-      <p className="font-display text-2xl font-bold leading-none">
+      {icon && <div className="mb-2 flex h-8 w-8 items-center justify-center">{icon}</div>}
+      <p className="font-display text-[28px] font-bold leading-none sm:text-[32px]">
         {value}
-        {unit && <span className="ml-1 text-xs font-bold">{unit}</span>}
+        {unit && <span className="ml-1 text-sm font-bold">{unit}</span>}
       </p>
       <p className="mt-1.5 text-[11.5px] font-bold">{label}</p>
       {hint && <p className={`mt-0.5 text-[11px] font-semibold ${HINT_CLASSES[tone]}`}>{hint}</p>}

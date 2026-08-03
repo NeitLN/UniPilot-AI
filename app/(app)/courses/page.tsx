@@ -127,7 +127,7 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
             {semesters.length > 0 && ` · Semester ${semesters[0]}`}
           </p>
         </div>
-        <AddCourseButton />
+        <AddCourseButton variant="primary" />
       </div>
 
       <CourseFilters semesters={semesters} />

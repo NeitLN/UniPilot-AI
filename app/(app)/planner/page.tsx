@@ -11,6 +11,7 @@ import {
   weekDayTabs,
   type PlanSessionLite,
 } from "@/lib/rules/plan-presentation";
+import { AlertTriangle } from "lucide-react";
 import { dayKey as toDayKey, defaultTimeZone, shiftDayKey } from "@/lib/rules/focus";
 import { PlannerHero, type PlanLifecycleView } from "@/components/planner/PlannerHero";
 import { PlanHealthCard } from "@/components/planner/PlanHealthCard";
@@ -169,29 +170,38 @@ export default async function PlannerPage() {
             reverse order from the Assignments page's Pilo-pick-first
             pattern, so this deliberately doesn't reuse that order-swap. */}
         <div className="flex min-w-0 flex-col gap-3.5 lg:order-1">
-          <PlannerHero
-            lifecycle={lifecycle}
-            planId={plan.id}
-            sessionCount={sessions.length}
-            totalMinutesLabel={formatMinutes(totalMinutes)}
-            generateProps={generateProps}
-          />
-          {lifecycle === "draft" && sessions.length > 0 && (
-            <div className="flex items-center gap-2.5 rounded-card-sm bg-coral-tint px-4 py-3">
-              <span aria-hidden="true" className="text-lg">
-                ⚠
-              </span>
-              <p className="text-[12.5px] font-bold text-coral-text">
-                Nothing is scheduled until you confirm it — use Review &amp; confirm above.
-              </p>
-            </div>
-          )}
+          <div id="review-confirm">
+            <PlannerHero
+              lifecycle={lifecycle}
+              planId={plan.id}
+              sessionCount={sessions.length}
+              totalMinutesLabel={formatMinutes(totalMinutes)}
+              generateProps={generateProps}
+            />
+          </div>
           <PlannerWeekView
             dayTabs={dayTabs}
             sessionsByDay={sessionsByDay}
             initialDayKey={initialDayKey}
             editable={isDraft}
           />
+          {lifecycle === "draft" && sessions.length > 0 && (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-card-sm bg-coral-tint px-4 py-3.5">
+              <div className="flex items-start gap-2.5">
+                <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-coral-text" aria-hidden="true" />
+                <div>
+                  <p className="text-[12.5px] font-extrabold text-coral-text">Nothing is scheduled until you confirm.</p>
+                  <p className="text-[12.5px] font-semibold text-coral-text/85">Review your plan and confirm to lock it in.</p>
+                </div>
+              </div>
+              <a
+                href="#review-confirm"
+                className="flex min-h-11 shrink-0 items-center rounded-ctl bg-coral px-4 text-sm font-extrabold text-white hover:bg-coral-deep"
+              >
+                Review &amp; confirm plan
+              </a>
+            </div>
+          )}
         </div>
 
         <div className="flex min-w-0 flex-col gap-3.5 lg:order-2">
