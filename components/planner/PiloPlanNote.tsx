@@ -6,12 +6,16 @@ import { Tag } from "@/components/ui/Tag";
 export function PiloPlanNote({ note, isDraft }: { note: string; isDraft: boolean }) {
   return (
     <div className="flex items-start gap-3 rounded-card-sm bg-card p-4">
+      {/* pilo-note.png, not the full-body pilo-ai-planner.png the hero uses:
+          that asset is a standing figure with ~55% empty margin, so at this
+          size it shrank to an unreadable speck. This one is the bust,
+          cropped to the subject. */}
       <Image
-        src="/mascots/pilo-ai-planner.png"
+        src="/mascots/pilo-note.png"
         alt=""
-        width={68}
-        height={68}
-        className="h-[68px] w-[68px] shrink-0 object-contain"
+        width={64}
+        height={64}
+        className="h-16 w-16 shrink-0 object-contain"
       />
       <div className="min-w-0">
         <div className="flex items-center gap-2">

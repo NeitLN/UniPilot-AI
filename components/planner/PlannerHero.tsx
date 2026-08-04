@@ -11,7 +11,6 @@ import {
   type ConfirmPlanResult,
 } from "@/app/(app)/planner/actions";
 import { Pilo } from "@/components/brand/Pilo";
-import { Tag } from "@/components/ui/Tag";
 import { GenerateButton, type GenerateButtonProps } from "./GenerateButton";
 
 /** FR-23 (docs/PRODUCT_REVIEW.md): confirmPlan used to swallow this outcome
@@ -30,6 +29,22 @@ function calendarPushMessage(result: ConfirmPlanResult): string {
 }
 
 export type PlanLifecycleView = "empty" | "draft" | "active" | "ended";
+
+/** The three motion strokes beside Pilo's raised wing in the concept art —
+ * they aren't baked into pilo-ai-planner.png, so they're drawn here.
+ * Purely decorative: the greeting they imply carries no information the
+ * heading and copy don't already state. */
+function WaveSparkle({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 32 32" fill="none" aria-hidden="true" className={className}>
+      <g stroke="currentColor" strokeWidth="3.4" strokeLinecap="round" className="text-white">
+        <path d="M14 12 L17 4" />
+        <path d="M21 15 L28 10" />
+        <path d="M23 22 L31 21" />
+      </g>
+    </svg>
+  );
+}
 
 export function PlannerHero({
   lifecycle,
@@ -141,34 +156,57 @@ export function PlannerHero({
           : "Generate a weekly study plan whenever you're ready.";
 
   return (
-    <div className={`rounded-card p-5 sm:p-6 ${lifecycle === "ended" || lifecycle === "empty" ? "bg-violet/70" : "bg-violet"} text-white`}>
-      <div className="flex flex-col gap-5 lg:flex-row lg:items-center">
-        <Image
-          src="/mascots/pilo-ai-planner.png"
-          alt=""
-          width={205}
-          height={205}
-          className="mx-auto h-[160px] w-[160px] shrink-0 object-contain lg:mx-0 lg:h-[205px] lg:w-[205px]"
-          priority
-        />
+    <div className={`overflow-hidden rounded-card p-5 sm:p-6 ${lifecycle === "ended" || lifecycle === "empty" ? "bg-violet/70" : "bg-violet"} text-white`}>
+      <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:gap-7">
+        {/* Negative bottom margin cancels the card's own padding so Pilo
+            stands ON the card's bottom edge (concept 02-ai-planner) rather
+            than floating in a centred box; `overflow-hidden` above keeps
+            that from spilling past the rounded corner. */}
+        <div className="relative mx-auto -mb-5 shrink-0 sm:-mb-6 lg:mx-0">
+          <Image
+            src="/mascots/pilo-ai-planner.png"
+            alt=""
+            width={205}
+            height={205}
+            className="h-[160px] w-[160px] object-contain object-bottom lg:h-[210px] lg:w-[210px]"
+            priority
+          />
+          <WaveSparkle className="absolute right-1 top-7 h-8 w-8 lg:right-0 lg:top-10 lg:h-10 lg:w-10" />
+        </div>
 
-        <div className="flex flex-1 flex-col gap-4">
+        <div className="flex flex-1 flex-col gap-4 lg:pb-2">
           <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <h2 className="font-display text-2xl font-bold">Pilo&rsquo;s plan</h2>
-              {badgeLabel && <Tag tone={lifecycle === "draft" ? "violet" : lifecycle === "active" ? "mint" : "neutral"}>{badgeLabel}</Tag>}
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h2 className="font-display text-2xl font-bold lg:text-3xl">Pilo&rsquo;s plan</h2>
+              {badgeLabel && (
+                // Not the shared <Tag>: its violet tone is a pale lavender
+                // chip tuned for light cards, which washes out on this
+                // violet hero. A translucent white pill keeps the same
+                // subtle weight the concept shows.
+                <span
+                  className={`rounded-pill px-2.5 py-1 text-[11px] font-extrabold ${
+                    lifecycle === "active" ? "bg-mint text-mint-text" : "bg-white/20 text-white"
+                  }`}
+                >
+                  {badgeLabel}
+                </span>
+              )}
             </div>
             <p className="mt-1.5 max-w-md text-[13px] font-medium text-white/88">{description}</p>
           </div>
 
           <div className="shrink-0">
             {lifecycle === "draft" && (
-              <div className="flex flex-wrap items-center gap-3">
+              // Confirm is the whole point of the card, so it stands alone
+              // on its own row as in the concept. Cancel stays — it's the
+              // only route to cancelPlan() anywhere in the app — but drops
+              // underneath as a quiet link instead of competing beside it.
+              <div className="flex flex-col items-start gap-2">
                 <button
                   type="button"
                   onClick={handleConfirm}
                   disabled={pending || sessionCount === 0}
-                  className="flex min-h-11 items-center justify-center rounded-ctl bg-lime px-5 py-2.5 text-sm font-extrabold text-ink hover:bg-lime-deep disabled:opacity-60"
+                  className="flex min-h-11 items-center justify-center rounded-ctl bg-lime px-7 py-2.5 text-sm font-extrabold text-ink hover:bg-lime-deep disabled:opacity-60"
                 >
                   {pending ? "Working…" : "Review & confirm"}
                 </button>
@@ -176,7 +214,7 @@ export function PlannerHero({
                   type="button"
                   onClick={handleCancel}
                   disabled={pending}
-                  className="text-[12px] font-bold text-white/75 hover:text-white disabled:opacity-60"
+                  className="text-[11.5px] font-bold text-white/70 hover:text-white disabled:opacity-60"
                 >
                   Cancel draft
                 </button>
