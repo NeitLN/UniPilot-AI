@@ -547,7 +547,7 @@ export function FocusTimer({
               <button
                 type="button"
                 onClick={() => handleStartBreak("short")}
-                className="flex min-h-[52px] flex-1 items-center justify-center gap-2.5 rounded-pill bg-card px-3 py-1.5 text-left text-[12.5px] font-extrabold text-ink hover:bg-card/70"
+                className="flex min-h-[52px] flex-1 items-center justify-center gap-2.5 rounded-pill bg-card px-3 py-1.5 text-left text-[12.5px] font-extrabold text-foreground hover:bg-card/70"
               >
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-ink/[0.06]">
                   <Coffee className="h-4 w-4 text-ink-2" aria-hidden="true" />
@@ -562,7 +562,7 @@ export function FocusTimer({
               <button
                 type="button"
                 onClick={() => handleStartBreak("long")}
-                className="flex min-h-[52px] flex-1 items-center justify-center gap-2.5 rounded-pill bg-card px-3 py-1.5 text-left text-[12.5px] font-extrabold text-ink hover:bg-card/70"
+                className="flex min-h-[52px] flex-1 items-center justify-center gap-2.5 rounded-pill bg-card px-3 py-1.5 text-left text-[12.5px] font-extrabold text-foreground hover:bg-card/70"
               >
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-ink/[0.06]">
                   <Sofa className="h-4 w-4 text-ink-2" aria-hidden="true" />
@@ -582,7 +582,7 @@ export function FocusTimer({
                 }}
                 aria-pressed={audioOn}
                 title="Real, CC0/public-domain background music (see public/audio/CREDITS.md) — plays while a focus session is running."
-                className="flex min-h-[52px] flex-1 items-center justify-center gap-2 rounded-pill bg-card px-3 py-1.5 text-[12.5px] font-extrabold text-ink hover:bg-card/70"
+                className="flex min-h-[52px] flex-1 items-center justify-center gap-2 rounded-pill bg-card px-3 py-1.5 text-[12.5px] font-extrabold text-foreground hover:bg-card/70"
               >
                 <Music className="h-4 w-4 shrink-0 text-ink-2" aria-hidden="true" />
                 Lo-fi · {audioOn ? "On" : "Off"}
@@ -612,7 +612,7 @@ export function FocusTimer({
                     Add an assignment first — Pomodoro needs one to log against.{" "}
                     <Link
                       href="/assignments"
-                      className="font-extrabold text-violet hover:underline"
+                      className="font-extrabold text-violet-text hover:underline"
                     >
                       Add one now →
                     </Link>

@@ -68,7 +68,7 @@ export function SettingsNav() {
               aria-current={isActive ? "true" : undefined}
               className={`flex min-h-11 items-center gap-2.5 rounded-ctl border-l-[3px] px-3 text-left text-sm font-bold transition-colors ${
                 isActive
-                  ? "border-violet bg-violet-tint text-violet"
+                  ? "border-violet bg-violet-tint text-violet-text"
                   : "border-transparent text-ink-2 hover:bg-line"
               }`}
             >

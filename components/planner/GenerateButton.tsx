@@ -92,7 +92,7 @@ export function GenerateButton({ disabled, disabledReasons, label, variant = "vi
                   {" "}
                   <Link
                     href="/settings"
-                    className={`font-extrabold hover:underline ${variant === "lime" ? "text-white" : "text-violet"}`}
+                    className={`font-extrabold hover:underline ${variant === "lime" ? "text-white" : "text-violet-text"}`}
                   >
                     Set it now →
                   </Link>
@@ -103,7 +103,7 @@ export function GenerateButton({ disabled, disabledReasons, label, variant = "vi
                   {" "}
                   <Link
                     href="/assignments"
-                    className={`font-extrabold hover:underline ${variant === "lime" ? "text-white" : "text-violet"}`}
+                    className={`font-extrabold hover:underline ${variant === "lime" ? "text-white" : "text-violet-text"}`}
                   >
                     Add one now →
                   </Link>
@@ -121,7 +121,7 @@ export function GenerateButton({ disabled, disabledReasons, label, variant = "vi
             <button
               type="button"
               onClick={handleGenerate}
-              className="text-[11.5px] font-extrabold text-violet hover:underline"
+              className="text-[11.5px] font-extrabold text-violet-text hover:underline"
             >
               Retry
             </button>

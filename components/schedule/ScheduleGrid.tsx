@@ -266,7 +266,7 @@ function DayColumn({
           expected to differ between SSR and hydration, not a real mismatch. */}
       <p
         className={`text-center text-[11px] font-extrabold uppercase tracking-wide ${
-          isToday ? "text-violet" : "text-ink-3"
+          isToday ? "text-violet-text" : "text-ink-3"
         }`}
         suppressHydrationWarning
       >
@@ -341,7 +341,7 @@ function MonthGrid({
                   key={b.id}
                   type="button"
                   onClick={() => onSelect(b.id)}
-                  className="truncate rounded-[6px] bg-violet-tint px-1.5 py-0.5 text-left text-[10px] font-bold text-violet"
+                  className="truncate rounded-[6px] bg-violet-tint px-1.5 py-0.5 text-left text-[10px] font-bold text-violet-text"
                 >
                   {b.title}
                 </button>

@@ -67,7 +67,7 @@ export function DeleteCourseDialog({ course, usage, open, onClose }: DeleteCours
               different route entirely, so the whole page (dialog included)
               unmounts anyway. Closing the dialog first raced the Link's own
               click handling and canceled the navigation outright. */}
-          <div className="mt-3 flex flex-col gap-1.5 text-[12.5px] font-bold text-violet">
+          <div className="mt-3 flex flex-col gap-1.5 text-[12.5px] font-bold text-violet-text">
             {usage.assignmentCount > 0 && (
               <Link href={`/assignments?course=${course.id}`}>View linked assignments →</Link>
             )}

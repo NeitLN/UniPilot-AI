@@ -51,10 +51,10 @@ export function ThemeToggle() {
               }`}
             >
               {isActive && (
-                <CheckCircle2 className="absolute right-1.5 top-1.5 h-4 w-4 text-violet" aria-hidden="true" fill="currentColor" />
+                <CheckCircle2 className="absolute right-1.5 top-1.5 h-4 w-4 text-violet-text" aria-hidden="true" fill="currentColor" />
               )}
-              <Icon className={`h-5 w-5 ${isActive ? "text-violet" : "text-ink-2"}`} aria-hidden="true" />
-              <span className={`text-xs font-bold ${isActive ? "text-violet" : "text-ink-2"}`}>{opt.label}</span>
+              <Icon className={`h-5 w-5 ${isActive ? "text-violet-text" : "text-ink-2"}`} aria-hidden="true" />
+              <span className={`text-xs font-bold ${isActive ? "text-violet-text" : "text-ink-2"}`}>{opt.label}</span>
             </button>
           );
         })}

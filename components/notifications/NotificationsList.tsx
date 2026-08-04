@@ -69,7 +69,7 @@ export function NotificationsList({
             type="button"
             onClick={handleMarkAll}
             disabled={pending}
-            className="flex min-h-11 items-center text-[12.5px] font-bold text-violet hover:underline disabled:opacity-60"
+            className="flex min-h-11 items-center text-[12.5px] font-bold text-violet-text hover:underline disabled:opacity-60"
           >
             Mark all read
           </button>

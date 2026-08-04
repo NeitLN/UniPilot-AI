@@ -321,13 +321,28 @@ export default async function WeeklyReportPage({ searchParams }: ReportsPageProp
   );
 }
 
-/** Card tint plus the solid disc behind its icon. Whole class literals, so
- * Tailwind's build-time scanner can see every one of them. */
-const REPORT_STAT_SKIN: Record<ReportStatTone, { card: string; disc: string }> = {
-  mint: { card: "bg-mint-tint", disc: "bg-mint" },
-  coral: { card: "bg-coral-tint", disc: "bg-coral" },
-  lime: { card: "bg-lime-tint", disc: "bg-mint" },
-  violet: { card: "bg-card", disc: "bg-violet" },
+/** Card tint, the solid disc behind its icon, and the text colours that go
+ * with that surface. Whole class literals, so Tailwind's build-time scanner
+ * can see every one of them.
+ *
+ * `text`/`label` are part of the skin rather than fixed on the element for a
+ * reason: --mint-tint, --coral-tint and --lime-tint deliberately keep their
+ * light values in dark mode (see globals.css), so a token that *does* flip —
+ * text-foreground, text-ink-2 — renders light-on-light there. These cards
+ * previously used exactly that and measured 1.02:1. The paired *-text tokens
+ * are theme-invariant by design, which is what a non-flipping tint needs.
+ * The violet card is the exception: it sits on --card, which does flip, so
+ * it takes the flipping tokens. */
+const REPORT_STAT_SKIN: Record<
+  ReportStatTone,
+  { card: string; disc: string; text: string; label: string }
+> = {
+  mint: { card: "bg-mint-tint", disc: "bg-mint", text: "text-mint-text", label: "text-mint-text" },
+  coral: { card: "bg-coral-tint", disc: "bg-coral", text: "text-coral-text", label: "text-coral-text" },
+  // No --lime-text exists; --ink is the fixed dark shade the lime family
+  // pairs with everywhere else (see lib/ui/course-tone.ts).
+  lime: { card: "bg-lime-tint", disc: "bg-mint", text: "text-ink", label: "text-ink" },
+  violet: { card: "bg-card", disc: "bg-violet", text: "text-foreground", label: "text-ink-2" },
 };
 
 type ReportStatTone = "mint" | "coral" | "lime" | "violet";
@@ -363,8 +378,8 @@ function ReportStat({
         {icon}
       </span>
       <div className="min-w-0">
-        <p className="text-[12px] font-semibold text-ink-2">{label}</p>
-        <p className="mt-0.5 font-display text-[30px] font-bold leading-none text-foreground tabular-nums">
+        <p className={`text-[12px] font-semibold ${skin.label}`}>{label}</p>
+        <p className={`mt-0.5 font-display text-[30px] font-bold leading-none tabular-nums ${skin.text}`}>
           {value}
           {suffix && <span className="ml-1 text-[13px] font-bold">{suffix}</span>}
         </p>
@@ -381,7 +396,7 @@ function ReportStat({
           </p>
         )}
         {delta && delta.direction === "flat" && (
-          <p className="mt-1.5 text-[11.5px] font-bold text-violet">No change</p>
+          <p className="mt-1.5 text-[11.5px] font-bold text-violet-text">No change</p>
         )}
         {!delta && <p className="mt-1.5 text-[11.5px] font-bold text-ink-3">No prior data</p>}
       </div>

@@ -115,7 +115,7 @@ export function WeekTimeGrid({
             const today = isSameDay(day, now);
             return (
               <div key={day.toISOString()} className="pb-2 text-center">
-                <p className={`text-[12px] font-bold ${today ? "text-violet" : "text-foreground"}`}>
+                <p className={`text-[12px] font-bold ${today ? "text-violet-text" : "text-foreground"}`}>
                   {day.toLocaleDateString(undefined, { weekday: "short" })} {day.getDate()}
                 </p>
               </div>

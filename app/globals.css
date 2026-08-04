@@ -29,6 +29,13 @@
   --violet-deep: #5a2fe0;
   --violet-soft: #8b62ff;
   --violet-tint: #ede7ff;
+  /* Violet used as *text* on a page surface, as opposed to --violet the
+     fill. Identical to --violet in light mode (5.83:1 on --card, 4.85:1 on
+     --violet-tint, so nothing changes there). It exists because --violet is
+     a fixed brand colour: on the dark theme's --card it drops to 2.81:1
+     across 18 call sites. Only the text role can flip — the fill has to stay
+     the brand purple — so the two roles need separate tokens. */
+  --violet-text: #6c3cf5;
 
   --lime: #d8ff4a;
   --lime-deep: #b8e62e;
@@ -125,6 +132,11 @@
      contrast to near-zero, so these small badge/callout chips just stay
      light pastel in both themes instead. */
   --violet-tint: #2c2350;
+  /* Lifted so violet text clears AA on every dark surface it lands on:
+     4.85:1 on --line, 5.27 on --violet-tint, 6.01 on --card, 6.82 on
+     --canvas. --violet itself is untouched, so buttons and fills keep the
+     brand purple. */
+  --violet-text: #a78bfa;
 
   /* --ink itself stays fixed (see :root comment below) — only the
      secondary/tertiary text shades flip. */
@@ -156,6 +168,7 @@
   --color-violet-deep: var(--violet-deep);
   --color-violet-soft: var(--violet-soft);
   --color-violet-tint: var(--violet-tint);
+  --color-violet-text: var(--violet-text);
 
   --color-lime: var(--lime);
   --color-lime-deep: var(--lime-deep);

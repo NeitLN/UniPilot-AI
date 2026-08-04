@@ -20,7 +20,7 @@ const CARDS: {
     key: "likely",
     label: "Most likely",
     hint: "Keep doing what you're doing",
-    text: "text-violet",
+    text: "text-violet-text",
     border: "border-violet/40",
     stroke: "stroke-violet",
   },

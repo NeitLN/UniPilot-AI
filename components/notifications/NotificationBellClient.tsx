@@ -145,7 +145,7 @@ export function NotificationBellClient({
                   <button
                     type="button"
                     onClick={handleMarkAll}
-                    className="text-[11px] font-bold text-violet hover:underline"
+                    className="text-[11px] font-bold text-violet-text hover:underline"
                   >
                     Mark all read
                   </button>
@@ -200,7 +200,7 @@ export function NotificationBellClient({
               <Link
                 href="/notifications"
                 onClick={() => setOpen(false)}
-                className="mt-2 flex min-h-11 items-center justify-center rounded-ctl px-2.5 py-2 text-center text-[12.5px] font-bold text-violet hover:bg-violet-tint"
+                className="mt-2 flex min-h-11 items-center justify-center rounded-ctl px-2.5 py-2 text-center text-[12.5px] font-bold text-violet-text hover:bg-violet-tint"
               >
                 View all
               </Link>

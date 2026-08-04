@@ -158,7 +158,7 @@ export function GpaTrendMini({
 
       {gap !== null && (
         <div className="mt-4 flex items-center gap-2.5 rounded-ctl bg-violet-tint px-3.5 py-2.5">
-          <Target className="h-4 w-4 shrink-0 text-violet" aria-hidden="true" />
+          <Target className="h-4 w-4 shrink-0 text-violet-text" aria-hidden="true" />
           <p className="text-[12px] font-semibold text-ink-2">
             {gap > 0
               ? `You're ${gap.toFixed(2)} away from your target GPA.`

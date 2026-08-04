@@ -19,7 +19,7 @@ export function ForgotPasswordForm() {
         </p>
         <Link
           href="/login"
-          className="mt-4 inline-block text-xs font-bold text-violet hover:underline"
+          className="mt-4 inline-block text-xs font-bold text-violet-text hover:underline"
         >
           Back to sign in
         </Link>

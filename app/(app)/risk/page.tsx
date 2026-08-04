@@ -48,7 +48,7 @@ export default async function RiskPage() {
                   {r.includes("weekly availability") && (
                     <>
                       {" "}
-                      <Link href="/settings" className="font-extrabold text-violet hover:underline">
+                      <Link href="/settings" className="font-extrabold text-violet-text hover:underline">
                         Set it now →
                       </Link>
                     </>
@@ -56,7 +56,7 @@ export default async function RiskPage() {
                   {r.includes("Add at least one assignment") && (
                     <>
                       {" "}
-                      <Link href="/assignments" className="font-extrabold text-violet hover:underline">
+                      <Link href="/assignments" className="font-extrabold text-violet-text hover:underline">
                         Add one now →
                       </Link>
                     </>
@@ -64,7 +64,7 @@ export default async function RiskPage() {
                   {r.includes("Log focus sessions") && (
                     <>
                       {" "}
-                      <Link href="/focus" className="font-extrabold text-violet hover:underline">
+                      <Link href="/focus" className="font-extrabold text-violet-text hover:underline">
                         Start a session →
                       </Link>
                     </>

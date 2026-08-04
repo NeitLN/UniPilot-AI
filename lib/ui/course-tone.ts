@@ -25,7 +25,7 @@ export const COURSE_TONE_CLASSES: Record<
   CourseTone,
   { bg: string; tint: string; text: string; border: string; solid: string; onSolid: string }
 > = {
-  violet: { bg: "bg-violet", tint: "bg-violet-tint", text: "text-violet", border: "border-violet", solid: "bg-violet", onSolid: "text-white" },
+  violet: { bg: "bg-violet", tint: "bg-violet-tint", text: "text-violet-text", border: "border-violet", solid: "bg-violet", onSolid: "text-white" },
   mint: { bg: "bg-mint", tint: "bg-mint-tint", text: "text-mint-text", border: "border-mint", solid: "bg-mint", onSolid: "text-ink" },
   tangerine: { bg: "bg-tangerine", tint: "bg-tangerine-tint", text: "text-tangerine-text", border: "border-tangerine", solid: "bg-tangerine", onSolid: "text-ink" },
   coral: { bg: "bg-coral", tint: "bg-coral-tint", text: "text-coral-text", border: "border-coral", solid: "bg-coral", onSolid: "text-ink" },

@@ -51,7 +51,7 @@ export function StudyPreferencesForm({
         label="Weekly availability"
         error={state.errors.weeklyAvailabilityHours}
       >
-        <p className="font-display text-3xl font-bold text-violet tabular-nums">
+        <p className="font-display text-3xl font-bold text-violet-text tabular-nums">
           {availabilityHours || 0} <span className="text-base font-semibold text-ink-3">hours</span>
         </p>
         <input

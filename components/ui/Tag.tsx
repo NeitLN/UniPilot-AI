@@ -3,7 +3,7 @@ export type TagTone = "coral" | "tangerine" | "violet" | "mint" | "neutral";
 const TONE_CLASSES: Record<TagTone, string> = {
   coral: "bg-coral-tint text-coral-text",
   tangerine: "bg-tangerine-tint text-tangerine-text",
-  violet: "bg-violet-tint text-violet",
+  violet: "bg-violet-tint text-violet-text",
   mint: "bg-mint-tint text-mint-text",
   neutral: "bg-line text-ink-2",
 };

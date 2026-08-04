@@ -82,7 +82,7 @@ export function LogSessionDialog({ assignments }: { assignments: FocusAssignment
         onClick={() => setOpen(true)}
         className="flex min-h-11 items-center gap-2 rounded-ctl border border-border-cb bg-card px-4 py-2.5 text-sm font-bold text-ink-2 hover:bg-line"
       >
-        <FileClock className="h-4 w-4 shrink-0 text-violet" aria-hidden="true" />
+        <FileClock className="h-4 w-4 shrink-0 text-violet-text" aria-hidden="true" />
         Log session
       </button>
 

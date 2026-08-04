@@ -142,7 +142,7 @@ export function GpaTrendChart({ points, targetGpa }: GpaTrendChartProps) {
                 stroke="currentColor"
                 strokeWidth="0.8"
                 vectorEffect="non-scaling-stroke"
-                className="text-violet"
+                className="text-violet-text"
                 points={points
                   .map((p, i) => {
                     const x = ((i + 0.5) / points.length) * 100;

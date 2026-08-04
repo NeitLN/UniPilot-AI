@@ -113,7 +113,7 @@ export function AssignmentCommandBar({ courses }: { courses: CourseOption[] }) {
                   onClick={() => selectSegment(s.key)}
                   className={`flex min-h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-[calc(var(--radius-ctl)-4px)] border px-3 text-[12.5px] font-extrabold motion-safe:transition-colors motion-safe:duration-200 ${
                     isActive
-                      ? "border-violet bg-violet-tint text-violet"
+                      ? "border-violet bg-violet-tint text-violet-text"
                       : "border-transparent text-ink-2 hover:bg-line"
                   }`}
                 >

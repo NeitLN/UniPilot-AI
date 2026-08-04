@@ -73,7 +73,7 @@ export function FocusHistoryCard({ entries }: { entries: FocusHistoryEntry[] }) 
               // min-h-6 + the negative-margin padding clears the 24px
               // minimum target size without adding any visible weight —
               // styled by type alone this measured 23px tall.
-              className="-mx-1 flex min-h-6 items-center px-1 text-[12.5px] font-bold text-violet hover:underline"
+              className="-mx-1 flex min-h-6 items-center px-1 text-[12.5px] font-bold text-violet-text hover:underline"
             >
               {expanded ? "Show less" : "View all history"}
             </button>

@@ -10,7 +10,7 @@ const FILL_CLASSES: Record<ProgressTone, string> = {
 const TEXT_CLASSES: Record<ProgressTone, string> = {
   coral: "text-coral-text",
   tangerine: "text-tangerine-text",
-  violet: "text-violet",
+  violet: "text-violet-text",
   muted: "text-ink-2",
 };
 

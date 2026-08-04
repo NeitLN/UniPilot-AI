@@ -57,7 +57,7 @@ export function AvailabilityBands({
               <span className="flex w-12 shrink-0 items-center gap-1 text-[11px] font-bold text-ink-2">
                 {day.shortLabel}
                 {isToday && (
-                  <span className="rounded-pill border border-violet/40 bg-violet-tint px-1.5 py-0.5 text-[8.5px] font-extrabold text-violet">
+                  <span className="rounded-pill border border-violet/40 bg-violet-tint px-1.5 py-0.5 text-[8.5px] font-extrabold text-violet-text">
                     Today
                   </span>
                 )}

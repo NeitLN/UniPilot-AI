@@ -76,7 +76,7 @@ export function LoginForm() {
         {isLogin && (
           <Link
             href="/forgot-password"
-            className="-mt-1 self-end text-xs font-bold text-violet hover:underline"
+            className="-mt-1 self-end text-xs font-bold text-violet-text hover:underline"
           >
             Forgot password?
           </Link>

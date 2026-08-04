@@ -46,7 +46,7 @@ export function TodayAgendaCard({ entries, now }: { entries: AgendaEntry[]; now:
         <h2 className="font-display text-lg font-bold text-foreground">Today</h2>
         <Link
           href="/schedule"
-          className="flex min-h-11 items-center text-[12.5px] font-extrabold text-violet hover:underline"
+          className="flex min-h-11 items-center text-[12.5px] font-extrabold text-violet-text hover:underline"
         >
           View all
         </Link>

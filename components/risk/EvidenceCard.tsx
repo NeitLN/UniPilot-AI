@@ -9,11 +9,13 @@ const IMPACT_CLASSES = {
   moderate: "bg-tangerine-tint text-tangerine-text",
   protective: "bg-mint-tint text-mint-text",
 };
-const IMPACT_HEADLINE_CLASSES = {
-  strong: "text-coral-text",
-  moderate: "text-tangerine-text",
-  protective: "text-mint-text",
-};
+/* The headline sits on bg-line, which flips to a dark surface in dark mode,
+   while coral-text/tangerine-text/mint-text are fixed dark shades chosen for
+   a light tint. That pairing rendered dark-on-dark — mint-text measured
+   1:1 on the dark --line. The impact tone is already carried by the chip and
+   the IconChip beside it, both of which keep the correct tint+text pairing,
+   so the headline itself just needs a token that flips with its surface. */
+const HEADLINE_CLASS = "text-foreground";
 const IMPACT_CHIP_TONE: Record<keyof typeof IMPACT_CLASSES, IconChipTone> = {
   strong: "coral",
   moderate: "tangerine",
@@ -77,7 +79,7 @@ export function EvidenceCard({ result, evidence }: { result: RiskResult; evidenc
             <li key={item.type} className="flex items-center gap-3 rounded-ctl bg-line p-3">
               <IconChip icon={item.icon} tone={IMPACT_CHIP_TONE[impact]} />
               <div className="min-w-0 flex-1">
-                <p className={`text-sm font-bold ${IMPACT_HEADLINE_CLASSES[impact]}`}>{item.headline}</p>
+                <p className={`text-sm font-bold ${HEADLINE_CLASS}`}>{item.headline}</p>
                 <p className="text-[11.5px] font-semibold text-ink-3">{item.detail}</p>
               </div>
               <div className="flex shrink-0 flex-col items-end gap-1">

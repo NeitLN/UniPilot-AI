@@ -53,7 +53,7 @@ export function LearningStats({ dailySeries, weeklySeries }: LearningStatsProps)
           onClick={() => setRange((r) => (r === "week" ? "weeks8" : "week"))}
           // See FocusHistoryCard: min-h-6 clears the 24px target-size floor
           // that type-only styling left this button 1px short of.
-          className="-mx-1 flex min-h-6 shrink-0 items-center px-1 text-[12.5px] font-bold text-violet hover:underline"
+          className="-mx-1 flex min-h-6 shrink-0 items-center px-1 text-[12.5px] font-bold text-violet-text hover:underline"
         >
           {range === "week" ? "This week" : "Last 8 weeks"}
         </button>

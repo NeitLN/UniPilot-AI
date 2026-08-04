@@ -51,7 +51,7 @@ export function ConnectionsCard({
           )}
           <Link
             href="/schedule"
-            className="flex min-h-11 items-center rounded-ctl border border-violet/30 bg-card px-3.5 text-xs font-bold text-violet hover:bg-violet-tint"
+            className="flex min-h-11 items-center rounded-ctl border border-violet/30 bg-card px-3.5 text-xs font-bold text-violet-text hover:bg-violet-tint"
           >
             Manage
           </Link>

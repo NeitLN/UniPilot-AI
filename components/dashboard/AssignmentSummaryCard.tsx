@@ -44,7 +44,7 @@ export function AssignmentSummaryCard({
         </h2>
         <Link
           href="/assignments"
-          className="flex min-h-11 items-center text-[12.5px] font-extrabold text-violet hover:underline"
+          className="flex min-h-11 items-center text-[12.5px] font-extrabold text-violet-text hover:underline"
         >
           View all
         </Link>

@@ -1,5 +1,5 @@
 const TONE_CLASSES = {
-  violet: "bg-violet-tint text-violet",
+  violet: "bg-violet-tint text-violet-text",
   lime: "bg-lime text-ink",
   mint: "bg-mint-tint text-mint-text",
   coral: "bg-coral-tint text-coral-text",
