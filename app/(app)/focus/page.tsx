@@ -10,7 +10,8 @@ import { getViewerTimeZone } from "@/lib/timezone";
 import { FocusTimer } from "@/components/focus/FocusTimer";
 import { FocusStats, type FocusStatsData } from "@/components/focus/FocusStats";
 import { DailyGoalCard } from "@/components/focus/DailyGoalCard";
-import { LearningStats, type CourseTimeGrade } from "@/components/focus/LearningStats";
+import { LearningStats } from "@/components/focus/LearningStats";
+import { CourseTimeCard, type CourseTimeGrade } from "@/components/focus/CourseTimeCard";
 import { FocusHistoryCard, type FocusHistoryEntry } from "@/components/focus/FocusHistoryCard";
 import { LogSessionDialog } from "@/components/focus/LogSessionDialog";
 
@@ -151,7 +152,13 @@ export default async function FocusPage() {
         />
       </div>
 
-      <div className="flex flex-col gap-3.5 lg:grid lg:grid-cols-[1fr_1.4fr] lg:items-stretch">
+      {/* The timer is the wider column — it was 1fr against a 1.4fr rail,
+          which made the page's primary control the smaller half.
+          items-start, not stretch: stretching the timer to match a taller
+          right column pushed ~140px of empty space in between its dial, its
+          select and its buttons, since the dial block absorbs all slack. The
+          card now sits at its own height, spaced as the concept draws it. */}
+      <div className="flex flex-col gap-3.5 lg:grid lg:grid-cols-[1.4fr_1fr] lg:items-start">
         <FocusTimer
           assignments={activeAssignments.map((a) => ({ id: a.id, title: a.title }))}
           defaultDurationMinutes={defaultFocusMinutes}
@@ -162,9 +169,12 @@ export default async function FocusPage() {
         </div>
       </div>
 
-      <FocusHistoryCard entries={focusHistory} />
+      <div className="flex flex-col gap-3.5 lg:grid lg:grid-cols-2 lg:items-stretch">
+        <FocusHistoryCard entries={focusHistory} />
+        <LearningStats dailySeries={statsData.dailyActivity} weeklySeries={weeklySeries} />
+      </div>
 
-      <LearningStats weeklySeries={weeklySeries} byCourse={courseTimeGrades} />
+      <CourseTimeCard byCourse={courseTimeGrades} />
     </div>
   );
 }

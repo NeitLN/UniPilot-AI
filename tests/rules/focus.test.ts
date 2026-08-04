@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   activityTone,
   breakKindForCycle,
+  chartAxisTicks,
   classify,
   completedCyclesToday,
   dailyActivity,
@@ -378,5 +379,35 @@ describe("validateManualSession", () => {
     expect(
       validateManualSession({ startedAt: "not-a-date", durationMinutes: 30 }, now).startedAt,
     ).toBeDefined();
+  });
+});
+
+describe("chartAxisTicks", () => {
+  it("picks round steps so the top tick reads at a glance", () => {
+    // The concept's Learning rhythm axis: a ~60-minute peak yields 0/20/40/60,
+    // not 0/17/34/51 scaled to the tallest bar.
+    expect(chartAxisTicks(60)).toEqual([0, 20, 40, 60]);
+    expect(chartAxisTicks(55)).toEqual([0, 20, 40, 60]);
+  });
+
+  it("always spans at least up to the largest value", () => {
+    for (const max of [3, 7, 45, 123, 999, 1450]) {
+      const ticks = chartAxisTicks(max);
+      expect(ticks[ticks.length - 1]).toBeGreaterThanOrEqual(max);
+      expect(ticks[0]).toBe(0);
+    }
+  });
+
+  it("keeps a labelled axis for an empty week instead of a bare baseline", () => {
+    const ticks = chartAxisTicks(0);
+    expect(ticks.length).toBeGreaterThanOrEqual(2);
+    expect(ticks[0]).toBe(0);
+    expect(ticks[ticks.length - 1]).toBeGreaterThan(0);
+  });
+
+  it("uses evenly spaced steps", () => {
+    const ticks = chartAxisTicks(240);
+    const gaps = ticks.slice(1).map((t, i) => t - ticks[i]);
+    expect(new Set(gaps).size).toBe(1);
   });
 });

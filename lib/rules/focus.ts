@@ -328,3 +328,27 @@ export function weeklyMinutesSeries(
 
   return buckets.map((b) => ({ ...b, minutes: Math.round(b.minutes) }));
 }
+
+/**
+ * Round y-axis ticks for a bar chart, from zero up to at least `maxValue`.
+ *
+ * Picks a 1/2/5-times-power-of-ten step so the top tick is a number people
+ * read at a glance (0/20/40/60), rather than scaling the axis to whatever
+ * the tallest bar happens to be (0/17/34/51). Always returns at least
+ * [0, step] so an all-zero week still draws a labelled axis instead of a
+ * bare baseline.
+ */
+export function chartAxisTicks(maxValue: number, targetIntervals = 4): number[] {
+  const target = Math.max(maxValue, 1);
+  const rough = target / Math.max(1, targetIntervals);
+  const magnitude = Math.pow(10, Math.floor(Math.log10(rough)));
+  const step =
+    [1, 2, 5, 10].map((m) => m * magnitude).find((s) => s >= rough) ?? 10 * magnitude;
+  const top = Math.ceil(target / step) * step;
+
+  const ticks: number[] = [];
+  for (let v = 0; v <= top + step / 1000; v += step) {
+    ticks.push(Math.round(v * 1000) / 1000);
+  }
+  return ticks;
+}

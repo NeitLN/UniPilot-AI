@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
-import { Play, Coffee, Sofa, Music, Bell } from "lucide-react";
+import { Play, Coffee, Sofa, Music, Bell, ChevronDown, ClipboardList } from "lucide-react";
 import { Pilo } from "@/components/brand/Pilo";
 import { Modal } from "@/components/ui/Modal";
 import { confirmVariants } from "@/lib/motion/variants";
@@ -21,8 +21,12 @@ import { FOCUS_TRACKS } from "@/lib/audio/focus-tracks";
 import { FOCUS_SESSION_STORAGE_KEY as STORAGE_KEY } from "@/lib/focus/local-session";
 
 const CYCLE_COUNT_KEY = "unipilot:focus:cycleCount";
-const RADIUS = 65;
+const RADIUS = 68;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+/** Thin ring, per the concept — at the old 12px the track/progress split
+ * read as a chunky donut rather than the drawn outline the dial is meant
+ * to be. Still a real progress arc: full circle only while idle. */
+const RING_WIDTH = 5;
 
 export interface FocusAssignmentOption {
   id: string;
@@ -111,6 +115,8 @@ export function FocusTimer({
   const router = useRouter();
   const searchParams = useSearchParams();
   const [session, setSession] = useState<StoredSession | null>(null);
+  // Seeded from Settings' Study preferences (profiles.default_focus_minutes);
+  // the picker below overrides it for this session only.
   const [selectedDurationMinutes, setSelectedDurationMinutes] = useState<DurationMinutes>(
     isDurationMinutes(defaultDurationMinutes) ? defaultDurationMinutes : 25,
   );
@@ -347,14 +353,50 @@ export function FocusTimer({
           varies with content, unlike the timer block below it. */}
       <div>
         {!isRunning && (
-          <>
-            <label className="mb-3 block text-left text-xs font-bold text-ink/70">
-              What are you working on?
+          <div className="mb-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <label htmlFor="focus-assignment" className="text-left text-[12.5px] font-bold text-ink">
+                What are you working on?
+              </label>
+              {/* 25/45/60 overrides the Settings default for this one
+                  session. Kept compact and on the label's row so it doesn't
+                  add a band above the dial. */}
+              <div
+                role="radiogroup"
+                aria-label="Focus session duration"
+                className="flex gap-0.5 rounded-pill bg-ink/10 p-1"
+              >
+                {DURATION_OPTIONS_MIN.map((mins) => (
+                  <button
+                    key={mins}
+                    type="button"
+                    role="radio"
+                    aria-checked={selectedDurationMinutes === mins}
+                    onClick={() => setSelectedDurationMinutes(mins)}
+                    className={`flex min-h-9 items-center justify-center rounded-pill px-3 text-[11.5px] font-extrabold motion-safe:transition-colors motion-safe:duration-200 ${
+                      selectedDurationMinutes === mins ? "bg-ink text-white" : "text-ink/70 hover:bg-card/60"
+                    }`}
+                  >
+                    {mins}m
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* appearance-none so the leading icon and the drawn chevron can
+                sit inside the control, which a native select arrow would
+                otherwise collide with. */}
+            <div className="relative mt-2">
+              <ClipboardList
+                aria-hidden="true"
+                className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-ink"
+              />
               <select
+                id="focus-assignment"
                 value={selectedId}
                 onChange={(e) => setSelectedId(e.target.value)}
                 disabled={assignments.length === 0}
-                className="mt-1 min-h-11 w-full rounded-ctl border border-ink/15 bg-card px-3 py-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-violet disabled:opacity-60"
+                className="min-h-[52px] w-full appearance-none rounded-pill bg-card pl-12 pr-11 text-base font-semibold text-foreground outline-none focus-visible:ring-2 focus-visible:ring-violet disabled:opacity-60"
               >
                 {assignments.length === 0 ? (
                   <option value="">No active assignments</option>
@@ -366,28 +408,12 @@ export function FocusTimer({
                   ))
                 )}
               </select>
-            </label>
-
-            <div className="mb-3 text-left">
-              <span className="block text-xs font-bold text-ink/70">Duration</span>
-              <div role="radiogroup" aria-label="Focus session duration" className="mt-1 flex gap-1.5">
-                {DURATION_OPTIONS_MIN.map((mins) => (
-                  <button
-                    key={mins}
-                    type="button"
-                    role="radio"
-                    aria-checked={selectedDurationMinutes === mins}
-                    onClick={() => setSelectedDurationMinutes(mins)}
-                    className={`flex min-h-11 flex-1 items-center justify-center rounded-ctl text-sm font-extrabold motion-safe:transition-colors motion-safe:duration-200 ${
-                      selectedDurationMinutes === mins ? "bg-ink text-white" : "bg-card text-ink-2 hover:bg-card/70"
-                    }`}
-                  >
-                    {mins}m
-                  </button>
-                ))}
-              </div>
+              <ChevronDown
+                aria-hidden="true"
+                className="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-ink"
+              />
             </div>
-          </>
+          </div>
         )}
 
         {isRunning && isBreak && (
@@ -410,15 +436,19 @@ export function FocusTimer({
           taller "This week" card (docs/PRODUCT_REVIEW_4.md, dashboard-gap
           feedback), and h-full above stretches this card to match instead
           of leaving canvas-colored space beneath a short card. */}
-      <div className="flex flex-1 flex-col items-center justify-center gap-2 sm:flex-row sm:gap-5">
-        <div className="relative mx-auto flex h-[190px] w-[190px] shrink-0 items-center justify-center">
+      <div className="flex flex-1 flex-col items-center justify-center gap-2 sm:flex-row sm:items-end sm:gap-5">
+        {/* No mx-auto: as a flex child its auto margins would absorb every
+            spare pixel of the row, shoving the mascot to the far edge instead
+            of leaving it beside the dial. The row's justify-center already
+            centres the pair. */}
+        <div className="relative flex h-[236px] w-[236px] shrink-0 flex-col items-center justify-center">
           <svg viewBox="0 0 150 150" className="absolute inset-0 -rotate-90">
             <circle
               cx="75"
               cy="75"
               r={RADIUS}
               fill="none"
-              strokeWidth="12"
+              strokeWidth={RING_WIDTH}
               className="stroke-ink/15"
             />
             <circle
@@ -426,34 +456,37 @@ export function FocusTimer({
               cy="75"
               r={RADIUS}
               fill="none"
-              strokeWidth="12"
+              strokeWidth={RING_WIDTH}
               strokeLinecap="round"
               strokeDasharray={CIRCUMFERENCE}
               strokeDashoffset={dashOffset}
               className="stroke-ink motion-safe:transition-[stroke-dashoffset] motion-safe:duration-200 motion-safe:ease-linear"
             />
           </svg>
-          <p className="font-display text-5xl font-bold text-ink tabular-nums">
+          <p className="font-display text-[4rem] font-bold leading-none text-ink tabular-nums">
             {formatClock(displayRemaining)}
+          </p>
+          {/* Inside the dial, not floating beneath it — the caption names
+              what the number is counting, so it belongs to the dial. */}
+          <p className="mt-2.5 text-center text-[11.5px] font-extrabold uppercase tracking-[0.14em] text-ink/60">
+            {isBreak ? "Break" : "Focus session"}
+            {isPaused ? " · Paused" : ""}
           </p>
         </div>
 
         {/* Companion, not decoration on every card (brief §5.3) — restrained
             to this one timer surface. Headphones + laptop pose regardless of
             state (the dedicated Focus Timer asset has no mood variants). */}
+        {/* Sits on the dial's baseline (items-end above) rather than centred
+            beside it, as the concept has it. */}
         <Image
           src="/mascots/pilo-focus-timer.png"
           alt=""
-          width={170}
-          height={170}
-          className="hidden h-auto w-[170px] object-contain sm:block"
+          width={130}
+          height={130}
+          className="hidden h-auto w-[130px] object-contain sm:block"
         />
       </div>
-
-      <p className="mt-3 text-center text-[10.5px] font-extrabold uppercase tracking-[0.14em] text-ink/60">
-        {isBreak ? "Break" : "Focus session"}
-        {isPaused ? " · Paused" : ""}
-      </p>
 
       {/* Bottom: actions, pinned to the card's bottom edge regardless of
           how much extra height the middle section absorbed above. */}
@@ -464,7 +497,7 @@ export function FocusTimer({
               type="button"
               onClick={handlePauseToggle}
               disabled={pending}
-              className="flex-1 rounded-ctl bg-card py-3 text-sm font-extrabold text-foreground disabled:opacity-60"
+              className="min-h-11 flex-1 rounded-pill bg-card py-3 text-sm font-extrabold text-foreground disabled:opacity-60"
             >
               {isPaused ? "Resume" : "Pause"}
             </button>
@@ -472,7 +505,7 @@ export function FocusTimer({
               <button
                 type="button"
                 onClick={skipBreak}
-                className="flex-1 rounded-ctl bg-ink py-3 text-sm font-extrabold text-white"
+                className="min-h-11 flex-1 rounded-pill bg-ink py-3 text-sm font-extrabold text-white"
               >
                 Skip break
               </button>
@@ -481,7 +514,7 @@ export function FocusTimer({
                 type="button"
                 onClick={() => setConfirmingStop(true)}
                 disabled={pending}
-                className="flex-1 rounded-ctl bg-ink py-3 text-sm font-extrabold text-white disabled:opacity-60"
+                className="min-h-11 flex-1 rounded-pill bg-ink py-3 text-sm font-extrabold text-white disabled:opacity-60"
               >
                 Stop
               </button>
@@ -493,28 +526,53 @@ export function FocusTimer({
               type="button"
               onClick={handleStart}
               disabled={!selectedId}
-              className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-ctl bg-ink py-3 text-sm font-extrabold text-white disabled:opacity-45"
+              className="mx-auto mt-4 flex w-full max-w-[340px] items-center justify-center gap-2.5 rounded-pill bg-ink py-3.5 text-base font-extrabold text-white disabled:opacity-45"
             >
-              <Play className="h-4 w-4" aria-hidden="true" fill="currentColor" />
+              {/* Dark glyph on a white disc, per the concept — a bare white
+                  triangle on the dark pill read as part of the label. */}
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white">
+                <Play className="h-3 w-3 text-ink" aria-hidden="true" fill="currentColor" />
+              </span>
               Start focus
             </button>
 
-            <div className="mt-2 flex gap-1.5">
+            {/* Two-line pills: the action and its length are separate facts,
+                and stacking them stops "Short break 5m" wrapping mid-phrase
+                at narrow widths. */}
+            {/* Three equal shares of the row rather than content-width pills
+                huddled in the middle, matching the concept's layout — but
+                stacked below sm: three of these side by side need ~450px and
+                overflowed the page at 390px. */}
+            <div className="mt-2.5 flex flex-col gap-2.5 sm:flex-row">
               <button
                 type="button"
                 onClick={() => handleStartBreak("short")}
-                className="flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-ctl bg-card text-xs font-extrabold text-ink hover:bg-card/70"
+                className="flex min-h-[52px] flex-1 items-center justify-center gap-2.5 rounded-pill bg-card px-3 py-1.5 text-left text-[12.5px] font-extrabold text-ink hover:bg-card/70"
               >
-                <Coffee className="h-3.5 w-3.5" aria-hidden="true" />
-                Short break {Math.round(SHORT_BREAK_SECONDS / 60)}m
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-ink/[0.06]">
+                  <Coffee className="h-4 w-4 text-ink-2" aria-hidden="true" />
+                </span>
+                <span>
+                  Short break
+                  <span className="block text-[11px] font-bold text-ink-3">
+                    {Math.round(SHORT_BREAK_SECONDS / 60)}m
+                  </span>
+                </span>
               </button>
               <button
                 type="button"
                 onClick={() => handleStartBreak("long")}
-                className="flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-ctl bg-card text-xs font-extrabold text-ink hover:bg-card/70"
+                className="flex min-h-[52px] flex-1 items-center justify-center gap-2.5 rounded-pill bg-card px-3 py-1.5 text-left text-[12.5px] font-extrabold text-ink hover:bg-card/70"
               >
-                <Sofa className="h-3.5 w-3.5" aria-hidden="true" />
-                Long break {Math.round(LONG_BREAK_SECONDS / 60)}m
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-ink/[0.06]">
+                  <Sofa className="h-4 w-4 text-ink-2" aria-hidden="true" />
+                </span>
+                <span>
+                  Long break
+                  <span className="block text-[11px] font-bold text-ink-3">
+                    {Math.round(LONG_BREAK_SECONDS / 60)}m
+                  </span>
+                </span>
               </button>
               <button
                 type="button"
@@ -524,10 +582,11 @@ export function FocusTimer({
                 }}
                 aria-pressed={audioOn}
                 title="Real, CC0/public-domain background music (see public/audio/CREDITS.md) — plays while a focus session is running."
-                className="flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-ctl bg-card text-xs font-extrabold text-ink hover:bg-card/70"
+                className="flex min-h-[52px] flex-1 items-center justify-center gap-2 rounded-pill bg-card px-3 py-1.5 text-[12.5px] font-extrabold text-ink hover:bg-card/70"
               >
-                <Music className="h-3.5 w-3.5" aria-hidden="true" />
+                <Music className="h-4 w-4 shrink-0 text-ink-2" aria-hidden="true" />
                 Lo-fi · {audioOn ? "On" : "Off"}
+                <ChevronDown className="h-4 w-4 shrink-0 text-ink-2" aria-hidden="true" />
               </button>
             </div>
             {audioOn && (
@@ -544,7 +603,7 @@ export function FocusTimer({
             )}
             <p className="mt-2.5 flex items-center justify-center gap-1.5 text-[10.5px] font-semibold text-ink/60">
               <Bell className="h-3 w-3" aria-hidden="true" />
-              Notifications stay quiet while you focus.
+              Notifications will stay quiet while you focus.
             </p>
             {!selectedId && (
               <p className="mt-2 text-[11.5px] font-semibold text-ink/70">

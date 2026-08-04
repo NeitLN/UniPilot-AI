@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { FileClock } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { FieldError } from "@/components/ui/FieldError";
 import { inputClass } from "@/components/ui/Field";
@@ -79,9 +80,10 @@ export function LogSessionDialog({ assignments }: { assignments: FocusAssignment
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex min-h-11 items-center rounded-ctl bg-line px-4 py-2.5 text-sm font-bold text-ink-2 hover:bg-line-hover"
+        className="flex min-h-11 items-center gap-2 rounded-ctl border border-border-cb bg-card px-4 py-2.5 text-sm font-bold text-ink-2 hover:bg-line"
       >
-        Log a past session
+        <FileClock className="h-4 w-4 shrink-0 text-violet" aria-hidden="true" />
+        Log session
       </button>
 
       <Modal open={open} onClose={handleClose} title="Log a past session">

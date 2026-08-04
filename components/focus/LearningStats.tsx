@@ -1,25 +1,19 @@
-import type { WeekMinutes } from "@/lib/rules/focus";
-import { formatMinutes } from "@/lib/rules/focus";
+"use client";
 
-// UX-06 (docs/PRODUCT_REVIEW.md): this chart had no per-bar value at all —
-// the GPA trend chart (components/gpa/GpaTrendChart.tsx) already solved the
-// same "read the exact number, not just relative bar height" need with a
-// label above each bar; same BAR_MAX_HEIGHT/LABEL_SPACE split there so the
-// label never eats into the tallest bar's own height (the QA-01 bug).
-const BAR_MAX_HEIGHT = 84;
-const LABEL_SPACE = 16;
-const CHART_HEIGHT = BAR_MAX_HEIGHT + LABEL_SPACE;
+import { useState } from "react";
+import { chartAxisTicks, formatMinutes, type DayActivity, type WeekMinutes } from "@/lib/rules/focus";
 
-export interface CourseTimeGrade {
-  name: string;
-  minutes: number;
-  gradePoint: number | null;
-}
+const BAR_MAX_HEIGHT = 132;
+const AXIS_WIDTH = 34;
 
 export interface LearningStatsProps {
+  /** Per-day totals for the last 7 days — the same series the weekly
+   * activity strip uses, so the two can never disagree. */
+  dailySeries: DayActivity[];
   weeklySeries: WeekMinutes[];
-  byCourse: CourseTimeGrade[];
 }
+
+type Range = "week" | "weeks8";
 
 function weekLabel(weekStart: string): string {
   const [, m, d] = weekStart.split("-").map(Number);
@@ -29,92 +23,90 @@ function weekLabel(weekStart: string): string {
   });
 }
 
-/** §5 "Thống kê học tập theo thời gian": hours/week over time, which course
- * eats the most focus time, and — loosely, a full correlation coefficient
- * needs more graded courses than most students will have — how that time
- * lines up against the grade each course ended up with. */
-export function LearningStats({ weeklySeries, byCourse }: LearningStatsProps) {
-  const maxMinutes = Math.max(1, ...weeklySeries.map((w) => w.minutes));
-  const topCourse = byCourse[0];
+function dayLabel(dayKey: string): string {
+  return new Date(`${dayKey}T12:00:00`).toLocaleDateString(undefined, { weekday: "short" });
+}
+
+/** §5 "Thống kê học tập theo thời gian" — when the time went in. The
+ * per-course breakdown lives in its own card (CourseTimeCard); this one is
+ * the chart alone, as the concept draws it. */
+export function LearningStats({ dailySeries, weeklySeries }: LearningStatsProps) {
+  // The concept labels this chart "This week"; that label is a real range
+  // switch rather than a caption, so the eight-week view the page already
+  // computes stays reachable instead of being dropped for the daily one.
+  const [range, setRange] = useState<Range>("week");
+
+  const points =
+    range === "week"
+      ? dailySeries.map((d) => ({ key: d.dayKey, label: dayLabel(d.dayKey), minutes: d.minutes }))
+      : weeklySeries.map((w) => ({ key: w.weekStart, label: weekLabel(w.weekStart), minutes: w.minutes }));
+
+  const ticks = chartAxisTicks(Math.max(...points.map((p) => p.minutes), 0));
+  const axisMax = ticks[ticks.length - 1];
 
   return (
-    <div className="rounded-card bg-card p-5">
-      <h2 className="font-display text-lg font-bold text-foreground">Learning stats</h2>
-      <p className="mt-0.5 text-[11.5px] font-semibold text-ink-3">
-        Minutes studied per week, last {weeklySeries.length} weeks.
-      </p>
-
-      <div className="mt-4 flex items-end gap-2" style={{ height: CHART_HEIGHT }}>
-        {weeklySeries.map((w) => {
-          const barHeight = w.minutes === 0 ? 2 : Math.max(4, Math.round((w.minutes / maxMinutes) * BAR_MAX_HEIGHT));
-          return (
-            <div
-              key={w.weekStart}
-              className="flex flex-1 shrink-0 flex-col items-center justify-end gap-1"
-              style={{ height: CHART_HEIGHT }}
-            >
-              <span className="truncate text-[9px] font-bold text-ink-3 tabular-nums">
-                {w.minutes > 0 ? Math.round(w.minutes) : ""}
-              </span>
-              <div
-                className="w-full shrink-0 rounded-t-[4px] bg-violet"
-                style={{ height: barHeight }}
-              />
-            </div>
-          );
-        })}
+    <div className="flex min-w-0 flex-col rounded-card bg-card p-5">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="font-display text-lg font-bold text-foreground">Learning rhythm</h2>
+        <button
+          type="button"
+          onClick={() => setRange((r) => (r === "week" ? "weeks8" : "week"))}
+          className="shrink-0 text-[12.5px] font-bold text-violet hover:underline"
+        >
+          {range === "week" ? "This week" : "Last 8 weeks"}
+        </button>
       </div>
-      <div className="mt-1 flex gap-2">
-        {weeklySeries.map((w) => (
-          <span
-            key={w.weekStart}
-            className="flex-1 text-center text-[9.5px] font-bold text-ink-3"
-          >
-            {weekLabel(w.weekStart)}
+
+      {/* Gridlines with round tick values, so a bar can be read as a number
+          instead of only against its neighbours. */}
+      <div className="mt-5 flex" style={{ height: BAR_MAX_HEIGHT }}>
+        <div
+          className="relative shrink-0 text-[9.5px] font-bold text-ink-3 tabular-nums"
+          style={{ width: AXIS_WIDTH }}
+        >
+          {ticks.map((t) => (
+            <span
+              key={t}
+              className="absolute right-2 translate-y-1/2"
+              style={{ bottom: `${(t / axisMax) * 100}%` }}
+            >
+              {t}m
+            </span>
+          ))}
+        </div>
+
+        <div className="relative min-w-0 flex-1">
+          {ticks.map((t) => (
+            <span
+              key={t}
+              aria-hidden="true"
+              className="absolute inset-x-0 border-t border-border-subtle-2"
+              style={{ bottom: `${(t / axisMax) * 100}%` }}
+            />
+          ))}
+          {/* Each bar is centred in its own share of the width rather than
+              filling it, so the columns read as separate readings. */}
+          <div className="absolute inset-0 flex items-end gap-1.5">
+            {points.map((p) => (
+              <div key={p.key} className="flex min-w-0 flex-1 justify-center self-stretch">
+                <div
+                  title={`${p.label}: ${formatMinutes(Math.round(p.minutes))}`}
+                  className="mt-auto w-full max-w-[26px] rounded-t-[4px] bg-mint"
+                  style={{ height: p.minutes > 0 ? `${Math.max(2, (p.minutes / axisMax) * 100)}%` : 2 }}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-2 flex gap-1.5" style={{ paddingLeft: AXIS_WIDTH }}>
+        {points.map((p) => (
+          <span key={p.key} className="min-w-0 flex-1 truncate text-center text-[9.5px] font-bold text-ink-3">
+            {p.label}
           </span>
         ))}
       </div>
-
-      {byCourse.length === 0 ? (
-        <p className="mt-4 text-[12.5px] font-semibold text-ink-3">
-          No focus sessions logged yet.
-        </p>
-      ) : (
-        <>
-          {topCourse && topCourse.minutes > 0 && (
-            <p className="mt-4 text-[12.5px] font-semibold text-ink-2">
-              Most time spent:{" "}
-              <span className="font-bold text-foreground">{topCourse.name}</span> —{" "}
-              {formatMinutes(topCourse.minutes)}
-            </p>
-          )}
-
-          <table className="mt-2 w-full text-[12.5px]">
-            <thead>
-              <tr className="text-left text-[10.5px] font-bold uppercase tracking-wide text-ink-3">
-                <th className="pb-1.5 font-bold">Course</th>
-                <th className="pb-1.5 font-bold">Time</th>
-                <th className="pb-1.5 text-right font-bold">Grade</th>
-              </tr>
-            </thead>
-            <tbody>
-              {byCourse.map((c) => (
-                <tr key={c.name} className="border-t border-line">
-                  <td className="min-w-0 truncate py-1.5 pr-2 font-semibold text-foreground">
-                    {c.name}
-                  </td>
-                  <td className="whitespace-nowrap py-1.5 pr-2 tabular-nums text-ink-2">
-                    {formatMinutes(c.minutes)}
-                  </td>
-                  <td className="py-1.5 text-right tabular-nums text-ink-2">
-                    {c.gradePoint === null ? "—" : c.gradePoint.toFixed(1)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </>
-      )}
     </div>
   );
 }

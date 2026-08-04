@@ -14,11 +14,14 @@ test.describe("Run a focus session", () => {
     const hasAssignments = (await select.locator("option").count()) > 0 &&
       (await select.locator("option").first().getAttribute("value")) !== "";
 
+    // The button has always read "Start focus"; this asserted an exact name
+    // of "Start", so it could never match and the test failed before this
+    // redesign touched it.
     if (hasAssignments) {
-      await expect(page.getByRole("button", { name: "Start", exact: true })).toBeEnabled();
+      await expect(page.getByRole("button", { name: "Start focus", exact: true })).toBeEnabled();
     }
 
-    await page.getByRole("button", { name: "Start", exact: true }).click();
+    await page.getByRole("button", { name: "Start focus", exact: true }).click();
     await expect(page.getByText("25:00")).not.toBeVisible({ timeout: 5_000 }).catch(() => {});
 
     await page.getByRole("button", { name: "Stop", exact: true }).click();
@@ -26,7 +29,10 @@ test.describe("Run a focus session", () => {
     await expect(page.getByText(/won't count toward your streak/)).toBeVisible();
 
     await page.getByRole("button", { name: "Stop", exact: true }).last().click();
-    await expect(page.getByText(/partial/i)).toBeVisible({ timeout: 10_000 });
+    // The Focus history chip for the session just logged. A bare /partial/i
+    // also matches "This week"'s "Plus N partial sessions" summary, so it
+    // resolved to two nodes and tripped strict mode.
+    await expect(page.getByText(/Focus · Partial/).first()).toBeVisible({ timeout: 10_000 });
   });
 });
 
@@ -38,9 +44,12 @@ test.describe("Log a past focus session", () => {
     await page.goto("/focus");
     await expect(page.getByRole("heading", { name: "Focus timer" })).toBeVisible();
 
-    await page.getByRole("button", { name: "Log a past session", exact: true }).click();
+    await page.getByRole("button", { name: "Log session", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Log a past session" })).toBeVisible();
 
+    // Scoped to the dialog from here: the header trigger now reads "Log
+    // session" too, so an unscoped lookup would match both buttons.
+    const dialog = page.getByRole("dialog");
     await page.locator('select[name="assignmentId"]').selectOption({ index: 1 });
     // Fixed, far-past timestamp on purpose — outside every window the Focus
     // page ever queries (60 days), so re-running this test hits the same
@@ -50,7 +59,7 @@ test.describe("Log a past focus session", () => {
     // pollution already found and fixed once in tests/e2e/gpa.spec.ts.
     await page.locator('input[name="startedAt"]').fill("2020-01-01T09:00");
     await page.locator('input[name="durationMinutes"]').fill("30");
-    await page.getByRole("button", { name: "Log session", exact: true }).click();
+    await dialog.getByRole("button", { name: "Log session", exact: true }).click();
 
     await expect(page.getByRole("heading", { name: "Log a past session" })).not.toBeVisible({
       timeout: 10_000,
