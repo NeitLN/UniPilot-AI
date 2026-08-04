@@ -6,6 +6,55 @@
 
 ---
 
+## 0. Corrections made while implementing this audit
+
+Three findings below turned out to be wrong once the fixes were actually
+attempted, and one thing the audit could not verify turned out to be a real
+defect. Recorded here rather than silently edited, because the reasoning
+errors are more useful to a future reader than a clean-looking report.
+
+**A11Y-01 — the diagnosis was wrong, the finding was real.** The audit blamed
+opacity modifiers (`/70`, `/80`) layered on muted tokens. Measuring the actual
+call sites disproved that: alpha was 1.0 on every single failure, and the whole
+codebase contains exactly one opacity-modified muted class. The real cause was
+narrower — `--ink-3` had only ever been checked against the white `--card`
+(5.06:1, passing) while also being used on `--canvas` (4.49), `--line` (4.40)
+and `--violet-tint` (4.21). The token was fine on the one surface anyone had
+tested it on. Fixed by retuning the token, not by removing modifiers.
+
+**PERF-02 — half of it did not exist.** The audit named `lib/push/deliver.ts:91`
+as an N+1. That line is inside `deliverDueNotifications`, the *single-user*
+path, where the per-notification update is bounded and documented as a
+deliberate trade-off. The path that actually scales,
+`deliverAllDueNotifications`, was already batched under SR-05 and had been for
+some time. The audit's grep found `await supabase` inside a loop and stopped
+reading. Only `lib/calendar/push.ts` had a real problem, and even there the fix
+is not batching — every session gets a different `gcal_event_id` back from
+Google, and deferring the writes would turn one orphaned event on a crash into
+N.
+
+**UX-01 — two of the three cards already had empty states.** `GpaTrendChart`
+and `PlanAdherenceCard` both branch on having no data. Only `LearningStats`
+was missing one.
+
+**Dark mode — listed as unverified, and it was broken.** The appendix
+correctly said a dark-mode sweep had not been done. Doing it found 49 real
+contrast failures across all ten routes, of a single shape: `.dark` redeclares
+only 12 tokens, and the tint surfaces that deliberately stay light were being
+paired with text tokens that flip (and vice versa). This was the largest real
+defect in the product and the audit missed it entirely by not looking.
+
+**Method note.** The first automated contrast sweep reported 34 failures; on
+verification, 11 were measurement artifacts (an active nav pill painted by an
+absolutely-positioned sibling the walker could not see). A later dark-mode
+test reported all ten routes failing for a completely different reason —
+`page.evaluate()` treats a string argument as an expression, so the measurement
+function came back as `undefined` and the assertion failed on `undefined !== []`.
+Both looked exactly like real findings. Any number in this report that was not
+independently re-derived should be treated with that in mind.
+
+---
+
 ## 1. Executive summary
 
 UniPilot AI is in **substantially better shape than a typical product at this stage**. The security model is genuinely well-built, the pure business logic is well-factored and well-tested, and the whole application renders across every route and viewport with **zero console errors and zero horizontal overflow**.

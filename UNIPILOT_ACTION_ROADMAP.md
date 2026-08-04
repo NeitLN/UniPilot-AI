@@ -39,6 +39,39 @@ Lý do đưa 2.1 và 2.2 lên đầu dù chúng thuộc nhóm "nâng cấp": hi�
 
 ---
 
+---
+
+## Trạng thái thực thi (cập nhật 2026-08-05)
+
+**Phần 1 và Phần 2 đã hoàn thành.** 24 commit trên nhánh `feat/ui-redesign-and-audit`, chưa push.
+
+| Bước | Trạng thái | Ghi chú |
+|---|---|---|
+| 1.1 | xong | `/reports` còn 1 `<h1>`, giao diện không đổi |
+| 1.2 | xong | `/courses` outline H1→H2→H2 |
+| 1.3 | xong | 2 nút 23px → 29px |
+| 1.4 | xong | **Chẩn đoán ban đầu sai** — xem mục 0 của báo cáo audit |
+| 1.5 | xong | **Phần lớn không tồn tại** — đường cron đã batch sẵn |
+| 2.1 | xong | 9 commit, mỗi commit pass tsc + test khi checkout cô lập |
+| 2.2 | xong | e2e giới hạn `main`/PR cùng repo để hạn chế rác DB dùng chung |
+| 2.3 | xong | FK thiếu index về 0, planner xác nhận dùng index |
+| 2.4 | xong | Đếm nguyên tử trong Postgres; xác minh 429 qua HTTP thật |
+| 2.5 | xong | 3 module trắng đã có test; chứng minh bắt được regression |
+| 2.6 | xong | `/api/health` miễn auth; **giám sát lỗi chưa làm** (cần tài khoản + DSN) |
+| 2.7 | xong | Chỉ `LearningStats` thiếu thật; 2 card kia đã có sẵn |
+| 2.8 | xong | audio 16.8 MB → 9.2 MB, thêm chỉ báo dung lượng |
+| 2.9 | xong | `requireEnv` nêu đúng tên biến thiếu |
+| 2.10 | xong | Ngưỡng 0.3 — **quyết định sản phẩm**, đảo ngược bằng cách đặt hằng số về 0 |
+| 2.11 | xong | `lib/rules` phủ 14/14 |
+
+**Phát sinh ngoài lộ trình:** dark mode có 49 lỗi contrast thật (audit ghi là *chưa kiểm được*). Đã sửa toàn bộ và thêm test hồi quy đo thật trên 10 route.
+
+**Số liệu:** 408 unit test (từ 327), 34 file test (từ 26), 46 e2e. tsc và lint sạch.
+
+**Phần 3 chưa bắt đầu** — đó là các đặt cược sản phẩm cần bạn quyết trước khi viết code.
+
+---
+
 # PHẦN 1 — LỖI THẬT
 
 *5 mục. Tất cả đều đã được **xác minh bằng đo đạc**, không phải suy đoán.*
