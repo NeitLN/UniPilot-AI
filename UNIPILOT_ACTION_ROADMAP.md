@@ -57,16 +57,16 @@ Lý do đưa 2.1 và 2.2 lên đầu dù chúng thuộc nhóm "nâng cấp": hi�
 | 2.3 | xong | FK thiếu index về 0, planner xác nhận dùng index |
 | 2.4 | xong | Đếm nguyên tử trong Postgres; xác minh 429 qua HTTP thật |
 | 2.5 | xong | 3 module trắng đã có test; chứng minh bắt được regression |
-| 2.6 | xong | `/api/health` miễn auth; **giám sát lỗi chưa làm** (cần tài khoản + DSN) |
+| 2.6 | xong | `/api/health` miễn auth; báo lỗi có cấu trúc ra stderr + webhook tuỳ chọn `ERROR_WEBHOOK_URL`. Gắn Sentry sau là đổi mỗi `deliver()` |
 | 2.7 | xong | Chỉ `LearningStats` thiếu thật; 2 card kia đã có sẵn |
 | 2.8 | xong | audio 16.8 MB → 9.2 MB, thêm chỉ báo dung lượng |
 | 2.9 | xong | `requireEnv` nêu đúng tên biến thiếu |
-| 2.10 | xong | Ngưỡng 0.3 — **quyết định sản phẩm**, đảo ngược bằng cách đặt hằng số về 0 |
+| 2.10 | xong | Ngưỡng `BELOW_AVERAGE_MARGIN = 0.3` — **quyết định sản phẩm** đã được chấp nhận; đặt về 0 để khôi phục hành vi cũ |
 | 2.11 | xong | `lib/rules` phủ 14/14 |
 
 **Phát sinh ngoài lộ trình:** dark mode có 49 lỗi contrast thật (audit ghi là *chưa kiểm được*). Đã sửa toàn bộ và thêm test hồi quy đo thật trên 10 route.
 
-**Số liệu:** 408 unit test (từ 327), 34 file test (từ 26), 46 e2e. tsc và lint sạch.
+**Số liệu:** 414 unit test (từ 327), 35 file test (từ 26), 47 e2e. tsc, lint và build sạch.
 
 **Phần 3 chưa bắt đầu** — đó là các đặt cược sản phẩm cần bạn quyết trước khi viết code.
 
