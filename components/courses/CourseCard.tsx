@@ -56,7 +56,12 @@ export function CourseCard({ course }: { course: CourseCardData }) {
       </div>
 
       <div>
-        <h3 className="font-display text-base font-bold leading-snug text-foreground line-clamp-2">{course.name}</h3>
+        {/* h2, not h3: the page's own heading is the <h1>, and nothing sits
+            between them, so an h3 here reported a missing level to anyone
+            navigating by heading. The <h2> further down at line 110 is
+            inside the detail dialog, where a new heading context starts, so
+            that one is already correct. */}
+        <h2 className="font-display text-base font-bold leading-snug text-foreground line-clamp-2">{course.name}</h2>
         <p className="mt-1 flex items-center gap-2 text-[11.5px] font-semibold text-ink-3">
           <span>
             {course.credits} credit{course.credits === 1 ? "" : "s"}
