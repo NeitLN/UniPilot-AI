@@ -86,9 +86,12 @@ export function WeeklyRecapHero({
         className="h-[130px] w-auto shrink-0 object-contain sm:h-[175px]"
       />
       <div className="min-w-0 flex-1">
-        <h1 className="font-display text-3xl font-bold sm:text-[42px] sm:leading-[1.1]">
+        {/* h2, not h1: the page already owns its <h1> ("Weekly report").
+            This is a slogan about the week, not a second page title, and
+            two h1s give a screen-reader user two competing titles. */}
+        <h2 className="font-display text-3xl font-bold sm:text-[42px] sm:leading-[1.1]">
           {headline(completedMinutes, completedCount, streak)}
-        </h1>
+        </h2>
         {/* Raw minutes, not "5h 25m": the gauge beside this states the same
             figure in minutes against a minute goal, and the two disagreeing
             in unit made them read as two different numbers. */}
