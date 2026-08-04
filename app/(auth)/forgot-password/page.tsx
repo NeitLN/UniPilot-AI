@@ -3,7 +3,7 @@ import { ForgotPasswordForm } from "./ForgotPasswordForm";
 
 export default function ForgotPasswordPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-canvas px-4">
+    <div className="flex min-h-[calc(100vh/var(--app-zoom))] items-center justify-center bg-canvas px-4">
       <div className="w-full max-w-sm rounded-card bg-card p-8 text-center">
         <div className="flex justify-center">
           <Logo tone="dark" size={44} />

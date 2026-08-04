@@ -50,3 +50,6 @@ next-env.d.ts
 
 .vercel
 .env*
+
+# Iteration screenshots from local design/verification runs — not product assets.
+docs/screenshots/zoom/

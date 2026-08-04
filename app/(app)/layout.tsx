@@ -17,7 +17,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   } = await supabase.auth.getUser();
 
   return (
-    <div className="flex min-h-screen w-full">
+    <div className="flex min-h-[calc(100vh/var(--app-zoom))] w-full">
       {/* A-01: without this, keyboard/screen-reader users had to tab past
           the sidebar's 8 nav links + sign-out + notification bell (11 tabs)
           on every single page just to reach the actual content. */}

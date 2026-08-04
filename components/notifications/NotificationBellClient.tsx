@@ -125,13 +125,17 @@ export function NotificationBellClient({
               onClick={() => setOpen(false)}
               className="fixed inset-0 z-40 cursor-default"
             />
+            {/* max-w divides 100vw by --app-zoom: viewport units still
+                measure the real viewport inside the zoomed body, so an
+                undivided 100vw cap sits ~20% wider than the screen and lets
+                this popover overflow on mobile. */}
             <motion.div
               initial="initial"
               animate="animate"
               exit="exit"
               variants={popoverVariants}
               style={{ transformOrigin: "top right" }}
-              className="absolute right-0 z-50 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-card bg-card p-3 shadow-xl"
+              className="absolute right-0 z-50 mt-2 w-80 max-w-[calc(100vw/var(--app-zoom)-2rem)] rounded-card bg-card p-3 shadow-xl"
             >
               <div className="flex items-center justify-between px-1">
                 <p className="font-display text-sm font-bold text-foreground">

@@ -9,6 +9,19 @@
    beforeInteractive script in app/layout.tsx (reads localStorage, falls
    back to prefers-color-scheme) so there's no flash of the wrong theme. */
 :root {
+  /* App-wide UI scale, applied via `zoom` on <body> below.
+     `zoom` rather than a root font-size bump because ~400 sizes in this
+     codebase are hardcoded px (text-[12.5px], h-[104px], the chart
+     heights in JS), which a rem-based scale would leave behind — the
+     result would be larger text inside unchanged boxes. `zoom` scales the
+     used value of every length regardless of unit, so px and rem move
+     together.
+     Anything measured in viewport units has to be divided by this (see
+     the `min-h-screen` replacements in the layouts): vh/vw always refer
+     to the real viewport, so inside a zoomed body they over-measure by
+     exactly this factor. */
+  --app-zoom: 1.2;
+
   --background: #f2f0fb;
   --foreground: #1d1338;
 
@@ -185,9 +198,28 @@
   --radius-pill: 20px;
 }
 
+/* Breakpoints scaled by the same factor as --app-zoom (1.2x).
+   CSS `zoom` does NOT change the viewport that media queries evaluate
+   against — unlike real browser zoom — so without this a 1200px window
+   would still match `lg:` while only having 1000px of zoomed layout space
+   to draw a two-column grid in, and it would overflow. Shifting each
+   breakpoint up by the zoom factor restores the "matches when there's
+   genuinely room" behaviour browser zoom gives for free.
+   Values must be literals: Tailwind resolves these at build time to emit
+   the @media rules, so calc(... * var(--app-zoom)) would not work.
+   Base values are Tailwind v4's defaults (40/48/64/80/96rem). */
+@theme {
+  --breakpoint-sm: 48rem; /* 640px x 1.2 =  768px */
+  --breakpoint-md: 57.6rem; /* 768px x 1.2 =  922px */
+  --breakpoint-lg: 76.8rem; /* 1024px x 1.2 = 1229px */
+  --breakpoint-xl: 96rem; /* 1280px x 1.2 = 1536px */
+  --breakpoint-2xl: 115.2rem; /* 1536px x 1.2 = 1843px */
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
+  zoom: var(--app-zoom);
 }
 
 @media (prefers-reduced-motion: reduce) {

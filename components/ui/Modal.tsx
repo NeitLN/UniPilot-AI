@@ -45,7 +45,7 @@ export function Modal({
       {open && (
         <motion.div
           key={title}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 px-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4"
           onClick={onClose}
           initial="initial"
           animate="animate"
@@ -60,7 +60,15 @@ export function Modal({
             tabIndex={-1}
             onClick={(e) => e.stopPropagation()}
             variants={modalPanelVariants}
-            className={`w-full ${SIZE_CLASSES[size]} overscroll-contain rounded-card bg-card p-6 outline-none`}
+            /* Capped + scrollable: the panel already carried
+               `overscroll-contain` (which only does anything on a scroll
+               container) but had no max-height, so a tall form — New
+               assignment is ~900px — was centred and clipped at BOTH ends
+               on any viewport shorter than itself, putting the submit
+               button out of reach. 100vh is divided by --app-zoom because
+               viewport units ignore the zoom on <body>; the 2rem subtracts
+               the overlay's own p-4 gutter. */
+            className={`max-h-[calc(100vh/var(--app-zoom)-2rem)] w-full ${SIZE_CLASSES[size]} overflow-y-auto overscroll-contain rounded-card bg-card p-6 outline-none`}
           >
             {children}
           </motion.div>
