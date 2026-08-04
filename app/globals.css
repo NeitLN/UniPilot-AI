@@ -42,7 +42,14 @@
   --ink-2: #4a4460;
   /* Darkened from an earlier #8a83a3 — that only hit 3.58:1 on white,
      below WCAG AA's 4.5:1 for normal text (Lighthouse a11y audit, Phase 11). */
-  --ink-3: #716b86;
+  /* Was #716b86, which was only ever checked against the white --card
+     (5.06:1) and passed there. It is also used on --canvas, --line and
+     --violet-tint, where it measured 4.49 / 4.40 / 4.21 — all under AA.
+     #67617b clears 4.5 on every surface it lands on (worst case 4.89 on
+     --violet-tint) and stays well clear of --ink-2, so the muted vs
+     secondary hierarchy still reads. tests/ui/contrast.test.ts enforces
+     both properties against these exact values. */
+  --ink-3: #67617b;
 
   --coral: #ff5470;
   --coral-tint: #ffe7eb;
@@ -92,7 +99,11 @@
      under `.dark`. */
   --dusk-text: #b7acd8;
   --dusk-muted: #9c90c4;
-  --dusk-label: #6c5f94;
+  /* Was #6c5f94 = 3.08:1 on --ink, the worst contrast in the product. It
+     labels the weight multipliers on Workload risk's dark hero at 11px,
+     where AA needs 4.5. #9184c0 gives 5.21:1 and still sits below
+     --dusk-muted, so it stays the quietest text on that panel. */
+  --dusk-label: #9184c0;
   --dusk-border: #33245c;
   --dusk-panel: #2a1d4d;
   --dusk-seg: #382a5e;

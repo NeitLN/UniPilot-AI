@@ -165,7 +165,11 @@ function DayList({
             ) : (
               <>
                 <span>{formatTime(b.startAt)}</span>
-                <span className="text-ink-3/70">{formatTime(b.endAt)}</span>
+                {/* No /70 here: --ink-3 is already the muted end of the
+                    scale, and knocking 30% off it lands at 3.08:1 against
+                    the card — well under AA. The end time reads as
+                    secondary from its position after the start time. */}
+                <span className="text-ink-3">{formatTime(b.endAt)}</span>
               </>
             )}
           </div>
