@@ -591,7 +591,15 @@ export function FocusTimer({
             </div>
             {audioOn && (
               <div className="mt-2 flex items-center justify-center gap-2 text-[11px] font-bold text-ink/70">
-                <span className="truncate">{FOCUS_TRACKS[trackIndex].label}</span>
+                {/* The size is stated because preload="none" means the file
+                    only downloads once Lo-fi is switched on — until then a
+                    student on mobile data has no way to know what it costs. */}
+                <span className="truncate">
+                  {FOCUS_TRACKS[trackIndex].label}
+                  <span className="ml-1.5 font-semibold text-ink/60">
+                    ~{FOCUS_TRACKS[trackIndex].sizeMb.toFixed(1)} MB
+                  </span>
+                </span>
                 <button
                   type="button"
                   onClick={() => setTrackIndex((i) => (i + 1) % FOCUS_TRACKS.length)}
