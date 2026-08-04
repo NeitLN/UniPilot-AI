@@ -95,6 +95,7 @@ export default async function AssignmentsPage({
     now,
   );
 
+  const activeTitleById = new Map(allActive.map((r) => [r.id, r.title]));
   const quickWins = deriveQuickWins(
     allActive.map((r) => ({
       id: r.id,
@@ -103,7 +104,7 @@ export default async function AssignmentsPage({
       archivedAt: r.archived_at,
       dueAt: r.due_at,
     })),
-  ).map((w) => ({ ...w, title: allActive.find((r) => r.id === w.id)!.title }));
+  ).map((w) => ({ ...w, title: activeTitleById.get(w.id) ?? "Untitled assignment" }));
 
   // Main list — respects course/status/search exactly as before. `when`
   // (today/week) is new: it can't be pushed into the DB query without
