@@ -36,6 +36,42 @@ test.describe("Run a focus session", () => {
   });
 });
 
+// WCAG 2.2 AA 2.5.8 Target Size (Minimum). Two bare text buttons on this
+// page ("View all history", "This week") were styled with type alone and no
+// padding, so they measured 23px tall — one pixel under the floor.
+test.describe("Focus timer target sizes", () => {
+  test("every interactive control is at least 24x24px", async ({ page }) => {
+    await page.goto("/focus");
+    await expect(page.getByRole("heading", { name: "Focus timer" })).toBeVisible();
+
+    const small = await page.evaluate(() => {
+      const out: { name: string; w: number; h: number }[] = [];
+      document
+        .querySelectorAll("button, a[href], [role=button], [role=radio], [role=switch]")
+        .forEach((el) => {
+          // Visually-hidden controls (the skip link's `sr-only`) collapse to
+          // a 1px clipped box and expand to a real target on focus, so their
+          // measured size means nothing. Detected by the clip rect Tailwind's
+          // sr-only sets, not by size: the app renders at zoom 1.2, so that
+          // 1px box actually measures 1.2px and a size threshold missed it.
+          const cs = getComputedStyle(el);
+          if (cs.clipPath === "inset(50%)") return;
+
+          const b = el.getBoundingClientRect();
+          if (b.width === 0 || b.height === 0) return;
+          if (b.width < 24 || b.height < 24)
+            out.push({
+              name: (el.getAttribute("aria-label") || el.textContent || el.tagName).trim().slice(0, 40),
+              w: Math.round(b.width),
+              h: Math.round(b.height),
+            });
+        });
+      return out;
+    });
+    expect(small).toEqual([]);
+  });
+});
+
 // FR-22 (docs/PRODUCT_REVIEW.md) — offline/on-paper study previously had no
 // way to count at all, since the Pomodoro timer was the only path that
 // could ever create a focus_sessions row.
