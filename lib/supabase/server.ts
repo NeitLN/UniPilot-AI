@@ -3,6 +3,7 @@ import { cache } from "react";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import type { Database } from "./types";
+import { supabaseUrl, supabaseAnonKey } from "./env";
 
 /**
  * Supabase client for Server Components, Server Actions, and Route Handlers.
@@ -23,8 +24,8 @@ export const createClient = cache(async function createClient() {
   const cookieStore = await cookies();
 
   return createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl(),
+    supabaseAnonKey(),
     {
       cookies: {
         getAll() {
