@@ -26,6 +26,11 @@ const ALWAYS_ACCESSIBLE_ROUTES = [
   "/reset-password",
   "/auth/confirm",
   "/api/cron/notifications",
+  // DEVOPS-02: an uptime monitor has no session. Without this the probe is
+  // 307'd to /login, which answers 200 and would report the app healthy
+  // through a total database outage — the same trap SR-01 hit with the cron
+  // route, where the redirect fired before the handler ever ran.
+  "/api/health",
 ];
 
 /**
