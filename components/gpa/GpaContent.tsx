@@ -98,9 +98,14 @@ export async function GpaContent() {
       .filter((c) => c.scoredWeight > 0),
   );
 
+  // Hoisted so the JSX below can narrow `targetGpa` to `number` via a plain
+  // `&&` chain instead of re-asserting it non-null with `!` right next to
+  // the ternary that already proved it — one guard, not two copies of it.
+  const targetGpa = profile?.target_gpa ?? null;
+  const programTotalCredits = profile?.program_total_credits ?? null;
   const onTrack =
-    profile?.program_total_credits && profile.target_gpa
-      ? onTrackProgress(profile.program_total_credits, doneCredits, profile.target_gpa, currentQP)
+    programTotalCredits && targetGpa
+      ? onTrackProgress(programTotalCredits, doneCredits, targetGpa, currentQP)
       : null;
 
   return (
@@ -110,8 +115,8 @@ export async function GpaContent() {
       </div>
 
       <div className="flex flex-col gap-3.5 sm:flex-row sm:items-stretch">
-        <GpaHero overallGpa={overallGpa} doneCredits={doneCredits} targetGpa={profile?.target_gpa ?? null} className="sm:flex-[1.4]" />
-        {onTrack && <OnTrackCard result={onTrack} targetGpa={profile!.target_gpa!} />}
+        <GpaHero overallGpa={overallGpa} doneCredits={doneCredits} targetGpa={targetGpa} className="sm:flex-[1.4]" />
+        {onTrack && targetGpa && <OnTrackCard result={onTrack} targetGpa={targetGpa} />}
       </div>
 
       <div className="flex flex-col gap-3.5 lg:grid lg:grid-cols-[1.4fr_1fr] lg:items-start">
@@ -121,11 +126,11 @@ export async function GpaContent() {
         </div>
 
         <div className="flex min-w-0 flex-col gap-3.5">
-          <GpaTrendChart points={trendPoints} targetGpa={profile?.target_gpa ?? null} />
+          <GpaTrendChart points={trendPoints} targetGpa={targetGpa} />
           <PredictedScenarios scenarios={scenarios} />
           <PredictedGrades courses={predictedCourses} />
           <ForecastCard
-            initialTargetGpa={profile?.target_gpa ?? 3.6}
+            initialTargetGpa={targetGpa ?? 3.6}
             doneCredits={doneCredits}
             currentQP={currentQP}
           />
