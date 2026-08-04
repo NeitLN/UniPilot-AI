@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   completedAtForTransition,
+  deriveQuickWins,
   isDueThisWeek,
   isDueToday,
   isOverdue,
@@ -8,12 +9,14 @@ import {
   overdueLabel,
   pickPiloAssignment,
   priorityLabel,
+  relativeDueLabel,
   progressTone,
   sectionForAssignment,
   sortByDueDate,
   statusLabel,
   validateAssignment,
   type AssignmentInput,
+  type QuickWinLike,
 } from "@/lib/rules/assignment";
 
 const baseInput: AssignmentInput = {
@@ -534,5 +537,78 @@ describe("pickPiloAssignment", () => {
       now,
     );
     expect(pick?.id).toBe("real-pick");
+  });
+});
+
+describe("relativeDueLabel", () => {
+  const now = new Date("2026-08-03T12:00:00.000Z");
+  const hoursFromNow = (h: number) => new Date(now.getTime() + h * 3_600_000).toISOString();
+
+  it("reads as past tense once more than an hour overdue", () => {
+    expect(relativeDueLabel(hoursFromNow(-24), now)).toBe("1 day ago");
+    expect(relativeDueLabel(hoursFromNow(-72), now)).toBe("3 days ago");
+  });
+
+  it("treats the hour either side of the deadline as imminent", () => {
+    expect(relativeDueLabel(hoursFromNow(-0.5), now)).toBe("any moment now");
+    expect(relativeDueLabel(hoursFromNow(0.5), now)).toBe("any moment now");
+  });
+
+  it("says today for anything inside the next 24 hours", () => {
+    expect(relativeDueLabel(hoursFromNow(5), now)).toBe("today");
+    expect(relativeDueLabel(hoursFromNow(23), now)).toBe("today");
+  });
+
+  it("switches to tomorrow and then day counts", () => {
+    expect(relativeDueLabel(hoursFromNow(25), now)).toBe("tomorrow");
+    expect(relativeDueLabel(hoursFromNow(24 * 5), now)).toBe("in 5 days");
+  });
+});
+
+describe("deriveQuickWins", () => {
+  const row = (id: string, progress: number, overrides: Partial<QuickWinLike> = {}): QuickWinLike => ({
+    id,
+    progress,
+    status: "in_progress",
+    archivedAt: null,
+    dueAt: "2026-08-10T00:00:00.000Z",
+    ...overrides,
+  });
+
+  it("excludes assignments below the quick-win progress threshold", () => {
+    const result = deriveQuickWins([row("low", 40), row("mid", 59)]);
+    expect(result).toEqual([]);
+  });
+
+  it("includes assignments at or above the threshold", () => {
+    const result = deriveQuickWins([row("a", 60), row("b", 75)]);
+    expect(result.map((r) => r.id)).toEqual(["b", "a"]);
+  });
+
+  it("excludes done and archived assignments even at high progress", () => {
+    const result = deriveQuickWins([
+      row("done", 90, { status: "done" }),
+      row("archived", 90, { archivedAt: "2026-08-01T00:00:00.000Z" }),
+      row("active", 90),
+    ]);
+    expect(result.map((r) => r.id)).toEqual(["active"]);
+  });
+
+  it("sorts by progress descending, then soonest due date on a tie", () => {
+    const result = deriveQuickWins([
+      row("later", 80, { dueAt: "2026-08-20T00:00:00.000Z" }),
+      row("sooner", 80, { dueAt: "2026-08-05T00:00:00.000Z" }),
+    ]);
+    expect(result.map((r) => r.id)).toEqual(["sooner", "later"]);
+  });
+
+  it("respects the limit parameter", () => {
+    const result = deriveQuickWins([row("a", 90), row("b", 85), row("c", 80)], 2);
+    expect(result).toHaveLength(2);
+    expect(result.map((r) => r.id)).toEqual(["a", "b"]);
+  });
+
+  it("returns an empty list when nothing qualifies", () => {
+    expect(deriveQuickWins([])).toEqual([]);
   });
 });

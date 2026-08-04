@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BarChart3 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { computeAndStoreRisk } from "@/lib/risk/compute";
 import type { RiskResult } from "@/lib/rules/risk";
@@ -29,14 +30,14 @@ export async function RiskHud() {
     <div className="flex flex-col gap-4 rounded-card bg-ink px-6 py-5 text-white lg:flex-row lg:items-center">
       <div className="flex-1">
         <div className="flex flex-wrap items-center gap-2.5">
-          <h2 className="font-display text-[19px] font-bold">Workload risk</h2>
+          <h2 className="font-display text-[19px] font-bold">Weekly balance</h2>
           <span
             className={`rounded-pill px-2.5 py-1 text-[11.5px] font-extrabold ${
               !result
                 ? "bg-tangerine-tint text-tangerine-text"
                 : result.warn
                   ? "bg-coral-deep text-white"
-                  : "bg-mint text-mint-text"
+                  : "bg-lime text-ink"
             }`}
           >
             {!result ? "Not enough data" : `Score ${result.score}`}
@@ -76,8 +77,9 @@ export async function RiskHud() {
       {result && (
         <Link
           href="/risk"
-          className="flex min-h-11 shrink-0 items-center justify-center rounded-ctl bg-lime px-4 py-2.5 text-center text-[13px] font-extrabold text-ink hover:bg-lime-deep lg:self-center"
+          className="flex min-h-11 shrink-0 items-center justify-center gap-1.5 rounded-ctl bg-lime px-4 py-2.5 text-center text-[13px] font-extrabold text-ink hover:bg-lime-deep lg:self-center"
         >
+          <BarChart3 className="h-4 w-4" aria-hidden="true" />
           View report
         </Link>
       )}

@@ -34,6 +34,16 @@ const TONE_FILL: Record<KpiTone, string> = {
   tangerine: "bg-ink",
 };
 
+// Same split as TONE_TEXT: the icon inherits the card's own text color, so
+// the translucent disc behind it has to be light on the dark violet/coral
+// cards and dark on the bright mint/tangerine ones.
+const TONE_ICON_DISC: Record<KpiTone, string> = {
+  violet: "bg-white/20",
+  coral: "bg-white/20",
+  mint: "bg-ink/10",
+  tangerine: "bg-ink/10",
+};
+
 export interface KpiCardProps {
   tone: KpiTone;
   label: string;
@@ -41,18 +51,33 @@ export interface KpiCardProps {
   unit?: string;
   hint: string;
   barPct?: number;
+  /** Decorative only — every card already states its meaning in `label`,
+   * so the icon is aria-hidden by its own caller and never the sole cue. */
+  icon?: React.ReactNode;
 }
 
-export function KpiCard({ tone, label, value, unit, hint, barPct }: KpiCardProps) {
+export function KpiCard({ tone, label, value, unit, hint, barPct, icon }: KpiCardProps) {
   return (
     <div className={`rounded-card ${TONE_BG[tone]} ${TONE_TEXT[tone]} px-5 py-[18px] pb-5`}>
-      <p className="text-[12.5px] font-bold">{label}</p>
-      <p className="mt-1 font-display text-[46px] font-bold leading-none tracking-[-0.045em]">
-        {value}
-        {unit && (
-          <span className="ml-1.5 text-[13px] font-bold tracking-normal">{unit}</span>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[12.5px] font-bold">{label}</p>
+          <p className="mt-1 font-display text-[46px] font-bold leading-none tracking-[-0.045em]">
+            {value}
+            {unit && (
+              <span className="ml-1.5 text-[13px] font-bold tracking-normal">{unit}</span>
+            )}
+          </p>
+        </div>
+        {icon && (
+          <span
+            aria-hidden="true"
+            className={`flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-full ${TONE_ICON_DISC[tone]}`}
+          >
+            {icon}
+          </span>
         )}
-      </p>
+      </div>
       {typeof barPct === "number" && (
         <div className={`mt-3 h-[7px] rounded-full ${TONE_TRACK[tone]}`}>
           <div

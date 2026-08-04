@@ -2,9 +2,10 @@ import Link from "next/link";
 import { AddAssignmentButton } from "./AddAssignmentButton";
 import type { CourseOption } from "./AssignmentForm";
 
-/** Real, always-available actions only — no fabricated "quick wins" (brief
- * §6.4: there's no effort/duration data to honestly rank tasks by speed).
- * Hidden on mobile by the page (can make the page too long there). */
+/** Fallback for the right rail's third card when no assignment qualifies as
+ * a real "quick win" (see AssignmentQuickWins.tsx / deriveQuickWins) — real,
+ * always-available navigation shortcuts rather than an empty card. Hidden
+ * on mobile by the page (can make the page too long there). */
 export function AssignmentQuickActions({ courses }: { courses: CourseOption[] }) {
   return (
     <div className="rounded-card-sm bg-card p-4">

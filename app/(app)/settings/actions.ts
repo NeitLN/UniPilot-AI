@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { validateStudyPreferences } from "@/lib/rules/preferences";
+import { AVATAR_COLORS, type AvatarColor } from "@/lib/rules/avatar-color";
 import type { Database } from "@/lib/supabase/types";
 
 export interface SettingsFormState {
@@ -43,7 +44,12 @@ export async function updateProfile(
 export interface StudyPreferencesFormState {
   errors: Partial<
     Record<
-      "weeklyAvailabilityHours" | "targetGpa" | "defaultFocusMinutes" | "dailyFocusGoalCycles" | "preferredStudyDays",
+      | "weeklyAvailabilityHours"
+      | "targetGpa"
+      | "defaultFocusMinutes"
+      | "dailyFocusGoalCycles"
+      | "preferredStudyDays"
+      | "programTotalCredits",
       string
     >
   >;
@@ -63,6 +69,8 @@ export async function updateStudyPreferences(
   const defaultFocusMinutes = Number(formData.get("defaultFocusMinutes"));
   const dailyFocusGoalCycles = Number(formData.get("dailyFocusGoalCycles"));
   const preferredStudyDays = formData.getAll("preferredStudyDays").map(Number);
+  const programTotalCreditsRaw = String(formData.get("programTotalCredits") ?? "").trim();
+  const programTotalCredits = programTotalCreditsRaw === "" ? null : Number(programTotalCreditsRaw);
 
   const errors: StudyPreferencesFormState["errors"] = {};
 
@@ -77,7 +85,7 @@ export async function updateStudyPreferences(
 
   Object.assign(
     errors,
-    validateStudyPreferences({ defaultFocusMinutes, dailyFocusGoalCycles, preferredStudyDays }),
+    validateStudyPreferences({ defaultFocusMinutes, dailyFocusGoalCycles, preferredStudyDays, programTotalCredits }),
   );
 
   if (Object.keys(errors).length > 0) return { errors };
@@ -95,6 +103,7 @@ export async function updateStudyPreferences(
     default_focus_minutes: defaultFocusMinutes,
     daily_focus_goal_cycles: dailyFocusGoalCycles,
     preferred_study_days: preferredStudyDays,
+    program_total_credits: programTotalCredits,
   });
 
   if (error) return { errors: {}, formError: error.message };
@@ -107,6 +116,23 @@ export async function updateStudyPreferences(
   revalidatePath("/reports");
   revalidatePath("/");
   return { errors: {}, ok: true };
+}
+
+export async function updateAvatarColor(color: AvatarColor) {
+  if (!(AVATAR_COLORS as readonly string[]).includes(color)) {
+    throw new Error("Not a valid avatar color.");
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Session expired — sign in again.");
+
+  const { error } = await supabase.from("profiles").upsert({ id: user.id, avatar_color: color });
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/settings");
 }
 
 export type NotificationCategory = Database["public"]["Tables"]["notification_preferences"]["Row"];

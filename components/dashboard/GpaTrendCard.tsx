@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { gpaBySemester } from "@/lib/rules/gpa";
-import { GpaTrendChart } from "@/components/gpa/GpaTrendChart";
+import { GpaTrendMini } from "./GpaTrendMini";
 
 export async function GpaTrendCard() {
   const supabase = await createClient();
@@ -15,7 +15,7 @@ export async function GpaTrendCard() {
     creditHours: g.credit_hours,
   }));
 
-  return <GpaTrendChart points={gpaBySemester(rows)} targetGpa={profile?.target_gpa ?? null} />;
+  return <GpaTrendMini points={gpaBySemester(rows)} targetGpa={profile?.target_gpa ?? null} />;
 }
 
 export function GpaTrendCardSkeleton() {

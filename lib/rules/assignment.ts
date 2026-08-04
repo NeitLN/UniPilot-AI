@@ -264,3 +264,51 @@ export function pickPiloAssignment<T extends AssignmentLike & { id: string }>(
 
   return upcoming[0] ?? null;
 }
+
+/**
+ * Human-readable "when is this due" phrase for Pilo's recommendation copy
+ * ("…it's due **today**"). Shared by Assignments' Pilo's-pick card and the
+ * Dashboard's daily briefing so the same assignment is never described two
+ * different ways on two screens.
+ */
+export function relativeDueLabel(dueAt: string, now = new Date()): string {
+  const diffHours = (new Date(dueAt).getTime() - now.getTime()) / 3_600_000;
+  if (diffHours < -1) {
+    const days = Math.max(1, Math.round(Math.abs(diffHours) / 24));
+    return days === 1 ? "1 day ago" : `${days} days ago`;
+  }
+  if (diffHours <= 1) return "any moment now";
+  if (diffHours < 24) return "today";
+  const days = Math.round(diffHours / 24);
+  return days === 1 ? "tomorrow" : `in ${days} days`;
+}
+
+export interface QuickWinLike {
+  id: string;
+  progress: number;
+  status: AssignmentStatus;
+  archivedAt: string | null;
+  dueAt: string;
+}
+
+/** Below this, an assignment reads as "started" rather than "almost done" —
+ * not a hard spec number, just where "quick win" stops being an honest
+ * description of the remaining work. */
+export const QUICK_WIN_PROGRESS_THRESHOLD = 60;
+
+/**
+ * "Quick wins" (concept §6.6) — this app has no per-assignment effort or
+ * duration estimate, so ranking by "which one is fastest" the way the
+ * concept's copy ("Skim slides — 30 min") implies isn't something this data
+ * can answer honestly (see the AssignmentQuickActions.tsx comment this
+ * feature was previously left out in favor of). What the data *can* say
+ * honestly: which active assignments are already mostly done, from the
+ * viewer's own progress field — those are genuinely the closest to a quick
+ * finish. Ties broken by soonest due date.
+ */
+export function deriveQuickWins<T extends QuickWinLike>(list: T[], limit = 3): T[] {
+  return [...list]
+    .filter((a) => !a.archivedAt && a.status !== "done" && a.progress >= QUICK_WIN_PROGRESS_THRESHOLD)
+    .sort((a, b) => b.progress - a.progress || new Date(a.dueAt).getTime() - new Date(b.dueAt).getTime())
+    .slice(0, limit);
+}

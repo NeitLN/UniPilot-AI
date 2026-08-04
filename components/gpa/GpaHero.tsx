@@ -1,28 +1,26 @@
 import { ProgressRing } from "@/components/ui/ProgressRing";
 
 /**
- * Only the real, always-computable half of the concept's hero row (concept
- * §5.1 also shows a separate "On track" card driven by "credits remaining
- * to graduate" — this schema has no total-program-credits field to derive
- * that from, and inventing one wasn't in scope for this pass; see
- * ForecastCard, which already asks the viewer for remaining credits
- * directly and answers the same "am I on track" question honestly instead
- * of assuming a number nobody entered).
+ * Cumulative GPA hero (concept §5.1). Sits beside OnTrackCard, which only
+ * renders once the viewer has saved a target GPA and total program credits
+ * in Settings — see lib/rules/gpa.ts onTrackProgress.
  */
 export function GpaHero({
   overallGpa,
   doneCredits,
   targetGpa,
+  className,
 }: {
   overallGpa: number;
   doneCredits: number;
   targetGpa: number | null;
+  className?: string;
 }) {
   const hasGrades = doneCredits > 0;
   const ringValue = hasGrades ? (overallGpa / 4) * 100 : 0;
 
   return (
-    <div className="flex items-center justify-between gap-5 rounded-card bg-violet p-5 text-white">
+    <div className={`flex items-center justify-between gap-5 rounded-card bg-violet p-5 text-white ${className ?? ""}`}>
       <div className="min-w-0">
         <p className="text-[11px] font-bold uppercase tracking-wide text-white/70">Cumulative GPA</p>
         <p className="mt-1 font-display text-4xl font-bold tabular-nums">

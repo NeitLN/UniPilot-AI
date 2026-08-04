@@ -14,10 +14,15 @@ function pct(minute: number): number {
   return ((minute - AVAILABILITY_WINDOW_START_MIN) / WINDOW_MINUTES) * 100;
 }
 
-/** Free-time-only bands, split morning/afternoon (see
- * lib/rules/plan-presentation.ts freeAvailabilityBands doc comment for why
- * a third "low energy" tint was deliberately dropped — there's no real
- * signal in this app's data to support that claim). */
+const PERIOD_FILL: Record<"morning" | "afternoon" | "low", string> = {
+  morning: "bg-mint",
+  afternoon: "bg-tangerine",
+  low: "bg-coral",
+};
+
+/** Free-time-only bands, split morning / afternoon / low-energy (18:00-20:00
+ * — see lib/rules/plan-presentation.ts's LOW_ENERGY_START_MIN doc comment
+ * for why that's a clock-time rule, not fabricated per-user data). */
 export function AvailabilityBands({
   days,
   busyRanges,
@@ -62,7 +67,7 @@ export function AvailabilityBands({
                   <div
                     key={i}
                     aria-hidden="true"
-                    className={`absolute inset-y-0 rounded-full ${b.period === "morning" ? "bg-mint" : "bg-tangerine"}`}
+                    className={`absolute inset-y-0 rounded-full ${PERIOD_FILL[b.period]}`}
                     style={{ left: `${pct(b.startMinute)}%`, width: `${pct(b.endMinute) - pct(b.startMinute)}%` }}
                   />
                 ))}
@@ -84,7 +89,10 @@ export function AvailabilityBands({
           <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-mint" /> Free morning
         </span>
         <span className="flex items-center gap-1.5">
-          <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-tangerine" /> Free afternoon/evening
+          <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-tangerine" /> Free afternoon
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-coral" /> Low energy (after 6pm)
         </span>
       </div>
     </div>

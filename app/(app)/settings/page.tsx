@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getNotificationPreferences } from "@/app/(app)/settings/actions";
+import { isAvatarColor } from "@/lib/rules/avatar-color";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { SettingsNav } from "@/components/settings/SettingsNav";
 import { SettingsSection } from "@/components/settings/SettingsSection";
@@ -9,7 +10,7 @@ import { AppearanceCard } from "@/components/settings/AppearanceCard";
 import { NotificationPreferencesCard } from "@/components/settings/NotificationPreferencesCard";
 import { ConnectionsCard } from "@/components/settings/ConnectionsCard";
 import { DataPrivacyCard } from "@/components/settings/DataPrivacyCard";
-import Image from "next/image";
+import { AvatarColorPicker } from "@/components/settings/AvatarColorPicker";
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -22,7 +23,7 @@ export default async function SettingsPage() {
     supabase
       .from("profiles")
       .select(
-        "full_name, weekly_availability_hours, target_gpa, default_focus_minutes, daily_focus_goal_cycles, preferred_study_days",
+        "full_name, weekly_availability_hours, target_gpa, default_focus_minutes, daily_focus_goal_cycles, preferred_study_days, avatar_color, program_total_credits",
       )
       .maybeSingle(),
     supabase
@@ -45,12 +46,8 @@ export default async function SettingsPage() {
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:items-start">
           <SettingsSection id="profile" title="Profile" className="lg:col-span-2">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-              <Image
-                src="/mascots/pilo-settings-avatar.png"
-                alt=""
-                width={92}
-                height={92}
-                className="h-[92px] w-[92px] shrink-0 rounded-full object-contain"
+              <AvatarColorPicker
+                initialColor={profile?.avatar_color && isAvatarColor(profile.avatar_color) ? profile.avatar_color : "violet"}
               />
               <div className="flex-1">
                 <SettingsForm initialFullName={profile?.full_name ?? ""} email={user?.email} />
@@ -70,6 +67,7 @@ export default async function SettingsPage() {
                 defaultFocusMinutes: profile?.default_focus_minutes ?? 25,
                 dailyFocusGoalCycles: profile?.daily_focus_goal_cycles ?? 4,
                 preferredStudyDays: profile?.preferred_study_days ?? [1, 2, 3, 4, 5],
+                programTotalCredits: profile?.program_total_credits ?? null,
               }}
             />
           </SettingsSection>

@@ -31,6 +31,9 @@ export interface Database {
           default_focus_minutes: number;
           daily_focus_goal_cycles: number;
           preferred_study_days: number[];
+          // 0018_profile_extras.sql
+          avatar_color: string;
+          program_total_credits: number | null;
           created_at: string;
         };
         Insert: {
@@ -41,6 +44,8 @@ export interface Database {
           default_focus_minutes?: number;
           daily_focus_goal_cycles?: number;
           preferred_study_days?: number[];
+          avatar_color?: string;
+          program_total_credits?: number | null;
           created_at?: string;
         };
         Update: {
@@ -51,6 +56,8 @@ export interface Database {
           default_focus_minutes?: number;
           daily_focus_goal_cycles?: number;
           preferred_study_days?: number[];
+          avatar_color?: string;
+          program_total_credits?: number | null;
           created_at?: string;
         };
         Relationships: [];

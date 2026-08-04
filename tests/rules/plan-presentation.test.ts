@@ -145,11 +145,12 @@ describe("derivePiloPlanNote", () => {
 });
 
 describe("freeAvailabilityBands", () => {
-  it("returns the full window split at noon for a day with nothing scheduled", () => {
+  it("returns the full window split at noon and 18:00 for a day with nothing scheduled", () => {
     const bands = freeAvailabilityBands("2026-08-03", [], "UTC");
     expect(bands).toEqual([
       { startMinute: 480, endMinute: 720, period: "morning" },
-      { startMinute: 720, endMinute: 1200, period: "afternoon" },
+      { startMinute: 720, endMinute: 1080, period: "afternoon" },
+      { startMinute: 1080, endMinute: 1200, period: "low" },
     ]);
   });
 
@@ -162,7 +163,8 @@ describe("freeAvailabilityBands", () => {
     expect(bands).toEqual([
       { startMinute: 480, endMinute: 540, period: "morning" }, // 08:00-09:00
       { startMinute: 630, endMinute: 720, period: "morning" }, // 10:30-12:00
-      { startMinute: 720, endMinute: 1200, period: "afternoon" },
+      { startMinute: 720, endMinute: 1080, period: "afternoon" },
+      { startMinute: 1080, endMinute: 1200, period: "low" },
     ]);
   });
 
@@ -187,7 +189,8 @@ describe("freeAvailabilityBands", () => {
     );
     expect(bands).toEqual([
       { startMinute: 480, endMinute: 720, period: "morning" },
-      { startMinute: 720, endMinute: 1200, period: "afternoon" },
+      { startMinute: 720, endMinute: 1080, period: "afternoon" },
+      { startMinute: 1080, endMinute: 1200, period: "low" },
     ]);
   });
 
@@ -199,5 +202,25 @@ describe("freeAvailabilityBands", () => {
       "America/New_York",
     );
     expect(bands.some((b) => b.endMinute === 1140)).toBe(true); // free ends at 19:00
+  });
+
+  it("tags 18:00-20:00 as low energy, distinct from afternoon", () => {
+    const bands = freeAvailabilityBands(
+      "2026-08-03",
+      [{ startAt: "2026-08-03T00:00:00.000Z", endAt: "2026-08-03T00:00:00.000Z" }], // no-op busy range
+      "UTC",
+    );
+    const low = bands.find((b) => b.period === "low");
+    expect(low).toEqual({ startMinute: 1080, endMinute: 1200, period: "low" });
+  });
+
+  it("only emits a low-energy band for the portion of free time after 18:00", () => {
+    const bands = freeAvailabilityBands(
+      "2026-08-03",
+      [{ startAt: "2026-08-03T17:00:00.000Z", endAt: "2026-08-03T19:00:00.000Z" }], // busy 17:00-19:00
+      "UTC",
+    );
+    expect(bands).toContainEqual({ startMinute: 1140, endMinute: 1200, period: "low" }); // 19:00-20:00 free
+    expect(bands.some((b) => b.period === "low" && b.startMinute < 1140)).toBe(false);
   });
 });

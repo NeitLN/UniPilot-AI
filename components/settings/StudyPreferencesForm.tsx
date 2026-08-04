@@ -18,6 +18,7 @@ export interface StudyPreferencesFormValues {
   defaultFocusMinutes: number;
   dailyFocusGoalCycles: number;
   preferredStudyDays: number[];
+  programTotalCredits: number | null;
 }
 
 const WEEKDAYS = [1, 2, 3, 4, 5, 6, 7];
@@ -81,6 +82,22 @@ export function StudyPreferencesForm({
           defaultValue={initialValues.targetGpa ?? undefined}
           className={inputClass(Boolean(state.errors.targetGpa))}
         />
+      </Field>
+
+      <Field label="Total credits to graduate" error={state.errors.programTotalCredits}>
+        <input
+          name="programTotalCredits"
+          type="number"
+          inputMode="numeric"
+          min={1}
+          step={1}
+          placeholder="e.g. 140"
+          defaultValue={initialValues.programTotalCredits ?? undefined}
+          className={inputClass(Boolean(state.errors.programTotalCredits))}
+        />
+        <span className="mt-1 text-[11px] font-semibold text-ink-3">
+          Powers the GPA tracker&rsquo;s &ldquo;On track&rdquo; card — leave blank to hide it.
+        </span>
       </Field>
 
       <div className="flex flex-col gap-1.5 text-xs font-bold text-ink-2">
