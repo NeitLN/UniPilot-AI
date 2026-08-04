@@ -4,6 +4,7 @@ import { canGeneratePlan, validateSessions } from "@/lib/rules/plan";
 import { buildPlanPrompt } from "@/lib/gemini/prompt";
 import { generatePlanJson, GeminiTimeoutError } from "@/lib/gemini/client";
 import { parseGeminiPlanResponse } from "@/lib/gemini/schema";
+import { consumeRateLimit, rateLimitHeaders, RATE_LIMITS } from "@/lib/rate-limit";
 
 // Safety margin above our own 20s Gemini timeout for Vercel's function limit.
 export const maxDuration = 30;
@@ -35,6 +36,16 @@ export async function POST() {
   } = await supabase.auth.getUser();
   if (!user) {
     return NextResponse.json({ error: "Not signed in." }, { status: 401 });
+  }
+
+  // SEC-01: a ceiling per user, checked right after auth so a rejected
+  // caller never reaches the expensive part below.
+  const limit = await consumeRateLimit(supabase, RATE_LIMITS.planGenerate);
+  if (!limit.allowed) {
+    return NextResponse.json(
+      { error: "You've generated a lot of plans in the last hour — try again shortly." },
+      { status: 429, headers: rateLimitHeaders(RATE_LIMITS.planGenerate, limit) },
+    );
   }
 
   const [{ data: profile }, { data: assignmentRows }, { data: classBlockRows }] =

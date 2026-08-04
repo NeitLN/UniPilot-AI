@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { toCsv } from "@/lib/export/csv";
+import { consumeRateLimit, rateLimitHeaders, RATE_LIMITS } from "@/lib/rate-limit";
 
 const RESOURCES = ["courses", "assignments", "grades", "schedule", "focus"] as const;
 type Resource = (typeof RESOURCES)[number];
@@ -68,6 +69,16 @@ export async function GET(request: NextRequest) {
   } = await supabase.auth.getUser();
   if (!user) {
     return NextResponse.json({ error: "Session expired — sign in again." }, { status: 401 });
+  }
+
+  // SEC-01: a ceiling per user, checked right after auth so a rejected
+  // caller never reaches the expensive part below.
+  const limit = await consumeRateLimit(supabase, RATE_LIMITS.export);
+  if (!limit.allowed) {
+    return NextResponse.json(
+      { error: "Too many exports in the last hour — try again shortly." },
+      { status: 429, headers: rateLimitHeaders(RATE_LIMITS.export, limit) },
+    );
   }
 
   const format = request.nextUrl.searchParams.get("format") === "csv" ? "csv" : "json";

@@ -526,7 +526,14 @@ export interface Database {
       };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      /** SEC-01, migration 0020. user_id is taken from auth.uid() inside the
+       * function rather than passed in, so it is deliberately absent here. */
+      consume_rate_limit: {
+        Args: { p_route: string; p_limit: number; p_window_seconds: number };
+        Returns: { allowed: boolean; remaining: number; reset_at: string }[];
+      };
+    };
     Enums: {
       assignment_status: AssignmentStatus;
       assignment_priority: AssignmentPriority;
