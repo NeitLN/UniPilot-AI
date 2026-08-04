@@ -1,0 +1,99 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+# A new push to the same branch/PR supersedes the one in flight — no point
+# burning runners (or racing two builds against the same e2e Supabase user).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # No .nvmrc / package.json "engines" pin exists in this repo yet —
+          # 22 is current Node LTS. Update here (and add a real pin) if that
+          # ever changes.
+          node-version: 22
+          cache: "npm"
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npx tsc --noEmit
+      - run: npm test
+      - run: npm run build
+
+  e2e:
+    needs: quality
+    runs-on: ubuntu-latest
+    # Two separate reasons this does not run on every push:
+    #
+    # 1. Forked-repo PRs get no access to this repo's secrets, so every env
+    #    var below would arrive empty and the run would fail on a confusing
+    #    auth error instead of a clear "skipped".
+    # 2. These specs write to the shared Supabase project — there is no
+    #    per-run database. Several of them create rows they do not delete
+    #    (a recurring series leaves its whole archived tail behind), and
+    #    that residue is not cosmetic: 89 accumulated rows pushed newly
+    #    created assignments onto page 2 of a 20-per-page list and broke
+    #    four specs that had nothing wrong with them. Restricting to `main`
+    #    and same-repo PRs keeps that growth to roughly one run per merge
+    #    instead of one per push to every branch.
+    #
+    # Revisit this the moment e2e gets its own throwaway database or the
+    # specs clean up after themselves — then it can run everywhere.
+    if: >-
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'pull_request' &&
+       github.event.pull_request.head.repo.full_name == github.repository)
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      GOOGLE_REDIRECT_URI: ${{ secrets.GOOGLE_REDIRECT_URI }}
+      CALENDAR_TOKEN_ENCRYPTION_KEY: ${{ secrets.CALENDAR_TOKEN_ENCRYPTION_KEY }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      NEXT_PUBLIC_VAPID_PUBLIC_KEY: ${{ secrets.NEXT_PUBLIC_VAPID_PUBLIC_KEY }}
+      VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+      VAPID_SUBJECT: ${{ secrets.VAPID_SUBJECT }}
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      # Dedicated throwaway Supabase account auth.setup.ts logs in with —
+      # see .env.local.example.
+      E2E_EMAIL: ${{ secrets.E2E_EMAIL }}
+      E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+
+      - run: npm ci
+
+      # --with-deps pulls the OS-level libraries the browsers need; plain
+      # ubuntu-latest runners don't have them preinstalled.
+      - run: npx playwright install --with-deps
+
+      # playwright.config.ts's webServer starts `npm run dev` itself
+      # (reuseExistingServer is false under CI), so no separate server step
+      # is needed here. Reporter is overridden to also emit the HTML report
+      # the failure step below uploads — the config's default "list"
+      # reporter only writes to the terminal.
+      - run: npx playwright test --reporter=list,html
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
