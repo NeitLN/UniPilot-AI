@@ -53,22 +53,22 @@ export default function DashboardPage() {
         sessionKey="dashboard-kpis"
         className="grid grid-cols-2 gap-3.5 md:grid-cols-4"
       >
-        <StaggerItem>
+        <StaggerItem className="h-full">
           <Suspense fallback={<KpiCardSkeleton tone="violet" />}>
             <GpaKpi />
           </Suspense>
         </StaggerItem>
-        <StaggerItem>
+        <StaggerItem className="h-full">
           <Suspense fallback={<KpiCardSkeleton tone="coral" />}>
             <ActiveTasksKpi />
           </Suspense>
         </StaggerItem>
-        <StaggerItem>
+        <StaggerItem className="h-full">
           <Suspense fallback={<KpiCardSkeleton tone="mint" />}>
             <FocusWeekKpi />
           </Suspense>
         </StaggerItem>
-        <StaggerItem>
+        <StaggerItem className="h-full">
           <Suspense fallback={<KpiCardSkeleton tone="tangerine" />}>
             <WorkloadRiskKpi />
           </Suspense>
