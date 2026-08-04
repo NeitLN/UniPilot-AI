@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   dragsGpaDown,
+  BELOW_AVERAGE_MARGIN,
   estimateGradePoint,
   gpa,
   gpaBySemester,
@@ -176,13 +177,36 @@ describe("gpaContribution", () => {
 });
 
 describe("dragsGpaDown", () => {
-  it("is true when the course's grade point is below the overall average", () => {
+  it("is true when the course sits a meaningful step below the average", () => {
+    // 2.8 against 3.26 is 0.46 below — past the margin.
     expect(dragsGpaDown({ gradePoint: 2.8, creditHours: 4 }, 3.26)).toBe(true);
   });
 
   it("is false when at or above the overall average", () => {
     expect(dragsGpaDown({ gradePoint: 3.7, creditHours: 3 }, 3.26)).toBe(false);
     expect(dragsGpaDown({ gradePoint: 3.26, creditHours: 3 }, 3.26)).toBe(false);
+  });
+
+  // UX-02: the rule was a plain `<`, so it fired on roughly half of every
+  // list — 6 of 9 rows on a realistic spread. These pin the margin that
+  // makes the label mean something.
+  it("ignores a course that is only marginally below", () => {
+    // 3.1 against 3.26 is 0.16 below — inside the margin, not worth a flag.
+    expect(dragsGpaDown({ gradePoint: 3.1, creditHours: 3 }, 3.26)).toBe(false);
+  });
+
+  it("does not fire exactly at the margin, only past it", () => {
+    expect(dragsGpaDown({ gradePoint: 3.26 - BELOW_AVERAGE_MARGIN, creditHours: 3 }, 3.26)).toBe(false);
+  });
+
+  it("flags a minority of a realistic spread, not most of it", () => {
+    // The nine-course dataset from the audit, where the old rule tagged 6.
+    const overall = 3.39;
+    const points = [3.0, 3.35, 3.3, 3.35, 3.7, 4.0, 3.7, 3.0, 3.3];
+    const flagged = points.filter((gradePoint) =>
+      dragsGpaDown({ gradePoint, creditHours: 3 }, overall),
+    ).length;
+    expect(flagged).toBeLessThan(points.length / 2);
   });
 });
 

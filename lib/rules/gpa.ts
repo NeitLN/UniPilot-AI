@@ -75,9 +75,28 @@ export function semesterLabel(semester: string): string {
   return /^\d+$/.test(trimmed) ? `Semester ${trimmed}` : trimmed;
 }
 
-/** A course drags the overall average down if its own grade point sits below it. */
+/**
+ * How far below the cumulative GPA a course has to sit before it is worth
+ * pointing at.
+ *
+ * UX-02 (UNIPILOT_COMPLETE_PRODUCT_AUDIT.md): the rule used to be a plain
+ * `<`, which is mathematically correct and useless in practice — by
+ * definition roughly half of anyone's courses sit below their own mean. On a
+ * realistic nine-course spread the "Below average" tag appeared on 6 rows.
+ * A label that applies to two thirds of the list is decoration, not
+ * information.
+ *
+ * 0.3 is a judgement call, not a fact: it is about one letter-grade step on
+ * the 4.0 scale (3.7 -> 3.3 -> 3.0), so it marks courses that are a real
+ * step behind rather than a rounding difference. Change this one number to
+ * retune; set it to 0 to restore the old behaviour exactly.
+ */
+export const BELOW_AVERAGE_MARGIN = 0.3;
+
+/** A course drags the overall average down when it sits a meaningful step
+ * below it — see BELOW_AVERAGE_MARGIN for why "meaningful" is 0.3. */
 export function dragsGpaDown(row: GradeLike, overallGpa: number): boolean {
-  return row.gradePoint < overallGpa;
+  return row.gradePoint < overallGpa - BELOW_AVERAGE_MARGIN;
 }
 
 export interface RequiredAverageResult {
