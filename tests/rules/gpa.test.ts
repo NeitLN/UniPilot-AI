@@ -5,7 +5,10 @@ import {
   gpa,
   gpaBySemester,
   gpaChartDomain,
+  letterGrade,
   gpaContribution,
+  gpaContributionPct,
+  semesterLabel,
   onTrackProgress,
   predictedCourseScore,
   projectGpaScenarios,
@@ -360,5 +363,59 @@ describe("gpaChartDomain", () => {
 
   it("falls back to the full range for an empty list", () => {
     expect(gpaChartDomain([])).toEqual({ min: 0, max: 4 });
+  });
+});
+
+describe("letterGrade", () => {
+  it("maps the standard 4.0 steps", () => {
+    expect(letterGrade(4.0)).toBe("A");
+    expect(letterGrade(3.7)).toBe("A-");
+    expect(letterGrade(3.3)).toBe("B+");
+    expect(letterGrade(3.0)).toBe("B");
+    expect(letterGrade(2.0)).toBe("C");
+    expect(letterGrade(1.0)).toBe("D");
+    expect(letterGrade(0)).toBe("F");
+  });
+
+  it("takes the lower letter between steps rather than rounding up", () => {
+    expect(letterGrade(3.65)).toBe("B+");
+    expect(letterGrade(3.99)).toBe("A-");
+  });
+});
+
+describe("gpaContributionPct", () => {
+  const rows: GradeLike[] = [
+    { gradePoint: 3.7, creditHours: 3 },
+    { gradePoint: 3.7, creditHours: 3 },
+    { gradePoint: 3.0, creditHours: 3 },
+    { gradePoint: 3.3, creditHours: 2 },
+    { gradePoint: 4.0, creditHours: 2 },
+  ];
+
+  it("is the row's share of total quality points", () => {
+    // 3 x 3.7 = 11.1 of 45.8 total quality points.
+    expect(gpaContributionPct(rows[0], rows)).toBe(24);
+    expect(gpaContributionPct(rows[3], rows)).toBe(14);
+  });
+
+  it("sums to about 100 across every row", () => {
+    const total = rows.reduce((s, r) => s + gpaContributionPct(r, rows), 0);
+    expect(Math.abs(total - 100)).toBeLessThanOrEqual(2);
+  });
+
+  it("returns 0 rather than dividing by zero when nothing is graded", () => {
+    expect(gpaContributionPct({ gradePoint: 0, creditHours: 0 }, [])).toBe(0);
+  });
+});
+
+describe("semesterLabel", () => {
+  it("spells out bare numeric codes", () => {
+    expect(semesterLabel("253")).toBe("Semester 253");
+    expect(semesterLabel(" 251 ")).toBe("Semester 251");
+  });
+
+  it("leaves a name that already reads as one alone", () => {
+    expect(semesterLabel("Fall 2025")).toBe("Fall 2025");
+    expect(semesterLabel("2025S1")).toBe("2025S1");
   });
 });

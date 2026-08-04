@@ -25,6 +25,56 @@ export function gpaContribution(row: GradeLike, allRows: GradeLike[]): number {
   );
 }
 
+/**
+ * This course's share of the total quality points behind the GPA, as a
+ * whole percent. Distinct from `gpaContribution`, which answers the same
+ * question in GPA points (0.89 of the 3.46) — this is the proportion the
+ * concept's breakdown bar fills, so a row's bar can be read against its
+ * neighbours. Shares across all rows sum to 100 (up to rounding).
+ */
+export function gpaContributionPct(row: GradeLike, allRows: GradeLike[]): number {
+  const totalQP = allRows.reduce((s, r) => s + qualityPoints(r.gradePoint, r.creditHours), 0);
+  if (totalQP === 0) return 0;
+  return Math.round((qualityPoints(row.gradePoint, row.creditHours) / totalQP) * 100);
+}
+
+/**
+ * Letter for a 4.0-scale grade point (A, A-, B+, …), for the breakdown's
+ * grade chip. Thresholds are the standard US scale the rest of this module
+ * already assumes; a point between two steps takes the lower letter rather
+ * than rounding up, so a 3.65 never displays as a flat A-.
+ */
+const LETTER_STEPS: { min: number; letter: string }[] = [
+  { min: 4.0, letter: "A" },
+  { min: 3.7, letter: "A-" },
+  { min: 3.3, letter: "B+" },
+  { min: 3.0, letter: "B" },
+  { min: 2.7, letter: "B-" },
+  { min: 2.3, letter: "C+" },
+  { min: 2.0, letter: "C" },
+  { min: 1.7, letter: "C-" },
+  { min: 1.3, letter: "D+" },
+  { min: 1.0, letter: "D" },
+];
+
+export function letterGrade(gradePoint: number): string {
+  for (const step of LETTER_STEPS) {
+    if (gradePoint >= step.min) return step.letter;
+  }
+  return "F";
+}
+
+/**
+ * Display label for a semester value. These are free text, so a blind
+ * "Semester " prefix would turn a "Fall 2025" entry into "Semester Fall
+ * 2025" — only bare numeric codes like `253` (how the sidebar already reads
+ * them) get the word put in front.
+ */
+export function semesterLabel(semester: string): string {
+  const trimmed = semester.trim();
+  return /^\d+$/.test(trimmed) ? `Semester ${trimmed}` : trimmed;
+}
+
 /** A course drags the overall average down if its own grade point sits below it. */
 export function dragsGpaDown(row: GradeLike, overallGpa: number): boolean {
   return row.gradePoint < overallGpa;

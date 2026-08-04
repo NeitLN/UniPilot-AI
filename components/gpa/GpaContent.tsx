@@ -110,16 +110,19 @@ export async function GpaContent() {
 
   return (
     <>
-      <div className="flex justify-end">
-        <AddGradeButton courses={courses} />
-      </div>
-
+      {/* Equal halves: the concept gives the GPA and the on-track readout the
+          same weight, where the hero used to take 1.4 of the row. */}
       <div className="flex flex-col gap-3.5 sm:flex-row sm:items-stretch">
-        <GpaHero overallGpa={overallGpa} doneCredits={doneCredits} targetGpa={targetGpa} className="sm:flex-[1.4]" />
+        <GpaHero
+          overallGpa={overallGpa}
+          doneCredits={doneCredits}
+          targetGpa={targetGpa}
+          className="sm:flex-1"
+        />
         {onTrack && targetGpa && <OnTrackCard result={onTrack} targetGpa={targetGpa} />}
       </div>
 
-      <div className="flex flex-col gap-3.5 lg:grid lg:grid-cols-[1.4fr_1fr] lg:items-start">
+      <div className="flex flex-col gap-3.5 lg:grid lg:grid-cols-[1.45fr_1fr] lg:items-start">
         <div className="flex min-w-0 flex-col gap-3.5">
           <CourseBreakdown grades={grades} courses={courses} overallGpa={overallGpa} />
           <PiloGpaInsight insight={insight} />
@@ -127,26 +130,35 @@ export async function GpaContent() {
 
         <div className="flex min-w-0 flex-col gap-3.5">
           <GpaTrendChart points={trendPoints} targetGpa={targetGpa} />
-          <PredictedScenarios scenarios={scenarios} />
-          <PredictedGrades courses={predictedCourses} />
+          <PredictedScenarios scenarios={scenarios} currentGpa={overallGpa} />
           <ForecastCard
             initialTargetGpa={targetGpa ?? 3.6}
             doneCredits={doneCredits}
             currentQP={currentQP}
           />
+          <PredictedGrades courses={predictedCourses} />
         </div>
       </div>
     </>
   );
 }
 
+/** Just the header action, so the page can put it on the title's own row
+ * (as the concept does) while the heading itself stays outside Suspense and
+ * renders immediately. Re-queries only the course list. */
+export async function AddGradeAction() {
+  const supabase = await createClient();
+  const { data: courseRows } = await supabase
+    .from("courses")
+    .select("id, name, code, credits")
+    .order("name");
+  return <AddGradeButton courses={courseRows ?? []} />;
+}
+
 export function GpaContentSkeleton() {
   return (
     <>
-      <div className="flex justify-end">
-        <div className="h-11 w-32 animate-pulse rounded-ctl bg-ink/10" />
-      </div>
-      <div className="h-32 animate-pulse rounded-card bg-card" />
+      <div className="h-40 animate-pulse rounded-card bg-card" />
       <div className="flex flex-col gap-3.5 lg:grid lg:grid-cols-[1.4fr_1fr] lg:items-start">
         <div className="h-64 min-w-0 animate-pulse rounded-card bg-card" />
         <div className="flex min-w-0 flex-col gap-3.5">
