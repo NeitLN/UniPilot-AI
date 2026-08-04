@@ -115,13 +115,15 @@ export function AssignmentCard({
 
   return (
     <div data-testid="assignment-card" className="rounded-ctl bg-card p-3.5">
-      {/* A `w-full` mobile progress bar used to sit as a flex *sibling* in
-          this same row — a width:100% flex item fights the title's flex-1
-          sibling for space and can starve it to 0px width (caught via a
-          real headless-browser measurement, not just visual review: the
-          title's bounding box measured 0 wide at 390px). Its own block
-          below the row avoids that entirely. */}
-      <div className="flex items-start gap-3 sm:items-center">
+      {/* One row that wraps, rather than two copies of the same content.
+          The badge and the progress bar used to be rendered twice — an
+          `sm:hidden` copy and a `hidden sm:block` copy — which put every
+          label in the DOM twice over.
+          `basis-full` is what keeps the earlier fix intact: a `w-full`
+          progress bar as a plain flex sibling fought the title's `flex-1`
+          for space and starved it to 0px at 390px (measured, not eyeballed).
+          Given its own flex line it can't compete for that width at all. */}
+      <div className="flex flex-wrap items-start gap-x-3 gap-y-2.5 sm:flex-nowrap sm:items-center">
         {!isArchivedView && (
           <button
             type="button"
@@ -167,31 +169,32 @@ export function AssignmentCard({
             })}
             {assignment.score !== null && ` · Score ${assignment.score}%`}
           </p>
-          <div className="mt-1.5 sm:hidden">
-            <Tag tone={badge.tone}>{badge.label}</Tag>
-          </div>
           {restoreError && <FieldError className="mt-1.5 text-[11px]">{restoreError}</FieldError>}
           {toggleError && <FieldError className="mt-1.5 text-[11px]">{toggleError}</FieldError>}
         </div>
 
-        <div className="hidden shrink-0 sm:block">
-          <Tag tone={badge.tone}>{badge.label}</Tag>
-        </div>
-
-        <ProgressBar value={assignment.progress} tone={tone} emphasizePercent className="hidden sm:flex sm:w-[130px]" />
-
+        {/* `order-*` below sm puts the actions button back beside the title
+            and drops the badge and bar onto their own lines; from sm up the
+            row reads in DOM order with the button pushed to the end. */}
         <button
           type="button"
           onClick={() => setShowActions(true)}
           aria-label={`Actions for ${assignment.title}`}
-          className="flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-ctl bg-line text-lg font-bold text-ink-2 hover:bg-line-hover"
+          className="order-2 flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-ctl bg-line text-lg font-bold text-ink-2 hover:bg-line-hover sm:order-last"
         >
           ⋯
         </button>
-      </div>
 
-      <div className="mt-2.5 sm:hidden">
-        <ProgressBar value={assignment.progress} tone={tone} emphasizePercent />
+        <div className="order-3 basis-full sm:order-none sm:basis-auto sm:shrink-0">
+          <Tag tone={badge.tone}>{badge.label}</Tag>
+        </div>
+
+        <ProgressBar
+          value={assignment.progress}
+          tone={tone}
+          emphasizePercent
+          className="order-4 basis-full sm:order-none sm:w-[130px] sm:basis-auto"
+        />
       </div>
 
       <Modal open={showActions} onClose={() => setShowActions(false)} title="Actions">

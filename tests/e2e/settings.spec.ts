@@ -72,18 +72,26 @@ test.describe("Settings", () => {
 
   test("appearance: theme choice persists across reload", async ({ page }) => {
     await page.goto("/settings");
-    await page.getByRole("button", { name: "Dark", exact: true }).click();
+    // Radios in a radiogroup, not pressed-buttons: the three themes are
+    // mutually exclusive, so ThemeToggle exposes role="radio"/aria-checked.
+    // This test still asked for role="button"/aria-pressed and could never
+    // match the control it was aiming at.
+    await page.getByRole("radio", { name: "Dark", exact: true }).click();
     await expect(page.locator("html")).toHaveClass(/(^|\s)dark(\s|$)/);
 
     await page.reload();
     await expect(page.locator("html")).toHaveClass(/(^|\s)dark(\s|$)/);
-    await expect(page.getByRole("button", { name: "Dark", exact: true })).toHaveAttribute(
-      "aria-pressed",
+    await expect(page.getByRole("radio", { name: "Dark", exact: true })).toHaveAttribute(
+      "aria-checked",
       "true",
     );
 
     // Restore.
-    await page.getByRole("button", { name: "System", exact: true }).click();
+    await page.getByRole("radio", { name: "System", exact: true }).click();
+    await expect(page.getByRole("radio", { name: "System", exact: true })).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
   });
 
   test("notifications: category toggle persists across reload", async ({ page }) => {
@@ -129,7 +137,9 @@ test.describe("Settings", () => {
     page,
   }) => {
     await page.goto("/settings");
-    await expect(page.getByRole("link", { name: "Download everything (JSON)" })).toHaveAttribute(
+    // The full-export link reads "Export my data" since the Settings
+    // redesign; only its label changed, so this asserts the same href.
+    await expect(page.getByRole("link", { name: "Export my data" })).toHaveAttribute(
       "href",
       "/api/export?format=json&type=all",
     );

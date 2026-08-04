@@ -8,7 +8,10 @@ test.describe("Weekly report", () => {
 
     // Whichever branch the E2E account's current data lands in, one of
     // these two must be true — never a blank/broken page.
-    const hasStats = await page.getByText("Completed", { exact: true }).isVisible().catch(() => false);
+    // "Study time", not "Completed": the latter is also the per-row label on
+    // each completed-assignment row, so it resolves to several nodes and the
+    // strict-mode error was being swallowed by the catch below into a false.
+    const hasStats = await page.getByText("Study time", { exact: true }).isVisible().catch(() => false);
     const isEmpty = await page
       .getByText("Nothing to report yet", { exact: false })
       .isVisible()
@@ -16,9 +19,12 @@ test.describe("Weekly report", () => {
     expect(hasStats || isEmpty).toBe(true);
   });
 
-  test("is reachable from the Dashboard teaser link", async ({ page }) => {
+  test("is reachable from the Dashboard", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("link", { name: "See your weekly report" }).click();
+    // The Dashboard's "See your weekly report" teaser card was removed in the
+    // dashboard redesign; the sidebar entry is now the route's only
+    // navigation affordance, so that's what reachability means here.
+    await page.getByRole("link", { name: "Weekly report", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Weekly report", exact: true })).toBeVisible();
   });
 });
