@@ -5,7 +5,7 @@ import {
   weeklyStats,
   dayKey,
   defaultTimeZone,
-  formatMinutes,
+
   ORPHANED_SESSION_KEY,
   type FocusSessionLike,
 } from "@/lib/rules/focus";
@@ -21,9 +21,8 @@ import {
   type EarlyCompletion,
 } from "@/lib/rules/insights";
 import { mondayOf, nextWeek, parseWeekParam, previousWeek, weekRangeForMonday, isFutureWeek } from "@/lib/rules/report-range";
-import { CheckCircle2, Clock, Flame, LineChart as LineChartIcon, AlertTriangle } from "lucide-react";
+import { CheckCircle2, Clock, Flame, LineChart as LineChartIcon, AlertCircle, ChevronRight } from "lucide-react";
 import { Pilo } from "@/components/brand/Pilo";
-import { IconChip, type IconChipTone } from "@/components/ui/IconChip";
 import { WeekNav } from "@/components/reports/WeekNav";
 import { WeeklyRecapHero } from "@/components/reports/WeeklyRecapHero";
 import { StudyRhythmChart } from "@/components/reports/StudyRhythmChart";
@@ -249,23 +248,26 @@ export default async function WeeklyReportPage({ searchParams }: ReportsPageProp
               delta={completedDelta}
               unit=""
               tone="mint"
-              icon={<CheckCircle2 className="h-[18px] w-[18px]" aria-hidden="true" />}
+              icon={<CheckCircle2 className="h-6 w-6" aria-hidden="true" />}
             />
             <ReportStat
               label="Study time"
-              value={formatMinutes(currentWeekStats.completedMinutes)}
+              // Raw minutes against a "min" suffix, matching the hero's gauge
+              // — formatMinutes would render "5h 25m" beside a 325/400 dial.
+              value={String(currentWeekStats.completedMinutes)}
+              suffix="min"
               delta={minutesDelta}
               unit=" min"
               tone="coral"
-              icon={<Clock className="h-[18px] w-[18px]" aria-hidden="true" />}
+              icon={<Clock className="h-6 w-6" aria-hidden="true" />}
             />
             <ReportStat
               label="Streak"
               value={`${currentStreak}d`}
               delta={streakDelta}
-              unit="d"
+              unit=" days"
               tone="lime"
-              icon={<Flame className="h-[18px] w-[18px]" aria-hidden="true" />}
+              icon={<Flame className="h-6 w-6" aria-hidden="true" />}
             />
             <ReportStat
               label="GPA"
@@ -273,7 +275,7 @@ export default async function WeeklyReportPage({ searchParams }: ReportsPageProp
               delta={gpaDelta}
               unit=""
               tone="violet"
-              icon={<LineChartIcon className="h-[18px] w-[18px]" aria-hidden="true" />}
+              icon={<LineChartIcon className="h-6 w-6" aria-hidden="true" />}
             />
           </div>
 
@@ -297,19 +299,18 @@ export default async function WeeklyReportPage({ searchParams }: ReportsPageProp
               <PlanAdherenceCard adherence={adherence} elapsed={elapsedPlanned.length} kept={keptPlanned.length} />
               <WeeklyWinCard win={weeklyWin} />
               {insight && (
-                <div className="flex items-start gap-3 rounded-card border border-tangerine/30 bg-tangerine-tint p-5">
-                  <IconChip
-                    icon={<AlertTriangle className="h-[18px] w-[18px]" aria-hidden="true" />}
-                    tone="tangerine"
-                    className="bg-tangerine text-white"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <h2 className="font-display text-sm font-extrabold text-tangerine-text">Worth a look</h2>
-                    <p className="mt-1 text-sm font-semibold text-tangerine-text">{insight}</p>
-                  </div>
-                  <span className="mt-1 shrink-0 text-tangerine-text" aria-hidden="true">
-                    ›
+                <div className="flex items-center gap-4 rounded-card bg-tangerine-tint p-5">
+                  <span
+                    aria-hidden="true"
+                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-tangerine text-white"
+                  >
+                    <AlertCircle className="h-6 w-6" />
                   </span>
+                  <div className="min-w-0 flex-1">
+                    <h2 className="text-[12.5px] font-semibold text-tangerine-text">Worth a look</h2>
+                    <p className="mt-1 text-[13px] font-semibold text-tangerine-text">{insight}</p>
+                  </div>
+                  <ChevronRight className="h-5 w-5 shrink-0 text-tangerine-text" aria-hidden="true" />
                 </div>
               )}
             </div>
@@ -320,20 +321,21 @@ export default async function WeeklyReportPage({ searchParams }: ReportsPageProp
   );
 }
 
-const REPORT_STAT_BG: Record<IconChipTone, string> = {
-  mint: "bg-mint-tint",
-  coral: "bg-coral-tint",
-  lime: "bg-lime",
-  violet: "bg-violet text-white",
-  tangerine: "bg-tangerine-tint",
-  sky: "bg-sky-tint",
-  ink: "bg-ink text-white",
-  white: "bg-card",
+/** Card tint plus the solid disc behind its icon. Whole class literals, so
+ * Tailwind's build-time scanner can see every one of them. */
+const REPORT_STAT_SKIN: Record<ReportStatTone, { card: string; disc: string }> = {
+  mint: { card: "bg-mint-tint", disc: "bg-mint" },
+  coral: { card: "bg-coral-tint", disc: "bg-coral" },
+  lime: { card: "bg-lime-tint", disc: "bg-mint" },
+  violet: { card: "bg-card", disc: "bg-violet" },
 };
+
+type ReportStatTone = "mint" | "coral" | "lime" | "violet";
 
 function ReportStat({
   label,
   value,
+  suffix,
   delta,
   unit,
   tone,
@@ -341,37 +343,48 @@ function ReportStat({
 }: {
   label: string;
   value: string;
+  /** Small trailing unit beside the figure ("min"), kept out of `value` so
+   * it doesn't inherit the headline's size. */
+  suffix?: string;
   delta: WeekOverWeek | null;
   unit: string;
-  tone: IconChipTone;
+  tone: ReportStatTone;
   icon: React.ReactNode;
 }) {
-  const onDark = tone === "violet";
+  const skin = REPORT_STAT_SKIN[tone];
   return (
-    <div className={`rounded-card p-4 ${REPORT_STAT_BG[tone]}`}>
-      <IconChip icon={icon} tone="white" size="sm" className="mb-2" />
-      <p className={`text-[11px] font-bold uppercase tracking-wide ${onDark ? "text-white/70" : "text-ink-3"}`}>{label}</p>
-      <p className={`mt-1 font-display text-[28px] font-bold leading-none ${onDark ? "text-white" : "text-foreground"}`}>{value}</p>
-      {delta && delta.direction !== "flat" && (
-        <p
-          className={`mt-2 inline-flex items-center rounded-pill px-2 py-0.5 text-[11px] font-extrabold ${
-            delta.direction === "up"
-              ? onDark
-                ? "bg-white/15 text-white"
-                : "bg-mint-tint text-mint-text"
-              : onDark
-                ? "bg-white/15 text-white"
-                : "bg-coral-tint text-coral-text"
-          }`}
-        >
-          {delta.direction === "up" ? "↑" : "↓"} {Math.abs(delta.delta)}
-          {unit} vs last week
+    // Disc beside the reading, not stacked above it — the concept's row
+    // layout, which also keeps all four cards the same height.
+    <div className={`flex items-center gap-3.5 rounded-card p-4 ${skin.card}`}>
+      <span
+        aria-hidden="true"
+        className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-white ${skin.disc}`}
+      >
+        {icon}
+      </span>
+      <div className="min-w-0">
+        <p className="text-[12px] font-semibold text-ink-2">{label}</p>
+        <p className="mt-0.5 font-display text-[30px] font-bold leading-none text-foreground tabular-nums">
+          {value}
+          {suffix && <span className="ml-1 text-[13px] font-bold">{suffix}</span>}
         </p>
-      )}
-      {delta && delta.direction === "flat" && (
-        <p className={`mt-2 text-[11px] font-bold ${onDark ? "text-white/70" : "text-ink-3"}`}>No change vs last week</p>
-      )}
-      {!delta && <p className={`mt-2 text-[11px] font-bold ${onDark ? "text-white/70" : "text-ink-3"}`}>No prior data</p>}
+        {/* A coloured arrow line rather than a filled pill: four pills in a
+            row competed with the figures they were annotating. */}
+        {delta && delta.direction !== "flat" && (
+          <p
+            className={`mt-1.5 text-[11.5px] font-bold ${
+              delta.direction === "up" ? "text-mint-text" : "text-coral-text"
+            }`}
+          >
+            {delta.direction === "up" ? "↑" : "↓"} {Math.abs(delta.delta)}
+            {unit} vs last week
+          </p>
+        )}
+        {delta && delta.direction === "flat" && (
+          <p className="mt-1.5 text-[11.5px] font-bold text-violet">No change</p>
+        )}
+        {!delta && <p className="mt-1.5 text-[11.5px] font-bold text-ink-3">No prior data</p>}
+      </div>
     </div>
   );
 }

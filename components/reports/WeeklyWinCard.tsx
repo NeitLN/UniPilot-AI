@@ -7,17 +7,17 @@ export function WeeklyWinCard({ win }: { win: WeeklyWin | null }) {
   if (!win) return null;
 
   return (
-    <div className="flex items-center gap-3 rounded-card-sm bg-card p-4">
+    <div className="flex items-center gap-4 rounded-card bg-card p-5">
       <Image
         src="/mascots/pilo-weekly-report.png"
         alt=""
-        width={102}
-        height={107}
-        className="h-[102px] w-auto shrink-0 object-contain"
+        width={110}
+        height={115}
+        className="h-[110px] w-auto shrink-0 object-contain"
       />
       <div className="min-w-0">
-        <h2 className="font-display text-sm font-bold text-foreground">This week&rsquo;s win</h2>
-        <p className="mt-0.5 text-[12.5px] font-semibold text-ink-2">{win.message}</p>
+        <h2 className="font-display text-lg font-bold text-foreground">This week&rsquo;s win</h2>
+        <p className="mt-1 text-[13px] font-semibold text-ink-2">{win.message}</p>
       </div>
     </div>
   );
