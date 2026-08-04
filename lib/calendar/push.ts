@@ -62,6 +62,18 @@ export async function pushConfirmedSessionsToCalendar(
   try {
     const accessToken = await getFreshAccessToken(supabase, userId, connection);
 
+    // Every session gets a different gcal_event_id back from Google, so
+    // there is no shared value to write with one batched `in(ids)` update
+    // the way the notification sweep does it.
+    //
+    // Deferring the writes until after the loop would batch them, but it
+    // trades away crash safety: a crash mid-loop currently orphans at most
+    // one Google event, and with the writes deferred it would orphan all of
+    // them — every one duplicated on the next retry. So each write is still
+    // dispatched the moment its own event exists. It is just no longer
+    // awaited before the next insert starts, which is what made every
+    // Google call wait out a database round trip first.
+    const writes: PromiseLike<unknown>[] = [];
     let pushed = 0;
     for (const session of sessions) {
       const body = buildCalendarEventBody({
@@ -71,9 +83,11 @@ export async function pushConfirmedSessionsToCalendar(
         title: session.assignment_id ? (titleById.get(session.assignment_id) ?? "study session") : "study session",
       });
       const eventId = await insertEvent(accessToken, body);
-      await supabase.from("study_sessions").update({ gcal_event_id: eventId }).eq("id", session.id);
+      writes.push(supabase.from("study_sessions").update({ gcal_event_id: eventId }).eq("id", session.id));
       pushed++;
     }
+    // Surfaces a failed write as push_error rather than losing it silently.
+    await Promise.all(writes);
 
     return { ok: true, pushed };
   } catch (err) {
