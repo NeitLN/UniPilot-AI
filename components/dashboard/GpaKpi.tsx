@@ -1,3 +1,4 @@
+import { LineChart } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { gpa } from "@/lib/rules/gpa";
 import { KpiCard } from "./KpiCard";
@@ -21,6 +22,7 @@ export async function GpaKpi() {
       value={hasGrades ? gpa(rows).toFixed(2) : "—"}
       unit={hasGrades ? "/4.0" : undefined}
       hint={hasGrades ? "Cumulative" : "Enter grades to see your GPA"}
+      icon={<LineChart className="h-6 w-6" />}
     />
   );
 }

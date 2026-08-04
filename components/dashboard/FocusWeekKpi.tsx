@@ -1,3 +1,4 @@
+import { Target } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { weeklyStats } from "@/lib/rules/focus";
 import { getViewerTimeZone } from "@/lib/timezone";
@@ -29,6 +30,7 @@ export async function FocusWeekKpi() {
       value={String(stats.completedCycles)}
       unit="cycles"
       hint={`${stats.completedMinutes} min completed`}
+      icon={<Target className="h-6 w-6" />}
     />
   );
 }

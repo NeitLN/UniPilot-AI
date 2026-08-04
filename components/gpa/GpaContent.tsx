@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import {
   gpa,
   gpaBySemester,
+  onTrackProgress,
   projectGpaScenarios,
   qualityPoints,
   strongestCourseInsight,
@@ -9,6 +10,7 @@ import {
 } from "@/lib/rules/gpa";
 import { AddGradeButton } from "@/components/gpa/AddGradeButton";
 import { GpaHero } from "@/components/gpa/GpaHero";
+import { OnTrackCard } from "@/components/gpa/OnTrackCard";
 import { CourseBreakdown, type GradeRow } from "@/components/gpa/CourseBreakdown";
 import { GpaTrendChart } from "@/components/gpa/GpaTrendChart";
 import { ForecastCard } from "@/components/gpa/ForecastCard";
@@ -26,7 +28,7 @@ export async function GpaContent() {
         .from("grades")
         .select("id, course_id, semester, grade_point, credit_hours")
         .order("semester", { ascending: true }),
-      supabase.from("profiles").select("target_gpa").maybeSingle(),
+      supabase.from("profiles").select("target_gpa, program_total_credits").maybeSingle(),
       supabase
         .from("assignments")
         .select("course_id, weight, score")
@@ -96,13 +98,21 @@ export async function GpaContent() {
       .filter((c) => c.scoredWeight > 0),
   );
 
+  const onTrack =
+    profile?.program_total_credits && profile.target_gpa
+      ? onTrackProgress(profile.program_total_credits, doneCredits, profile.target_gpa, currentQP)
+      : null;
+
   return (
     <>
       <div className="flex justify-end">
         <AddGradeButton courses={courses} />
       </div>
 
-      <GpaHero overallGpa={overallGpa} doneCredits={doneCredits} targetGpa={profile?.target_gpa ?? null} />
+      <div className="flex flex-col gap-3.5 sm:flex-row sm:items-stretch">
+        <GpaHero overallGpa={overallGpa} doneCredits={doneCredits} targetGpa={profile?.target_gpa ?? null} className="sm:flex-[1.4]" />
+        {onTrack && <OnTrackCard result={onTrack} targetGpa={profile!.target_gpa!} />}
+      </div>
 
       <div className="flex flex-col gap-3.5 lg:grid lg:grid-cols-[1.4fr_1fr] lg:items-start">
         <div className="flex min-w-0 flex-col gap-3.5">

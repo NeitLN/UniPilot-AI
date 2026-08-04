@@ -1,22 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
+import { relativeDueLabel } from "@/lib/rules/assignment";
 
 export interface PiloPickAssignment {
   id: string;
   title: string;
   dueAt: string;
-}
-
-function relativeDueLabel(dueAt: string, now: Date): string {
-  const diffHours = (new Date(dueAt).getTime() - now.getTime()) / 3_600_000;
-  if (diffHours < -1) {
-    const days = Math.max(1, Math.round(Math.abs(diffHours) / 24));
-    return days === 1 ? "1 day ago" : `${days} days ago`;
-  }
-  if (diffHours <= 1) return "any moment now";
-  if (diffHours < 24) return "today";
-  const days = Math.round(diffHours / 24);
-  return days === 1 ? "tomorrow" : `in ${days} days`;
 }
 
 /** The right column's "what should I do next" card — `pick` is computed

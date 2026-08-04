@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { FieldError } from "@/components/ui/FieldError";
 import { popoverVariants } from "@/lib/motion/variants";
+import { isFocusWorkActive } from "@/lib/focus/local-session";
 import {
   markNotificationRead,
   markAllNotificationsRead,
@@ -48,6 +49,14 @@ export function NotificationBellClient({
     // non-blocking client call after mount instead. This component doesn't
     // remount on client-side navigation within the (app) layout, so it
     // fires once per app session rather than on every route change.
+    //
+    // Focus Timer's "stay quiet while you focus" (concept §10.3) — skip
+    // this proactive nudge while a work phase is actually running, so a
+    // focus session doesn't get interrupted by a badge/refresh the moment
+    // it happens to become due. The cron still delivers within 15 minutes
+    // regardless, so nothing is silently dropped, only delayed.
+    if (isFocusWorkActive()) return;
+
     fetch("/api/push/send", { method: "POST" })
       .then((res) => (res.ok ? res.json() : null))
       .then((result: { deliveredCount?: number } | null) => {

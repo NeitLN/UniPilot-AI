@@ -137,6 +137,12 @@ export function derivePiloPlanNote(days: DayLoad[]): string {
 export const AVAILABILITY_WINDOW_START_MIN = 8 * 60; // 08:00
 export const AVAILABILITY_WINDOW_END_MIN = 20 * 60; // 20:00
 const NOON_MIN = 12 * 60;
+/** Last two hours of the display window (18:00-20:00) — tagged "low"
+ * instead of "afternoon". This is a clock-time rule applied identically to
+ * every viewer, not a claim about any individual's actual energy or
+ * behavior — same category of deterministic planning heuristic as the
+ * Workload Risk score itself, not fabricated per-user data. */
+const LOW_ENERGY_START_MIN = 18 * 60;
 
 function minutesOfDay(date: Date, timeZone: string): number {
   const parts = new Intl.DateTimeFormat("en-US", {
@@ -158,7 +164,7 @@ export interface BusyRange {
 export interface AvailabilityBand {
   startMinute: number;
   endMinute: number;
-  period: "morning" | "afternoon";
+  period: "morning" | "afternoon" | "low";
 }
 
 /**
@@ -202,15 +208,23 @@ export function freeAvailabilityBands(
   }
   if (cursor < AVAILABILITY_WINDOW_END_MIN) free.push({ start: cursor, end: AVAILABILITY_WINDOW_END_MIN });
 
-  // Split each free interval at noon so morning/afternoon can be tinted
-  // differently (brief §1.2 — legend must have real text, not color alone).
+  // Split each free interval at noon and again at 18:00 so morning/
+  // afternoon/low-energy can be tinted differently (brief §1.2 — legend
+  // must have real text, not color alone).
   const bands: AvailabilityBand[] = [];
   for (const f of free) {
     if (f.start < NOON_MIN) {
       bands.push({ startMinute: f.start, endMinute: Math.min(f.end, NOON_MIN), period: "morning" });
     }
-    if (f.end > NOON_MIN) {
-      bands.push({ startMinute: Math.max(f.start, NOON_MIN), endMinute: f.end, period: "afternoon" });
+    if (f.end > NOON_MIN && f.start < LOW_ENERGY_START_MIN) {
+      bands.push({
+        startMinute: Math.max(f.start, NOON_MIN),
+        endMinute: Math.min(f.end, LOW_ENERGY_START_MIN),
+        period: "afternoon",
+      });
+    }
+    if (f.end > LOW_ENERGY_START_MIN) {
+      bands.push({ startMinute: Math.max(f.start, LOW_ENERGY_START_MIN), endMinute: f.end, period: "low" });
     }
   }
   return bands.filter((b) => b.endMinute > b.startMinute);

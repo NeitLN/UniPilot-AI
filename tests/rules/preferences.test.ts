@@ -5,6 +5,7 @@ const base: StudyPreferencesInput = {
   defaultFocusMinutes: 25,
   dailyFocusGoalCycles: 4,
   preferredStudyDays: [1, 2, 3, 4, 5],
+  programTotalCredits: null,
 };
 
 describe("validateStudyPreferences", () => {
@@ -36,5 +37,18 @@ describe("validateStudyPreferences", () => {
 
   it("accepts an empty preferred-days list", () => {
     expect(validateStudyPreferences({ ...base, preferredStudyDays: [] }).preferredStudyDays).toBeUndefined();
+  });
+
+  it("accepts a null program total credits (not set)", () => {
+    expect(validateStudyPreferences({ ...base, programTotalCredits: null }).programTotalCredits).toBeUndefined();
+  });
+
+  it("accepts a positive program total credits", () => {
+    expect(validateStudyPreferences({ ...base, programTotalCredits: 140 }).programTotalCredits).toBeUndefined();
+  });
+
+  it("rejects a zero or negative program total credits", () => {
+    expect(validateStudyPreferences({ ...base, programTotalCredits: 0 }).programTotalCredits).toBeDefined();
+    expect(validateStudyPreferences({ ...base, programTotalCredits: -5 }).programTotalCredits).toBeDefined();
   });
 });

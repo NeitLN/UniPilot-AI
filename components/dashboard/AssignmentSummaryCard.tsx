@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { ClipboardList } from "lucide-react";
 import { Pilo } from "@/components/brand/Pilo";
 import { Tag } from "@/components/ui/Tag";
 import { FadeIn } from "@/components/motion/FadeIn";
+import { courseTone, COURSE_TONE_CLASSES } from "@/lib/ui/course-tone";
 import {
   overdueLabel,
   priorityLabel,
@@ -15,6 +17,9 @@ import type {
 export interface SummaryAssignment {
   id: string;
   title: string;
+  /** Drives the row's accent color via the same stable per-course hash used
+   * on Schedule/Courses/GPA — null (no course) falls back to neutral. */
+  courseId: string | null;
   courseName: string | null;
   dueAt: string;
   status: AssignmentStatus;
@@ -56,11 +61,23 @@ export function AssignmentSummaryCard({
         <ul className="mt-1">
           {items.map((a) => {
             const overdue = overdueLabel(a);
+            const tone = a.courseId ? COURSE_TONE_CLASSES[courseTone(a.courseId)] : null;
             return (
               <li
                 key={a.id}
                 className="flex items-center gap-3 border-t border-line py-[11px] first:border-t-0 first:pt-3"
               >
+                {/* One consistent glyph, tinted per course — the schema has
+                    no subject field, so varying the icon by course would be
+                    inventing meaning the data can't back. */}
+                <span
+                  aria-hidden="true"
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-ctl ${
+                    tone ? `${tone.tint} ${tone.text}` : "bg-line text-ink-3"
+                  }`}
+                >
+                  <ClipboardList className="h-[18px] w-[18px]" />
+                </span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-bold text-foreground">
                     {a.title}

@@ -10,10 +10,13 @@ export interface StudyPreferencesInput {
   dailyFocusGoalCycles: number;
   /** ISO weekday numbers, 1=Monday..7=Sunday. */
   preferredStudyDays: number[];
+  /** Total credits required to graduate — null means "not set", distinct
+   * from 0 (GPA's On-track card needs to tell those apart). */
+  programTotalCredits: number | null;
 }
 
 export type StudyPreferencesErrors = Partial<
-  Record<"defaultFocusMinutes" | "dailyFocusGoalCycles" | "preferredStudyDays", string>
+  Record<"defaultFocusMinutes" | "dailyFocusGoalCycles" | "preferredStudyDays" | "programTotalCredits", string>
 >;
 
 export function validateStudyPreferences(input: StudyPreferencesInput): StudyPreferencesErrors {
@@ -36,6 +39,13 @@ export function validateStudyPreferences(input: StudyPreferencesInput): StudyPre
   const unique = new Set(days).size === days.length;
   if (!validRange || !unique) {
     errors.preferredStudyDays = "Preferred study days must be valid, unique weekdays.";
+  }
+
+  if (
+    input.programTotalCredits !== null &&
+    (!Number.isFinite(input.programTotalCredits) || input.programTotalCredits <= 0)
+  ) {
+    errors.programTotalCredits = "Enter a positive number of credits, or leave it blank.";
   }
 
   return errors;

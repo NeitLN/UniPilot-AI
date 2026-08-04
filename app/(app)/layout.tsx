@@ -38,9 +38,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </Suspense>
         </div>
 
-        <p className="px-2.5 pb-2 text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#6C5F94]">
-          Your space
-        </p>
         <SidebarNav />
         {user?.email && <UserFooter email={user.email} />}
       </aside>

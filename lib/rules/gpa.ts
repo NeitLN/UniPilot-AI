@@ -51,6 +51,56 @@ export function requiredAverage(
   return { value: Number(v.toFixed(2)), achievable: v <= 4.0 };
 }
 
+export type OnTrackStatus = "reached" | "on-track" | "at-risk" | "impossible";
+
+export interface OnTrackResult {
+  status: OnTrackStatus;
+  /** Null once every remaining credit is spoken for (status "reached" or
+   * "impossible" with 0 credits left) — there's nothing left to average. */
+  requiredAverage: number | null;
+  remainingCredits: number;
+  completedPct: number;
+}
+
+/**
+ * GPA's "On track" card (concept §5.1) — was dropped entirely from the
+ * pixel-match pass because `programTotalCredits` didn't exist as a real
+ * column (see GpaHero.tsx's original comment). Now that Settings collects
+ * it, this answers "am I on track to hit my target GPA" the same way
+ * ForecastCard's What-if simulator already does (requiredAverage), just
+ * pinned to the profile's own saved target/remaining instead of a
+ * viewer-adjustable what-if.
+ *
+ * "at-risk" vs "on-track" is a judgment call, not a hard rule from any
+ * spec: a required average above 3.7 needs near-perfect grades on every
+ * remaining course, which reads as "technically possible, practically
+ * risky" rather than comfortably on track.
+ */
+export function onTrackProgress(
+  programTotalCredits: number,
+  doneCredits: number,
+  targetGpa: number,
+  currentQP: number,
+): OnTrackResult {
+  const remainingCredits = Math.max(0, programTotalCredits - doneCredits);
+  const completedPct =
+    programTotalCredits > 0 ? Math.min(100, Math.round((doneCredits / programTotalCredits) * 100)) : 0;
+
+  if (remainingCredits === 0) {
+    const overall = doneCredits > 0 ? currentQP / doneCredits : 0;
+    return {
+      status: overall >= targetGpa ? "reached" : "impossible",
+      requiredAverage: null,
+      remainingCredits,
+      completedPct,
+    };
+  }
+
+  const req = requiredAverage(targetGpa, doneCredits, remainingCredits, currentQP);
+  const status: OnTrackStatus = req.value > 4 ? "impossible" : req.value > 3.7 ? "at-risk" : "on-track";
+  return { status, requiredAverage: req.value, remainingCredits, completedPct };
+}
+
 export interface SemesterGpaPoint {
   semester: string;
   gpa: number;

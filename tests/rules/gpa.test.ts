@@ -6,6 +6,7 @@ import {
   gpaBySemester,
   gpaChartDomain,
   gpaContribution,
+  onTrackProgress,
   predictedCourseScore,
   projectGpaScenarios,
   qualityPoints,
@@ -283,6 +284,52 @@ describe("estimateGradePoint", () => {
   it("clamps to the 0-4.0 range", () => {
     expect(estimateGradePoint(-10)).toBe(0);
     expect(estimateGradePoint(150)).toBe(4);
+  });
+});
+
+describe("onTrackProgress", () => {
+  it("reports on-track when the required average is comfortably reachable", () => {
+    // 30 done credits at 3.5 (QP=105), target 3.6 across 120 total, 90 remaining.
+    const result = onTrackProgress(120, 30, 3.6, 105);
+    expect(result.status).toBe("on-track");
+    expect(result.remainingCredits).toBe(90);
+    expect(result.completedPct).toBe(25);
+    expect(result.requiredAverage).not.toBeNull();
+  });
+
+  it("reports at-risk when the required average is high but still under 4.0", () => {
+    // 100 done at 3.0 (QP=300), target 3.6 across 120 total, 20 remaining
+    // needs (3.6*120-300)/20 = 3.6*120=432-300=132/20=6.6 -> clamp scenario;
+    // use numbers that land the requirement between 3.7 and 4.0 instead.
+    const result = onTrackProgress(120, 100, 3.4, 330); // avg so far 3.3
+    expect(result.requiredAverage).toBeGreaterThan(3.7);
+    expect(result.requiredAverage).toBeLessThanOrEqual(4.0);
+    expect(result.status).toBe("at-risk");
+  });
+
+  it("reports impossible when the required average exceeds 4.0", () => {
+    const result = onTrackProgress(120, 110, 3.9, 330); // avg so far 3.0, only 10 credits left
+    expect(result.status).toBe("impossible");
+    expect(result.requiredAverage).toBeGreaterThan(4.0);
+  });
+
+  it("reports reached when there are no remaining credits and target is met", () => {
+    const result = onTrackProgress(120, 120, 3.5, 432); // avg 3.6 >= target 3.5
+    expect(result.status).toBe("reached");
+    expect(result.requiredAverage).toBeNull();
+    expect(result.remainingCredits).toBe(0);
+    expect(result.completedPct).toBe(100);
+  });
+
+  it("reports impossible (not reached) when done but under target with no credits left", () => {
+    const result = onTrackProgress(120, 120, 3.9, 432); // avg 3.6 < target 3.9
+    expect(result.status).toBe("impossible");
+    expect(result.requiredAverage).toBeNull();
+  });
+
+  it("never returns negative remaining credits when done exceeds the program total", () => {
+    const result = onTrackProgress(120, 130, 3.5, 468);
+    expect(result.remainingCredits).toBe(0);
   });
 });
 

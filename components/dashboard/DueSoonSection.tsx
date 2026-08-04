@@ -21,6 +21,7 @@ export async function DueSoonSection() {
     (rows ?? []).map((r) => ({
       id: r.id,
       title: r.title,
+      courseId: r.course_id,
       courseName: r.course_id ? (courseNameById.get(r.course_id) ?? null) : null,
       dueAt: r.due_at,
       status: r.status,

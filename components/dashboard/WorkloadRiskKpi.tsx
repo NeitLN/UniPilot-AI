@@ -1,3 +1,4 @@
+import { ShieldCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { computeAndStoreRisk } from "@/lib/risk/compute";
 import { KpiCard } from "./KpiCard";
@@ -22,6 +23,7 @@ export async function WorkloadRiskKpi() {
         label="Workload risk"
         value="—"
         hint="Not enough data yet"
+        icon={<ShieldCheck className="h-6 w-6" />}
       />
     );
   }
@@ -36,6 +38,7 @@ export async function WorkloadRiskKpi() {
       unit="/100"
       hint={warn ? "Above the warning threshold" : "Within a healthy range"}
       barPct={score}
+      icon={<ShieldCheck className="h-6 w-6" />}
     />
   );
 }

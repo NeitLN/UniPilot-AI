@@ -1,10 +1,6 @@
 import { Suspense } from "react";
 import { StaggerList, StaggerItem } from "@/components/motion/StaggerList";
 import { WelcomeBanner } from "@/components/dashboard/WelcomeBanner";
-import {
-  WeeklyReportTeaser,
-  WeeklyReportTeaserSkeleton,
-} from "@/components/dashboard/WeeklyReportTeaser";
 import { KpiCardSkeleton } from "@/components/dashboard/KpiCard";
 import {
   SemesterLabel,
@@ -16,10 +12,14 @@ import { FocusWeekKpi } from "@/components/dashboard/FocusWeekKpi";
 import { DueSoonSection } from "@/components/dashboard/DueSoonSection";
 import { TodaySection } from "@/components/dashboard/TodaySection";
 import { AssignmentSummarySkeleton } from "@/components/dashboard/AssignmentSummaryCard";
+import { TodayAgendaSkeleton } from "@/components/dashboard/TodayAgendaCard";
 import { RiskHud, RiskHudSkeleton } from "@/components/dashboard/RiskHud";
 import { WorkloadRiskKpi } from "@/components/dashboard/WorkloadRiskKpi";
 import { FocusCard, FocusCardSkeleton } from "@/components/dashboard/FocusCard";
-import { PlanCard, PlanCardSkeleton } from "@/components/dashboard/PlanCard";
+import {
+  PiloBriefingCard,
+  PiloBriefingCardSkeleton,
+} from "@/components/dashboard/PiloBriefingCard";
 import {
   GpaTrendCard,
   GpaTrendCardSkeleton,
@@ -79,26 +79,22 @@ export default function DashboardPage() {
         <RiskHud />
       </Suspense>
 
-      <Suspense fallback={<WeeklyReportTeaserSkeleton />}>
-        <WeeklyReportTeaser />
-      </Suspense>
-
       <div className="flex flex-col gap-3.5 lg:grid lg:grid-cols-[1.4fr_1fr] lg:items-start">
         <div className="flex min-w-0 flex-col gap-3.5">
           <Suspense fallback={<AssignmentSummarySkeleton title="Due soon" />}>
             <DueSoonSection />
           </Suspense>
-          <Suspense fallback={<AssignmentSummarySkeleton title="Today" />}>
+          <Suspense fallback={<TodayAgendaSkeleton />}>
             <TodaySection />
           </Suspense>
         </div>
 
         <div className="flex min-w-0 flex-col gap-3.5">
+          <Suspense fallback={<PiloBriefingCardSkeleton />}>
+            <PiloBriefingCard />
+          </Suspense>
           <Suspense fallback={<FocusCardSkeleton />}>
             <FocusCard />
-          </Suspense>
-          <Suspense fallback={<PlanCardSkeleton />}>
-            <PlanCard />
           </Suspense>
           <Suspense fallback={<GpaTrendCardSkeleton />}>
             <GpaTrendCard />

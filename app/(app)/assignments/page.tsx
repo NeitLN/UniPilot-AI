@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getViewerTimeZone } from "@/lib/timezone";
 import {
+  deriveQuickWins,
   isDueThisWeek,
   isDueToday,
   pickPiloAssignment,
@@ -17,6 +18,7 @@ import { AssignmentSection } from "@/components/assignments/AssignmentSection";
 import { AssignmentCard, type AssignmentRow } from "@/components/assignments/AssignmentCard";
 import { PiloPickCard } from "@/components/assignments/PiloPickCard";
 import { AssignmentWeekProgress } from "@/components/assignments/AssignmentWeekProgress";
+import { AssignmentQuickWins } from "@/components/assignments/AssignmentQuickWins";
 import { AssignmentQuickActions } from "@/components/assignments/AssignmentQuickActions";
 import { Pagination } from "@/components/ui/Pagination";
 import { FieldError } from "@/components/ui/FieldError";
@@ -61,7 +63,7 @@ export default async function AssignmentsPage({
   // personal assignment list, not N+1) feeds all three.
   const { data: statsRows } = await supabase
     .from("assignments")
-    .select("id, title, due_at, priority, status, archived_at")
+    .select("id, title, due_at, priority, status, archived_at, progress")
     .is("archived_at", null)
     .order("due_at", { ascending: true });
   const allNonArchived = statsRows ?? [];
@@ -92,6 +94,16 @@ export default async function AssignmentsPage({
     })),
     now,
   );
+
+  const quickWins = deriveQuickWins(
+    allActive.map((r) => ({
+      id: r.id,
+      progress: r.progress,
+      status: r.status,
+      archivedAt: r.archived_at,
+      dueAt: r.due_at,
+    })),
+  ).map((w) => ({ ...w, title: allActive.find((r) => r.id === w.id)!.title }));
 
   // Main list — respects course/status/search exactly as before. `when`
   // (today/week) is new: it can't be pushed into the DB query without
@@ -313,7 +325,11 @@ export default async function AssignmentsPage({
           <PiloPickCard pick={piloPick} now={now} />
           <AssignmentWeekProgress total={weekTotal} completed={weekCompleted} />
           <div className="hidden md:block">
-            <AssignmentQuickActions courses={courses} />
+            {quickWins.length > 0 ? (
+              <AssignmentQuickWins items={quickWins} />
+            ) : (
+              <AssignmentQuickActions courses={courses} />
+            )}
           </div>
         </div>
       </div>

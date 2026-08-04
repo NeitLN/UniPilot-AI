@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
-import { Play, Coffee, Sofa } from "lucide-react";
+import { Play, Coffee, Sofa, Music, Bell } from "lucide-react";
 import { Pilo } from "@/components/brand/Pilo";
 import { Modal } from "@/components/ui/Modal";
 import { confirmVariants } from "@/lib/motion/variants";
@@ -17,8 +17,9 @@ import {
   SHORT_BREAK_SECONDS,
 } from "@/lib/rules/focus";
 import { enqueueMutation } from "@/lib/offline/idb";
+import { FOCUS_TRACKS } from "@/lib/audio/focus-tracks";
+import { FOCUS_SESSION_STORAGE_KEY as STORAGE_KEY } from "@/lib/focus/local-session";
 
-const STORAGE_KEY = "unipilot:focus:session";
 const CYCLE_COUNT_KEY = "unipilot:focus:cycleCount";
 const RADIUS = 65;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
@@ -126,6 +127,14 @@ export function FocusTimer({
   const [confirmingStop, setConfirmingStop] = useState(false);
   const [pending, setPending] = useState(false);
   const finishedRef = useRef(false);
+
+  // Real CC0/public-domain background tracks (public/audio/CREDITS.md) —
+  // only actually plays while a work phase is running. `trackIndex` picks
+  // a random track each time the toggle goes from off to on, so repeat
+  // sessions don't always open with the same loop.
+  const [audioOn, setAudioOn] = useState(false);
+  const [trackIndex, setTrackIndex] = useState(0);
+  const audioElRef = useRef<HTMLAudioElement | null>(null);
 
   // Resume an in-flight session after a reload. localStorage isn't available
   // during SSR, so the very first client render still shows the picker —
@@ -277,6 +286,42 @@ export function FocusTimer({
   const isRunning = session !== null;
   const isPaused = Boolean(session?.pausedAt);
   const isBreak = session?.phase === "break";
+
+  const shouldPlayAudio = audioOn && isRunning && !isBreak && !isPaused;
+
+  // Plays only while a work phase is actively running (not paused, not on
+  // break, not idle) — toggling the button just sets the preference; this
+  // effect is the single place that actually starts/stops playback, so
+  // pausing the timer or hitting a break silences it automatically. Kept
+  // separate from the track-change effect below so pausing/resuming never
+  // restarts the current track from 0:00.
+  useEffect(() => {
+    const el = audioElRef.current;
+    if (!el) return;
+    if (shouldPlayAudio) {
+      void el.play().catch(() => {
+        // Autoplay can be blocked if this effect fires without a recent
+        // click in the chain (e.g. resuming an in-flight session after a
+        // reload) — the toggle button itself is always a real click, so
+        // this only silently no-ops the reload-resume edge case.
+      });
+    } else {
+      el.pause();
+    }
+  }, [shouldPlayAudio]);
+
+  // "Next track" — the <audio> element's `src` prop already points at the
+  // new file by the time this runs; `load()` makes the browser actually
+  // pick it up (a bare src-attribute change isn't reliably enough on its
+  // own across browsers), then resumes playback if it was already playing.
+  useEffect(() => {
+    const el = audioElRef.current;
+    if (!el) return;
+    el.load();
+    if (shouldPlayAudio) void el.play().catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- deliberately track-only; shouldPlayAudio read fresh, not a re-run trigger
+  }, [trackIndex]);
+
   const duration = session ? phaseDuration(session) : selectedDurationMinutes * 60;
   const displayRemaining = session
     ? session.pausedAt
@@ -296,6 +341,8 @@ export function FocusTimer({
     <div
       className={`flex h-full flex-col rounded-card p-5 text-center ${isBreak ? "bg-mint" : "bg-lime"}`}
     >
+      <audio ref={audioElRef} src={FOCUS_TRACKS[trackIndex].src} loop preload="none" className="hidden" />
+
       {/* Top: assignment picker (idle) or the running/break title — height
           varies with content, unlike the timer block below it. */}
       <div>
@@ -469,7 +516,36 @@ export function FocusTimer({
                 <Sofa className="h-3.5 w-3.5" aria-hidden="true" />
                 Long break {Math.round(LONG_BREAK_SECONDS / 60)}m
               </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!audioOn) setTrackIndex(Math.floor(Math.random() * FOCUS_TRACKS.length));
+                  setAudioOn((v) => !v);
+                }}
+                aria-pressed={audioOn}
+                title="Real, CC0/public-domain background music (see public/audio/CREDITS.md) — plays while a focus session is running."
+                className="flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-ctl bg-card text-xs font-extrabold text-ink hover:bg-card/70"
+              >
+                <Music className="h-3.5 w-3.5" aria-hidden="true" />
+                Lo-fi · {audioOn ? "On" : "Off"}
+              </button>
             </div>
+            {audioOn && (
+              <div className="mt-2 flex items-center justify-center gap-2 text-[11px] font-bold text-ink/70">
+                <span className="truncate">{FOCUS_TRACKS[trackIndex].label}</span>
+                <button
+                  type="button"
+                  onClick={() => setTrackIndex((i) => (i + 1) % FOCUS_TRACKS.length)}
+                  className="rounded-pill bg-card px-2.5 py-1 text-[10.5px] font-extrabold text-ink hover:bg-card/70"
+                >
+                  Next track
+                </button>
+              </div>
+            )}
+            <p className="mt-2.5 flex items-center justify-center gap-1.5 text-[10.5px] font-semibold text-ink/60">
+              <Bell className="h-3 w-3" aria-hidden="true" />
+              Notifications stay quiet while you focus.
+            </p>
             {!selectedId && (
               <p className="mt-2 text-[11.5px] font-semibold text-ink/70">
                 {assignments.length === 0 ? (
