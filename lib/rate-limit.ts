@@ -27,6 +27,10 @@ export const RATE_LIMITS = {
   export: { key: "export", limit: 20, windowSeconds: HOUR },
   /** Talks to Google on the user's behalf; their quota, not just ours. */
   calendarSync: { key: "calendar.sync", limit: 30, windowSeconds: HOUR },
+  /** A crash loop in a client component can fire an error handler on every
+   * render. The ceiling is generous enough to keep a real burst of distinct
+   * errors, low enough that a loop cannot bury the logs. */
+  errorReport: { key: "error.report", limit: 60, windowSeconds: HOUR },
 } as const satisfies Record<string, RateLimitRule>;
 
 export interface RateLimitResult {

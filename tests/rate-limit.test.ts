@@ -93,6 +93,9 @@ describe("RATE_LIMITS", () => {
     // most permissive one.
     expect(RATE_LIMITS.planGenerate.limit).toBeLessThan(RATE_LIMITS.export.limit);
     expect(RATE_LIMITS.export.limit).toBeLessThan(RATE_LIMITS.calendarSync.limit);
+    // Error reports are the cheapest thing here and the one most likely to
+    // arrive in a burst, so it gets the loosest ceiling.
+    expect(RATE_LIMITS.calendarSync.limit).toBeLessThan(RATE_LIMITS.errorReport.limit);
   });
 
   it("uses stable route keys, since they are stored as data", () => {
@@ -100,6 +103,7 @@ describe("RATE_LIMITS", () => {
       "plan.generate",
       "export",
       "calendar.sync",
+      "error.report",
     ]);
   });
 });

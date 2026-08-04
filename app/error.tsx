@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { THEME_STORAGE_KEY } from "@/lib/theme";
+import { reportClientError } from "@/lib/observability/client";
 
 /**
  * SR-02 (docs/PRODUCT_REVIEW_3.md): the app had zero error boundaries
@@ -21,9 +22,11 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // No observability pipeline yet (see docs/PRODUCT_REVIEW_3.md) — the
-    // browser console is the only trace of what broke.
+    // Ships to /api/errors so this lands in the same structured log stream
+    // as server errors. The console line stays for local development, where
+    // there is no log collector to read.
     console.error(error);
+    reportClientError(error, "app/error.tsx");
   }, [error]);
 
   useEffect(() => {

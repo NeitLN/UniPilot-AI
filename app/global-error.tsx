@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { reportClientError } from "@/lib/observability/client";
 
 /**
  * SR-02 (docs/PRODUCT_REVIEW_3.md): fires only when the root layout itself
@@ -20,6 +21,10 @@ export default function GlobalError({
 }) {
   useEffect(() => {
     console.error(error);
+    // This boundary fires when the root layout itself failed, which is the
+    // case least likely to be reproduced locally — so it is the one most
+    // worth getting off the user's machine.
+    reportClientError(error, "app/global-error.tsx");
   }, [error]);
 
   return (
