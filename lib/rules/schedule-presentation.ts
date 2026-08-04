@@ -102,6 +102,25 @@ export function freeMinutesForDay(
   return { freeMinutes, blockCount };
 }
 
+/**
+ * "10:30" rather than "10:30 AM" — the compact clock the concept uses inside
+ * week-grid blocks and the Next class card, where the hour gutter beside them
+ * already establishes morning vs afternoon and the full label would truncate.
+ * The Today rail keeps the period, since it has no gutter to read against.
+ *
+ * Built from `formatToParts` instead of a regex over the formatted string so
+ * it stays correct in locales that put the period first or use a non-Latin
+ * marker; dropping the part is the only locale-safe way to remove it.
+ */
+export function formatClockShort(date: Date, locale?: string): string {
+  return new Intl.DateTimeFormat(locale, { hour: "numeric", minute: "2-digit" })
+    .formatToParts(date)
+    .filter((p) => p.type !== "dayPeriod")
+    .map((p) => p.value)
+    .join("")
+    .trim();
+}
+
 /** Vertical position (0-100) of an event within a time grid spanning
  * [gridStartMin, gridEndMin) — clamps events that start before or end
  * after the grid instead of rendering off-canvas, and flags the clamp so

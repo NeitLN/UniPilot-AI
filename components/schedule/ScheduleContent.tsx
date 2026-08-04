@@ -12,12 +12,12 @@ import {
 import { ViewSwitcher } from "@/components/schedule/ViewSwitcher";
 import { SyncStatusBar } from "@/components/schedule/SyncStatusBar";
 import { ScheduleGrid } from "@/components/schedule/ScheduleGrid";
-import { WeekTimeGrid } from "@/components/schedule/WeekTimeGrid";
+import { WeekTimeGrid, type DeadlineMarker } from "@/components/schedule/WeekTimeGrid";
 import { ScheduleSummaryStrip } from "@/components/schedule/ScheduleSummaryStrip";
 import { TodayAgendaCard } from "@/components/schedule/TodayAgendaCard";
 import { FreeTimeCard } from "@/components/schedule/FreeTimeCard";
 import { AddEventButton } from "@/components/schedule/AddEventButton";
-import { AddCourseButton } from "@/components/courses/AddCourseButton";
+import { SyncCalendarButton } from "@/components/schedule/SyncCalendarButton";
 import type { ScheduleView } from "@/lib/calendar/view";
 import { addDays, toDateParam } from "@/lib/calendar/view";
 import type { AssignmentLink, ClassBlockData } from "@/components/schedule/types";
@@ -127,6 +127,17 @@ export async function ScheduleContent({
     (assignmentsByCourse[a.course_id] ??= []).push({ id: a.id, title: a.title, dueAt: a.due_at });
   }
 
+  // Same rows, re-shaped for the grid: due dates falling inside the week on
+  // screen get plotted as markers. Previously `due_at` only ever surfaced
+  // inside a class's detail modal, so a deadline was invisible unless you
+  // happened to click the right class.
+  const weekDeadlines: DeadlineMarker[] = (assignmentRows ?? [])
+    .filter((a) => {
+      const due = new Date(a.due_at).getTime();
+      return due >= start.getTime() && due < end.getTime();
+    })
+    .map((a) => ({ id: a.id, title: a.title, dueAt: a.due_at, courseId: a.course_id }));
+
   const todaysAgenda = todayBlocks(todaysBlocksSource, now, timeZone);
   const nextClassBlock = nextClass(todaysBlocksSource, now);
   const { freeMinutes, blockCount } = freeMinutesForDay(dayKey(now, timeZone), todaysBlocksSource, timeZone);
@@ -157,23 +168,28 @@ export async function ScheduleContent({
 
   return (
     <>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <AddCourseButton />
-        <div className="flex flex-wrap items-center gap-2">
-          <AddEventButton courses={courses} />
-          <SyncNowInline connected={Boolean(connection)} />
-        </div>
+      {/* Concept §8 puts exactly two actions here: add an event, and sync.
+          "Add course" moved out — Courses owns that, and this page's own
+          event form already covers what you'd add from a calendar. */}
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        <AddEventButton courses={courses} />
+        <SyncCalendarButton connected={Boolean(connection)} />
       </div>
 
       <ScheduleSummaryStrip
         nextClassBlock={nextClassBlock}
         now={now}
         classesTodayCount={todaysAgenda.filter((b) => !b.isAllDay).length}
+        coursesTodayCount={new Set(todaysAgenda.map((b) => b.courseId).filter(Boolean)).size}
         freeBlockCount={blockCount}
         freeMinutesTotal={freeMinutes}
       />
 
-      <div className="flex flex-col gap-3.5 lg:grid lg:grid-cols-[1.7fr_1fr] lg:items-start">
+      {/* 2.6fr, not 1.7fr: at 1.7 the seven day columns were narrow enough to
+          clip a course name mid-word ("Requiremen…"), which is the one thing
+          the week grid has to get right. The rail's cards are all short
+          key/value rows and read fine at the narrower width. */}
+      <div className="flex flex-col gap-3.5 lg:grid lg:grid-cols-[2.6fr_1fr] lg:items-start">
         <div className="flex min-w-0 flex-col gap-3.5 rounded-card bg-card p-4">
           <ViewSwitcher view={view} date={toDateParam(anchorDate)} />
           {view === "week" ? (
@@ -183,6 +199,7 @@ export async function ScheduleContent({
               blocks={blocks}
               courses={courses}
               assignmentsByCourse={assignmentsByCourse}
+              deadlines={weekDeadlines}
             />
           ) : (
             <ScheduleGrid
@@ -196,7 +213,7 @@ export async function ScheduleContent({
         </div>
 
         <div className="flex min-w-0 flex-col gap-3.5">
-          <TodayAgendaCard blocks={todaysAgenda} focusAssignmentId={focusPick?.id ?? null} />
+          <TodayAgendaCard blocks={todaysAgenda} focusAssignmentId={focusPick?.id ?? null} now={now} />
           <FreeTimeCard
             freeMinutesTotal={weekFreeMinutes}
             freeBlockCount={weekFreeBlockCount}
@@ -215,21 +232,6 @@ export async function ScheduleContent({
   );
 }
 
-/** Header-row "Sync Google Calendar" affordance (concept §8) — links to the
- * connect flow when there's no connection yet; once connected, the real
- * sync control already lives in SyncStatusBar below, so this becomes a
- * quiet status link instead of a second, competing sync button. */
-function SyncNowInline({ connected }: { connected: boolean }) {
-  if (connected) return null;
-  return (
-    <a
-      href="/api/calendar/oauth/start"
-      className="flex min-h-11 items-center rounded-ctl border border-border-cb bg-card px-3.5 text-xs font-bold text-ink-2 hover:bg-line"
-    >
-      Sync Google Calendar
-    </a>
-  );
-}
 
 export function ScheduleContentSkeleton() {
   return (

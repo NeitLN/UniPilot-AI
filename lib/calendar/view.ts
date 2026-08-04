@@ -63,6 +63,47 @@ export function shiftDate(view: ScheduleView, date: Date, direction: 1 | -1): Da
   return new Date(date.getFullYear(), date.getMonth() + direction, 1);
 }
 
+/**
+ * The heading above the grid: "Aug 3–9, 2026" for a week, "Aug 4, 2026" for a
+ * day, "August 2026" for a month. Week view previously showed only the anchor
+ * date ("August 4, 2026"), which said nothing about the six other days on
+ * screen — the concept labels the span, not the cursor.
+ *
+ * `getViewRange` returns an exclusive end, so the last visible day is end-1;
+ * the year is printed once when both ends share it, and the month is repeated
+ * only when the span actually crosses one.
+ */
+export function formatViewRangeLabel(
+  view: ScheduleView,
+  date: Date,
+  locale?: string,
+): string {
+  const { start, end } = getViewRange(view, date);
+  const last = addDays(end, -1);
+
+  if (view === "month") {
+    return start.toLocaleDateString(locale, { month: "long", year: "numeric" });
+  }
+  if (view === "day") {
+    return start.toLocaleDateString(locale, { month: "short", day: "numeric", year: "numeric" });
+  }
+
+  const sameYear = start.getFullYear() === last.getFullYear();
+  const sameMonth = sameYear && start.getMonth() === last.getMonth();
+
+  if (sameMonth) {
+    const head = start.toLocaleDateString(locale, { month: "short", day: "numeric" });
+    return `${head}–${last.getDate()}, ${last.getFullYear()}`;
+  }
+  if (sameYear) {
+    const head = start.toLocaleDateString(locale, { month: "short", day: "numeric" });
+    const tail = last.toLocaleDateString(locale, { month: "short", day: "numeric" });
+    return `${head}–${tail}, ${last.getFullYear()}`;
+  }
+  const opts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric", year: "numeric" };
+  return `${start.toLocaleDateString(locale, opts)}–${last.toLocaleDateString(locale, opts)}`;
+}
+
 export function parseDateParam(value: string | undefined): Date {
   if (!value) return startOfDay(new Date());
   const [y, m, d] = value.split("-").map(Number);

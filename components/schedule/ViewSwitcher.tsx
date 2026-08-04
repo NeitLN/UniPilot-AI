@@ -1,7 +1,9 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
+  formatViewRangeLabel,
   parseDateParam,
   shiftDate,
   toDateParam,
@@ -45,8 +47,8 @@ export function ViewSwitcher({
             type="button"
             onClick={() => navigate(v.value, date)}
             aria-pressed={view === v.value}
-            className={`flex min-h-11 items-center rounded-[12px] px-3 py-1.5 text-xs font-bold transition-colors ${
-              view === v.value ? "bg-card text-foreground" : "text-ink-2"
+            className={`flex min-h-11 items-center rounded-[12px] px-3.5 py-1.5 text-xs font-bold transition-colors ${
+              view === v.value ? "bg-violet text-white" : "text-ink-2 hover:text-foreground"
             }`}
           >
             {v.label}
@@ -54,19 +56,22 @@ export function ViewSwitcher({
         ))}
       </div>
 
-      <div className="flex items-center gap-1">
+      {/* Round chevrons flanking a Today pill, per the concept — the old
+          "‹"/"›" text glyphs rendered at whatever weight the font gave them
+          and read as punctuation rather than controls. */}
+      <div className="flex items-center gap-1.5">
         <button
           type="button"
           aria-label="Previous"
           onClick={() => navigate(view, toDateParam(shiftDate(view, anchor, -1)))}
-          className="flex min-h-11 min-w-11 items-center justify-center rounded-ctl bg-line px-2.5 py-1.5 text-sm font-bold text-ink-2 hover:bg-line-hover"
+          className="flex min-h-11 min-w-11 items-center justify-center rounded-full text-ink-2 hover:bg-line"
         >
-          ‹
+          <ChevronLeft className="h-4 w-4" aria-hidden="true" />
         </button>
         <button
           type="button"
           onClick={() => navigate(view, toDateParam(new Date()))}
-          className="flex min-h-11 items-center rounded-ctl bg-line px-3 py-1.5 text-xs font-bold text-ink-2 hover:bg-line-hover"
+          className="flex min-h-11 items-center rounded-ctl border border-border-cb bg-card px-4 py-1.5 text-xs font-bold text-ink-2 hover:bg-line"
         >
           Today
         </button>
@@ -74,20 +79,16 @@ export function ViewSwitcher({
           type="button"
           aria-label="Next"
           onClick={() => navigate(view, toDateParam(shiftDate(view, anchor, 1)))}
-          className="flex min-h-11 min-w-11 items-center justify-center rounded-ctl bg-line px-2.5 py-1.5 text-sm font-bold text-ink-2 hover:bg-line-hover"
+          className="flex min-h-11 min-w-11 items-center justify-center rounded-full text-ink-2 hover:bg-line"
         >
-          ›
+          <ChevronRight className="h-4 w-4" aria-hidden="true" />
         </button>
       </div>
 
       {/* Formatted in the runtime's local timezone — expected to differ
           between SSR and hydration, not a real mismatch. */}
-      <p className="text-sm font-bold text-foreground" suppressHydrationWarning>
-        {anchor.toLocaleDateString(undefined, {
-          month: "long",
-          day: view === "month" ? undefined : "numeric",
-          year: "numeric",
-        })}
+      <p className="font-display text-base font-bold text-foreground" suppressHydrationWarning>
+        {formatViewRangeLabel(view, anchor)}
       </p>
     </div>
   );

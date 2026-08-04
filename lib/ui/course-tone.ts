@@ -12,16 +12,25 @@ const TONES: CourseTone[] = ["violet", "mint", "tangerine", "coral", "sky", "lim
 // Static so Tailwind's class scanner can see every literal string at build
 // time — building a class name like `bg-${tone}-tint` dynamically would be
 // invisible to the compiler and get purged.
+/**
+ * `onSolid` is the text colour to pair with `solid` as a *fill* (the week
+ * grid's class blocks). It is not the same as `text`, which is tuned for
+ * the pale `tint` background — dropping `text-sky-text` onto solid `bg-sky`
+ * measures about 3.9:1, under the 4.5:1 AA floor for the 10px type used in
+ * those blocks. Only violet is dark enough to carry white; every other tone
+ * here is a bright fill and takes ink instead (coral included: white on
+ * coral is ~3.1:1, which is why KpiCard has a separate coral-deep).
+ */
 export const COURSE_TONE_CLASSES: Record<
   CourseTone,
-  { bg: string; tint: string; text: string; border: string; solid: string }
+  { bg: string; tint: string; text: string; border: string; solid: string; onSolid: string }
 > = {
-  violet: { bg: "bg-violet", tint: "bg-violet-tint", text: "text-violet", border: "border-violet", solid: "bg-violet" },
-  mint: { bg: "bg-mint", tint: "bg-mint-tint", text: "text-mint-text", border: "border-mint", solid: "bg-mint" },
-  tangerine: { bg: "bg-tangerine", tint: "bg-tangerine-tint", text: "text-tangerine-text", border: "border-tangerine", solid: "bg-tangerine" },
-  coral: { bg: "bg-coral", tint: "bg-coral-tint", text: "text-coral-text", border: "border-coral", solid: "bg-coral" },
-  sky: { bg: "bg-sky", tint: "bg-sky-tint", text: "text-sky-text", border: "border-sky", solid: "bg-sky" },
-  lime: { bg: "bg-lime", tint: "bg-lime-tint", text: "text-ink", border: "border-lime", solid: "bg-lime" },
+  violet: { bg: "bg-violet", tint: "bg-violet-tint", text: "text-violet", border: "border-violet", solid: "bg-violet", onSolid: "text-white" },
+  mint: { bg: "bg-mint", tint: "bg-mint-tint", text: "text-mint-text", border: "border-mint", solid: "bg-mint", onSolid: "text-ink" },
+  tangerine: { bg: "bg-tangerine", tint: "bg-tangerine-tint", text: "text-tangerine-text", border: "border-tangerine", solid: "bg-tangerine", onSolid: "text-ink" },
+  coral: { bg: "bg-coral", tint: "bg-coral-tint", text: "text-coral-text", border: "border-coral", solid: "bg-coral", onSolid: "text-ink" },
+  sky: { bg: "bg-sky", tint: "bg-sky-tint", text: "text-sky-text", border: "border-sky", solid: "bg-sky", onSolid: "text-ink" },
+  lime: { bg: "bg-lime", tint: "bg-lime-tint", text: "text-ink", border: "border-lime", solid: "bg-lime", onSolid: "text-ink" },
 };
 
 /** FNV-1a — small, dependency-free, stable across platforms (unlike

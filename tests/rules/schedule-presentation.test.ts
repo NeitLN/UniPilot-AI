@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  formatClockShort,
   freeMinutesForDay,
   isCurrentDisplayedRange,
   isHappeningNow,
@@ -148,5 +149,23 @@ describe("isCurrentDisplayedRange", () => {
     const range = { start: "2026-08-03T00:00:00.000Z", end: "2026-08-10T00:00:00.000Z" };
     expect(isCurrentDisplayedRange(range, new Date("2026-08-01T00:00:00.000Z"))).toBe(false);
     expect(isCurrentDisplayedRange(range, new Date("2026-08-11T00:00:00.000Z"))).toBe(false);
+  });
+});
+
+describe("formatClockShort", () => {
+  it("drops the AM/PM marker but keeps the 12-hour clock", () => {
+    expect(formatClockShort(new Date(2026, 7, 4, 9, 0), "en-US")).toBe("9:00");
+    expect(formatClockShort(new Date(2026, 7, 4, 13, 30), "en-US")).toBe("1:30");
+    expect(formatClockShort(new Date(2026, 7, 4, 0, 5), "en-US")).toBe("12:05");
+  });
+
+  it("leaves no stray separator where the marker was", () => {
+    const out = formatClockShort(new Date(2026, 7, 4, 22, 15), "en-US");
+    expect(out).toBe("10:15");
+    expect(out).toBe(out.trim());
+  });
+
+  it("is a no-op for locales that already use a 24-hour clock", () => {
+    expect(formatClockShort(new Date(2026, 7, 4, 13, 30), "en-GB")).toBe("13:30");
   });
 });
