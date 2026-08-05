@@ -38,6 +38,7 @@ const { GoogleTokenRevokedError } = await import("@/lib/calendar/oauth");
 
 function makeClient(connectionRow: Record<string, unknown> | null) {
   const updates: { table: string; payload: Record<string, unknown> }[] = [];
+  const deletes: { table: string; userId?: string }[] = [];
   return {
     from: (table: string) => ({
       select: () => ({
@@ -50,8 +51,15 @@ function makeClient(connectionRow: Record<string, unknown> | null) {
         return { eq: async () => ({ error: null }) };
       },
       upsert: async () => ({ error: null }),
+      delete: () => ({
+        eq: async (_col: string, value: string) => {
+          deletes.push({ table, userId: value });
+          return { error: null };
+        },
+      }),
     }),
     updates,
+    deletes,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any;
 }
@@ -121,5 +129,35 @@ describe("syncCalendarForUser — error messages shown to the user", () => {
     await syncCalendarForUser(client, "u1");
 
     expect(reportError).not.toHaveBeenCalled();
+  });
+
+  it("deletes the connection row on a revoked token instead of marking it errored", async () => {
+    // A revoked refresh token cannot be un-revoked, and the schema's
+    // refresh_token column is not-null, so there is no "clear the token but
+    // keep the row" option. Leaving the row behind with a dead token is
+    // what made `connected` stay true forever and the Schedule header's
+    // only button (Sync -> syncNow()) retry the exact same failure with no
+    // path back to /api/calendar/oauth/start.
+    refreshAccessToken.mockRejectedValue(new GoogleTokenRevokedError());
+    const client = makeClient(CONNECTION);
+
+    await syncCalendarForUser(client, "u1");
+
+    expect(client.deletes).toEqual([{ table: "google_calendar_connections", userId: "u1" }]);
+    expect(client.updates).toHaveLength(0);
+  });
+
+  it("keeps the row and records the error for a transient failure, rather than deleting it", async () => {
+    // Only a confirmed revocation should drop the connection. A network
+    // blip or a Google outage is not a reason to make the student
+    // re-consent from scratch.
+    refreshAccessToken.mockRejectedValue(new Error("network blip"));
+    const client = makeClient(CONNECTION);
+
+    await syncCalendarForUser(client, "u1");
+
+    expect(client.deletes).toHaveLength(0);
+    expect(client.updates).toHaveLength(1);
+    expect(client.updates[0].payload).toMatchObject({ last_sync_status: "error" });
   });
 });

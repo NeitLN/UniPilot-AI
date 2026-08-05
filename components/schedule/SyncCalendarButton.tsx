@@ -26,18 +26,35 @@ export function SyncCalendarButton({ connected }: { connected: boolean }) {
     "flex min-h-11 items-center gap-2 rounded-ctl border border-border-cb bg-card px-4 py-2.5 text-sm font-bold text-ink-2 hover:bg-line disabled:opacity-60";
 
   if (!connected) {
-    // Offline can't complete an OAuth round-trip, so the control is present
-    // but visibly inert rather than a link that silently fails.
-    return isOnline ? (
-      <a href="/api/calendar/oauth/start" className={className}>
-        <GoogleCalendarMark />
-        Sync Google Calendar
-      </a>
-    ) : (
-      <span className={`${className} opacity-60`} aria-disabled="true">
-        <GoogleCalendarMark />
-        Sync Google Calendar
-      </span>
+    return (
+      <div className="flex flex-col items-end gap-1">
+        {/* Offline can't complete an OAuth round-trip, so the control is
+            present but visibly inert rather than a link that silently fails. */}
+        {isOnline ? (
+          <a href="/api/calendar/oauth/start" className={className}>
+            <GoogleCalendarMark />
+            Sync Google Calendar
+          </a>
+        ) : (
+          <span className={`${className} opacity-60`} aria-disabled="true">
+            <GoogleCalendarMark />
+            Sync Google Calendar
+          </span>
+        )}
+        {/* `connected` can flip false *because of* a click on this very
+            button — a revoked Google token makes the server delete the
+            connection row, so the next render lands here. `error` is local
+            state that survives that transition (router.refresh() re-renders
+            this component in place, it doesn't remount it), so the reason
+            "why am I looking at Connect again" stays visible next to the
+            actual reconnect link instead of vanishing into a fresh, silent
+            "not connected" state. */}
+        {error && (
+          <p role="alert" className="text-[11.5px] font-semibold text-coral-text">
+            {error}
+          </p>
+        )}
+      </div>
     );
   }
 

@@ -75,14 +75,30 @@ export async function syncCalendarForUser(
       err instanceof GoogleTokenRevokedError
         ? err.message
         : "Couldn't sync Google Calendar right now. Try again shortly.";
-    if (!(err instanceof GoogleTokenRevokedError)) {
+
+    if (err instanceof GoogleTokenRevokedError) {
+      // A revoked refresh token cannot be un-revoked — Google does not
+      // renew one, it has to be reissued through the consent screen. Leaving
+      // the row in place with a dead refresh_token (not-null in the schema,
+      // so it can't just be cleared) kept the app reporting `connected:
+      // true` forever: the Schedule header's only button stayed "Sync
+      // Google Calendar" -> syncNow(), which would fail this exact way on
+      // every click with no way to actually reach /api/calendar/oauth/start
+      // and reconnect. Deleting the row makes `connected` false again, so
+      // the UI falls back to the same "Connect" link that already works —
+      // reconnecting is not a distinct flow from connecting, since Google
+      // requires the same full consent round-trip either way. It also stops
+      // every later click from spending an external API round trip on a
+      // call that cannot succeed.
+      await supabase.from("google_calendar_connections").delete().eq("user_id", userId);
+    } else {
       await reportError(err, { source: "calendar.sync", userId });
+      // Cache in class_blocks is intentionally left alone here (BR-03).
+      await supabase
+        .from("google_calendar_connections")
+        .update({ last_sync_status: "error", last_sync_error: message })
+        .eq("user_id", userId);
     }
-    // Cache in class_blocks is intentionally left alone here (BR-03).
-    await supabase
-      .from("google_calendar_connections")
-      .update({ last_sync_status: "error", last_sync_error: message })
-      .eq("user_id", userId);
 
     return { ok: false, reason: "sync_error", message };
   }

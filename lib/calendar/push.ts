@@ -107,7 +107,16 @@ export async function pushConfirmedSessionsToCalendar(
       err instanceof GoogleTokenRevokedError
         ? err.message
         : "Couldn't push your plan to Google Calendar right now. Try again shortly.";
-    if (!(err instanceof GoogleTokenRevokedError)) {
+    if (err instanceof GoogleTokenRevokedError) {
+      // Same reasoning as lib/calendar/sync.ts's catch block: a revoked
+      // refresh token cannot be un-revoked, and leaving the row behind kept
+      // `connected` stuck at true with no path back to
+      // /api/calendar/oauth/start. Deleted here too so the very next page
+      // load — not just the next explicit "Sync" click — already shows the
+      // real, working Connect flow instead of a connection that will fail
+      // the identical way on every attempt.
+      await supabase.from("google_calendar_connections").delete().eq("user_id", userId);
+    } else {
       await reportError(err, { source: "calendar.push", userId });
     }
     return { ok: false, reason: "push_error", message };

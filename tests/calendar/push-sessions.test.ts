@@ -39,9 +39,11 @@ function makeClient(
   /** Resolves the pending update promises on demand, so a test can hold them
    * open and observe whether the inserts kept going. */
   const gates: (() => void)[] = [];
+  const deletes: { table: string; userId: string }[] = [];
 
   function builder(table: string) {
     let staged: { gcal_event_id?: string } | null = null;
+    let deleting = false;
     const chain: Record<string, unknown> = {
       select: () => chain,
       is: () => chain,
@@ -55,7 +57,15 @@ function makeClient(
         staged = payload;
         return chain;
       },
+      delete: () => {
+        deleting = true;
+        return chain;
+      },
       eq: (_col: string, value: string) => {
+        if (deleting) {
+          deletes.push({ table, userId: value });
+          return Promise.resolve({ data: null, error: null });
+        }
         if (staged) {
           const gcalEventId = staged.gcal_event_id!;
           return new Promise((resolve) => {
@@ -73,7 +83,7 @@ function makeClient(
     return chain;
   }
 
-  return { from: (t: string) => builder(t), written, gates };
+  return { from: (t: string) => builder(t), written, gates, deletes };
 }
 
 const SESSIONS = [
@@ -195,5 +205,12 @@ describe("pushConfirmedSessionsToCalendar", () => {
         "Google Calendar access was disconnected. Reconnect to keep syncing.",
       );
     }
+
+    // The message alone used to be a dead end: the connection row stayed
+    // in place with a dead refresh_token, `connected` stayed true, and the
+    // only button on Schedule kept retrying the identical failure with no
+    // way to reach /api/calendar/oauth/start. Deleting it here is what
+    // makes the next render fall back to the real, working Connect link.
+    expect(client.deletes).toEqual([{ table: "google_calendar_connections", userId: "u1" }]);
   });
 });

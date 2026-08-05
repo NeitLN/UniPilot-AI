@@ -10,10 +10,13 @@ export interface ConnectionsCardProps {
   lastSyncError: string | null;
 }
 
-/** Step 8.6 — Google Calendar status only. "Manage" links to Schedule
- * (real, existing destination — sync/reconnect controls already live in
- * SyncStatusBar there) rather than fabricating a disconnect action that
- * doesn't exist in the codebase. */
+/** Step 8.6 — Google Calendar status only. "Manage" links to Schedule,
+ * where the actual sync control lives (SyncCalendarButton). There is no
+ * separate "reconnect" action anywhere: a revoked token makes the server
+ * delete the connection row outright (lib/calendar/sync.ts), so the same
+ * "Connect" link below handles first-time connect and recovering from a
+ * revocation identically — Google requires the same full consent
+ * round-trip either way. */
 export function ConnectionsCard({
   connected,
   lastSyncedAt,
