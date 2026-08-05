@@ -43,7 +43,7 @@ Lý do đưa 2.1 và 2.2 lên đầu dù chúng thuộc nhóm "nâng cấp": hi�
 
 ## Trạng thái thực thi (cập nhật 2026-08-05)
 
-**Phần 1 và Phần 2 đã hoàn thành.** 24 commit trên nhánh `feat/ui-redesign-and-audit`, chưa push.
+**Phần 1, 2 và 3 đã hoàn thành.** Toàn bộ đã push lên nhánh `feat/ui-redesign-and-audit`.
 
 | Bước | Trạng thái | Ghi chú |
 |---|---|---|
@@ -92,7 +92,9 @@ Tôi từng ghi ở đây rằng "0019/0020/0021 mới chỉ chạy trên DB dev
 
 **Đính chính thêm:** khuyến nghị `create index concurrently` cho 0019 là thừa ở quy mô hiện tại — bảng lớn nhất có 83 dòng, 3 người dùng, nên khoá khi tạo index không đáng kể. Nó chỉ đáng bận tâm khi bảng lên hàng trăm nghìn dòng.
 
-**Chưa xác minh được:** biến `NEXT_PUBLIC_SUPABASE_URL` của môi trường Production trên Vercel có trỏ đúng project này không. Đọc env production bị chặn quyền, và tôi không lách.
+**Chưa xác minh được, và không thể xác minh bằng cách đọc.** Biến `NEXT_PUBLIC_SUPABASE_URL` của môi trường Production trên Vercel có trỏ đúng project này không thì vẫn chưa biết. Đã chạy `vercel env pull` (có phép): **cả 12/12 biến do người dùng tạo đều được đánh dấu Sensitive**, nên Vercel trả về `[SENSITIVE]` thay vì giá trị — đây là cơ chế write-only của Vercel, dashboard cũng không xem được. Bốn đường gián tiếp đều tắc: bundle client không chứa URL (app chỉ tạo client phía server, quét 229 script), không có request nào từ trình duyệt tới Supabase (auth chạy bằng server action), không có OAuth phía client, log audit auth rỗng.
+
+**Nhưng hiện không có rủi ro:** `/api/health` trên production trả redirect, tức bản deploy đang chạy code cũ từ `main`, có trước toàn bộ nhánh này — nó chưa chạm tới `rate_limits`, `plan_nudges` hay `dedupe_key`. Câu hỏi này chỉ cần trả lời khi merge và deploy nhánh này.
 
 ---
 
