@@ -28,6 +28,17 @@ function hourLabel(h: number): string {
   return `${h12} ${period}`;
 }
 
+/** The now-indicator's clock, in the same 12-hour convention as the axis
+ * above — but without the meridiem. The gutter is a fixed 48px column, and
+ * "2:41 PM" does not fit a padded chip inside it (it wrapped to two lines).
+ * The meridiem is the part that can go: the hour labels bracketing this
+ * rule already read "2 PM" and "3 PM", so it is spelled out immediately
+ * above and below at all times. */
+function clockLabel(date: Date): string {
+  const h = date.getHours() % 12 === 0 ? 12 : date.getHours() % 12;
+  return `${h}:${String(date.getMinutes()).padStart(2, "0")}`;
+}
+
 function minutesOfDayLocal(date: Date): number {
   return date.getHours() * 60 + date.getMinutes();
 }
@@ -254,15 +265,23 @@ export function WeekTimeGrid({
               className="pointer-events-none absolute inset-x-0 z-20 flex -translate-y-1/2 items-center"
               style={{ top: `${positionEvent(nowMinutes, nowMinutes + 1).topPct}%` }}
             >
-              {/* The rule itself is a coral fill, but its clock label is
-                  *text* on the card's own background, where the bare accent
-                  token measures ~3.1:1 — under AA. The darker paired token is
-                  the one that's safe here (D-03 / semantic-color-text-guard). */}
-              <span
-                className="w-12 shrink-0 pr-1.5 text-right text-[9.5px] font-extrabold text-coral-text"
-                suppressHydrationWarning
-              >
-                {now.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}
+              {/* The rule is a coral fill, but this clock label is *text*.
+                  Standing bare on the card it has no theme-stable shade:
+                  --coral-text is a dark shade built to sit on a light tint
+                  (2.61:1 measured here in dark mode) and --coral is the
+                  reverse, light-unsafe. Same trap SR-03/D-03 hit, so this
+                  takes the same way out those settled on — carry your own
+                  background rather than chase one shade across both themes.
+                  --coral-deep is the sanctioned solid fill for small white
+                  text (5.18:1), and unlike a pastel tint chip it still reads
+                  as one piece with the rule it labels. */}
+              <span className="w-12 shrink-0 pr-1.5 text-right">
+                <span
+                  className="rounded-pill bg-coral-deep px-1 py-px text-[9.5px] font-extrabold whitespace-nowrap text-white"
+                  suppressHydrationWarning
+                >
+                  {clockLabel(now)}
+                </span>
               </span>
               <span aria-hidden="true" className="h-1.5 w-1.5 shrink-0 rounded-full bg-coral" />
               <span aria-hidden="true" className="h-[2px] flex-1 bg-coral" />
