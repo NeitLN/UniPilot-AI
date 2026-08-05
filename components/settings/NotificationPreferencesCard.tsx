@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { ClipboardList, AlertTriangle, FileBarChart, Clock } from "lucide-react";
+import { ClipboardList, AlertTriangle, FileBarChart, CalendarCheck, Clock } from "lucide-react";
 import {
   updateNotificationPreference,
   type NotificationCategory,
@@ -38,6 +38,13 @@ const CATEGORIES: {
     hint: "A recap of your week, once it's ready.",
     icon: FileBarChart,
     tone: "mint",
+  },
+  {
+    key: "plan_nudges",
+    label: "Plan check-ins",
+    hint: "Mid-week, if you're falling behind your study plan.",
+    icon: CalendarCheck,
+    tone: "coral",
   },
   {
     key: "focus_reminders",

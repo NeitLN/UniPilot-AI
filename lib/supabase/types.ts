@@ -402,6 +402,7 @@ export interface Database {
           push_status: string | null;
           assignment_id: string | null;
           class_block_id: string | null;
+          dedupe_key: string | null;
         };
         Insert: {
           id?: string;
@@ -415,6 +416,7 @@ export interface Database {
           push_status?: string | null;
           assignment_id?: string | null;
           class_block_id?: string | null;
+          dedupe_key?: string | null;
         };
         Update: {
           id?: string;
@@ -428,6 +430,7 @@ export interface Database {
           push_status?: string | null;
           assignment_id?: string | null;
           class_block_id?: string | null;
+          dedupe_key?: string | null;
         };
         Relationships: [];
       };
@@ -441,6 +444,7 @@ export interface Database {
           workload_warnings: boolean;
           weekly_report: boolean;
           focus_reminders: boolean;
+          plan_nudges: boolean;
           updated_at: string;
         };
         Insert: {
@@ -449,6 +453,7 @@ export interface Database {
           workload_warnings?: boolean;
           weekly_report?: boolean;
           focus_reminders?: boolean;
+          plan_nudges?: boolean;
           updated_at?: string;
         };
         Update: {
@@ -457,6 +462,7 @@ export interface Database {
           workload_warnings?: boolean;
           weekly_report?: boolean;
           focus_reminders?: boolean;
+          plan_nudges?: boolean;
           updated_at?: string;
         };
         Relationships: [];
