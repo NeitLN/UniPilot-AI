@@ -5,6 +5,7 @@ import {
   weeklyMinutesSeries,
   dailyActivity,
   completedCyclesToday,
+  ORPHANED_SESSION_KEY,
 } from "@/lib/rules/focus";
 import { getViewerTimeZone } from "@/lib/timezone";
 import { FocusTimer } from "@/components/focus/FocusTimer";
@@ -74,7 +75,7 @@ export default async function FocusPage() {
   const focusHistory: FocusHistoryEntry[] = (sessionRows ?? []).map((s) => ({
     id: s.id,
     assignmentTitle: s.assignment_id
-      ? (assignmentTitleById.get(s.assignment_id) ?? "Deleted assignment")
+      ? (assignmentTitleById.get(s.assignment_id) ?? "Unassigned")
       : "Unassigned",
     courseId: s.assignment_id ? (assignmentCourseById.get(s.assignment_id) ?? null) : null,
     startedAt: s.started_at,
@@ -89,7 +90,13 @@ export default async function FocusPage() {
   const byAssignment = Object.entries(stats.minutesByAssignment)
     .map(([id, minutes]) => ({
       id,
-      title: assignmentTitleById.get(id) ?? "Deleted assignment",
+      // ORPHANED_SESSION_KEY is the bucket for sessions with no assignment
+      // at all — either a "General study" session, or one whose assignment
+      // was deleted later. Both read as "Unassigned", matching what the
+      // history list beside this already showed; the two used to disagree
+      // ("Deleted assignment" here vs "Unassigned" there) for the same row.
+      title:
+        id === ORPHANED_SESSION_KEY ? "Unassigned" : (assignmentTitleById.get(id) ?? "Unassigned"),
       minutes,
     }))
     .sort((a, b) => b.minutes - a.minutes);
@@ -121,10 +128,15 @@ export default async function FocusPage() {
   for (const s of sessions) {
     let courseName: string;
     if (s.assignmentId === null) {
-      courseName = "Unknown course";
+      // No assignment means no course to attribute the time to — the same
+      // "No course" bucket an assignment without a course already uses.
+      // This said "Unknown course" before, which implied the course existed
+      // and couldn't be found, and disagreed with the "Unassigned" label
+      // the very same session got in the stats card above.
+      courseName = "No course";
     } else {
       const courseId = assignmentCourseById.get(s.assignmentId);
-      courseName = courseId ? (courseNameById.get(courseId) ?? "Unknown course") : "No course";
+      courseName = courseId ? (courseNameById.get(courseId) ?? "No course") : "No course";
     }
     allTimeCourseMinutes.set(
       courseName,
