@@ -1,4 +1,4 @@
-import { Check, AlertTriangle, X } from "lucide-react";
+import { Check, AlertTriangle, X, Target } from "lucide-react";
 import type { OnTrackResult } from "@/lib/rules/gpa";
 
 const STATUS_COPY: Record<OnTrackResult["status"], (req: number | null, target: number) => string> =
@@ -11,6 +11,10 @@ const STATUS_COPY: Record<OnTrackResult["status"], (req: number | null, target: 
         ? "Your target isn't reachable anymore — every credit is already in."
         : `A ${req.toFixed(2)} average is needed, which is over 4.0 — this target isn't reachable with these credits.`,
     reached: (_req, target) => `You've already reached your ${target.toFixed(2)} target GPA.`,
+    // States the requirement without passing judgment on it — there are no
+    // completed credits yet to judge.
+    "not-started": (req, target) =>
+      `Hitting your ${target.toFixed(2)} target means averaging ${req!.toFixed(2)} across your credits. Add your first grade to see how you're tracking.`,
   };
 
 const STATUS_ICON: Record<OnTrackResult["status"], typeof Check> = {
@@ -18,6 +22,7 @@ const STATUS_ICON: Record<OnTrackResult["status"], typeof Check> = {
   "at-risk": AlertTriangle,
   impossible: X,
   reached: Check,
+  "not-started": Target,
 };
 
 const STATUS_TITLE: Record<OnTrackResult["status"], string> = {
@@ -25,6 +30,7 @@ const STATUS_TITLE: Record<OnTrackResult["status"], string> = {
   "at-risk": "At risk",
   impossible: "Off track",
   reached: "Target reached",
+  "not-started": "Your target",
 };
 
 /** Each status keeps its own card tint plus a matching dark disc, so the
@@ -52,6 +58,16 @@ const MINT_SKIN: StatusSkin = {
 const STATUS_SKIN: Record<OnTrackResult["status"], StatusSkin> = {
   "on-track": MINT_SKIN,
   reached: MINT_SKIN,
+  // Violet, not amber: this is the brand's neutral "informational" tint.
+  // Nothing has gone wrong yet, so nothing here should read as a warning.
+  "not-started": {
+    card: "bg-violet-tint",
+    disc: "bg-violet-text",
+    text: "text-violet-text",
+    textSoft: "text-violet-text/90",
+    track: "bg-violet-text/20",
+    fill: "bg-violet-text",
+  },
   "at-risk": {
     card: "bg-tangerine-tint",
     disc: "bg-tangerine-text",

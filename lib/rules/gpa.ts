@@ -117,7 +117,15 @@ export function requiredAverage(
   return { value: Number(v.toFixed(2)), achievable: v <= 4.0 };
 }
 
-export type OnTrackStatus = "reached" | "on-track" | "at-risk" | "impossible";
+/**
+ * `not-started` means no completed credits yet — nothing has happened to be
+ * on or off track *of*. It exists because this case used to be reported as
+ * "at-risk": with doneCredits === 0 the required average is just the target
+ * itself, so any target above the 3.7 threshold made a brand-new account
+ * open on an amber "At risk" warning before the student had entered a
+ * single grade.
+ */
+export type OnTrackStatus = "reached" | "on-track" | "at-risk" | "impossible" | "not-started";
 
 export interface OnTrackResult {
   status: OnTrackStatus;
@@ -165,6 +173,15 @@ export function onTrackProgress(
   }
 
   const req = requiredAverage(targetGpa, doneCredits, remainingCredits, currentQP);
+
+  // Nothing completed yet: requiredAverage degenerates to the target itself,
+  // so judging it against the at-risk threshold says nothing about the
+  // student and everything about how ambitious their target is. Report the
+  // requirement without a verdict instead.
+  if (doneCredits === 0) {
+    return { status: "not-started", requiredAverage: req.value, remainingCredits, completedPct };
+  }
+
   const status: OnTrackStatus =
     req.value > 4 ? "impossible" : req.value > 3.7 ? "at-risk" : "on-track";
   return { status, requiredAverage: req.value, remainingCredits, completedPct };

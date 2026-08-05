@@ -368,6 +368,40 @@ describe("onTrackProgress", () => {
     const result = onTrackProgress(120, 130, 3.5, 468);
     expect(result.remainingCredits).toBe(0);
   });
+
+  // A tester opening a brand-new account saw an amber "At risk" warning on
+  // the GPA page before entering a single grade. With no completed credits
+  // the required average is just the target itself, so a target above the
+  // 3.7 at-risk threshold auto-classified every new account as at risk —
+  // the verdict described the ambition of the target, not the student.
+  describe("with no completed credits", () => {
+    it("reports not-started rather than a verdict it has no evidence for", () => {
+      const result = onTrackProgress(120, 0, 4.0, 0);
+      expect(result.status).toBe("not-started");
+    });
+
+    it("still reports the required average, which is simply the target", () => {
+      const result = onTrackProgress(120, 0, 4.0, 0);
+      expect(result.requiredAverage).toBeCloseTo(4.0, 5);
+      expect(result.remainingCredits).toBe(120);
+      expect(result.completedPct).toBe(0);
+    });
+
+    it("does not depend on how ambitious the target is", () => {
+      // The old behaviour split on the 3.7 threshold, so a 3.5 target
+      // looked "on track" and a 4.0 target looked "at risk" — for two
+      // accounts that had both done exactly nothing.
+      for (const target of [2.0, 3.5, 3.8, 4.0]) {
+        expect(onTrackProgress(120, 0, target, 0).status).toBe("not-started");
+      }
+    });
+
+    it("resumes real verdicts as soon as one credit is completed", () => {
+      // 3 credits at 4.0 (QP=12) against a 4.0 target: still achievable,
+      // and now there is actual evidence to judge.
+      expect(onTrackProgress(120, 3, 4.0, 12).status).not.toBe("not-started");
+    });
+  });
 });
 
 describe("gpaChartDomain", () => {
