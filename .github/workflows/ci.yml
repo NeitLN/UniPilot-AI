@@ -24,7 +24,22 @@ jobs:
           node-version: 22
           cache: "npm"
 
-      - run: npm ci
+      # `npm ci` cannot work here while the lock file is generated on
+      # Windows. The wasm32-wasi optional bindings (tailwind oxide, rolldown,
+      # unrs resolver) never resolve on Windows, so their peer deps
+      # (@emnapi/core, @emnapi/runtime, @emnapi/wasi-threads) are recorded
+      # only as declarations, never as installed entries — and npm on Linux
+      # refuses to install without them. Regenerating the lock from scratch
+      # did not fix it either: those peers float on ^ ranges and publish
+      # often, so the versions had already moved again by the next run
+      # (1.11.1 -> 1.11.3 between two pushes).
+      #
+      # `npm install` resolves at install time and works on both platforms.
+      # The cost is honest: CI no longer installs a byte-identical tree to a
+      # developer's. The real fix is to generate the lock on Linux — either
+      # in a container or by having a workflow commit it — at which point
+      # this should go back to `npm ci`.
+      - run: npm install --no-audit --no-fund
       # Formatting first, and enforced here rather than left to a pre-commit
       # habit: it went unchecked long enough for 302 of 599 files to drift out
       # of style, which made the documented `npm run format` a 300-file diff
@@ -83,7 +98,8 @@ jobs:
           node-version: 22
           cache: "npm"
 
-      - run: npm ci
+      # Same lock-file constraint as the quality job above.
+      - run: npm install --no-audit --no-fund
 
       # --with-deps pulls the OS-level libraries the browsers need; plain
       # ubuntu-latest runners don't have them preinstalled.
