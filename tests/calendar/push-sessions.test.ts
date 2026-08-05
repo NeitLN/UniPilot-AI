@@ -150,7 +150,11 @@ describe("pushConfirmedSessionsToCalendar", () => {
     expect(await promise).toEqual({ ok: true, pushed: 3 });
   });
 
-  it("reports a Google failure instead of throwing", async () => {
+  it("reports a Google failure instead of throwing, without leaking the raw error body", async () => {
+    // "quota exceeded" here stands in for whatever Google's API actually
+    // returns — often a raw JSON error object. It must never reach the
+    // student on the plan-confirmation screen verbatim; a fixed, readable
+    // sentence takes its place.
     vi.stubGlobal(
       "fetch",
       vi.fn(async () => ({
@@ -165,6 +169,31 @@ describe("pushConfirmedSessionsToCalendar", () => {
     const out = await pushConfirmedSessionsToCalendar(client as any, "u1", "p1");
 
     expect(out.ok).toBe(false);
-    if (!out.ok && out.reason === "push_error") expect(out.message).toContain("quota exceeded");
+    if (!out.ok && out.reason === "push_error") {
+      expect(out.message).not.toContain("quota exceeded");
+      expect(out.message).toBe(
+        "Couldn't push your plan to Google Calendar right now. Try again shortly.",
+      );
+    }
+  });
+
+  it("tells the student to reconnect when Google has revoked access, not to retry", async () => {
+    // getFreshAccessToken is what actually throws GoogleTokenRevokedError
+    // (it calls refreshAccessToken internally) — mocked directly here since
+    // this suite mocks the whole sync module rather than fetch for the
+    // refresh path.
+    const { GoogleTokenRevokedError } = await import("@/lib/calendar/oauth");
+    getFreshAccessToken.mockRejectedValueOnce(new GoogleTokenRevokedError());
+    const client = makeClient(SESSIONS);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const out = await pushConfirmedSessionsToCalendar(client as any, "u1", "p1");
+
+    expect(out.ok).toBe(false);
+    if (!out.ok && out.reason === "push_error") {
+      expect(out.message).toBe(
+        "Google Calendar access was disconnected. Reconnect to keep syncing.",
+      );
+    }
   });
 });

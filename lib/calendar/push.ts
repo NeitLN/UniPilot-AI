@@ -2,7 +2,9 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
 import { getFreshAccessToken } from "./sync";
+import { GoogleTokenRevokedError } from "./oauth";
 import { buildCalendarEventBody, type GoogleCalendarEventBody } from "./map";
+import { reportError } from "@/lib/observability/report";
 
 const EVENTS_ENDPOINT = "https://www.googleapis.com/calendar/v3/calendars/primary/events";
 
@@ -97,7 +99,17 @@ export async function pushConfirmedSessionsToCalendar(
 
     return { ok: true, pushed };
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Unknown push error";
+    // Same reasoning as lib/calendar/sync.ts: most failures here carry
+    // Google's raw OAuth/API error body as .message, which is not fit to
+    // show on the confirmation screen. GoogleTokenRevokedError already
+    // carries a message written for a person.
+    const message =
+      err instanceof GoogleTokenRevokedError
+        ? err.message
+        : "Couldn't push your plan to Google Calendar right now. Try again shortly.";
+    if (!(err instanceof GoogleTokenRevokedError)) {
+      await reportError(err, { source: "calendar.push", userId });
+    }
     return { ok: false, reason: "push_error", message };
   }
 }

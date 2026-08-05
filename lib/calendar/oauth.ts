@@ -23,6 +23,21 @@ function env(name: string): string {
   return value;
 }
 
+/**
+ * Google's refresh token was revoked or expired (the user disconnected the
+ * app from their Google Account settings, changed their password, or it
+ * simply idled past Google's inactivity limit). Distinct from every other
+ * failure mode here because the fix is not "retry" — it's "reconnect": no
+ * refresh call will ever succeed again until the user goes through the
+ * consent screen and a new refresh token is issued.
+ */
+export class GoogleTokenRevokedError extends Error {
+  constructor() {
+    super("Google Calendar access was disconnected. Reconnect to keep syncing.");
+    this.name = "GoogleTokenRevokedError";
+  }
+}
+
 export interface GoogleTokenResponse {
   access_token: string;
   expires_in: number;
@@ -80,7 +95,23 @@ export async function refreshAccessToken(
   });
 
   if (!res.ok) {
-    throw new Error(`Google token refresh failed: ${await res.text()}`);
+    const body = await res.text();
+    // Google's OAuth error responses are {"error": "...", ...} — parsed
+    // rather than string-matched so a coincidental substring elsewhere in
+    // the payload can't misclassify a different failure as a revocation.
+    let code: unknown;
+    try {
+      code = (JSON.parse(body) as { error?: unknown }).error;
+    } catch {
+      // Not JSON — fall through to the generic error below.
+    }
+    if (code === "invalid_grant") {
+      throw new GoogleTokenRevokedError();
+    }
+    // Every other failure (network blip, Google outage, a scope Google
+    // rejects) — logged with the real detail server-side, never shown to
+    // the user verbatim (that's lib/calendar/sync.ts's job).
+    throw new Error(`Google token refresh failed: ${body}`);
   }
   return res.json();
 }

@@ -1,7 +1,8 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
-import { refreshAccessToken } from "./oauth";
+import { refreshAccessToken, GoogleTokenRevokedError } from "./oauth";
+import { reportError } from "@/lib/observability/report";
 import { decryptToken } from "./tokenCrypto";
 import { mapGoogleEventToClassBlock, type GoogleCalendarEvent } from "./map";
 
@@ -64,7 +65,19 @@ export async function syncCalendarForUser(
 
     return { ok: true, eventCount: rows.length };
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Unknown sync error";
+    // `err.message` for most failures here is Google's raw OAuth/API error
+    // body (see oauth.ts) — never fit to store as something a student reads
+    // on the Schedule page. GoogleTokenRevokedError is the one case whose
+    // .message is already written for a person; everything else collapses
+    // to one generic sentence, with the real detail sent to the server log
+    // instead of the row the UI reads.
+    const message =
+      err instanceof GoogleTokenRevokedError
+        ? err.message
+        : "Couldn't sync Google Calendar right now. Try again shortly.";
+    if (!(err instanceof GoogleTokenRevokedError)) {
+      await reportError(err, { source: "calendar.sync", userId });
+    }
     // Cache in class_blocks is intentionally left alone here (BR-03).
     await supabase
       .from("google_calendar_connections")
