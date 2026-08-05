@@ -66,15 +66,21 @@ Lý do đưa 2.1 và 2.2 lên đầu dù chúng thuộc nhóm "nâng cấp": hi�
 
 **Phát sinh ngoài lộ trình:** dark mode có 49 lỗi contrast thật (audit ghi là *chưa kiểm được*). Đã sửa toàn bộ và thêm test hồi quy đo thật trên 10 route.
 
-**Số liệu:** 440 unit test (từ 327), 38 file test (từ 26), 47 e2e. tsc, lint và build sạch.
+**Số liệu:** 451 unit test (từ 327), 40 file test (từ 26), 47 e2e. tsc, lint và build sạch.
 
-**Phần 3: đã làm 3.4.** Các bước còn lại (3.1, 3.2, 3.3, 3.5) là đặt cược sản phẩm cần bạn quyết trước khi viết code. Chọn 3.4 trước vì nó gần một lỗi UX hơn là tính năng mới.
+**Phần 3 đã xử lý hết.** Chi tiết từng bước bên dưới — gồm cả hai bước tôi kết luận là **không nên làm**.
 
 | Bước | Trạng thái | Ghi chú |
 |---|---|---|
 | 3.4 | xong một nửa | **Luận điểm gốc sai một phần** — onboarding *có* thu `weekly_availability_hours` (bước 1), nên AI Planner không hề bị chặn. Ngõ cụt thật chỉ nằm ở thẻ "On track". Đã sửa theo vế thứ hai của đề xuất (thẻ tự nói ra thứ nó thiếu); vế "onboarding thu thêm 2 trường" vẫn để ngỏ vì đó là quyết định sản phẩm |
 | 3.2 | xong | Nhắc giữa tuần khi bám kế hoạch tụt dưới 50%. Chống trùng bằng unique index — **bản partial đầu tiên của tôi sai**, Postgres không suy ra được nên mọi insert đều ném lỗi; phát hiện bằng cách thử trên DB thật chứ mock unit test không bắt được |
-| 3.1 / 3.3 / 3.5 | chưa bắt đầu | chờ bạn quyết |
+| 3.1 | xong một phần | **Luận điểm sai** — Dashboard *đã có* HUD "Weekly balance" nổi bật. Thứ thiếu thật là **delta**, đã thêm |
+| 3.3 | **không làm — cố ý** | **Luận điểm sai gần hết.** `TodaySection` đã gộp lớp học + phiên học của kế hoạch đã xác nhận vào một dòng thời gian, có trạng thái "Now"/"In N min"; deadline nằm ở "Due soon" ngay phía trên. Việc **loại deadline khỏi dòng thời gian** là quyết định có chủ đích, đã ghi rõ trong comment: *"a deadline isn't a block of time you can look at and know what you're doing at 10:30."* Xây theo đề xuất sẽ là ghi đè một quyết định đã cân nhắc |
+| 3.5 | xong (quyết định) | **Không thêm cột.** Giữ một nhãn `Completed` trung thực; ghi quyết định vào `docs/DESIGN_PIXEL_MATCH_GAP_REVIEW.md` (W9) và vào chính component |
+
+**Phát sinh ngoài lộ trình (đợt 3):** hai công tắc thông báo `weekly_report` và `focus_reminders` là **công tắc chết** — không có gì đọc chúng, bật/tắt không đổi hành vi nào. Đã bỏ khỏi giao diện (giữ cột, không mất dữ liệu) và thêm guard: mọi category còn hiển thị phải được đọc bởi code giao thông báo, không tính UI settings. Đã chứng minh guard bắt được bằng cách thêm lại một công tắc chết.
+
+**Tổng kết Phần 3:** 5 bước → 3 bước làm (3.1, 3.2, 3.4), 1 bước là quyết định không làm (3.5), 1 bước cố ý không làm vì luận điểm sai (3.3). **4/5 luận điểm gốc của audit sai hoặc nói quá** — chỉ 3.2 đúng nguyên vẹn. Đây là lý do tôi kiểm chứng trước khi xây ở từng bước.
 
 **Phát sinh ngoài lộ trình (đợt 2):** chỉ báo giờ hiện tại của `/schedule` rớt contrast dark mode (2.61:1). Test hồi quy 10 route trước đó không bắt được vì nhãn này chỉ render khi giờ hiện tại nằm trong khung 08:00–20:00 — lần chạy trước rơi ngoài khung.
 
