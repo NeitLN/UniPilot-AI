@@ -8,6 +8,7 @@ import {
 } from "@/app/(app)/assignments/actions";
 import { ensurePushSubscription } from "@/lib/push/subscribe";
 import { enqueueMutation } from "@/lib/offline/idb";
+import { useQueueOwner } from "@/components/offline/QueueOwnerProvider";
 import { useOnlineStatus } from "@/lib/offline/useOnlineStatus";
 import { REPEAT_OPTIONS, type EventRepeat } from "@/lib/rules/event";
 import { FieldError } from "@/components/ui/FieldError";
@@ -59,6 +60,9 @@ export function AssignmentForm({
   onSaved,
   onCancel,
 }: AssignmentFormProps) {
+  // OFF-001: an offline edit is stored against its author, so it can never
+  // be replayed into whichever account is signed in when connectivity returns.
+  const queueOwner = useQueueOwner();
   const isEdit = Boolean(initialValues);
   const action = isEdit
     ? updateAssignment.bind(null, initialValues!.id)
@@ -106,13 +110,17 @@ export function AssignmentForm({
     }
 
     if (isEdit) {
-      await enqueueMutation("updateAssignment", {
-        id: initialValues!.id,
-        snapshotUpdatedAt: initialValues!.updatedAt,
-        ...payload,
-      });
+      await enqueueMutation(
+        "updateAssignment",
+        {
+          id: initialValues!.id,
+          snapshotUpdatedAt: initialValues!.updatedAt,
+          ...payload,
+        },
+        queueOwner,
+      );
     } else {
-      await enqueueMutation("createAssignment", payload);
+      await enqueueMutation("createAssignment", payload, queueOwner);
     }
 
     onSaved();

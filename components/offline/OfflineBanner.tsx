@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getQueuedMutations } from "@/lib/offline/idb";
 import { flushQueue } from "@/lib/offline/queue";
+import { useQueueOwner } from "@/components/offline/QueueOwnerProvider";
 
 // How often to re-check `navigator.onLine` while a mutation is queued. The
 // `online` window event is the primary trigger, but it can race a listener
@@ -17,23 +18,34 @@ export function OfflineBanner() {
   const [conflictCount, setConflictCount] = useState(0);
   const [syncedMessage, setSyncedMessage] = useState<string | null>(null);
   const queueCountRef = useRef(0);
+  // OFF-001: every read and every replay is scoped to this account, so a
+  // queue left behind by whoever used the browser before is neither counted
+  // here nor sent to the server under this session.
+  const queueOwner = useQueueOwner();
 
   const refreshQueueCount = useCallback(async () => {
-    const queue = await getQueuedMutations();
+    const queue = await getQueuedMutations(queueOwner);
     queueCountRef.current = queue.length;
     setQueueCount(queue.length);
-  }, []);
+  }, [queueOwner]);
 
   const attemptFlush = useCallback(async () => {
     if (!navigator.onLine) return;
-    const { synced, conflicts } = await flushQueue();
+    const { synced, conflicts, dropped } = await flushQueue(queueOwner);
     await refreshQueueCount();
     setConflictCount(conflicts);
-    if (synced > 0) {
-      setSyncedMessage(`Synced ${synced} offline change${synced === 1 ? "" : "s"}.`);
+    if (synced > 0 || dropped > 0) {
+      const parts = [];
+      if (synced > 0) parts.push(`Synced ${synced} offline change${synced === 1 ? "" : "s"}.`);
+      // Saying so matters: the alternative is a change quietly disappearing
+      // after the banner spent days claiming it was waiting to sync.
+      if (dropped > 0) {
+        parts.push(`${dropped} couldn't be saved and ${dropped === 1 ? "was" : "were"} discarded.`);
+      }
+      setSyncedMessage(parts.join(" "));
       setTimeout(() => setSyncedMessage(null), 5000);
     }
-  }, [refreshQueueCount]);
+  }, [refreshQueueCount, queueOwner]);
 
   useEffect(() => {
     // Syncing from browser-only state (navigator.onLine, IndexedDB) on mount —

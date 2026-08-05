@@ -17,6 +17,7 @@ import {
   SHORT_BREAK_SECONDS,
 } from "@/lib/rules/focus";
 import { enqueueMutation } from "@/lib/offline/idb";
+import { useQueueOwner } from "@/components/offline/QueueOwnerProvider";
 import { FOCUS_TRACKS } from "@/lib/audio/focus-tracks";
 import { FOCUS_SESSION_STORAGE_KEY as STORAGE_KEY } from "@/lib/focus/local-session";
 
@@ -113,6 +114,7 @@ export function FocusTimer({
   defaultDurationMinutes?: number;
 }) {
   const router = useRouter();
+  const queueOwner = useQueueOwner();
   const searchParams = useSearchParams();
   const [session, setSession] = useState<StoredSession | null>(null);
   // Seeded from Settings' Study preferences (profiles.default_focus_minutes);
@@ -180,7 +182,9 @@ export function FocusTimer({
     } else {
       // No network to reach the server action — queue it so the completed
       // cycle isn't lost, synced the moment the browser comes back online.
-      await enqueueMutation("logFocusSession", input);
+      // Tagged with its author (OFF-001) so a shared browser can never log
+      // this session into the next student's account.
+      await enqueueMutation("logFocusSession", input, queueOwner);
     }
     setPending(false);
     router.refresh();

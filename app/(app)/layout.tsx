@@ -8,6 +8,7 @@ import { SemesterLabel, SemesterLabelSkeleton } from "@/components/dashboard/Sem
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import { OfflineBanner } from "@/components/offline/OfflineBanner";
+import { QueueOwnerProvider } from "@/components/offline/QueueOwnerProvider";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -16,7 +17,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     data: { user },
   } = await supabase.auth.getUser();
 
+  // OFF-001: the offline queue must know whose mutations it is holding.
+  // `user` is already resolved here, so the id is handed to the client tree
+  // once rather than fetched again by each component that queues.
   return (
+    <QueueOwnerProvider userId={user?.id ?? ""}>
     <div className="flex min-h-[calc(100vh/var(--app-zoom))] w-full">
       {/* A-01: without this, keyboard/screen-reader users had to tab past
           the sidebar's 8 nav links + sign-out + notification bell (11 tabs)
@@ -77,6 +82,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <MobileBottomNav />
       </div>
     </div>
+    </QueueOwnerProvider>
   );
 }
 
