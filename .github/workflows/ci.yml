@@ -25,6 +25,11 @@ jobs:
           cache: "npm"
 
       - run: npm ci
+      # Formatting first, and enforced here rather than left to a pre-commit
+      # habit: it went unchecked long enough for 302 of 599 files to drift out
+      # of style, which made the documented `npm run format` a 300-file diff
+      # that would bury whatever change was actually under review.
+      - run: npm run format:check
       - run: npm run lint
       - run: npx tsc --noEmit
       - run: npm test
