@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import Link from "next/link";
 import { FieldError } from "@/components/ui/FieldError";
+import { FieldSuccess } from "@/components/ui/FieldSuccess";
 import { login, signup, type AuthFormState } from "./actions";
 
 const initialState: AuthFormState = {};
@@ -83,6 +84,12 @@ export function LoginForm() {
         )}
 
         {state?.error && <FieldError className="text-left text-xs">{state.error}</FieldError>}
+        {/* Sign-up can succeed without signing anyone in — email confirmation
+            pending, or the address already has an account. Both used to
+            redirect and bounce silently back to this form. */}
+        {state?.notice && (
+          <FieldSuccess className="text-left text-xs">{state.notice}</FieldSuccess>
+        )}
 
         <button
           type="submit"
