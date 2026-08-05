@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { ClipboardList, AlertTriangle, FileBarChart, CalendarCheck, Clock } from "lucide-react";
+import { ClipboardList, AlertTriangle, CalendarCheck } from "lucide-react";
 import {
   updateNotificationPreference,
   type NotificationCategory,
@@ -32,26 +32,21 @@ const CATEGORIES: {
     icon: AlertTriangle,
     tone: "tangerine",
   },
-  {
-    key: "weekly_report",
-    label: "Weekly report",
-    hint: "A recap of your week, once it's ready.",
-    icon: FileBarChart,
-    tone: "mint",
-  },
+  // "Weekly report" and "Focus reminders" used to sit here. Both were dead:
+  // nothing anywhere read `weekly_report` or `focus_reminders`, so the
+  // switches saved a value and then changed nothing at all. A control that
+  // does nothing is worse than a missing one — it spends the user's trust
+  // and then quietly fails to deliver what it promised, with no way to tell.
+  //
+  // The columns are left in place (no migration, no data lost), so when
+  // either feature ships its toggle comes straight back with whatever the
+  // user had already chosen.
   {
     key: "plan_nudges",
     label: "Plan check-ins",
     hint: "Mid-week, if you're falling behind your study plan.",
     icon: CalendarCheck,
     tone: "coral",
-  },
-  {
-    key: "focus_reminders",
-    label: "Focus reminders",
-    hint: "Gentle prompts to start a focus session.",
-    icon: Clock,
-    tone: "sky",
   },
 ];
 

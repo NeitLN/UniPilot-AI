@@ -96,7 +96,7 @@ test.describe("Settings", () => {
 
   test("notifications: category toggle persists across reload", async ({ page }) => {
     await page.goto("/settings");
-    const toggle = page.getByRole("switch", { name: "Focus reminders" });
+    const toggle = page.getByRole("switch", { name: "Plan check-ins" });
     const before = await toggle.getAttribute("aria-checked");
 
     await toggle.click();
@@ -108,14 +108,14 @@ test.describe("Settings", () => {
     await expect(toggle).toBeEnabled();
 
     await page.reload();
-    await expect(page.getByRole("switch", { name: "Focus reminders" })).toHaveAttribute(
+    await expect(page.getByRole("switch", { name: "Plan check-ins" })).toHaveAttribute(
       "aria-checked",
       before === "true" ? "false" : "true",
     );
 
     // Restore.
-    await page.getByRole("switch", { name: "Focus reminders" }).click();
-    await expect(page.getByRole("switch", { name: "Focus reminders" })).toHaveAttribute(
+    await page.getByRole("switch", { name: "Plan check-ins" }).click();
+    await expect(page.getByRole("switch", { name: "Plan check-ins" })).toHaveAttribute(
       "aria-checked",
       before ?? "true",
     );
