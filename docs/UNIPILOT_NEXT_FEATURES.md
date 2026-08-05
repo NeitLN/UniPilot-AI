@@ -10,11 +10,11 @@
 
 **Làm 3 tính năng. Không làm 5 tính năng.**
 
-| #      | Tính năng                                                           | Vì sao                                                 | Effort |
-| ------ | ------------------------------------------------------------------- | ------------------------------------------------------ | ------ |
-| **F1** | **Quick capture** — thêm bài tập chỉ với tiêu đề + hạn nộp          | Hành động thường xuyên nhất đang có form nặng nhất     | **S**  |
-| **F2** | **Nhắc cập nhật tiến độ sau phiên Focus**                           | Hai tính năng dùng nhiều nhất không hề nối với nhau    | **M**  |
-| **F3** | **Dự báo điểm theo từng môn** — "cần bao nhiêu điểm ở phần còn lại" | Câu hỏi phổ biến nhất của sinh viên, dữ liệu đã có sẵn | **M**  |
+| #      | Tính năng                                                                 | Vì sao                                              | Effort |
+| ------ | ------------------------------------------------------------------------- | --------------------------------------------------- | ------ |
+| **F1** | **Quick capture** — thêm bài tập chỉ với tiêu đề + hạn nộp                | Hành động thường xuyên nhất đang có form nặng nhất  | **S**  |
+| **F2** | **Nhắc cập nhật tiến độ sau phiên Focus**                                 | Hai tính năng dùng nhiều nhất không hề nối với nhau | **M**  |
+| **F3** | **Dự báo GPA theo môn sắp học** — "cần bao nhiêu điểm mỗi môn để đạt 3.6" | Biến con số GPA trừu tượng thành mục tiêu từng môn  | **M**  |
 
 Điểm chung của cả ba: **không mở bề mặt mới**. F1 và F2 gỡ bỏ ma sát trên luồng đã có; F3 dùng đúng dữ liệu đã thu thập. Không có tính năng nào cần bảng mới, không có tính năng nào cần gọi AI thêm.
 
@@ -71,13 +71,23 @@ Bối cảnh thật: giảng viên nói "bài luận nộp thứ Sáu tuần sau
 
 Thêm nữa, nút "Add assignment" **chỉ tồn tại trên trang `/assignments`** — không có trên Dashboard, không có trên Schedule.
 
-#### Khoảng trống 3 — Không trả lời được câu hỏi phổ biến nhất
+#### Khoảng trống 3 — Con số GPA đúng nhưng không hành động được
 
-`predictedCourseScore` (`lib/rules/gpa.ts:259`) chỉ tính trung bình **những gì đã có điểm**. Không có hàm nào trả lời: _"tôi cần bao nhiêu điểm ở phần còn lại để đạt 80% môn này?"_
+App **đã** biết trả lời "cần trung bình bao nhiêu". `requiredAverage` (`lib/rules/gpa.ts:110`) tính ra con số đó, và `OnTrackCard` hiển thị nó:
 
-`requiredAverage` có tồn tại — nhưng ở **cấp GPA toàn khoá**, tức "cần trung bình 3.6 cho các tín chỉ còn lại". Đó là con số trừu tượng. Còn "cần 78% bài cuối kỳ để giữ điểm A môn Cấu trúc dữ liệu" là con số **hành động được ngay**.
+> _"You need a 3.60 average across your remaining credits."_
 
-Dữ liệu đã có đủ: mỗi assignment có `weight` và `score`.
+Con số này **đúng về toán học nhưng vô dụng về hành động**. Sinh viên không học "các tín chỉ còn lại" — họ học **Giải thuật, Xác suất, Tiếng Anh**, mỗi môn một số tín chỉ khác nhau. Câu hỏi thật của họ là: _"vậy môn Giải thuật tôi phải được mấy điểm?"_
+
+App đã có đủ dữ liệu để trả lời mà chưa dùng:
+
+| Dữ liệu                          | Ở đâu                                       | Dùng để                             |
+| -------------------------------- | ------------------------------------------- | ----------------------------------- |
+| GPA hiện tại + tín chỉ đã tính   | `grades.grade_point`, `grades.credit_hours` | Điểm xuất phát                      |
+| Môn sắp học + số tín chỉ mỗi môn | `courses.credits` (có `CHECK credits > 0`)  | Chia mục tiêu theo trọng số tín chỉ |
+| Mục tiêu GPA                     | `profiles.target_gpa`                       | Đích đến                            |
+
+**Cách nhận biết môn nào "sắp học":** `grades` có ràng buộc `UNIQUE (user_id, course_id, semester)`. Môn nào chưa có dòng điểm tương ứng thì chưa học xong. Không cần thêm cột, không cần sinh viên nhập lại gì.
 
 ### 1.3. Còn một khoảng trống từ audit trước, chưa làm
 
@@ -140,8 +150,8 @@ Hiện sau khi hoàn thành một chu kỳ, app chỉ nói **"Cycle logged — b
 **Persona C — bám GPA**
 
 - Thích nhất: dự báo GPA
-- Vấp: biết "cần trung bình 3.6 các tín chỉ còn lại" nhưng **không biết phải làm gì với con số đó tuần này**
-- Nhu cầu: _quy đổi mục tiêu về hành động cụ thể của từng môn_
+- Vấp: biết "cần trung bình 3.6 các tín chỉ còn lại" nhưng **không biết phải làm gì với con số đó** — không ai học "tín chỉ còn lại", người ta học Giải thuật và Xác suất
+- Nhu cầu: _quy đổi mục tiêu GPA về điểm cần đạt ở từng môn cụ thể đang học_
 
 ### 2.3. Kết luận UX
 
@@ -211,34 +221,60 @@ Hết 25 phút
 
 **Nguyên tắc quan trọng — không tự đoán:** app **không** tự suy ra tiến độ từ thời gian học. Học 2 tiếng không có nghĩa là xong 50%. App chỉ **bỏ đi 6 bước điều hướng**, còn con số vẫn do sinh viên quyết.
 
-### 3.3. F3 — Dự báo điểm theo môn
+### 3.3. F3 — Dự báo GPA theo môn sắp học
 
-**Vị trí:** thẻ mới trong modal chi tiết môn học (`/courses` → bấm vào một môn), không phải trang mới.
+**Vị trí:** thẻ mới trên trang `/gpa`, đặt **ngay dưới `OnTrackCard`** — vì nó chính là phần trả lời tiếp cho con số mà thẻ kia vừa nêu. Không phải trang mới.
 
 ```
-┌────────────────────────────────────────────────┐
-│  Dự báo điểm — Cấu trúc dữ liệu                │
-│                                                │
-│  Đã chấm      60% trọng số   →  trung bình 82% │
-│  Còn lại      40% trọng số   →  chưa chấm      │
-│                                                │
-│  Muốn kết thúc ở:   [ 80 ]%                    │
-│                                                │
-│  →  Cần đạt  77%  ở phần còn lại               │
-│      "Trong tầm với."                          │
-└────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────┐
+│  Cần bao nhiêu điểm mỗi môn?                             │
+│                                                          │
+│  Hiện tại   GPA 3.40  ·  9 tín chỉ đã tính               │
+│  Mục tiêu   [ 3.6 ]                                      │
+│                                                          │
+│  →  Cần 3.80 ở mỗi môn dưới đây                          │
+│                                                          │
+│  ┌────────────────────────────────────────────────────┐  │
+│  │ CS302  Giải thuật      4 tín   [ 3.80 ]      🔓   │  │
+│  │ MA201  Xác suất        3 tín   [ 3.80 ]      🔓   │  │
+│  │ EN101  Tiếng Anh       2 tín   [ 3.80 ]      🔓   │  │
+│  └────────────────────────────────────────────────────┘  │
+│                                                          │
+│  9 tín chỉ từ 3 môn chưa có điểm                         │
+└──────────────────────────────────────────────────────────┘
 ```
 
-**Bốn trạng thái:**
+**Sau khi sinh viên khoá một môn** (bấm 🔓 → 🔒, tự nhập điểm mình tin là đạt được):
 
-| Trạng thái        | Điều kiện                      | Hiển thị                                                                                             |
-| ----------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------- |
-| Bình thường       | cần ≤ 100%                     | Số cần đạt + đánh giá                                                                                |
-| Không thể         | cần > 100%                     | "Không thể đạt bằng phần còn lại" — nêu mức cao nhất có thể                                          |
-| Đã chắc chắn      | đạt kể cả khi phần còn lại = 0 | "Đã chắc suất — kể cả bỏ trống phần còn lại"                                                         |
-| **Thiếu dữ liệu** | tổng trọng số ≠ 100 (±2)       | Không hiện dự báo. Thay bằng: "Trọng số các bài mới cộng được 60%. Thêm phần còn lại để xem dự báo." |
+```
+│  →  Cần 3.64 ở 2 môn còn lại                             │
+│                                                          │
+│  │ CS302  Giải thuật      4 tín   [ 4.00 ]      🔒   │   │  ← đã khoá
+│  │ MA201  Xác suất        3 tín   [ 3.64 ]      🔓   │   │  ← tính lại
+│  │ EN101  Tiếng Anh       2 tín   [ 3.64 ]      🔓   │   │  ← tính lại
+```
 
-Trạng thái thứ tư là quan trọng nhất — xem mục 4.3.
+> Bộ số trên **đã kiểm chứng bằng công thức thật**, không phải minh hoạ ước chừng: GPA 3.40 trên 9 tín, mục tiêu 3.6, 9 tín sắp tới → cần 3.80/môn; khoá môn 4 tín ở 4.0 → hai môn còn lại thành 3.64, và GPA kết thúc đúng 3.600. Mức cao nhất có thể đạt trong ví dụ này là 3.70.
+
+**Chi tiết thiết kế:**
+
+- Mặc định **mọi môn cùng một mức** — đó là câu trả lời trung thực khi chưa biết gì thêm về từng môn.
+- Khoá một môn = "tôi tin môn này được 4.0". Các môn chưa khoá **tự tính lại ngay**, không cần bấm nút.
+- Số tín chỉ hiển thị cạnh mỗi môn, vì đó là lý do các con số **không** bằng nhau khi đã khoá — môn 4 tín kéo GPA mạnh hơn môn 2 tín.
+- Dòng cuối luôn ghi **tổng tín chỉ và số môn đang tính**, để sinh viên phát hiện ngay nếu thiếu môn (xem §4.3).
+- Mục tiêu GPA lấy từ `profiles.target_gpa`, chỉnh được ngay tại chỗ mà **không lưu** — giống What-if của `ForecastCard` đã làm.
+
+**Năm trạng thái:**
+
+| Trạng thái      | Điều kiện                | Hiển thị                                                                                        |
+| --------------- | ------------------------ | ----------------------------------------------------------------------------------------------- |
+| Bình thường     | cần ≤ 4.0                | Điểm cần cho từng môn                                                                           |
+| Không thể       | cần > 4.0                | "Không đạt được 3.6 với 9 tín chỉ này — cao nhất có thể là 3.55"                                |
+| Đã chắc suất    | cần ≤ 0                  | "Đã chắc — kể cả rớt hết các môn này bạn vẫn trên 3.6"                                          |
+| Chưa có môn nào | không môn nào thiếu điểm | "Thêm môn học kỳ tới vào Courses để xem cần bao nhiêu điểm"                                     |
+| Đã khoá hết     | mọi môn đều khoá         | Không hiện "cần bao nhiêu" nữa, mà hiện **GPA kết quả**: "Với các điểm này bạn kết thúc ở 3.58" |
+
+**Điểm quan trọng — trạng thái 4 không phải lỗi.** Sinh viên chưa nhập môn kỳ sau là chuyện bình thường; thẻ này chỉ nói cần thêm gì, không cảnh báo.
 
 ---
 
@@ -286,34 +322,48 @@ Bài có `weight = 0` **không làm sai lệch** dự báo điểm — nó chỉ
 
 3. **Assignment bị xoá giữa phiên.** Nếu bài bị xoá trong lúc đang học, hộp thoại phải **không hiện** thay vì lỗi. Kiểm tra `assignmentId` còn nằm trong danh sách hiện tại trước khi render.
 
-### 4.3. F3 — Dự báo điểm theo môn · Rủi ro **TRUNG BÌNH** ⚠️
+### 4.3. F3 — Dự báo GPA theo môn · Rủi ro **THẤP**
 
-Đây là tính năng duy nhất có rủi ro thật, và rủi ro nằm ở **tính đúng đắn của con số**, không phải ở kỹ thuật.
+Bản này **an toàn hơn hẳn** bản dự báo theo trọng số bài tập đã bị loại (xem §6). Toàn bộ đầu vào đều là số sinh viên đã tự nhập, không có suy đoán nào.
 
-**Vấn đề:** công thức cần biết _"còn bao nhiêu trọng số chưa chấm"_. App chỉ biết trọng số của **những bài sinh viên đã nhập**.
+**Công thức** — chính là `requiredAverage` đã có, không cần hàm toán mới:
 
-Nếu tổng trọng số các bài đã nhập là **60%**, có hai khả năng hoàn toàn khác nhau:
+```
+tổngTínChỉ    = tínChỉĐãTính + Σ(tín chỉ mọi môn chưa có điểm)
+qpĐãBiết      = qpHiệnTại + Σ(điểm khoá × tín chỉ)   ← môn đã khoá
+tínChỉChưaKhoá = Σ(tín chỉ các môn chưa khoá)
 
-- Sinh viên **chưa nhập hết** bài tập (còn 40% ở các bài chưa ghi) → dự báo sẽ **sai**
-- Môn học **chỉ tính 60%** qua bài tập, 40% còn lại là chuyên cần/thi vấn đáp → dự báo cũng **sai**
+điểmCầnMỗiMôn = (mụcTiêu × tổngTínChỉ − qpĐãBiết) ÷ tínChỉChưaKhoá
+```
 
-App không thể phân biệt hai trường hợp này.
+Đây đúng là `requiredAverage(mụcTiêu, tínChỉĐãTính + tínChỉĐãKhoá, tínChỉChưaKhoá, qpĐãBiết)` — hàm đã tồn tại và **đã có test**. Việc khoá môn chỉ là chuyển tín chỉ và quality point của môn đó từ vế "còn lại" sang vế "đã biết".
 
-**Cách xử lý bắt buộc:** chỉ hiển thị dự báo khi tổng trọng số nằm trong khoảng **98–102%**. Ngoài khoảng đó, **không đoán** — hiện thông báo yêu cầu bổ sung trọng số.
+**Sáu trường hợp biên phải xử lý:**
 
-> Đây chính là nguyên tắc đã áp dụng ở quyết định PROD-05 (`docs/DESIGN_PIXEL_MATCH_GAP_REVIEW.md` W9): **không bịa nhãn từ dữ liệu không tồn tại**. Một dự báo điểm sai còn nguy hiểm hơn không có dự báo — sinh viên có thể dựa vào đó mà học ít đi.
+| Trường hợp          | Xảy ra khi                                 | Xử lý                                                         |
+| ------------------- | ------------------------------------------ | ------------------------------------------------------------- |
+| Chia cho 0          | `tínChỉChưaKhoá = 0` (khoá hết môn)        | Không tính "cần bao nhiêu" — hiện **GPA kết quả** thay thế    |
+| Không có môn nào    | Mọi môn đều đã có điểm                     | Trạng thái rỗng, không phải lỗi                               |
+| Cần > 4.0           | Mục tiêu quá cao so với số tín chỉ còn lại | Nêu mức cao nhất có thể đạt                                   |
+| Cần ≤ 0             | Đã chắc suất                               | "Kể cả rớt hết vẫn trên mục tiêu"                             |
+| Chưa có điểm nào    | `tínChỉĐãTính = 0`                         | Công thức vẫn đúng: cần đúng bằng mục tiêu ở mọi môn          |
+| Điểm khoá ngoài 0–4 | Sinh viên gõ 5                             | Chặn ở input, cùng ràng buộc `CHECK (grade_point 0–4)` của DB |
 
-**Không cần schema mới:** mục tiêu điểm nhập trực tiếp trên thẻ (giống What-if simulator của GPA đã làm), không lưu vào DB.
+**Rủi ro thật duy nhất — danh sách môn không đầy đủ.** Nếu sinh viên mới nhập 2 trong 5 môn kỳ tới, dự báo sẽ tính trên 2 môn và ra con số sai.
+
+Khác với bản bị loại, rủi ro này **nhìn thấy được và tự sửa được**: thẻ luôn ghi rõ _"9 tín chỉ từ 3 môn chưa có điểm"_ ngay dưới danh sách. Sinh viên biết mình học 5 môn sẽ lập tức thấy con số không khớp và vào Courses thêm. Còn ở bản trọng số bài tập, không cách nào biết "60% này là do thiếu bài hay do môn chỉ tính 60%".
+
+**Không cần schema mới:** mục tiêu và điểm khoá đều là trạng thái tạm trên client, không lưu DB — giống What-if simulator của `ForecastCard` đã làm.
 
 ### 4.4. Bảng tổng hợp rủi ro
 
-|     | Migration | Action mới | Gọi AI | Rủi ro chính                              |
-| --- | --------- | ---------- | ------ | ----------------------------------------- |
-| F1  | Không     | Không      | Không  | Prompt AI hiểu nhầm `weight 0`            |
-| F2  | Không     | Không      | Không  | Offline queue + xung đột                  |
-| F3  | Không     | Không      | Không  | **Dự báo sai khi trọng số không đủ 100%** |
+|     | Migration | Action mới | Gọi AI | Ghi DB    | Rủi ro chính                                     |
+| --- | --------- | ---------- | ------ | --------- | ------------------------------------------------ |
+| F1  | Không     | Không      | Không  | Có        | Prompt AI hiểu nhầm `weight 0`                   |
+| F2  | Không     | Không      | Không  | Có        | Offline queue + xung đột                         |
+| F3  | Không     | Không      | Không  | **Không** | Danh sách môn thiếu → số sai, nhưng tự thấy được |
 
-Không tính năng nào cần bảng mới, cột mới, hay chi phí API tăng thêm.
+Không tính năng nào cần bảng mới, cột mới, hay chi phí API tăng thêm. **F3 không ghi gì vào DB** — nó chỉ đọc và tính, nên không có rủi ro làm hỏng dữ liệu.
 
 ---
 
@@ -322,27 +372,30 @@ Không tính năng nào cần bảng mới, cột mới, hay chi phí API tăng 
 ### 5.1. Thứ tự thực hiện
 
 ```
-F1 (Quick capture)  →  F2 (Nhắc tiến độ)  →  F3 (Dự báo môn)
-     S                      M                     M
+F1 (Quick capture)  →  F2 (Nhắc tiến độ)  →  F3 (Dự báo GPA theo môn)
+     S                      M                        M
 ```
 
 **Vì sao thứ tự này:**
 
-1. **F1 trước** — rẻ nhất, rủi ro thấp nhất, và nó **làm tăng lượng dữ liệu đầu vào** cho mọi thứ phía sau. Nhiều bài tập được ghi hơn → Planner tốt hơn, Risk chính xác hơn, F3 có dữ liệu để dự báo.
+1. **F1 trước** — rẻ nhất, rủi ro thấp nhất, và nó **làm tăng lượng dữ liệu đầu vào** cho mọi thứ phía sau. Nhiều bài tập được ghi hơn → Planner tốt hơn, Risk chính xác hơn.
 2. **F2 tiếp** — phụ thuộc vào việc có bài tập để gắn (F1 tạo ra chúng), và đóng luôn việc còn tồn từ audit trước.
-3. **F3 cuối** — cần trọng số đầy đủ mới chạy được, mà F1 chính là thứ khiến sinh viên chịu khó nhập trọng số (vì giờ nhập được **sau**, không bị ép nhập ngay).
+3. **F3 cuối** — nhưng lý do khác hai cái trên: F3 **không phụ thuộc dữ liệu** của F1/F2. Nó đọc `courses` và `grades`, hai bảng F1/F2 không đụng tới, nên **về kỹ thuật có thể làm bất cứ lúc nào**.
 
-Ba tính năng này **không độc lập** — chúng xếp theo đúng thứ tự phụ thuộc dữ liệu.
+> ⚠️ **F3 đã trở thành độc lập** sau khi đổi hướng. Bản cũ (theo trọng số bài tập) phải xếp cuối vì cần F1 làm sinh viên chịu nhập trọng số. Bản GPA thì không — nó chỉ cần `courses.credits`, thứ đã bắt buộc từ trước (`CHECK credits > 0`).
+>
+> Vẫn xếp cuối vì **giá trị/công sức thấp hơn**: F1 và F2 gỡ ma sát trên luồng hằng ngày, còn F3 phục vụ một câu hỏi mang tính thời điểm (đầu kỳ, lúc đăng ký môn). Nếu muốn có thứ gây ấn tượng nhanh, **F3 làm trước cũng được** mà không phá vỡ gì.
 
 ### 5.2. Chỉ số đo lường
 
-| Tính năng | Chỉ số                                           | Hiện tại         | Mục tiêu |
-| --------- | ------------------------------------------------ | ---------------- | -------- |
-| F1        | Số bài tập tạo / người dùng hoạt động / tuần     | cần đo           | +40%     |
-| F1        | Tỉ lệ bài tập được bổ sung trọng số trong 7 ngày | —                | > 50%    |
-| F2        | Tỉ lệ phiên Focus hoàn thành có cập nhật tiến độ | 0% (bất khả thi) | > 35%    |
-| F2        | Độ lệch giữa `progress` và thực tế               | không đo được    | —        |
-| F3        | Tỉ lệ môn học có đủ trọng số 100%                | cần đo           | > 60%    |
+| Tính năng | Chỉ số                                                                   | Hiện tại         | Mục tiêu |
+| --------- | ------------------------------------------------------------------------ | ---------------- | -------- |
+| F1        | Số bài tập tạo / người dùng hoạt động / tuần                             | cần đo           | +40%     |
+| F1        | Tỉ lệ bài tập được bổ sung trọng số trong 7 ngày                         | —                | > 50%    |
+| F2        | Tỉ lệ phiên Focus hoàn thành có cập nhật tiến độ                         | 0% (bất khả thi) | > 35%    |
+| F2        | Độ lệch giữa `progress` và thực tế                                       | không đo được    | —        |
+| F3        | Tỉ lệ người dùng có ≥1 môn chưa có điểm trong Courses                    | cần đo           | > 70%    |
+| F3        | Tỉ lệ mở `/gpa` có tương tác với thẻ dự báo (đổi mục tiêu hoặc khoá môn) | —                | > 25%    |
 
 **Bắc đẩu (giữ nguyên từ audit trước):** số phiên học **đã lên kế hoạch và thực hiện được** mỗi tuần.
 
@@ -364,14 +417,15 @@ Mỗi tính năng chỉ được coi là xong khi:
 
 Ghi lại để sau này không ai tưởng là bị bỏ sót.
 
-| Ý tưởng                                    | Vì sao không                                                                                                                                                                                               |
-| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Bảng xếp hạng / so sánh bạn bè**         | Thêm một cơ chế giữ chân **cạnh tranh** với cơ chế trung thực app đang có. Học tập không phải trò chơi tổng bằng không, và so sánh GPA công khai là rủi ro tâm lý thật.                                    |
-| **AI chat tutor**                          | Bề mặt AI thứ hai, chi phí token tăng theo lượt chat (không theo tuần như Planner), và không ai kiểm chứng được câu trả lời có đúng không. Planner an toàn vì output của nó được validate lại server-side. |
-| **Gamification streak (huy hiệu, cấp độ)** | Streak hiện tại trung thực vì nó chỉ đếm việc có thật. Thêm phần thưởng sẽ tạo động cơ **gian lận chính mình** — bấm timer rồi bỏ đó.                                                                      |
-| **Chia sẻ lịch / nhóm học**                | Cần mô hình quyền hạn hoàn toàn mới, phá vỡ mô hình RLS "mỗi người một cõi" đang rất chắc chắn (đã kiểm chứng 15/15 bảng chặn truy cập chéo). Chi phí bảo mật rất lớn.                                     |
-| **Tích hợp LMS (Moodle/Canvas)**           | Giá trị cao nhưng phụ thuộc từng trường, không có API chuẩn, và mỗi trường một kiểu xác thực. Đây là dự án riêng, không phải một tính năng.                                                                |
-| **Tự suy tiến độ từ thời gian học**        | Học 2 tiếng ≠ xong 50%. Đây là **bịa dữ liệu**, đúng thứ mà quyết định PROD-05 đã bác bỏ.                                                                                                                  |
+| Ý tưởng                                             | Vì sao không                                                                                                                                                                                                                                                                                                                                                                                                   |
+| --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Bảng xếp hạng / so sánh bạn bè**                  | Thêm một cơ chế giữ chân **cạnh tranh** với cơ chế trung thực app đang có. Học tập không phải trò chơi tổng bằng không, và so sánh GPA công khai là rủi ro tâm lý thật.                                                                                                                                                                                                                                        |
+| **AI chat tutor**                                   | Bề mặt AI thứ hai, chi phí token tăng theo lượt chat (không theo tuần như Planner), và không ai kiểm chứng được câu trả lời có đúng không. Planner an toàn vì output của nó được validate lại server-side.                                                                                                                                                                                                     |
+| **Gamification streak (huy hiệu, cấp độ)**          | Streak hiện tại trung thực vì nó chỉ đếm việc có thật. Thêm phần thưởng sẽ tạo động cơ **gian lận chính mình** — bấm timer rồi bỏ đó.                                                                                                                                                                                                                                                                          |
+| **Chia sẻ lịch / nhóm học**                         | Cần mô hình quyền hạn hoàn toàn mới, phá vỡ mô hình RLS "mỗi người một cõi" đang rất chắc chắn (đã kiểm chứng 15/15 bảng chặn truy cập chéo). Chi phí bảo mật rất lớn.                                                                                                                                                                                                                                         |
+| **Tích hợp LMS (Moodle/Canvas)**                    | Giá trị cao nhưng phụ thuộc từng trường, không có API chuẩn, và mỗi trường một kiểu xác thực. Đây là dự án riêng, không phải một tính năng.                                                                                                                                                                                                                                                                    |
+| **Tự suy tiến độ từ thời gian học**                 | Học 2 tiếng ≠ xong 50%. Đây là **bịa dữ liệu**, đúng thứ mà quyết định PROD-05 đã bác bỏ.                                                                                                                                                                                                                                                                                                                      |
+| **Dự báo điểm theo trọng số bài tập trong một môn** | Từng là bản F3 đầu tiên, **đã loại**. Công thức cần biết "còn bao nhiêu trọng số chưa chấm", nhưng app không phân biệt được _sinh viên chưa nhập hết bài_ với _môn chỉ tính 60% qua bài tập_ — hai trường hợp cho ra dự báo sai hoàn toàn khác nhau, và không có cách nào tự phát hiện. Bản GPA thay thế không có vấn đề này vì mọi đầu vào đều là số sinh viên đã tự nhập và số môn thiếu thì nhìn thấy ngay. |
 
 ---
 
@@ -418,43 +472,80 @@ Ghi lại để sau này không ai tưởng là bị bỏ sót.
 - Offline: cập nhật vào hàng đợi, đồng bộ khi có mạng lại
 - Assignment bị xoá giữa chừng: không hiện hộp thoại, không lỗi
 
-### 7.3. F3 — Dự báo điểm theo môn
+### 7.3. F3 — Dự báo GPA theo môn sắp học
 
 **File cần sửa:**
 
-| File                                        | Việc                                                   |
-| ------------------------------------------- | ------------------------------------------------------ |
-| `lib/rules/gpa.ts`                          | Thêm `courseGradeForecast(assignments, targetPercent)` |
-| `components/courses/CourseForecastCard.tsx` | **File mới**                                           |
-| `components/courses/CourseCard.tsx`         | Gắn thẻ vào modal chi tiết môn                         |
-| `tests/rules/gpa.test.ts`                   | Test 4 trạng thái + biên trọng số                      |
+| File                                     | Việc                                                          |
+| ---------------------------------------- | ------------------------------------------------------------- |
+| `lib/rules/gpa.ts`                       | Thêm `perCourseTargets()` — bọc quanh `requiredAverage` đã có |
+| `components/gpa/PerCourseTargetCard.tsx` | **File mới** — thẻ có danh sách môn, khoá/mở, ô mục tiêu      |
+| `components/gpa/GpaContent.tsx`          | Truy vấn môn chưa có điểm; đặt thẻ ngay dưới `OnTrackCard`    |
+| `tests/rules/gpa.test.ts`                | Test 5 trạng thái + 6 trường hợp biên ở §4.3                  |
+| `tests/e2e/gpa.spec.ts`                  | Test: đổi mục tiêu và khoá một môn thì các môn khác tính lại  |
+
+**Truy vấn môn chưa có điểm** (`GpaContent.tsx`) — RLS đã giới hạn theo người dùng nên không cần thêm điều kiện:
+
+```sql
+select c.id, c.code, c.name, c.credits, c.semester
+from courses c
+where not exists (
+  select 1 from grades g where g.course_id = c.id
+)
+order by c.semester, c.code
+```
 
 **Chữ ký hàm đề xuất:**
 
 ```ts
-export type CourseForecastStatus =
-  | "ok" // cần ≤ 100%
-  | "impossible" // cần > 100%
-  | "secured" // đạt kể cả khi phần còn lại = 0
-  | "incomplete-weights"; // tổng trọng số ngoài 98–102%
+export type PerCourseTargetStatus =
+  | "ok" // cần ≤ 4.0
+  | "impossible" // cần > 4.0
+  | "secured" // cần ≤ 0
+  | "no-courses" // không môn nào thiếu điểm
+  | "all-locked"; // đã khoá hết — hiện GPA kết quả thay vì "cần bao nhiêu"
 
-export interface CourseForecast {
-  status: CourseForecastStatus;
-  gradedWeight: number; // % trọng số đã chấm
-  remainingWeight: number; // % trọng số chưa chấm
-  currentAverage: number | null;
-  requiredOnRemaining: number | null;
-  maxAchievable: number; // điểm cao nhất còn có thể đạt
+export interface UpcomingCourse {
+  id: string;
+  code: string | null;
+  name: string;
+  credits: number;
+  /** Điểm sinh viên tự khoá; null = để hệ thống tính. */
+  lockedGradePoint: number | null;
 }
+
+export interface PerCourseTargetResult {
+  status: PerCourseTargetStatus;
+  /** Điểm cần đạt ở mỗi môn CHƯA khoá. Null khi all-locked/no-courses. */
+  requiredPerUnlockedCourse: number | null;
+  /** GPA cuối cùng nếu mọi môn đạt đúng như đang hiển thị. */
+  projectedGpa: number;
+  /** Mức cao nhất còn có thể đạt (mọi môn chưa khoá được 4.0). */
+  maxAchievableGpa: number;
+  totalUpcomingCredits: number;
+  upcomingCourseCount: number;
+}
+
+export function perCourseTargets(
+  currentQP: number,
+  doneCredits: number,
+  targetGpa: number,
+  courses: UpcomingCourse[],
+): PerCourseTargetResult;
 ```
 
 **Tiêu chí nghiệm thu:**
 
-- Tổng trọng số 60% → **không** hiện dự báo, hiện lời nhắc bổ sung
-- Tổng trọng số 100% → hiện đúng số cần đạt
-- Cần > 100% → trạng thái "không thể", nêu mức cao nhất có thể đạt
-- Đã chắc suất → nói rõ, không bắt học thêm vô ích
-- Test biên: tổng 98%, 100%, 102% đều hiện; 97% và 103% thì không
+- GPA 3.40 / **9 tín**, mục tiêu 3.6, 3 môn (4+3+2 tín) → cần **3.80** ở mỗi môn
+- Khoá môn 4 tín ở 4.0 → hai môn còn lại tính lại thành **3.64**, không phải vẫn 3.80
+- Cùng dữ liệu đó, `maxAchievableGpa` phải ra **3.70**
+- Đổi thành 18 tín đã tính (giữ nguyên phần còn lại) → cần đúng **4.00**, tức sát trần; nếu mục tiêu nhích lên 3.61 thì phải chuyển sang trạng thái "không thể"
+- Khoá **hết** môn → không hiện "cần bao nhiêu", hiện GPA kết quả
+- Mục tiêu quá cao → trạng thái "không thể" **kèm mức cao nhất đạt được**
+- Chưa có môn nào chưa điểm → trạng thái rỗng, **không phải cảnh báo**
+- Chưa có điểm nào (`doneCredits = 0`) → cần đúng bằng mục tiêu ở mọi môn
+- Không có `Infinity`/`NaN` lọt ra UI trong bất kỳ trường hợp nào
+- Số tín chỉ và số môn đang tính **luôn hiển thị**, kể cả khi dự báo bình thường
 
 ---
 
