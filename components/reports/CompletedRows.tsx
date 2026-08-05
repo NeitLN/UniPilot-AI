@@ -9,9 +9,19 @@ export interface CompletedRow {
   completedAt: string;
 }
 
-/** Uses the real `completed_at` column (0017_assignment_completed_at.sql),
+/**
+ * Uses the real `completed_at` column (0017_assignment_completed_at.sql),
  * not `updated_at` — the previous version's proxy over-counted anything
- * merely edited again this week (brief §7.2/§7.8). */
+ * merely edited again this week (brief §7.2/§7.8).
+ *
+ * PROD-05: the mockup shows two labels here, "Submitted" and "Completed".
+ * There is one terminal state in the schema, so a "Submitted" label would
+ * be invented from data that does not exist. Decided against splitting it
+ * (docs/DESIGN_PIXEL_MATCH_GAP_REVIEW.md, W9): for a student the two are
+ * nearly always the same moment, and a distinction nobody maintains
+ * produces wrong labels — worse than one honest one. This single label is
+ * a deliberate divergence from the design, not an oversight.
+ */
 export function CompletedRows({ rows }: { rows: CompletedRow[] }) {
   if (rows.length === 0) return null;
 

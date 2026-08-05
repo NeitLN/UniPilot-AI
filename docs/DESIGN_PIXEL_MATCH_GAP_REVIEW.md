@@ -205,7 +205,16 @@ Phần **chưa đạt** nằm ở lớp chi tiết thị giác — thứ tạo r
 | W6 | Plan adherence | Lime, `80%` cực to, `4 of 5 planned sessions completed`, **hình bia + mũi tên lớn** bên phải | Dải lime mỏng chỉ có 1 dòng chữ + glyph bia tí hon | **[SAI]** 🔴 |
 | W7 | This week's win | Pilo ~110px bên trái, copy ngắn, **tên bài in đậm màu violet** | Pilo nhỏ hơn, copy dài tràn dòng | **[SAI]** |
 | W8 | Worth a look | Card **amber tint** + icon ⚠ chip + `Software Testing is due soon` + chevron | Code có (`reports/page.tsx:275`) nhưng render ra chưa thấy tone amber/icon/chevron | **[SAI]** / **[?]** |
-| W9 | Activity list | 3 dòng: chip check xanh, `Submitted`/`Completed`, tên bài, dot màu + tên môn, timestamp, chevron `›` | `CompletedRows` có tồn tại, nằm dưới fold — chưa xác nhận style | **[?]** |
+| W9 | Activity list | 3 dòng: chip check xanh, `Submitted`/`Completed`, tên bài, dot màu + tên môn, timestamp, chevron `›` | `CompletedRows` khớp cấu trúc; **cố ý chỉ dùng một nhãn `Completed`** — xem quyết định bên dưới | **[ĐÃ QUYẾT]** |
+
+> **Quyết định về `Submitted` vs `Completed` (PROD-05, chốt 2026-08-05).**
+> **Không thêm cột.** Mẫu thiết kế vẽ hai nhãn, nhưng schema chỉ có một trạng thái kết thúc (`assignment_status = 'done'` + `completed_at`), nên bất kỳ nhãn "Submitted" nào hiện giờ cũng là **bịa ra từ dữ liệu không tồn tại**.
+>
+> Lý do không thêm: với sinh viên, "làm xong" và "nộp" gần như luôn là cùng một khoảnh khắc. Tách đôi trạng thái kết thúc buộc họ phải duy trì một phân biệt mà đa số sẽ không duy trì — và một phân biệt không được duy trì thì sinh ra **nhãn sai**, tệ hơn hẳn một nhãn đúng. Nó cũng buộc phải rà lại mọi chỗ đang kiểm `status = 'done'` (đếm KPI, weekly report, risk, planner).
+>
+> Vì vậy `CompletedRows` giữ đúng một nhãn. Đây là chênh lệch **có chủ đích** so với mẫu, không phải thiếu sót — đừng "sửa" nó cho khớp ảnh.
+>
+> Nếu sau này thật sự cần: thêm `submitted_at timestamptz` (một cột mốc thời gian, **không** thêm giá trị enum), để mọi thứ đang kiểm `'done'` không phải đổi.
 
 ---
 
