@@ -123,7 +123,7 @@ export default async function PlannerPage() {
   if (!plan) {
     return (
       <div className="flex flex-col gap-3.5">
-        <Header generateProps={generateProps} />
+        <Header generateProps={generateProps} lifecycle="empty" />
         <PlannerHero
           lifecycle="empty"
           planId={null}
@@ -184,7 +184,7 @@ export default async function PlannerPage() {
 
   return (
     <div className="flex flex-col gap-3.5">
-      <Header generateProps={generateProps} />
+      <Header generateProps={generateProps} lifecycle={lifecycle} />
 
       <div className="flex flex-col gap-3.5 lg:grid lg:grid-cols-[1.6fr_1fr] lg:items-start">
         {/* Hero first, insights after — brief §1.7 explicitly wants the
@@ -247,7 +247,22 @@ export default async function PlannerPage() {
   );
 }
 
-function Header({ generateProps }: { generateProps: GenerateButtonProps }) {
+function Header({
+  generateProps,
+  lifecycle,
+}: {
+  generateProps: GenerateButtonProps;
+  lifecycle: PlanLifecycleView;
+}) {
+  // PlannerHero renders this exact same button, same label, same disabled
+  // state, inside its own card for the "empty" and "ended" lifecycles (see
+  // its generateProps comment) — a real tester flagged the two sitting
+  // stacked on the page as confusing, since nothing distinguishes them as
+  // "two different actions". The hero's copy is the one carrying context
+  // (mascot, "you're all caught up" framing), so it keeps the button; the
+  // header only shows its own for draft/active, where the hero is busy
+  // with confirm/cancel instead and doesn't offer one.
+  const heroAlreadyShowsGenerate = lifecycle === "empty" || lifecycle === "ended";
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div>
@@ -256,7 +271,7 @@ function Header({ generateProps }: { generateProps: GenerateButtonProps }) {
           Your week, planned around what matters.
         </p>
       </div>
-      <GenerateButton {...generateProps} />
+      {!heroAlreadyShowsGenerate && <GenerateButton {...generateProps} />}
     </div>
   );
 }
