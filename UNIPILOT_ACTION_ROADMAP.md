@@ -68,7 +68,14 @@ Lý do đưa 2.1 và 2.2 lên đầu dù chúng thuộc nhóm "nâng cấp": hi�
 
 **Số liệu:** 414 unit test (từ 327), 35 file test (từ 26), 47 e2e. tsc, lint và build sạch.
 
-**Phần 3 chưa bắt đầu** — đó là các đặt cược sản phẩm cần bạn quyết trước khi viết code.
+**Phần 3: đã làm 3.4.** Các bước còn lại (3.1, 3.2, 3.3, 3.5) là đặt cược sản phẩm cần bạn quyết trước khi viết code. Chọn 3.4 trước vì nó gần một lỗi UX hơn là tính năng mới.
+
+| Bước | Trạng thái | Ghi chú |
+|---|---|---|
+| 3.4 | xong một nửa | **Luận điểm gốc sai một phần** — onboarding *có* thu `weekly_availability_hours` (bước 1), nên AI Planner không hề bị chặn. Ngõ cụt thật chỉ nằm ở thẻ "On track". Đã sửa theo vế thứ hai của đề xuất (thẻ tự nói ra thứ nó thiếu); vế "onboarding thu thêm 2 trường" vẫn để ngỏ vì đó là quyết định sản phẩm |
+| 3.1 / 3.2 / 3.3 / 3.5 | chưa bắt đầu | chờ bạn quyết |
+
+**Phát sinh ngoài lộ trình (đợt 2):** chỉ báo giờ hiện tại của `/schedule` rớt contrast dark mode (2.61:1). Test hồi quy 10 route trước đó không bắt được vì nhãn này chỉ render khi giờ hiện tại nằm trong khung 08:00–20:00 — lần chạy trước rơi ngoài khung.
 
 ---
 
@@ -459,7 +466,13 @@ Deploy thiếu key Supabase sẽ cho ra một lỗi khó hiểu từ sâu trong 
 
 **Luận điểm.** `weekly_availability_hours`, `target_gpa` và `program_total_credits` đều **chặn tính năng thật**: AI Planner từ chối chạy nếu không có availability; thẻ "On track" của GPA không render nếu thiếu tổng tín chỉ. Sinh viên bỏ qua onboarding sẽ gặp vài thẻ chết mà **không được giải thích tại sao**.
 
+> **Đính chính (2026-08-05, khi bắt tay làm).** Vế đầu sai. `OnboardingWizard.tsx` có `STEPS = ["Availability", "Course", "First task"]` và **thu `weekly_availability_hours` ngay ở bước 1**, nên AI Planner chưa bao giờ bị chặn vì lý do này. Chỉ `target_gpa` và `program_total_credits` là không được hỏi ở đâu cả, và ngõ cụt thật vì thế thu lại còn đúng một chỗ: thẻ "On track".
+
 **Đề xuất.** Onboarding thu ba trường này, hoặc mỗi thẻ bị chặn tự nói ra thứ nó đang thiếu kèm link tới đúng chỗ điền.
+
+**Đã làm.** Vế thứ hai. `OnTrackSetupCard` chiếm đúng ô của thẻ "On track" khi thiếu trường, nêu **đích danh** trường nào đang thiếu (một hay cả hai, chia số ít/số nhiều) và link thẳng tới `/settings#study-preferences`. Xác minh hai chiều trên dữ liệu thật: xoá `program_total_credits` → thẻ setup hiện đúng nội dung; trả lại giá trị cũ (40) → thẻ "On track" thật quay lại. 5 test component, có chứng minh bắt được regression.
+
+**Chưa làm.** Đưa hai trường này vào onboarding. Đó là quyết định sản phẩm: onboarding hiện có 3 bước, thêm trường sẽ kéo dài luồng đăng ký để đổi lấy một thẻ mà nhiều sinh viên có thể không cần.
 
 ---
 
