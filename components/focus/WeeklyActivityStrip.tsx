@@ -28,13 +28,21 @@ const MAX_SQUARES = 4;
  * used to draw: the bar could only encode the tone, so a 1-cycle day and a
  * 4-cycle day at the same tone looked identical. A rest day still draws one
  * dashed placeholder so the week keeps its seven columns. */
-export function WeeklyActivityStrip({ days, goalCycles }: { days: DayActivity[]; goalCycles: number }) {
+export function WeeklyActivityStrip({
+  days,
+  goalCycles,
+}: {
+  days: DayActivity[];
+  goalCycles: number;
+}) {
   return (
     <div>
       <div className="grid grid-cols-7 gap-2">
         {days.map((d) => {
           const tone = activityTone(d.completedCycles, goalCycles);
-          const label = new Date(`${d.dayKey}T12:00:00`).toLocaleDateString(undefined, { weekday: "short" });
+          const label = new Date(`${d.dayKey}T12:00:00`).toLocaleDateString(undefined, {
+            weekday: "short",
+          });
           const squares = Math.min(Math.max(d.completedCycles, 1), MAX_SQUARES);
           const cycleText =
             d.completedCycles > 0
@@ -67,7 +75,10 @@ export function WeeklyActivityStrip({ days, goalCycles }: { days: DayActivity[];
       <div className="mt-2.5 flex flex-wrap gap-2.5 text-[10px] font-bold text-dusk-text">
         {(Object.keys(TONE_LABEL) as ActivityTone[]).map((tone) => (
           <span key={tone} className="flex items-center gap-1">
-            <span aria-hidden="true" className={`h-2.5 w-2.5 rounded-[3px] ${TONE_CLASSES[tone]}`} />
+            <span
+              aria-hidden="true"
+              className={`h-2.5 w-2.5 rounded-[3px] ${TONE_CLASSES[tone]}`}
+            />
             {TONE_LABEL[tone]}
           </span>
         ))}

@@ -95,7 +95,10 @@ export async function deliverDueNotifications(
   }
 
   if (deadSubscriptionIds.size > 0) {
-    await supabase.from("push_subscriptions").delete().in("id", [...deadSubscriptionIds]);
+    await supabase
+      .from("push_subscriptions")
+      .delete()
+      .in("id", [...deadSubscriptionIds]);
   }
 
   return { deliveredCount: due.length };
@@ -159,7 +162,10 @@ export async function deliverAllDueNotifications(
   }
 
   if (deadSubscriptionIds.size > 0) {
-    await supabase.from("push_subscriptions").delete().in("id", [...deadSubscriptionIds]);
+    await supabase
+      .from("push_subscriptions")
+      .delete()
+      .in("id", [...deadSubscriptionIds]);
   }
 
   for (const [status, ids] of Object.entries(idsByStatus) as [PushStatus, string[]][]) {

@@ -42,10 +42,7 @@ export function SidebarNav() {
   return (
     <nav className="flex flex-col gap-1" aria-label="Sidebar">
       {NAV_ITEMS.map((item) => {
-        const isActive =
-          item.href === "/"
-            ? pathname === "/"
-            : pathname?.startsWith(item.href);
+        const isActive = item.href === "/" ? pathname === "/" : pathname?.startsWith(item.href);
         const Icon = item.icon;
 
         return (
@@ -53,9 +50,7 @@ export function SidebarNav() {
             key={item.href}
             href={item.href}
             className={`relative flex min-h-11 items-center gap-2.5 rounded-ctl px-3.5 py-2.5 text-sm font-semibold transition-colors ${
-              isActive
-                ? "text-ink font-extrabold"
-                : "text-[#B7ACD8] hover:bg-white/5"
+              isActive ? "text-ink font-extrabold" : "text-[#B7ACD8] hover:bg-white/5"
             }`}
           >
             {/* Same shared layoutId/tween approach as MobileBottomNav — one

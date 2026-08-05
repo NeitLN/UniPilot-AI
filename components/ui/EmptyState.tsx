@@ -25,7 +25,9 @@ export function EmptyState({
   className?: string;
 }) {
   return (
-    <FadeIn className={`flex flex-col items-center gap-3 rounded-card-sm bg-card py-10 text-center ${className ?? ""}`}>
+    <FadeIn
+      className={`flex flex-col items-center gap-3 rounded-card-sm bg-card py-10 text-center ${className ?? ""}`}
+    >
       {pilo && <Pilo mood={pilo} size={64} />}
       <div>
         <p className="font-display text-base font-bold text-foreground">{heading}</p>

@@ -58,8 +58,8 @@ export function FocusStats({ data }: { data: FocusStatsData }) {
       {data.partialSessions > 0 && (
         <p className="mt-3 text-[11.5px] font-semibold text-dusk-text">
           Plus {data.partialSessions} partial session
-          {data.partialSessions === 1 ? "" : "s"} (
-          {formatMinutes(data.partialMinutes)}) — not counted toward the streak.
+          {data.partialSessions === 1 ? "" : "s"} ({formatMinutes(data.partialMinutes)}) — not
+          counted toward the streak.
         </p>
       )}
 
@@ -70,7 +70,9 @@ export function FocusStats({ data }: { data: FocusStatsData }) {
       )}
 
       {!hasAnySession && (
-        <p className="mt-3 text-[12.5px] font-semibold text-dusk-text">No focus sessions yet this week.</p>
+        <p className="mt-3 text-[12.5px] font-semibold text-dusk-text">
+          No focus sessions yet this week.
+        </p>
       )}
 
       <div className="mt-4">
@@ -87,7 +89,10 @@ export function FocusStats({ data }: { data: FocusStatsData }) {
               per-course table. */}
           <ul className="mt-1.5 flex flex-col gap-1">
             {data.byAssignment.slice(0, TOP_ASSIGNMENTS).map((a) => (
-              <li key={a.id} className="flex items-center justify-between gap-3 text-[12.5px] font-semibold">
+              <li
+                key={a.id}
+                className="flex items-center justify-between gap-3 text-[12.5px] font-semibold"
+              >
                 <span className="min-w-0 truncate">{a.title}</span>
                 <span className="shrink-0 text-dusk-text">{formatMinutes(a.minutes)}</span>
               </li>

@@ -48,7 +48,10 @@ export default async function RiskPage() {
                   {r.includes("weekly availability") && (
                     <>
                       {" "}
-                      <Link href="/settings" className="font-extrabold text-violet-text hover:underline">
+                      <Link
+                        href="/settings"
+                        className="font-extrabold text-violet-text hover:underline"
+                      >
                         Set it now →
                       </Link>
                     </>
@@ -56,7 +59,10 @@ export default async function RiskPage() {
                   {r.includes("Add at least one assignment") && (
                     <>
                       {" "}
-                      <Link href="/assignments" className="font-extrabold text-violet-text hover:underline">
+                      <Link
+                        href="/assignments"
+                        className="font-extrabold text-violet-text hover:underline"
+                      >
                         Add one now →
                       </Link>
                     </>
@@ -64,7 +70,10 @@ export default async function RiskPage() {
                   {r.includes("Log focus sessions") && (
                     <>
                       {" "}
-                      <Link href="/focus" className="font-extrabold text-violet-text hover:underline">
+                      <Link
+                        href="/focus"
+                        className="font-extrabold text-violet-text hover:underline"
+                      >
                         Start a session →
                       </Link>
                     </>
@@ -85,26 +94,30 @@ export default async function RiskPage() {
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
   const sevenDaysAgoKey = sevenDaysAgo.toISOString().slice(0, 10);
 
-  const [{ data: scoreRow }, { data: warning }, { data: trendRows }, { data: activeAssignments }] = await Promise.all([
-    supabase.from("risk_scores").select("computed_at").eq("id", scoreId).single(),
-    supabase
-      .from("risk_warnings")
-      .select("id, status")
-      .eq("risk_score_id", scoreId)
-      .maybeSingle(),
-    supabase
-      .from("risk_scores")
-      .select("score_date, score")
-      .gte("score_date", sevenDaysAgoKey)
-      .order("score_date", { ascending: true }),
-    supabase
-      .from("assignments")
-      .select("id, title, due_at, priority, status, archived_at")
-      .is("archived_at", null)
-      .neq("status", "done"),
-  ]);
+  const [{ data: scoreRow }, { data: warning }, { data: trendRows }, { data: activeAssignments }] =
+    await Promise.all([
+      supabase.from("risk_scores").select("computed_at").eq("id", scoreId).single(),
+      supabase
+        .from("risk_warnings")
+        .select("id, status")
+        .eq("risk_score_id", scoreId)
+        .maybeSingle(),
+      supabase
+        .from("risk_scores")
+        .select("score_date, score")
+        .gte("score_date", sevenDaysAgoKey)
+        .order("score_date", { ascending: true }),
+      supabase
+        .from("assignments")
+        .select("id, title, due_at, priority, status, archived_at")
+        .is("archived_at", null)
+        .neq("status", "done"),
+    ]);
 
-  const trendPoints: RiskTrendPoint[] = (trendRows ?? []).map((r) => ({ scoreDate: r.score_date, score: r.score }));
+  const trendPoints: RiskTrendPoint[] = (trendRows ?? []).map((r) => ({
+    scoreDate: r.score_date,
+    score: r.score,
+  }));
 
   const suggestionTarget = pickPiloAssignment(
     (activeAssignments ?? []).map((a) => ({
@@ -122,7 +135,9 @@ export default async function RiskPage() {
   if (evidence.overdueCount > 0) {
     lighterWeekActions.push({
       icon: <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />,
-      label: suggestionTarget ? `Clear "${suggestionTarget.title}"` : `Clear ${evidence.overdueCount} overdue task${evidence.overdueCount === 1 ? "" : "s"}`,
+      label: suggestionTarget
+        ? `Clear "${suggestionTarget.title}"`
+        : `Clear ${evidence.overdueCount} overdue task${evidence.overdueCount === 1 ? "" : "s"}`,
       href: suggestionTarget ? `/focus?assignment=${suggestionTarget.id}` : "/assignments",
     });
   }
@@ -177,9 +192,7 @@ export default async function RiskPage() {
 function Header() {
   return (
     <div>
-      <h1 className="font-display text-3xl font-semibold text-foreground">
-        Workload risk
-      </h1>
+      <h1 className="font-display text-3xl font-semibold text-foreground">Workload risk</h1>
       <p className="mt-1 text-sm font-semibold text-ink-2">
         Planning aid, not a medical or psychological assessment.
       </p>

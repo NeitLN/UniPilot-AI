@@ -18,10 +18,16 @@ export function ExportData() {
         href="/api/export?format=json&type=all"
         className="flex items-center gap-3 rounded-ctl bg-line px-4 py-3 hover:bg-line-hover"
       >
-        <IconChip icon={<Download className="h-[18px] w-[18px]" aria-hidden="true" />} tone="violet" size="sm" />
+        <IconChip
+          icon={<Download className="h-[18px] w-[18px]" aria-hidden="true" />}
+          tone="violet"
+          size="sm"
+        />
         <span className="min-w-0 flex-1">
           <span className="block text-sm font-bold text-foreground">Export my data</span>
-          <span className="block text-[11.5px] font-semibold text-ink-3">Download a copy of your data</span>
+          <span className="block text-[11.5px] font-semibold text-ink-3">
+            Download a copy of your data
+          </span>
         </span>
         <span aria-hidden="true" className="text-ink-3">
           ›

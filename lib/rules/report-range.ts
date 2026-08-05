@@ -41,7 +41,10 @@ export interface WeekRange {
 
 /** Converts a Monday `YYYY-MM-DD` key into actual UTC instants for the
  * given viewer timezone, for use in Postgres range queries. */
-export function weekRangeForMonday(mondayKey: string, timeZone: string = defaultTimeZone()): WeekRange {
+export function weekRangeForMonday(
+  mondayKey: string,
+  timeZone: string = defaultTimeZone(),
+): WeekRange {
   // The offset between this local calendar day and UTC, sampled at local
   // noon to dodge any DST transition landing exactly at midnight.
   const noonLocal = new Date(`${mondayKey}T12:00:00`);
@@ -56,7 +59,14 @@ export function weekRangeForMonday(mondayKey: string, timeZone: string = default
     hour12: false,
   }).formatToParts(noonLocal);
   const get = (type: string) => Number(parts.find((p) => p.type === type)?.value ?? "0");
-  const zonedNoon = Date.UTC(get("year"), get("month") - 1, get("day"), get("hour"), get("minute"), get("second"));
+  const zonedNoon = Date.UTC(
+    get("year"),
+    get("month") - 1,
+    get("day"),
+    get("hour"),
+    get("minute"),
+    get("second"),
+  );
   const offsetMs = noonLocal.getTime() - zonedNoon;
 
   const [y, m, d] = mondayKey.split("-").map(Number);
@@ -74,6 +84,10 @@ export function nextWeek(mondayKey: string): string {
 }
 
 /** Never navigate into a week that hasn't started yet. */
-export function isFutureWeek(mondayKey: string, now: Date = new Date(), timeZone: string = defaultTimeZone()): boolean {
+export function isFutureWeek(
+  mondayKey: string,
+  now: Date = new Date(),
+  timeZone: string = defaultTimeZone(),
+): boolean {
   return mondayKey > mondayOf(now, timeZone);
 }

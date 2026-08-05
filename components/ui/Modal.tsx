@@ -20,13 +20,7 @@ const SIZE_CLASSES: Record<"md" | "lg", string> = {
   lg: "max-w-xl",
 };
 
-export function Modal({
-  open,
-  onClose,
-  title,
-  children,
-  size = "md",
-}: ModalProps) {
+export function Modal({ open, onClose, title, children, size = "md" }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

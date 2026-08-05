@@ -40,23 +40,19 @@ export async function GET(request: NextRequest) {
       return redirectWithError(request, "missing_refresh_token");
     }
 
-    const { error: upsertError } = await supabase
-      .from("google_calendar_connections")
-      .upsert(
-        {
-          user_id: user.id,
-          refresh_token: encryptToken(tokens.refresh_token),
-          access_token: tokens.access_token,
-          access_token_expires_at: new Date(
-            Date.now() + tokens.expires_in * 1000,
-          ).toISOString(),
-          scope: tokens.scope,
-          connected_at: new Date().toISOString(),
-          last_sync_status: "never",
-          last_sync_error: null,
-        },
-        { onConflict: "user_id" },
-      );
+    const { error: upsertError } = await supabase.from("google_calendar_connections").upsert(
+      {
+        user_id: user.id,
+        refresh_token: encryptToken(tokens.refresh_token),
+        access_token: tokens.access_token,
+        access_token_expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
+        scope: tokens.scope,
+        connected_at: new Date().toISOString(),
+        last_sync_status: "never",
+        last_sync_error: null,
+      },
+      { onConflict: "user_id" },
+    );
 
     if (upsertError) {
       return redirectWithError(request, "storage_failed");
@@ -65,9 +61,7 @@ export async function GET(request: NextRequest) {
     return redirectWithError(request, "token_exchange_failed");
   }
 
-  const response = NextResponse.redirect(
-    new URL("/schedule?connected=1", request.url),
-  );
+  const response = NextResponse.redirect(new URL("/schedule?connected=1", request.url));
   response.cookies.delete(OAUTH_STATE_COOKIE);
   return response;
 }

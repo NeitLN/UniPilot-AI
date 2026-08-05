@@ -8,9 +8,7 @@ export default function ForgotPasswordPage() {
         <div className="flex justify-center">
           <Logo tone="dark" size={44} />
         </div>
-        <h1 className="mt-4 font-display text-lg font-bold text-foreground">
-          Reset your password
-        </h1>
+        <h1 className="mt-4 font-display text-lg font-bold text-foreground">Reset your password</h1>
         <p className="mt-2 mb-6 text-sm font-semibold text-ink-2">
           Enter the email on your account and we&rsquo;ll send you a reset link.
         </p>

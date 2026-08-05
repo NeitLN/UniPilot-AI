@@ -2,9 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
-const { consumeRateLimit, rateLimitHeaders, retryAfterSeconds, RATE_LIMITS } = await import(
-  "@/lib/rate-limit"
-);
+const { consumeRateLimit, rateLimitHeaders, retryAfterSeconds, RATE_LIMITS } =
+  await import("@/lib/rate-limit");
 
 /**
  * SEC-01 — the counting itself lives in consume_rate_limit() (migration
@@ -20,7 +19,11 @@ function client(response: { data?: unknown; error?: unknown }) {
 
 describe("consumeRateLimit", () => {
   it("passes the rule through to the database function", async () => {
-    const c = { rpc: vi.fn(async () => ({ data: [{ allowed: true, remaining: 9, reset_at: new Date().toISOString() }] })) };
+    const c = {
+      rpc: vi.fn(async () => ({
+        data: [{ allowed: true, remaining: 9, reset_at: new Date().toISOString() }],
+      })),
+    };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await consumeRateLimit(c as any, RATE_LIMITS.planGenerate);
     expect(c.rpc).toHaveBeenCalledWith("consume_rate_limit", {

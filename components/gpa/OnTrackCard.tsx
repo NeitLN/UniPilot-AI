@@ -1,15 +1,17 @@
 import { Check, AlertTriangle, X } from "lucide-react";
 import type { OnTrackResult } from "@/lib/rules/gpa";
 
-const STATUS_COPY: Record<OnTrackResult["status"], (req: number | null, target: number) => string> = {
-  "on-track": (req) => `You need a ${req!.toFixed(2)} average across your remaining credits.`,
-  "at-risk": (req) => `You need a ${req!.toFixed(2)} average across your remaining credits — that's tight.`,
-  impossible: (req) =>
-    req === null
-      ? "Your target isn't reachable anymore — every credit is already in."
-      : `A ${req.toFixed(2)} average is needed, which is over 4.0 — this target isn't reachable with these credits.`,
-  reached: (_req, target) => `You've already reached your ${target.toFixed(2)} target GPA.`,
-};
+const STATUS_COPY: Record<OnTrackResult["status"], (req: number | null, target: number) => string> =
+  {
+    "on-track": (req) => `You need a ${req!.toFixed(2)} average across your remaining credits.`,
+    "at-risk": (req) =>
+      `You need a ${req!.toFixed(2)} average across your remaining credits — that's tight.`,
+    impossible: (req) =>
+      req === null
+        ? "Your target isn't reachable anymore — every credit is already in."
+        : `A ${req.toFixed(2)} average is needed, which is over 4.0 — this target isn't reachable with these credits.`,
+    reached: (_req, target) => `You've already reached your ${target.toFixed(2)} target GPA.`,
+  };
 
 const STATUS_ICON: Record<OnTrackResult["status"], typeof Check> = {
   "on-track": Check,
@@ -87,7 +89,9 @@ export function OnTrackCard({ result, targetGpa }: { result: OnTrackResult; targ
           <Icon className="h-7 w-7 text-white" strokeWidth={3} />
         </span>
         <div className="min-w-0">
-          <p className={`font-display text-2xl font-bold ${skin.text}`}>{STATUS_TITLE[result.status]}</p>
+          <p className={`font-display text-2xl font-bold ${skin.text}`}>
+            {STATUS_TITLE[result.status]}
+          </p>
           <p className={`mt-1 text-[13px] font-semibold ${skin.textSoft}`}>
             {STATUS_COPY[result.status](result.requiredAverage, targetGpa)}
           </p>
@@ -96,11 +100,16 @@ export function OnTrackCard({ result, targetGpa }: { result: OnTrackResult; targ
 
       <div>
         <div className={`h-2.5 w-full overflow-hidden rounded-full ${skin.track}`}>
-          <div className={`h-full rounded-full ${skin.fill}`} style={{ width: `${result.completedPct}%` }} />
+          <div
+            className={`h-full rounded-full ${skin.fill}`}
+            style={{ width: `${result.completedPct}%` }}
+          />
         </div>
         {/* Split to the two ends rather than joined by a "·": they are two
             independent readings of the same bar, one per end it describes. */}
-        <div className={`mt-2 flex flex-wrap justify-between gap-x-3 gap-y-1 text-[11.5px] font-bold ${skin.textSoft}`}>
+        <div
+          className={`mt-2 flex flex-wrap justify-between gap-x-3 gap-y-1 text-[11.5px] font-bold ${skin.textSoft}`}
+        >
           <span>{result.completedPct}% of credits completed</span>
           <span>{result.remainingCredits} credits remaining</span>
         </div>

@@ -24,8 +24,7 @@ const listeners = new Set<() => void>();
 
 export function applyTheme(pref: ThemePreference) {
   const isDark =
-    pref === "dark" ||
-    (pref === "system" && matchMedia("(prefers-color-scheme: dark)").matches);
+    pref === "dark" || (pref === "system" && matchMedia("(prefers-color-scheme: dark)").matches);
   document.documentElement.classList.toggle("dark", isDark);
   localStorage.setItem(THEME_STORAGE_KEY, pref);
   listeners.forEach((listener) => listener());

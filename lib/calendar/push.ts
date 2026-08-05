@@ -53,7 +53,9 @@ export async function pushConfirmedSessionsToCalendar(
     .is("gcal_event_id", null);
   if (!sessions || sessions.length === 0) return { ok: true, pushed: 0 };
 
-  const assignmentIds = [...new Set(sessions.map((s) => s.assignment_id).filter((id): id is string => Boolean(id)))];
+  const assignmentIds = [
+    ...new Set(sessions.map((s) => s.assignment_id).filter((id): id is string => Boolean(id))),
+  ];
   const { data: assignments } = assignmentIds.length
     ? await supabase.from("assignments").select("id, title").in("id", assignmentIds)
     : { data: [] as { id: string; title: string }[] };
@@ -80,10 +82,14 @@ export async function pushConfirmedSessionsToCalendar(
         id: session.id,
         startAt: session.start_at,
         endAt: session.end_at,
-        title: session.assignment_id ? (titleById.get(session.assignment_id) ?? "study session") : "study session",
+        title: session.assignment_id
+          ? (titleById.get(session.assignment_id) ?? "study session")
+          : "study session",
       });
       const eventId = await insertEvent(accessToken, body);
-      writes.push(supabase.from("study_sessions").update({ gcal_event_id: eventId }).eq("id", session.id));
+      writes.push(
+        supabase.from("study_sessions").update({ gcal_event_id: eventId }).eq("id", session.id),
+      );
       pushed++;
     }
     // Surfaces a failed write as push_error rather than losing it silently.

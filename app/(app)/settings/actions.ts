@@ -85,7 +85,12 @@ export async function updateStudyPreferences(
 
   Object.assign(
     errors,
-    validateStudyPreferences({ defaultFocusMinutes, dailyFocusGoalCycles, preferredStudyDays, programTotalCredits }),
+    validateStudyPreferences({
+      defaultFocusMinutes,
+      dailyFocusGoalCycles,
+      preferredStudyDays,
+      programTotalCredits,
+    }),
   );
 
   if (Object.keys(errors).length > 0) return { errors };
@@ -149,7 +154,9 @@ export async function getNotificationPreferences(): Promise<NotificationCategory
 
   const { data } = await supabase
     .from("notification_preferences")
-    .select("user_id, assignment_reminders, workload_warnings, weekly_report, focus_reminders, plan_nudges, updated_at")
+    .select(
+      "user_id, assignment_reminders, workload_warnings, weekly_report, focus_reminders, plan_nudges, updated_at",
+    )
     .eq("user_id", user.id)
     .maybeSingle();
 

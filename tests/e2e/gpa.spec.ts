@@ -17,7 +17,9 @@ test.describe("Track GPA", () => {
     // GPA redesign (UNIPILOT_8_SCREENS_GENZ_UI_BUILD_ROADMAP.md Phase 5): the
     // cumulative figure now lives in GpaHero's ring, not a "Cumulative GPA: X"
     // text line — an aria-label on the ring itself states the same fact.
-    await expect(page.getByLabel("Cumulative GPA 3.70 out of 4.0")).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByLabel("Cumulative GPA 3.70 out of 4.0")).toBeVisible({
+      timeout: 10_000,
+    });
     // Scoped to the breakdown table — the same semester text also appears
     // as a trend-chart axis label, which would otherwise be a second match.
     await expect(page.getByRole("cell", { name: semester })).toBeVisible();

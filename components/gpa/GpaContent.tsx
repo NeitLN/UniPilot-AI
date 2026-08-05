@@ -53,10 +53,7 @@ export async function GpaContent() {
 
   const overallGpa = gpa(grades);
   const doneCredits = grades.reduce((s, g) => s + g.creditHours, 0);
-  const currentQP = grades.reduce(
-    (s, g) => s + qualityPoints(g.gradePoint, g.creditHours),
-    0,
-  );
+  const currentQP = grades.reduce((s, g) => s + qualityPoints(g.gradePoint, g.creditHours), 0);
   const trendPoints = gpaBySemester(grades);
 
   // F-03: only courses with no official grade yet are candidates — once a
@@ -87,9 +84,14 @@ export async function GpaContent() {
     grades.map((g) => ({ courseName: g.courseName, gradePoint: g.gradePoint })),
     predictedCourses
       .map((c) => {
-        const scoredWeight = c.assignments.filter((a) => a.score !== null).reduce((s, a) => s + a.weight, 0);
+        const scoredWeight = c.assignments
+          .filter((a) => a.score !== null)
+          .reduce((s, a) => s + a.weight, 0);
         const totalWeight = c.assignments.reduce((s, a) => s + a.weight, 0);
-        const scoredPoints = c.assignments.reduce((s, a) => s + (a.score ?? 0) * (a.score !== null ? a.weight : 0), 0);
+        const scoredPoints = c.assignments.reduce(
+          (s, a) => s + (a.score ?? 0) * (a.score !== null ? a.weight : 0),
+          0,
+        );
         return {
           courseName: c.name,
           predictedScore: scoredWeight > 0 ? scoredPoints / scoredWeight : 0,

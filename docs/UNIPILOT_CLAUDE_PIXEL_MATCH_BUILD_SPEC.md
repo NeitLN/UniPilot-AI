@@ -44,33 +44,33 @@ The concept images control appearance. The live source controls behavior and dat
 
 ### Visual references
 
-| Route | Screen | Reference |
-| --- | --- | --- |
+| Route                            | Screen             | Reference                                         |
+| -------------------------------- | ------------------ | ------------------------------------------------- |
 | `/dashboard` or current app home | Dashboard baseline | `docs/design-concepts/00-dashboard-reference.png` |
-| `/assignments` | Assignments | `docs/design-concepts/01-assignments.png` |
-| `/planner` | AI Planner | `docs/design-concepts/02-ai-planner.png` |
-| `/schedule` | Schedule | `docs/design-concepts/03-schedule.png` |
-| `/courses` | Courses | `docs/design-concepts/04-courses.png` |
-| `/focus` | Focus Timer | `docs/design-concepts/05-focus-timer.png` |
-| `/gpa` | GPA Tracker | `docs/design-concepts/06-gpa-tracker.png` |
-| `/risk` | Workload Risk | `docs/design-concepts/07-workload-risk.png` |
-| `/reports` | Weekly Report | `docs/design-concepts/08-weekly-report.png` |
-| `/settings` | Settings | `docs/design-concepts/09-settings.png` |
+| `/assignments`                   | Assignments        | `docs/design-concepts/01-assignments.png`         |
+| `/planner`                       | AI Planner         | `docs/design-concepts/02-ai-planner.png`          |
+| `/schedule`                      | Schedule           | `docs/design-concepts/03-schedule.png`            |
+| `/courses`                       | Courses            | `docs/design-concepts/04-courses.png`             |
+| `/focus`                         | Focus Timer        | `docs/design-concepts/05-focus-timer.png`         |
+| `/gpa`                           | GPA Tracker        | `docs/design-concepts/06-gpa-tracker.png`         |
+| `/risk`                          | Workload Risk      | `docs/design-concepts/07-workload-risk.png`       |
+| `/reports`                       | Weekly Report      | `docs/design-concepts/08-weekly-report.png`       |
+| `/settings`                      | Settings           | `docs/design-concepts/09-settings.png`            |
 
 ### Mascot assets
 
-| Screen | Required asset |
-| --- | --- |
-| Assignments | `public/mascots/pilo-assignments.png` |
-| AI Planner | `public/mascots/pilo-ai-planner.png` |
-| Schedule | No large mascot; use `public/mascots/pilo-logo.png` in shared branding only |
-| Courses | No large mascot; use `public/mascots/pilo-logo.png` in shared branding only |
-| Focus Timer | `public/mascots/pilo-focus-timer.png` |
-| GPA Tracker | `public/mascots/pilo-gpa-tracker.png` |
-| Workload Risk | `public/mascots/pilo-workload-risk.png` |
-| Weekly Report | `public/mascots/pilo-weekly-report.png` |
-| Settings | `public/mascots/pilo-settings-avatar.png` |
-| Shared application logo | `public/mascots/pilo-logo.png` |
+| Screen                  | Required asset                                                              |
+| ----------------------- | --------------------------------------------------------------------------- |
+| Assignments             | `public/mascots/pilo-assignments.png`                                       |
+| AI Planner              | `public/mascots/pilo-ai-planner.png`                                        |
+| Schedule                | No large mascot; use `public/mascots/pilo-logo.png` in shared branding only |
+| Courses                 | No large mascot; use `public/mascots/pilo-logo.png` in shared branding only |
+| Focus Timer             | `public/mascots/pilo-focus-timer.png`                                       |
+| GPA Tracker             | `public/mascots/pilo-gpa-tracker.png`                                       |
+| Workload Risk           | `public/mascots/pilo-workload-risk.png`                                     |
+| Weekly Report           | `public/mascots/pilo-weekly-report.png`                                     |
+| Settings                | `public/mascots/pilo-settings-avatar.png`                                   |
+| Shared application logo | `public/mascots/pilo-logo.png`                                              |
 
 The optional mapping file `lib/pilo-mascots.ts` exports all paths. Merge it with the repository's existing conventions if a different assets module already exists.
 
@@ -146,7 +146,7 @@ import Image from "next/image";
   width={1254}
   height={1254}
   className="h-auto w-full object-contain"
-/>
+/>;
 ```
 
 - Hero mascot rendered width: normally 220–320 px on desktop.

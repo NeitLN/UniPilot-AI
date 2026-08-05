@@ -31,8 +31,8 @@ export function PiloPickCard({
           <h2 className="font-display text-lg font-bold">Pilo&rsquo;s pick</h2>
           {pick ? (
             <p className="mt-1.5 text-[13px] font-medium leading-relaxed text-white/88">
-              Start with <span className="font-bold text-white">{pick.title}</span> — it&rsquo;s
-              due {relativeDueLabel(pick.dueAt, now)}.
+              Start with <span className="font-bold text-white">{pick.title}</span> — it&rsquo;s due{" "}
+              {relativeDueLabel(pick.dueAt, now)}.
             </p>
           ) : (
             <p className="mt-1.5 text-[13px] font-medium leading-relaxed text-white/88">

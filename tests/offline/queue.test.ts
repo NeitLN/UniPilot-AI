@@ -94,7 +94,11 @@ describe("flushQueue", () => {
         id: 7,
         userId: USER,
         kind: "updateAssignment" as const,
-        payload: { id: "a1", snapshotUpdatedAt: "2026-08-01T10:00:00.000Z", title: "Edited offline" },
+        payload: {
+          id: "a1",
+          snapshotUpdatedAt: "2026-08-01T10:00:00.000Z",
+          title: "Edited offline",
+        },
         createdAt: "2026-08-01T00:00:00.000Z",
         attempts: 0,
       },
@@ -113,7 +117,11 @@ describe("flushQueue", () => {
         id: 8,
         userId: USER,
         kind: "updateAssignment" as const,
-        payload: { id: "a1", snapshotUpdatedAt: "2026-08-01T10:00:00.000Z", title: "Edited offline" },
+        payload: {
+          id: "a1",
+          snapshotUpdatedAt: "2026-08-01T10:00:00.000Z",
+          title: "Edited offline",
+        },
         createdAt: "2026-08-01T00:00:00.000Z",
         attempts: 0,
       },
@@ -131,7 +139,10 @@ describe("flushQueue", () => {
     getQueuedMutations.mockResolvedValue([created(1)]);
     let release!: () => void;
     createAssignment.mockImplementation(
-      () => new Promise<void>((resolve) => { release = resolve; }),
+      () =>
+        new Promise<void>((resolve) => {
+          release = resolve;
+        }),
     );
 
     const first = flushQueue(USER);

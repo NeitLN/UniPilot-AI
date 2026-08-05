@@ -28,9 +28,7 @@ export async function POST() {
   if (!result.ok) {
     const status = result.reason === "not_connected" ? 400 : 502;
     const message =
-      result.reason === "not_connected"
-        ? "Google Calendar isn't connected."
-        : result.message;
+      result.reason === "not_connected" ? "Google Calendar isn't connected." : result.message;
     return NextResponse.json({ error: message }, { status });
   }
 

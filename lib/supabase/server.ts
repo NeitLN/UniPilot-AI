@@ -23,25 +23,19 @@ import { supabaseUrl, supabaseAnonKey } from "./env";
 export const createClient = cache(async function createClient() {
   const cookieStore = await cookies();
 
-  return createServerClient<Database>(
-    supabaseUrl(),
-    supabaseAnonKey(),
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options),
-            );
-          } catch {
-            // Called from a Server Component with no writable cookie jar.
-            // Safe to ignore as long as proxy.ts refreshes the session.
-          }
-        },
+  return createServerClient<Database>(supabaseUrl(), supabaseAnonKey(), {
+    cookies: {
+      getAll() {
+        return cookieStore.getAll();
+      },
+      setAll(cookiesToSet) {
+        try {
+          cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
+        } catch {
+          // Called from a Server Component with no writable cookie jar.
+          // Safe to ignore as long as proxy.ts refreshes the session.
+        }
       },
     },
-  );
+  });
 });

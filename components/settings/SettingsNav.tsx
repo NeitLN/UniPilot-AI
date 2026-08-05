@@ -53,10 +53,7 @@ export function SettingsNav() {
   return (
     <>
       {/* Desktop: vertical nav, sticky in the 25% rail. */}
-      <nav
-        aria-label="Settings sections"
-        className="sticky top-4 hidden flex-col gap-1 md:flex"
-      >
+      <nav aria-label="Settings sections" className="sticky top-4 hidden flex-col gap-1 md:flex">
         {ITEMS.map((item) => {
           const Icon = item.icon;
           const isActive = active === item.id;
@@ -92,9 +89,7 @@ export function SettingsNav() {
             onClick={() => goTo(item.id)}
             aria-current={active === item.id ? "true" : undefined}
             className={`flex min-h-11 shrink-0 items-center rounded-pill px-3.5 text-sm font-bold transition-colors ${
-              active === item.id
-                ? "bg-violet text-white"
-                : "bg-line text-ink-2 hover:bg-line-hover"
+              active === item.id ? "bg-violet text-white" : "bg-line text-ink-2 hover:bg-line-hover"
             }`}
           >
             {item.label}

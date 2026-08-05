@@ -83,7 +83,9 @@ export function PredictedScenarios({
           <div key={c.key} className={`rounded-ctl border ${c.border} bg-card p-3`}>
             <p className={`text-[11px] font-bold ${c.text}`}>{c.label}</p>
             <div className="mt-1 flex items-end justify-between gap-2">
-              <p className={`font-display text-[26px] font-bold leading-none tabular-nums ${c.text}`}>
+              <p
+                className={`font-display text-[26px] font-bold leading-none tabular-nums ${c.text}`}
+              >
                 {scenarios[c.key].toFixed(2)}
               </p>
               <Sparkline from={currentGpa} to={scenarios[c.key]} stroke={c.stroke} />

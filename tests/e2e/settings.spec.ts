@@ -133,9 +133,7 @@ test.describe("Settings", () => {
     );
   });
 
-  test("data & privacy: export links present, delete requires matching email", async ({
-    page,
-  }) => {
+  test("data & privacy: export links present, delete requires matching email", async ({ page }) => {
     await page.goto("/settings");
     // The full-export link reads "Export my data" since the Settings
     // redesign; only its label changed, so this asserts the same href.

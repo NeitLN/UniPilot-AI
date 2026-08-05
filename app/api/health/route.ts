@@ -47,10 +47,7 @@ export async function GET() {
 
   const body: HealthBody = {
     status: database.ok ? "ok" : "degraded",
-    revision:
-      process.env.VERCEL_GIT_COMMIT_SHA ??
-      process.env.GITHUB_SHA ??
-      "unknown",
+    revision: process.env.VERCEL_GIT_COMMIT_SHA ?? process.env.GITHUB_SHA ?? "unknown",
     checks: { database },
   };
 

@@ -5,9 +5,7 @@ import { KpiCard } from "./KpiCard";
 
 export async function GpaKpi() {
   const supabase = await createClient();
-  const { data } = await supabase
-    .from("grades")
-    .select("grade_point, credit_hours");
+  const { data } = await supabase.from("grades").select("grade_point, credit_hours");
 
   const rows = (data ?? []).map((g) => ({
     gradePoint: g.grade_point,

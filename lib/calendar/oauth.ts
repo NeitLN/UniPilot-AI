@@ -45,9 +45,7 @@ export function getGoogleAuthUrl(state: string): string {
   return `${AUTH_ENDPOINT}?${params.toString()}`;
 }
 
-export async function exchangeCodeForTokens(
-  code: string,
-): Promise<GoogleTokenResponse> {
+export async function exchangeCodeForTokens(code: string): Promise<GoogleTokenResponse> {
   const res = await fetch(TOKEN_ENDPOINT, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },

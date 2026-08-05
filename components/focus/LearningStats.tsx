@@ -37,10 +37,7 @@ function dayLabel(dayKey: string): string {
 /** §5 "Thống kê học tập theo thời gian" — when the time went in. The
  * per-course breakdown lives in its own card (CourseTimeCard); this one is
  * the chart alone, as the concept draws it. */
-export function LearningStats({
-  dailySeries,
-  weeklySeries,
-}: LearningStatsProps) {
+export function LearningStats({ dailySeries, weeklySeries }: LearningStatsProps) {
   // The concept labels this chart "This week"; that label is a real range
   // switch rather than a caption, so the eight-week view the page already
   // computes stays reachable instead of being dropped for the daily one.
@@ -70,9 +67,7 @@ export function LearningStats({
   return (
     <div className="flex min-w-0 flex-col rounded-card bg-card p-5">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="font-display text-lg font-bold text-foreground">
-          Learning rhythm
-        </h2>
+        <h2 className="font-display text-lg font-bold text-foreground">Learning rhythm</h2>
         <button
           type="button"
           onClick={() => setRange((r) => (r === "week" ? "weeks8" : "week"))}
@@ -86,9 +81,7 @@ export function LearningStats({
 
       {!hasData ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-1.5 py-10 text-center">
-          <p className="text-[13px] font-bold text-foreground">
-            No focus time yet
-          </p>
+          <p className="text-[13px] font-bold text-foreground">No focus time yet</p>
           <p className="max-w-[34ch] text-[12px] font-semibold text-ink-3">
             {range === "week"
               ? "Run a focus session and this week's rhythm shows up here."
@@ -128,18 +121,12 @@ export function LearningStats({
               filling it, so the columns read as separate readings. */}
               <div className="absolute inset-0 flex items-end gap-1.5">
                 {points.map((p) => (
-                  <div
-                    key={p.key}
-                    className="flex min-w-0 flex-1 justify-center self-stretch"
-                  >
+                  <div key={p.key} className="flex min-w-0 flex-1 justify-center self-stretch">
                     <div
                       title={`${p.label}: ${formatMinutes(Math.round(p.minutes))}`}
                       className="mt-auto w-full max-w-[26px] rounded-t-[4px] bg-mint"
                       style={{
-                        height:
-                          p.minutes > 0
-                            ? `${Math.max(2, (p.minutes / axisMax) * 100)}%`
-                            : 2,
+                        height: p.minutes > 0 ? `${Math.max(2, (p.minutes / axisMax) * 100)}%` : 2,
                       }}
                     />
                   </div>
@@ -148,10 +135,7 @@ export function LearningStats({
             </div>
           </div>
 
-          <div
-            className="mt-2 flex gap-1.5"
-            style={{ paddingLeft: AXIS_WIDTH }}
-          >
+          <div className="mt-2 flex gap-1.5" style={{ paddingLeft: AXIS_WIDTH }}>
             {points.map((p) => (
               <span
                 key={p.key}

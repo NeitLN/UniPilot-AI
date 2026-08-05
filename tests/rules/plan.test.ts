@@ -49,7 +49,11 @@ describe("validateSessions", () => {
 
   it("accepts a session that fits cleanly", () => {
     const sessions: StudySessionCandidate[] = [
-      { assignmentId: "a1", startAt: "2026-08-01T09:00:00.000Z", endAt: "2026-08-01T10:00:00.000Z" },
+      {
+        assignmentId: "a1",
+        startAt: "2026-08-01T09:00:00.000Z",
+        endAt: "2026-08-01T10:00:00.000Z",
+      },
     ];
     const [result] = validateSessions({
       sessions,
@@ -62,7 +66,11 @@ describe("validateSessions", () => {
 
   it("rejects a session overlapping a class block", () => {
     const sessions: StudySessionCandidate[] = [
-      { assignmentId: "a1", startAt: "2026-08-01T09:00:00.000Z", endAt: "2026-08-01T10:00:00.000Z" },
+      {
+        assignmentId: "a1",
+        startAt: "2026-08-01T09:00:00.000Z",
+        endAt: "2026-08-01T10:00:00.000Z",
+      },
     ];
     const [result] = validateSessions({
       sessions,
@@ -76,8 +84,16 @@ describe("validateSessions", () => {
 
   it("rejects two proposed sessions that overlap each other, keeping the earlier one", () => {
     const sessions: StudySessionCandidate[] = [
-      { assignmentId: "a1", startAt: "2026-08-01T10:00:00.000Z", endAt: "2026-08-01T11:00:00.000Z" },
-      { assignmentId: "a1", startAt: "2026-08-01T09:30:00.000Z", endAt: "2026-08-01T10:30:00.000Z" },
+      {
+        assignmentId: "a1",
+        startAt: "2026-08-01T10:00:00.000Z",
+        endAt: "2026-08-01T11:00:00.000Z",
+      },
+      {
+        assignmentId: "a1",
+        startAt: "2026-08-01T09:30:00.000Z",
+        endAt: "2026-08-01T10:30:00.000Z",
+      },
     ];
     const results = validateSessions({
       sessions,
@@ -94,7 +110,11 @@ describe("validateSessions", () => {
 
   it("rejects a session scheduled after the assignment's due date", () => {
     const sessions: StudySessionCandidate[] = [
-      { assignmentId: "a1", startAt: "2026-08-06T09:00:00.000Z", endAt: "2026-08-06T10:00:00.000Z" },
+      {
+        assignmentId: "a1",
+        startAt: "2026-08-06T09:00:00.000Z",
+        endAt: "2026-08-06T10:00:00.000Z",
+      },
     ];
     const [result] = validateSessions({
       sessions,
@@ -108,8 +128,16 @@ describe("validateSessions", () => {
 
   it("rejects a session that would exceed the day's availability", () => {
     const sessions: StudySessionCandidate[] = [
-      { assignmentId: "a1", startAt: "2026-08-01T08:00:00.000Z", endAt: "2026-08-01T10:00:00.000Z" }, // 2h
-      { assignmentId: "a1", startAt: "2026-08-01T11:00:00.000Z", endAt: "2026-08-01T14:00:00.000Z" }, // 3h -> total 5h > 4h cap
+      {
+        assignmentId: "a1",
+        startAt: "2026-08-01T08:00:00.000Z",
+        endAt: "2026-08-01T10:00:00.000Z",
+      }, // 2h
+      {
+        assignmentId: "a1",
+        startAt: "2026-08-01T11:00:00.000Z",
+        endAt: "2026-08-01T14:00:00.000Z",
+      }, // 3h -> total 5h > 4h cap
     ];
     const results = validateSessions({
       sessions,
@@ -124,7 +152,11 @@ describe("validateSessions", () => {
 
   it("rejects an inverted time range", () => {
     const sessions: StudySessionCandidate[] = [
-      { assignmentId: "a1", startAt: "2026-08-01T10:00:00.000Z", endAt: "2026-08-01T09:00:00.000Z" },
+      {
+        assignmentId: "a1",
+        startAt: "2026-08-01T10:00:00.000Z",
+        endAt: "2026-08-01T09:00:00.000Z",
+      },
     ];
     const [result] = validateSessions({
       sessions,

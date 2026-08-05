@@ -17,12 +17,12 @@ A personal Student Life OS — assignments, schedule, focus timer, GPA, an AI st
 
 ## Screenshots
 
-| Dashboard | Assignments | Schedule |
-|---|---|---|
+| Dashboard                                    | Assignments                                      | Schedule                                   |
+| -------------------------------------------- | ------------------------------------------------ | ------------------------------------------ |
 | ![Dashboard](docs/screenshots/dashboard.png) | ![Assignments](docs/screenshots/assignments.png) | ![Schedule](docs/screenshots/schedule.png) |
 
-| Focus timer | GPA tracker | AI planner | Workload risk |
-|---|---|---|---|
+| Focus timer                          | GPA tracker                      | AI planner                               | Workload risk                      |
+| ------------------------------------ | -------------------------------- | ---------------------------------------- | ---------------------------------- |
 | ![Focus](docs/screenshots/focus.png) | ![GPA](docs/screenshots/gpa.png) | ![Planner](docs/screenshots/planner.png) | ![Risk](docs/screenshots/risk.png) |
 
 ## Tech stack
@@ -68,17 +68,17 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ### Environment variables
 
-| Variable | Where to get it |
-|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project → Settings → API |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase project → Settings → API |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase project → Settings → API (server-only, never exposed to the client) |
-| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google Cloud Console → APIs & Services → Credentials (OAuth client) |
-| `GOOGLE_REDIRECT_URI` | `http://localhost:3000/api/calendar/oauth/callback` in dev |
-| `CALENDAR_TOKEN_ENCRYPTION_KEY` | Generate with `openssl rand -base64 32` |
-| `GEMINI_API_KEY` | [Google AI Studio](https://aistudio.google.com/apikey) |
-| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | Generate with `npx web-push generate-vapid-keys` |
-| `VAPID_SUBJECT` | `mailto:you@example.com` |
+| Variable                                             | Where to get it                                                              |
+| ---------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`                           | Supabase project → Settings → API                                            |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY`                      | Supabase project → Settings → API                                            |
+| `SUPABASE_SERVICE_ROLE_KEY`                          | Supabase project → Settings → API (server-only, never exposed to the client) |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`          | Google Cloud Console → APIs & Services → Credentials (OAuth client)          |
+| `GOOGLE_REDIRECT_URI`                                | `http://localhost:3000/api/calendar/oauth/callback` in dev                   |
+| `CALENDAR_TOKEN_ENCRYPTION_KEY`                      | Generate with `openssl rand -base64 32`                                      |
+| `GEMINI_API_KEY`                                     | [Google AI Studio](https://aistudio.google.com/apikey)                       |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | Generate with `npx web-push generate-vapid-keys`                             |
+| `VAPID_SUBJECT`                                      | `mailto:you@example.com`                                                     |
 
 For the Google OAuth consent screen in "Testing" mode, add your own Google account under **Test users** or the calendar connect flow will fail with `access_denied`.
 

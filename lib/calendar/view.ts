@@ -73,11 +73,7 @@ export function shiftDate(view: ScheduleView, date: Date, direction: 1 | -1): Da
  * the year is printed once when both ends share it, and the month is repeated
  * only when the span actually crosses one.
  */
-export function formatViewRangeLabel(
-  view: ScheduleView,
-  date: Date,
-  locale?: string,
-): string {
+export function formatViewRangeLabel(view: ScheduleView, date: Date, locale?: string): string {
   const { start, end } = getViewRange(view, date);
   const last = addDays(end, -1);
 

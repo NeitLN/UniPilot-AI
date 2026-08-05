@@ -48,19 +48,17 @@ export async function POST() {
     );
   }
 
-  const [{ data: profile }, { data: assignmentRows }, { data: classBlockRows }] =
-    await Promise.all([
-      supabase
-        .from("profiles")
-        .select("weekly_availability_hours, target_gpa")
-        .maybeSingle(),
+  const [{ data: profile }, { data: assignmentRows }, { data: classBlockRows }] = await Promise.all(
+    [
+      supabase.from("profiles").select("weekly_availability_hours, target_gpa").maybeSingle(),
       supabase
         .from("assignments")
         .select("id, title, due_at, weight, priority, progress")
         .is("archived_at", null)
         .neq("status", "done"),
       supabase.from("class_blocks").select("title, start_at, end_at"),
-    ]);
+    ],
+  );
 
   const weeklyAvailabilityHours = profile?.weekly_availability_hours ?? 0;
   const assignments = assignmentRows ?? [];
@@ -112,10 +110,7 @@ export async function POST() {
         { status: 504 },
       );
     }
-    return NextResponse.json(
-      { error: "Couldn't reach Gemini.", retryable: true },
-      { status: 502 },
-    );
+    return NextResponse.json({ error: "Couldn't reach Gemini.", retryable: true }, { status: 502 });
   }
 
   const parsed = parseGeminiPlanResponse(rawText);
@@ -129,12 +124,8 @@ export async function POST() {
   // Never trust the model: drop any session pointing at an assignment we
   // didn't actually offer it, then re-validate every remaining one server-side.
   const assignmentIds = new Set(assignments.map((a) => a.id));
-  const assignmentDueAt = Object.fromEntries(
-    assignments.map((a) => [a.id, a.due_at]),
-  );
-  const candidateSessions = parsed.sessions.filter((s) =>
-    assignmentIds.has(s.assignmentId),
-  );
+  const assignmentDueAt = Object.fromEntries(assignments.map((a) => [a.id, a.due_at]));
+  const candidateSessions = parsed.sessions.filter((s) => assignmentIds.has(s.assignmentId));
 
   const validated = validateSessions({
     sessions: candidateSessions,
@@ -176,10 +167,7 @@ export async function POST() {
     .single();
 
   if (planError || !plan) {
-    return NextResponse.json(
-      { error: "Couldn't save the draft plan." },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Couldn't save the draft plan." }, { status: 500 });
   }
 
   if (validSessions.length > 0) {
@@ -193,10 +181,7 @@ export async function POST() {
       })),
     );
     if (sessionsError) {
-      return NextResponse.json(
-        { error: "Couldn't save the study sessions." },
-        { status: 500 },
-      );
+      return NextResponse.json({ error: "Couldn't save the study sessions." }, { status: 500 });
     }
   }
 

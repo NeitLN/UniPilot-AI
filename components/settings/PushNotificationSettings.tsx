@@ -12,9 +12,7 @@ import {
 } from "@/lib/push/subscribe";
 
 export function PushNotificationSettings() {
-  const [state, setState] = useState<PushSubscriptionState | "loading">(
-    "loading",
-  );
+  const [state, setState] = useState<PushSubscriptionState | "loading">("loading");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // Set only inside handleEnable's success path below — never by the
@@ -77,8 +75,7 @@ export function PushNotificationSettings() {
     <div className="flex flex-col gap-2 text-xs font-bold text-ink-2">
       Push notifications
       <p className="text-[11.5px] font-semibold text-ink-3">
-        Get deadline and schedule reminders on this device, even when UniPilot
-        isn&apos;t open.
+        Get deadline and schedule reminders on this device, even when UniPilot isn&apos;t open.
       </p>
       {/* Cross-fades between states (checking / unsupported / denied /
           default / enabled) instead of the old hard swap — each is a
@@ -110,9 +107,8 @@ export function PushNotificationSettings() {
             role="status"
             className="text-[11.5px] font-semibold text-ink-3"
           >
-            This browser doesn&apos;t support push notifications. On
-            iPhone/iPad, add UniPilot to your Home Screen first, then try again
-            from there.
+            This browser doesn&apos;t support push notifications. On iPhone/iPad, add UniPilot to
+            your Home Screen first, then try again from there.
           </motion.p>
         )}
 
@@ -126,8 +122,8 @@ export function PushNotificationSettings() {
             role="status"
             className="text-[11.5px] font-semibold text-ink-3"
           >
-            Notifications are blocked for UniPilot in this browser. Allow them
-            from your browser or device settings to turn this back on.
+            Notifications are blocked for UniPilot in this browser. Allow them from your browser or
+            device settings to turn this back on.
           </motion.p>
         )}
 
@@ -146,11 +142,7 @@ export function PushNotificationSettings() {
               disabled={pending}
               className="flex min-h-11 w-fit items-center justify-center rounded-ctl bg-line px-3.5 text-sm font-bold text-foreground hover:bg-line-hover disabled:opacity-60"
             >
-              {pending
-                ? "Working…"
-                : state === "enabled"
-                  ? "Turn off"
-                  : "Turn on"}
+              {pending ? "Working…" : state === "enabled" ? "Turn off" : "Turn on"}
             </button>
 
             {/* The one moment here that earns emphasis beyond a plain
@@ -178,9 +170,7 @@ export function PushNotificationSettings() {
       </AnimatePresence>
       {error && <FieldError className="text-[11px]">{error}</FieldError>}
       <p aria-live="polite" className="sr-only">
-        {state === "enabled"
-          ? "Push notifications are on for this device."
-          : ""}
+        {state === "enabled" ? "Push notifications are on for this device." : ""}
       </p>
     </div>
   );
@@ -188,13 +178,7 @@ export function PushNotificationSettings() {
 
 function CheckIcon() {
   return (
-    <svg
-      viewBox="0 0 20 20"
-      width="14"
-      height="14"
-      fill="none"
-      aria-hidden="true"
-    >
+    <svg viewBox="0 0 20 20" width="14" height="14" fill="none" aria-hidden="true">
       <path
         d="M4 10.5 8 14l8-8"
         stroke="currentColor"

@@ -23,7 +23,12 @@ import {
 
 describe("projectGpaScenarios", () => {
   it("returns null when no in-progress course has any assignment weight", () => {
-    expect(projectGpaScenarios([], [{ courseId: "c1", courseName: "A", creditHours: 3, assignments: [] }])).toBeNull();
+    expect(
+      projectGpaScenarios(
+        [],
+        [{ courseId: "c1", courseName: "A", creditHours: 3, assignments: [] }],
+      ),
+    ).toBeNull();
   });
 
   it("worst <= likely <= best for a partially-scored course", () => {
@@ -123,7 +128,10 @@ describe("strongestCourseInsight", () => {
   });
 
   it("ignores predicted courses with too little scored weight to be meaningful", () => {
-    const insight = strongestCourseInsight([], [{ courseName: "Database", predictedScore: 100, scoredWeight: 5 }]);
+    const insight = strongestCourseInsight(
+      [],
+      [{ courseName: "Database", predictedScore: 100, scoredWeight: 5 }],
+    );
     expect(insight).toBeNull();
   });
 
@@ -196,7 +204,9 @@ describe("dragsGpaDown", () => {
   });
 
   it("does not fire exactly at the margin, only past it", () => {
-    expect(dragsGpaDown({ gradePoint: 3.26 - BELOW_AVERAGE_MARGIN, creditHours: 3 }, 3.26)).toBe(false);
+    expect(dragsGpaDown({ gradePoint: 3.26 - BELOW_AVERAGE_MARGIN, creditHours: 3 }, 3.26)).toBe(
+      false,
+    );
   });
 
   it("flags a minority of a realistic spread, not most of it", () => {

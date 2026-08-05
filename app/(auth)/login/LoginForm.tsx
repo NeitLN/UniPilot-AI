@@ -10,14 +10,8 @@ const initialState: AuthFormState = {};
 
 export function LoginForm() {
   const [mode, setMode] = useState<"login" | "signup">("login");
-  const [loginState, loginAction, loginPending] = useActionState(
-    login,
-    initialState,
-  );
-  const [signupState, signupAction, signupPending] = useActionState(
-    signup,
-    initialState,
-  );
+  const [loginState, loginAction, loginPending] = useActionState(login, initialState);
+  const [signupState, signupAction, signupPending] = useActionState(signup, initialState);
 
   const isLogin = mode === "login";
   const state = isLogin ? loginState : signupState;
@@ -87,9 +81,7 @@ export function LoginForm() {
         {/* Sign-up can succeed without signing anyone in — email confirmation
             pending, or the address already has an account. Both used to
             redirect and bounce silently back to this form. */}
-        {state?.notice && (
-          <FieldSuccess className="text-left text-xs">{state.notice}</FieldSuccess>
-        )}
+        {state?.notice && <FieldSuccess className="text-left text-xs">{state.notice}</FieldSuccess>}
 
         <button
           type="submit"

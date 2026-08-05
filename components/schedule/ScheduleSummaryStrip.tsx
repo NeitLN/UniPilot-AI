@@ -20,7 +20,9 @@ export function NextClassCard({ block, now }: { block: ClassBlockLite | null; no
         <IconChip icon={<GraduationCap aria-hidden="true" />} tone="violet" size="lg" square />
         <div>
           <p className="text-[11.5px] font-semibold text-ink-3">Next class</p>
-          <p className="mt-0.5 font-display text-base font-bold text-foreground">No more classes today</p>
+          <p className="mt-0.5 font-display text-base font-bold text-foreground">
+            No more classes today
+          </p>
         </div>
       </div>
     );
@@ -41,7 +43,9 @@ export function NextClassCard({ block, now }: { block: ClassBlockLite | null; no
       />
       <div className="min-w-0 flex-1">
         <p className="text-[11.5px] font-semibold text-ink-3">Next class</p>
-        <p className="mt-0.5 truncate font-display text-base font-bold text-foreground">{block.title}</p>
+        <p className="mt-0.5 truncate font-display text-base font-bold text-foreground">
+          {block.title}
+        </p>
         {/* Time and room stack instead of sharing a "·"-joined line — the
             concept gives each its own row, and a long room name no longer
             pushes the time out of view. AM/PM is dropped here for the same
@@ -95,7 +99,11 @@ export function ScheduleSummaryStrip({
         icon={<IconChip icon={<BookOpen aria-hidden="true" />} tone="violet" size="sm" square />}
         label={classesTodayCount === 1 ? "class today" : "classes today"}
         value={String(classesTodayCount)}
-        hint={coursesTodayCount > 0 ? `Across ${coursesTodayCount} course${coursesTodayCount === 1 ? "" : "s"}` : undefined}
+        hint={
+          coursesTodayCount > 0
+            ? `Across ${coursesTodayCount} course${coursesTodayCount === 1 ? "" : "s"}`
+            : undefined
+        }
         className="flex-1"
       />
       <StatTile

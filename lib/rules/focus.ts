@@ -23,7 +23,10 @@ export function breakKindForCycle(completedCycleNumber: number): "short" | "long
  * (manual entries, pre-Phase-4-redesign stored sessions) — UNIPILOT_8_SCREENS
  * Step 4.1 adds 45/60 min options, so a 45-min session stopped at 30:00 must
  * not misclassify as "completed" just because it beat the old fixed 25:00. */
-export function classify(elapsedSeconds: number, targetSeconds: number = POMODORO_SECONDS): FocusResult {
+export function classify(
+  elapsedSeconds: number,
+  targetSeconds: number = POMODORO_SECONDS,
+): FocusResult {
   return elapsedSeconds >= targetSeconds ? "completed" : "partial";
 }
 
@@ -187,9 +190,7 @@ export function weeklyStats(
   const { now = new Date(), timeZone = defaultTimeZone() } = options;
   const todayKey = dayKey(now, timeZone);
   const weekAgoKey = shiftDayKey(todayKey, -6);
-  const recent = sessions.filter(
-    (s) => dayKey(new Date(s.startedAt), timeZone) >= weekAgoKey,
-  );
+  const recent = sessions.filter((s) => dayKey(new Date(s.startedAt), timeZone) >= weekAgoKey);
 
   const stats: WeeklyFocusStats = {
     completedCycles: 0,
@@ -284,8 +285,9 @@ export function completedCyclesToday(
   timeZone: string = defaultTimeZone(),
 ): number {
   const todayKey = dayKey(now, timeZone);
-  return sessions.filter((s) => s.result === "completed" && dayKey(new Date(s.startedAt), timeZone) === todayKey)
-    .length;
+  return sessions.filter(
+    (s) => s.result === "completed" && dayKey(new Date(s.startedAt), timeZone) === todayKey,
+  ).length;
 }
 
 /** B-02: a sub-minute session used to render as a flat "0 min", reading as
@@ -342,8 +344,7 @@ export function chartAxisTicks(maxValue: number, targetIntervals = 4): number[] 
   const target = Math.max(maxValue, 1);
   const rough = target / Math.max(1, targetIntervals);
   const magnitude = Math.pow(10, Math.floor(Math.log10(rough)));
-  const step =
-    [1, 2, 5, 10].map((m) => m * magnitude).find((s) => s >= rough) ?? 10 * magnitude;
+  const step = [1, 2, 5, 10].map((m) => m * magnitude).find((s) => s >= rough) ?? 10 * magnitude;
   const top = Math.ceil(target / step) * step;
 
   const ticks: number[] = [];

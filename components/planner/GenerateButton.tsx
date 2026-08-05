@@ -25,7 +25,12 @@ interface GenerateResponse {
   rejectedSessions?: unknown[];
 }
 
-export function GenerateButton({ disabled, disabledReasons, label, variant = "violet" }: GenerateButtonProps) {
+export function GenerateButton({
+  disabled,
+  disabledReasons,
+  label,
+  variant = "violet",
+}: GenerateButtonProps) {
   const router = useRouter();
   const isOnline = useOnlineStatus();
   const [pending, setPending] = useState(false);

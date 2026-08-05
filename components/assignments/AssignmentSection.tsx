@@ -49,7 +49,9 @@ export function AssignmentSection({
   return (
     <div className={TONE_WRAPPER[tone]}>
       <div className="flex items-center justify-between gap-2 px-0.5">
-        <h2 className={`flex items-center gap-2 font-display text-base font-bold ${TONE_HEADING[tone]}`}>
+        <h2
+          className={`flex items-center gap-2 font-display text-base font-bold ${TONE_HEADING[tone]}`}
+        >
           <IconChip
             icon={TONE_ICON[tone]}
             size="sm"

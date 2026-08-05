@@ -80,7 +80,10 @@ export async function createAssignment(
   const recurrenceGroupId = occurrences.length > 1 ? crypto.randomUUID() : null;
   const baseRow = toRow(input);
   // A brand-new row has no prior status to transition from.
-  const completedAt = completedAtForTransition({ status: "not_started", completedAt: null }, input.status);
+  const completedAt = completedAtForTransition(
+    { status: "not_started", completedAt: null },
+    input.status,
+  );
 
   const { data: created, error } = await supabase
     .from("assignments")
@@ -137,7 +140,10 @@ export async function updateAssignment(
     .eq("id", id)
     .maybeSingle();
   const completedAt = current
-    ? completedAtForTransition({ status: current.status, completedAt: current.completed_at }, input.status)
+    ? completedAtForTransition(
+        { status: current.status, completedAt: current.completed_at },
+        input.status,
+      )
     : completedAtForTransition({ status: "not_started", completedAt: null }, input.status);
 
   const { error } = await supabase
@@ -172,7 +178,10 @@ export async function setAssignmentStatus(id: string, status: AssignmentStatus) 
     .eq("id", id)
     .maybeSingle();
   const completedAt = current
-    ? completedAtForTransition({ status: current.status, completedAt: current.completed_at }, status)
+    ? completedAtForTransition(
+        { status: current.status, completedAt: current.completed_at },
+        status,
+      )
     : null;
   const { error } = await supabase
     .from("assignments")
@@ -249,10 +258,7 @@ export async function archiveAssignment(id: string, scope: "this" | "following" 
  * cancelled on archive and isn't recreated here). */
 export async function restoreAssignment(id: string) {
   const supabase = await createClient();
-  const { error } = await supabase
-    .from("assignments")
-    .update({ archived_at: null })
-    .eq("id", id);
+  const { error } = await supabase.from("assignments").update({ archived_at: null }).eq("id", id);
 
   if (error) throw new Error(error.message);
   revalidatePath("/assignments");

@@ -23,7 +23,7 @@ and `--violet-tint` (4.21). The token was fine on the one surface anyone had
 tested it on. Fixed by retuning the token, not by removing modifiers.
 
 **PERF-02 — half of it did not exist.** The audit named `lib/push/deliver.ts:91`
-as an N+1. That line is inside `deliverDueNotifications`, the *single-user*
+as an N+1. That line is inside `deliverDueNotifications`, the _single-user_
 path, where the per-notification update is bounded and documented as a
 deliberate trade-off. The path that actually scales,
 `deliverAllDueNotifications`, was already batched under SR-05 and had been for
@@ -63,12 +63,12 @@ The honest headline is that **I found no open P0 and no open P1**. That is a rea
 
 What I did find clusters into four themes:
 
-| Theme | Severity | Why it matters |
-|---|---|---|
-| **No CI pipeline** | P2 | 346 unit + 33 e2e tests exist and nothing runs them. This is the *root cause* of the five stale e2e tests found and fixed earlier today — they had been broken for a while with nobody notified. |
-| **11 foreign keys with no index** | P2 | Verified against the live database. Every RLS policy filters on `user_id`; several of those columns are unindexed. Fine at 41 rows, a cliff at 41,000. |
-| **Opacity modifiers break WCAG AA** | P2 | The base colour tokens all pass AA. The failures come from `/70`, `/80` modifiers layered on top of tokens that were already tuned to the floor. |
-| **No rate limiting anywhere** | P2 | `/api/plan/generate` calls a paid Gemini API behind nothing but an auth check. |
+| Theme                               | Severity | Why it matters                                                                                                                                                                                   |
+| ----------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **No CI pipeline**                  | P2       | 346 unit + 33 e2e tests exist and nothing runs them. This is the _root cause_ of the five stale e2e tests found and fixed earlier today — they had been broken for a while with nobody notified. |
+| **11 foreign keys with no index**   | P2       | Verified against the live database. Every RLS policy filters on `user_id`; several of those columns are unindexed. Fine at 41 rows, a cliff at 41,000.                                           |
+| **Opacity modifiers break WCAG AA** | P2       | The base colour tokens all pass AA. The failures come from `/70`, `/80` modifiers layered on top of tokens that were already tuned to the floor.                                                 |
+| **No rate limiting anywhere**       | P2       | `/api/plan/generate` calls a paid Gemini API behind nothing but an auth check.                                                                                                                   |
 
 Two smaller but notable gaps: **no health check, no error monitoring, no deployment config in the repo**, and **`lib/push`, `lib/offline` and `lib/risk` have zero tests** — `lib/push` being the notification-delivery path that is hardest to verify by hand and has already shipped one silent bug (SR-01).
 
@@ -115,7 +115,7 @@ I want to be specific here, because several of these are things teams usually ge
 - `lib/rules/` — 13 of 14 modules have dedicated unit tests. 346 tests pass.
 - Business logic is genuinely pure and injectable (`now` is a parameter, not `new Date()` inside), which is why it is testable.
 - Defense in depth on validation: `updateTargetGpa` validates in the client, again in the server action, **and** the column carries `check (target_gpa between 0 and 4)`.
-- Comments explain *why*, not *what*, and repeatedly cite the measurement or review that motivated a decision.
+- Comments explain _why_, not _what_, and repeatedly cite the measurement or review that motivated a decision.
 
 ---
 
@@ -129,16 +129,17 @@ Five functional e2e failures were found and fixed earlier today (duplicated DOM 
 
 ### BUG-01 — `/reports` renders two `<h1>` elements
 
-| Field | Value |
-|---|---|
-| **Screen** | Weekly report |
-| **Specialist** | Accessibility Specialist |
-| **Severity** | **P3** |
-| **Category** | Accessibility / semantic HTML |
-| **Effort** | **S** |
-| **Regression risk** | Very low |
+| Field               | Value                         |
+| ------------------- | ----------------------------- |
+| **Screen**          | Weekly report                 |
+| **Specialist**      | Accessibility Specialist      |
+| **Severity**        | **P3**                        |
+| **Category**        | Accessibility / semantic HTML |
+| **Effort**          | **S**                         |
+| **Regression risk** | Very low                      |
 
 **Evidence (VERIFIED).** Automated sweep reported `h1Count != 1` for `/reports` only. Confirmed in source:
+
 - `app/(app)/reports/page.tsx:218` → `<h1>Weekly report</h1>`
 - `components/reports/WeeklyRecapHero.tsx:89` → `<h1>{headline(...)}</h1>`
 
@@ -159,14 +160,14 @@ Five functional e2e failures were found and fixed earlier today (duplicated DOM 
 
 ### BUG-02 — `/courses` skips a heading level (h1 → h3)
 
-| Field | Value |
-|---|---|
-| **Screen** | Courses |
-| **Specialist** | Accessibility Specialist |
-| **Severity** | **P3** |
-| **Category** | Accessibility / WCAG 1.3.1 Info and Relationships |
-| **Effort** | **S** |
-| **Regression risk** | Very low |
+| Field               | Value                                             |
+| ------------------- | ------------------------------------------------- |
+| **Screen**          | Courses                                           |
+| **Specialist**      | Accessibility Specialist                          |
+| **Severity**        | **P3**                                            |
+| **Category**        | Accessibility / WCAG 1.3.1 Info and Relationships |
+| **Effort**          | **S**                                             |
+| **Regression risk** | Very low                                          |
 
 **Evidence (VERIFIED).** Sweep reported one heading jump, on `/courses` only: `h1->h3: E2E Test Course`. Confirmed in source: `app/(app)/courses/page.tsx:124` is `<h1>Courses</h1>`; `components/courses/CourseCard.tsx:59` is `<h3>{course.name}</h3>`. No `<h2>` sits between them.
 
@@ -175,7 +176,7 @@ Five functional e2e failures were found and fixed earlier today (duplicated DOM 
 **Expected.** Heading levels descend without gaps.
 **Actual.** A screen-reader user navigating by heading level hears a missing level and may assume content was skipped.
 
-**Root cause (confirmed).** `CourseCard` uses `<h3>` twice — once for the card title (line 59) and once inside its modal (line 110, where `<h2>` *is* correct because the modal is its own context). The card-level one was never reconciled with the page.
+**Root cause (confirmed).** `CourseCard` uses `<h3>` twice — once for the card title (line 59) and once inside its modal (line 110, where `<h2>` _is_ correct because the modal is its own context). The card-level one was never reconciled with the page.
 
 **Recommended solution.** Change the card title to `<h2>`. The modal's `<h2>` is correct as-is since a dialog starts a new heading context.
 
@@ -187,16 +188,17 @@ Five functional e2e failures were found and fixed earlier today (duplicated DOM 
 
 ### BUG-03 — Two controls on `/focus` are under the 24×24px minimum target size
 
-| Field | Value |
-|---|---|
-| **Screen** | Focus timer |
-| **Specialist** | Accessibility Specialist |
-| **Severity** | **P3** |
-| **Category** | Accessibility / WCAG 2.5.8 Target Size (Minimum), AA in WCAG 2.2 |
-| **Effort** | **S** |
-| **Regression risk** | Very low |
+| Field               | Value                                                            |
+| ------------------- | ---------------------------------------------------------------- |
+| **Screen**          | Focus timer                                                      |
+| **Specialist**      | Accessibility Specialist                                         |
+| **Severity**        | **P3**                                                           |
+| **Category**        | Accessibility / WCAG 2.5.8 Target Size (Minimum), AA in WCAG 2.2 |
+| **Effort**          | **S**                                                            |
+| **Regression risk** | Very low                                                         |
 
 **Evidence (VERIFIED).** Measured bounding boxes at 1440px:
+
 - "View all history" — **110 × 23 px**
 - "This week" — **71 × 23 px**
 
@@ -221,14 +223,14 @@ Both are 1px under the 24px floor. (The skip link measures 1×1px, which is the 
 
 ### UX-01 — Empty and low-data states make several redesigned cards look broken rather than empty
 
-| Field | Value |
-|---|---|
-| **Screen** | Focus timer, Weekly report, GPA tracker |
-| **Specialist** | UX/UI Designer + Gen Z Student |
-| **Severity** | **P2** |
-| **Category** | UX / empty states |
-| **Effort** | **M** |
-| **Regression risk** | Low |
+| Field               | Value                                   |
+| ------------------- | --------------------------------------- |
+| **Screen**          | Focus timer, Weekly report, GPA tracker |
+| **Specialist**      | UX/UI Designer + Gen Z Student          |
+| **Severity**        | **P2**                                  |
+| **Category**        | UX / empty states                       |
+| **Effort**          | **M**                                   |
+| **Regression risk** | Low                                     |
 
 **Evidence (VERIFIED during this session's redesign work).** With a clean account, the Learning rhythm chart renders seven bars of 2px against a labelled axis, and Plan adherence renders a title with a single line of prose and no figure. Both read as "something failed to load" rather than "you have not done this yet."
 
@@ -245,14 +247,14 @@ Both are 1px under the 24px floor. (The skip link measures 1×1px, which is the 
 
 ### UX-02 — "Below average" tag fires on the majority of rows, which destroys its signal
 
-| Field | Value |
-|---|---|
-| **Screen** | GPA tracker → Course breakdown |
-| **Specialist** | UX/UI Designer + Gen Z Student |
-| **Severity** | **P3** |
-| **Category** | UX / information design |
-| **Effort** | **S** |
-| **Regression risk** | Low |
+| Field               | Value                          |
+| ------------------- | ------------------------------ |
+| **Screen**          | GPA tracker → Course breakdown |
+| **Specialist**      | UX/UI Designer + Gen Z Student |
+| **Severity**        | **P3**                         |
+| **Category**        | UX / information design        |
+| **Effort**          | **S**                          |
+| **Regression risk** | Low                            |
 
 **Evidence (VERIFIED).** `dragsGpaDown()` is `row.gradePoint < overallGpa`. With a realistic nine-course spread seeded during this session, **6 of 9 rows** carried the tag. A label that applies to two thirds of rows is decoration, not information.
 
@@ -268,12 +270,12 @@ Both are 1px under the 24px floor. (The skip link measures 1×1px, which is the 
 
 ### UX-03 — Two different cards were both titled "Predicted grades"
 
-| Field | Value |
-|---|---|
-| **Screen** | GPA tracker |
-| **Specialist** | UX/UI Designer |
-| **Severity** | **P3** — *already fixed in the working tree* |
-| **Category** | UX / naming |
+| Field          | Value                                        |
+| -------------- | -------------------------------------------- |
+| **Screen**     | GPA tracker                                  |
+| **Specialist** | UX/UI Designer                               |
+| **Severity**   | **P3** — _already fixed in the working tree_ |
+| **Category**   | UX / naming                                  |
 
 **Evidence (VERIFIED).** `PredictedScenarios` (the worst/likely/best trio) and `PredictedGrades` (the per-course list) both rendered an `<h2>Predicted grades</h2>`. A reader had no way to tell which card a number came from. Renamed to "Course predictions" during this session. Recorded here for completeness.
 
@@ -283,18 +285,18 @@ Both are 1px under the 24px floor. (The skip link measures 1×1px, which is the 
 
 ### SEC-01 — No rate limiting on any endpoint, including the paid AI route
 
-| Field | Value |
-|---|---|
-| **Screen** | `/api/plan/generate` (also `/api/export`, `/api/calendar/sync`, `/api/push/send`, `/api/risk/compute`) |
-| **Specialist** | Application Security Engineer |
-| **Severity** | **P2** |
-| **Category** | Security / abuse and cost control (OWASP API4:2023 Unrestricted Resource Consumption) |
-| **Effort** | **M** |
-| **Regression risk** | Low |
+| Field               | Value                                                                                                  |
+| ------------------- | ------------------------------------------------------------------------------------------------------ |
+| **Screen**          | `/api/plan/generate` (also `/api/export`, `/api/calendar/sync`, `/api/push/send`, `/api/risk/compute`) |
+| **Specialist**      | Application Security Engineer                                                                          |
+| **Severity**        | **P2**                                                                                                 |
+| **Category**        | Security / abuse and cost control (OWASP API4:2023 Unrestricted Resource Consumption)                  |
+| **Effort**          | **M**                                                                                                  |
+| **Regression risk** | Low                                                                                                    |
 
 **Evidence (VERIFIED).** `grep -rn "ratelimit\|rateLimit\|Retry-After\|429"` across `app/` and `lib/` returns **no matches**. `app/api/plan/generate/route.ts` checks `getUser()` and a business gate (`canGeneratePlan`), then calls Gemini. There is no per-user throttle and no 429 path anywhere in the codebase.
 
-**Reproduction.** Sign in as any user and POST `/api/plan/generate` repeatedly. Each call reaches the Gemini API. *(I did not actually run this — doing so would incur real cost against your API key. The absence of any throttle is confirmed statically.)*
+**Reproduction.** Sign in as any user and POST `/api/plan/generate` repeatedly. Each call reaches the Gemini API. _(I did not actually run this — doing so would incur real cost against your API key. The absence of any throttle is confirmed statically.)_
 
 **Expected.** A signed-in user cannot drive unbounded spend or load.
 **Actual.** Any authenticated user can call the paid AI endpoint as fast as the network allows. `/api/export` has the same property and is I/O-heavy.
@@ -311,14 +313,14 @@ Both are 1px under the 24px floor. (The skip link measures 1×1px, which is the 
 
 ### SEC-02 — Supabase environment variables use non-null assertions instead of validated reads
 
-| Field | Value |
-|---|---|
-| **Screen** | App-wide bootstrap |
-| **Specialist** | Application Security Engineer + DevOps |
-| **Severity** | **P3** |
-| **Category** | Configuration robustness |
-| **Effort** | **S** |
-| **Regression risk** | Very low |
+| Field               | Value                                  |
+| ------------------- | -------------------------------------- |
+| **Screen**          | App-wide bootstrap                     |
+| **Specialist**      | Application Security Engineer + DevOps |
+| **Severity**        | **P3**                                 |
+| **Category**        | Configuration robustness               |
+| **Effort**          | **S**                                  |
+| **Regression risk** | Very low                               |
 
 **Evidence (VERIFIED).** Eight occurrences of `process.env.X!`: `NEXT_PUBLIC_SUPABASE_URL!` (×4), `NEXT_PUBLIC_SUPABASE_ANON_KEY!` (×3), `SUPABASE_SERVICE_ROLE_KEY!` (×1). By contrast `lib/calendar/oauth.ts`, `lib/calendar/tokenCrypto.ts` and `lib/gemini/client.ts` all validate properly and throw `Missing required env var: X`.
 
@@ -335,13 +337,13 @@ Both are 1px under the 24px floor. (The skip link measures 1×1px, which is the 
 
 ### SEC-03 — Fixed salt in the calendar-token key derivation
 
-| Field | Value |
-|---|---|
-| **Screen** | Google Calendar token storage |
-| **Specialist** | Application Security Engineer |
-| **Severity** | **P3** — informational, not a live vulnerability |
-| **Category** | Cryptography |
-| **Effort** | **S** |
+| Field               | Value                                                      |
+| ------------------- | ---------------------------------------------------------- |
+| **Screen**          | Google Calendar token storage                              |
+| **Specialist**      | Application Security Engineer                              |
+| **Severity**        | **P3** — informational, not a live vulnerability           |
+| **Category**        | Cryptography                                               |
+| **Effort**          | **S**                                                      |
 | **Regression risk** | **High** — changing the KDF invalidates every stored token |
 
 **Evidence (VERIFIED).** `lib/calendar/tokenCrypto.ts:14` — `const KEY_SALT = "unipilot-calendar-token-v1";` then `scryptSync(secret, KEY_SALT, 32)`.
@@ -356,14 +358,14 @@ Both are 1px under the 24px floor. (The skip link measures 1×1px, which is the 
 
 ### PERF-01 — Eleven foreign keys have no index
 
-| Field | Value |
-|---|---|
-| **Screen** | Database-wide |
-| **Specialist** | Database Engineer |
-| **Severity** | **P2** |
-| **Category** | Performance / scalability |
-| **Effort** | **S** |
-| **Regression risk** | Very low (additive) |
+| Field               | Value                     |
+| ------------------- | ------------------------- |
+| **Screen**          | Database-wide             |
+| **Specialist**      | Database Engineer         |
+| **Severity**        | **P2**                    |
+| **Category**        | Performance / scalability |
+| **Effort**          | **S**                     |
+| **Regression risk** | Very low (additive)       |
 
 **Evidence (VERIFIED against the live database),** by querying `pg_constraint` for FK columns with no leading index:
 
@@ -377,6 +379,7 @@ notifications.class_block_id notifications.user_id
 Postgres does **not** auto-index foreign keys — only primary keys and unique constraints. The existing indexes cover `assignments(user_id, due_at)`, `class_blocks(user_id, start_at)`, `focus_sessions(user_id, started_at)` and the notification/recurrence cases, but not the above.
 
 **Why each matters:**
+
 - `courses.user_id`, `notifications.user_id`, `risk_warnings.user_id` — the RLS policy on every one of these tables filters `user_id = auth.uid()`. Unindexed, that is a sequential scan on **every single query**, for every user.
 - `study_sessions.plan_id` — the RLS policy is a correlated subquery joining on `plan_id`. Unindexed, this is the worst of the set.
 - `*.course_id` — deleting a course must scan children to enforce the FK. `deleteCourse` already checks for linked data, so this path runs in production.
@@ -385,6 +388,7 @@ Postgres does **not** auto-index foreign keys — only primary keys and unique c
 **Actual.** Sequential scans. Current row counts are small (41 assignments, 55 focus sessions) so this is **not user-visible today** — it is a cliff, not a current outage.
 
 **Recommended solution.** One additive migration:
+
 ```sql
 create index if not exists courses_user_id_idx on courses (user_id);
 create index if not exists notifications_user_id_idx on notifications (user_id);
@@ -398,6 +402,7 @@ create index if not exists focus_sessions_assignment_id_idx on focus_sessions (a
 create index if not exists notifications_assignment_id_idx on notifications (assignment_id);
 create index if not exists notifications_class_block_id_idx on notifications (class_block_id);
 ```
+
 Use `create index concurrently` if applying to a live production database with meaningful traffic.
 
 **Files.** New `supabase/migrations/0019_missing_fk_indexes.sql`
@@ -408,18 +413,18 @@ Use `create index concurrently` if applying to a live production database with m
 
 ### PERF-02 — N+1 writes in notification delivery and calendar push
 
-| Field | Value |
-|---|---|
-| **Screen** | `lib/push/deliver.ts`, `lib/calendar/push.ts` |
-| **Specialist** | Database Engineer + Performance Engineer |
-| **Severity** | **P3** |
-| **Category** | Performance |
-| **Effort** | **M** |
+| Field               | Value                                                                |
+| ------------------- | -------------------------------------------------------------------- |
+| **Screen**          | `lib/push/deliver.ts`, `lib/calendar/push.ts`                        |
+| **Specialist**      | Database Engineer + Performance Engineer                             |
+| **Severity**        | **P3**                                                               |
+| **Category**        | Performance                                                          |
+| **Effort**          | **M**                                                                |
 | **Regression risk** | Medium — touches the delivery path, which has no tests (see TEST-01) |
 
 **Evidence (VERIFIED).** `lib/push/deliver.ts:91` issues one `UPDATE notifications SET delivered_at, push_status WHERE id = ?` **per notification inside the loop**. `lib/calendar/push.ts:74` issues one `UPDATE study_sessions SET gcal_event_id WHERE id = ?` **per session inside the loop**.
 
-**Assessment.** Bounded per user by the number of due notifications, so it is not pathological. But `deliverAllDueNotifications` runs across *every* user every 15 minutes, so total round-trips scale with (users × due notifications).
+**Assessment.** Bounded per user by the number of due notifications, so it is not pathological. But `deliverAllDueNotifications` runs across _every_ user every 15 minutes, so total round-trips scale with (users × due notifications).
 
 **Recommended solution.** Group by resulting status and issue one `UPDATE ... WHERE id = ANY($1)` per status bucket. For the calendar case, batch into a single upsert after the loop.
 
@@ -431,16 +436,17 @@ Use `create index concurrently` if applying to a live production database with m
 
 ### PERF-03 — Heavy static assets in `public/`
 
-| Field | Value |
-|---|---|
-| **Screen** | Focus timer (audio), all mascot surfaces |
-| **Specialist** | Performance Engineer |
-| **Severity** | **P3** |
-| **Category** | Performance / asset weight |
-| **Effort** | **S** |
-| **Regression risk** | Low |
+| Field               | Value                                    |
+| ------------------- | ---------------------------------------- |
+| **Screen**          | Focus timer (audio), all mascot surfaces |
+| **Specialist**      | Performance Engineer                     |
+| **Severity**        | **P3**                                   |
+| **Category**        | Performance / asset weight               |
+| **Effort**          | **S**                                    |
+| **Regression risk** | Low                                      |
 
 **Evidence (VERIFIED).**
+
 - Audio: **17 MB** total — `satie-gymnopedie-1.ogg` 6.3 MB, `satie-gymnopedie-3.ogg` 5.5 MB, `debussy-reverie.ogg` 3.9 MB, `omfgdude-lofi-loop.ogg` 1.4 MB.
 - Mascot PNGs: **~3.6 MB** total — largest `pilo-ai-planner.png` at 655 KB.
 
@@ -460,15 +466,15 @@ Use `create index concurrently` if applying to a live production database with m
 
 **Evidence (VERIFIED)** — production build, desktop 1440×900, localhost:
 
-| Route | Transfer | DOMContentLoaded |
-|---|---|---|
-| `/` | 320 KB | 637 ms |
-| `/risk` | 18 KB | **825 ms** |
-| `/assignments` | 18 KB | 589 ms |
-| `/schedule` | 18 KB | 520 ms |
-| `/focus` | 17 KB | 530 ms |
-| `/gpa` | 16 KB | 420 ms |
-| everything else | 16–17 KB | 409–474 ms |
+| Route           | Transfer | DOMContentLoaded |
+| --------------- | -------- | ---------------- |
+| `/`             | 320 KB   | 637 ms           |
+| `/risk`         | 18 KB    | **825 ms**       |
+| `/assignments`  | 18 KB    | 589 ms           |
+| `/schedule`     | 18 KB    | 520 ms           |
+| `/focus`        | 17 KB    | 530 ms           |
+| `/gpa`          | 16 KB    | 420 ms           |
+| everything else | 16–17 KB | 409–474 ms       |
 
 Total client JS is **1.0 MB across 35 chunks**, largest chunk 226 KB.
 
@@ -482,42 +488,42 @@ Total client JS is **1.0 MB across 35 chunks**, largest chunk 226 KB.
 
 ### A11Y-01 — Opacity modifiers push text below WCAG AA
 
-| Field | Value |
-|---|---|
-| **Screen** | App-wide; confirmed on `/risk`, `/settings`, `/courses`, `/assignments`, `/focus` |
-| **Specialist** | Accessibility Specialist |
-| **Severity** | **P2** |
-| **Category** | Accessibility / WCAG 1.4.3 Contrast (Minimum) |
-| **Effort** | **M** |
-| **Regression risk** | Low |
+| Field               | Value                                                                             |
+| ------------------- | --------------------------------------------------------------------------------- |
+| **Screen**          | App-wide; confirmed on `/risk`, `/settings`, `/courses`, `/assignments`, `/focus` |
+| **Specialist**      | Accessibility Specialist                                                          |
+| **Severity**        | **P2**                                                                            |
+| **Category**        | Accessibility / WCAG 1.4.3 Contrast (Minimum)                                     |
+| **Effort**          | **M**                                                                             |
+| **Regression risk** | Low                                                                               |
 
 **Evidence (VERIFIED).** This is the most interesting accessibility finding, because the naive reading is wrong.
 
 **Every base token passes AA:**
 
-| Pair | Ratio | Result |
-|---|---|---|
-| `ink-3` on `card` (light) | 5.06:1 | PASS |
-| `ink-3` on `card` (dark) | 5.61:1 | PASS |
-| `dusk-muted` on `ink` | 5.99:1 | PASS |
-| `dusk-text` on `ink` | 8.24:1 | PASS |
+| Pair                      | Ratio  | Result |
+| ------------------------- | ------ | ------ |
+| `ink-3` on `card` (light) | 5.06:1 | PASS   |
+| `ink-3` on `card` (dark)  | 5.61:1 | PASS   |
+| `dusk-muted` on `ink`     | 5.99:1 | PASS   |
+| `dusk-text` on `ink`      | 8.24:1 | PASS   |
 
 **The failures come from opacity modifiers layered on top of them:**
 
-| Composite | Ratio | Result |
-|---|---|---|
+| Composite                    | Ratio  | Result   |
+| ---------------------------- | ------ | -------- |
 | `text-ink-3/90` on `bg-card` | 4.12:1 | **FAIL** |
 | `text-ink-3/80` on `bg-card` | 3.38:1 | **FAIL** |
 | `text-ink-3/70` on `bg-card` | 2.83:1 | **FAIL** |
-| `dusk-muted/80` on `bg-ink` | 4.30:1 | **FAIL** |
+| `dusk-muted/80` on `bg-ink`  | 4.30:1 | **FAIL** |
 
 A live measurement on `/risk` confirmed a real instance: the factor-weight chips (`×0.40`, `×0.35`, `×0.25`) render at `rgb(108,95,148)` on `rgb(29,19,56)` = **3.08:1** at 11px, against a 4.5:1 requirement.
 
-There are **47 opacity-modified text classes** across `components/` and `app/`. Most are `text-ink/70` on lime or mint fills, where `--ink` is so dark that even at 70% the contrast stays high — those are fine. The dangerous ones are modifiers applied to tokens that were *already tuned to sit near the 4.5 floor* (`ink-3`, `dusk-muted`), which is precisely where the failures show up.
+There are **47 opacity-modified text classes** across `components/` and `app/`. Most are `text-ink/70` on lime or mint fills, where `--ink` is so dark that even at 70% the contrast stays high — those are fine. The dangerous ones are modifiers applied to tokens that were _already tuned to sit near the 4.5 floor_ (`ink-3`, `dusk-muted`), which is precisely where the failures show up.
 
 **Measurement caveat — reported honestly.** My automated sweep initially flagged 34 nodes. On verification, the `1:1` hits (one per page, always the active sidebar item) and the `1.13:1` hit on the Planner hero are **measurement artifacts**, not real failures: the active nav item's background is an absolutely-positioned sibling pill and the hero's violet fill sits on an ancestor my walker could not resolve. I am excluding them. The genuine failures are the composited-opacity cases above.
 
-**Recommended solution.** Introduce dedicated muted tokens (`--ink-4`, `--dusk-faint`) that are *pre-checked* at their final rendered value, and ban opacity modifiers on `ink-3` / `dusk-*` text. This is exactly the shape of the existing `semantic-color-text-guard.test.ts`, which already blocks bare `text-mint`/`text-coral`/`text-tangerine` — extend that guard to catch `text-{ink-3,dusk-*}/<number>`.
+**Recommended solution.** Introduce dedicated muted tokens (`--ink-4`, `--dusk-faint`) that are _pre-checked_ at their final rendered value, and ban opacity modifiers on `ink-3` / `dusk-*` text. This is exactly the shape of the existing `semantic-color-text-guard.test.ts`, which already blocks bare `text-mint`/`text-coral`/`text-tangerine` — extend that guard to catch `text-{ink-3,dusk-*}/<number>`.
 
 **Files.** `app/globals.css` (new tokens), `tests/components/semantic-color-text-guard.test.ts` (extend), then the ~10 real call sites.
 
@@ -525,7 +531,7 @@ There are **47 opacity-modified text classes** across `components/` and `app/`. 
 
 ---
 
-*(BUG-01, BUG-02 and BUG-03 above are also accessibility findings — listed under Confirmed bugs because they are concrete defects rather than systemic issues.)*
+_(BUG-01, BUG-02 and BUG-03 above are also accessibility findings — listed under Confirmed bugs because they are concrete defects rather than systemic issues.)_
 
 ---
 
@@ -533,12 +539,12 @@ There are **47 opacity-modified text classes** across `components/` and `app/`. 
 
 ### CODE-01 — Working tree carries 70 uncommitted files
 
-| Field | Value |
-|---|---|
+| Field          | Value                        |
+| -------------- | ---------------------------- |
 | **Specialist** | Full-stack Engineer + DevOps |
-| **Severity** | **P2** |
-| **Category** | Source control / risk |
-| **Effort** | **S** |
+| **Severity**   | **P2**                       |
+| **Category**   | Source control / risk        |
+| **Effort**     | **S**                        |
 
 **Evidence (VERIFIED).** `git status --short | wc -l` → **70**. These span nine logically distinct pieces of work (120% zoom, Modal fix, AI Planner hero, two Schedule passes, Focus timer, GPA tracker, Weekly report, and today's bug fixes).
 
@@ -552,12 +558,12 @@ There are **47 opacity-modified text classes** across `components/` and `app/`. 
 
 ### CODE-02 — `lib/rules/avatar-color.ts` has no unit test
 
-| Field | Value |
-|---|---|
-| **Specialist** | QA Engineer |
-| **Severity** | **P3** |
-| **Category** | Test coverage |
-| **Effort** | **S** |
+| Field          | Value         |
+| -------------- | ------------- |
+| **Specialist** | QA Engineer   |
+| **Severity**   | **P3**        |
+| **Category**   | Test coverage |
+| **Effort**     | **S**         |
 
 **Evidence (VERIFIED).** 13 of 14 `lib/rules/` modules have a matching `tests/rules/*.test.ts`. `avatar-color` is the only gap. It encodes the same six-tone palette as `course-tone.ts` and migration 0018's check constraint — three places that must agree, with nothing asserting they do.
 
@@ -567,7 +573,7 @@ There are **47 opacity-modified text classes** across `components/` and `app/`. 
 
 ## 9. Product improvement opportunities
 
-*(Product Manager and Gen Z Student perspectives. These are opinions grounded in the code, clearly separated from defects.)*
+_(Product Manager and Gen Z Student perspectives. These are opinions grounded in the code, clearly separated from defects.)_
 
 **PROD-01 — Workload Risk is the most differentiated feature and the least surfaced.** Every student app has assignments and a timer. Very few compute a weighted risk score. It currently sits behind a sidebar link with no proactive surface. Consider surfacing a risk delta on the dashboard when it crosses a threshold.
 
@@ -585,12 +591,12 @@ There are **47 opacity-modified text classes** across `components/` and `app/`. 
 
 ### Stage 1 — Critical (P0/P1)
 
-**There are none.** I did not find a security breach, a data-loss path, an authorization hole, or a broken core workflow. Rather than pad this stage, I am promoting the two items whose *absence* creates the most ongoing risk:
+**There are none.** I did not find a security breach, a data-loss path, an authorization hole, or a broken core workflow. Rather than pad this stage, I am promoting the two items whose _absence_ creates the most ongoing risk:
 
-| Item | Why it belongs first |
-|---|---|
+| Item                           | Why it belongs first                                                                               |
+| ------------------------------ | -------------------------------------------------------------------------------------------------- |
 | **DEVOPS-01 — Add CI** (below) | Without it, everything else regresses silently. This is the highest-leverage change in the report. |
-| **PERF-01 — FK indexes** | Additive, near-zero risk, and removes a scaling cliff before it is a production incident. |
+| **PERF-01 — FK indexes**       | Additive, near-zero risk, and removes a scaling cliff before it is a production incident.          |
 
 ### Stage 2 — Reliability and usability (P2)
 
@@ -611,15 +617,15 @@ BUG-01, BUG-02, BUG-03 (all Small), PERF-02 (N+1 batching), PERF-03 (asset weigh
 
 Ranked by value ÷ effort. Every one is Small.
 
-| # | Change | File | Impact |
-|---|---|---|---|
-| 1 | Add the 11 FK indexes | one new migration | Removes a scaling cliff |
-| 2 | Add a CI workflow | `.github/workflows/ci.yml` | Stops silent regressions permanently |
-| 3 | Demote the Weekly report hero `<h1>` to `<h2>` | `WeeklyRecapHero.tsx` | Fixes BUG-01 |
-| 4 | Promote the course card `<h3>` to `<h2>` | `CourseCard.tsx` | Fixes BUG-02 |
-| 5 | Add `min-h-6` to two `/focus` text buttons | 2 files | Fixes BUG-03 |
-| 6 | Replace three `process.env.X!` with `requireEnv` | 4 Supabase files | Clear boot failures |
-| 7 | Add `avatar-color` unit test | 1 new test | Closes the last `lib/rules` gap |
+| #   | Change                                           | File                       | Impact                               |
+| --- | ------------------------------------------------ | -------------------------- | ------------------------------------ |
+| 1   | Add the 11 FK indexes                            | one new migration          | Removes a scaling cliff              |
+| 2   | Add a CI workflow                                | `.github/workflows/ci.yml` | Stops silent regressions permanently |
+| 3   | Demote the Weekly report hero `<h1>` to `<h2>`   | `WeeklyRecapHero.tsx`      | Fixes BUG-01                         |
+| 4   | Promote the course card `<h3>` to `<h2>`         | `CourseCard.tsx`           | Fixes BUG-02                         |
+| 5   | Add `min-h-6` to two `/focus` text buttons       | 2 files                    | Fixes BUG-03                         |
+| 6   | Replace three `process.env.X!` with `requireEnv` | 4 Supabase files           | Clear boot failures                  |
+| 7   | Add `avatar-color` unit test                     | 1 new test                 | Closes the last `lib/rules` gap      |
 
 ---
 
@@ -627,23 +633,23 @@ Ranked by value ÷ effort. Every one is Small.
 
 ### TEST-01 — Three library modules have zero tests
 
-| Field | Value |
-|---|---|
+| Field          | Value       |
+| -------------- | ----------- |
 | **Specialist** | QA Engineer |
-| **Severity** | **P2** |
-| **Effort** | **M** |
+| **Severity**   | **P2**      |
+| **Effort**     | **M**       |
 
 **Evidence (VERIFIED).**
 
-| Module | Files | Tests |
-|---|---|---|
-| `lib/push` | 3 | **0** |
-| `lib/offline` | 3 | **0** |
-| `lib/risk` | 1 | **0** |
-| `lib/gemini` | 3 | 1 |
-| `lib/calendar` | 6 | 4 |
+| Module         | Files | Tests |
+| -------------- | ----- | ----- |
+| `lib/push`     | 3     | **0** |
+| `lib/offline`  | 3     | **0** |
+| `lib/risk`     | 1     | **0** |
+| `lib/gemini`   | 3     | 1     |
+| `lib/calendar` | 6     | 4     |
 
-`lib/push` is the notable one: it is the notification-delivery path, it is the hardest thing in the product to verify by hand, it runs unattended on a cron, and it has already shipped one silent bug (SR-01 — the cron endpoint was being redirected to `/login` before its `CRON_SECRET` check ever ran, meaning scheduled notifications had likely *never* been delivered). Exactly the code that most needs a test has none.
+`lib/push` is the notable one: it is the notification-delivery path, it is the hardest thing in the product to verify by hand, it runs unattended on a cron, and it has already shipped one silent bug (SR-01 — the cron endpoint was being redirected to `/login` before its `CRON_SECRET` check ever ran, meaning scheduled notifications had likely _never_ been delivered). Exactly the code that most needs a test has none.
 
 `lib/offline` is the mutation queue that replays writes after a connection returns — silent data loss if it regresses.
 
@@ -653,11 +659,11 @@ Ranked by value ÷ effort. Every one is Small.
 
 ### DEVOPS-01 — No CI pipeline
 
-| Field | Value |
-|---|---|
-| **Specialist** | DevOps/SRE |
-| **Severity** | **P2** |
-| **Effort** | **S** |
+| Field               | Value           |
+| ------------------- | --------------- |
+| **Specialist**      | DevOps/SRE      |
+| **Severity**        | **P2**          |
+| **Effort**          | **S**           |
 | **Regression risk** | None (additive) |
 
 **Evidence (VERIFIED).** `.github/workflows/` contains exactly one file: `notifications-cron.yml`. There is **no workflow that runs `npm run lint`, `npx tsc --noEmit`, `npm test` or `npx playwright test`** on push or pull request.
@@ -672,11 +678,11 @@ Ranked by value ÷ effort. Every one is Small.
 
 ### DEVOPS-02 — No health check, no error monitoring, no deployment config in the repo
 
-| Field | Value |
-|---|---|
+| Field          | Value      |
+| -------------- | ---------- |
 | **Specialist** | DevOps/SRE |
-| **Severity** | **P2** |
-| **Effort** | **M** |
+| **Severity**   | **P2**     |
+| **Effort**     | **M**      |
 
 **Evidence (VERIFIED).** No `/api/health` route. No Sentry/Datadog/Logtail in `package.json`. No `vercel.json`, `Dockerfile` or `docker-compose.yml`. `app/error.tsx` and `app/global-error.tsx` **do** exist (good — errors are caught and rendered), but nothing reports them anywhere.
 
@@ -692,17 +698,17 @@ Ranked by value ÷ effort. Every one is Small.
 
 Listed explicitly so nothing here is mistaken for a pass.
 
-| Area | Why not verified |
-|---|---|
-| **Sign up** | Requires a fresh, deliverable email address. Sign in / sign out are covered by the e2e auth setup and do work. |
-| **Google Calendar OAuth + sync** | Requires real Google credentials and a consenting account. Code review shows correct CSRF state handling and encrypted token storage; **the round trip itself is untested by me**. |
-| **Gemini plan generation** | Requires a live API key and incurs real cost. The route's auth, business gate and schema validation were reviewed statically; `tests/gemini/schema.test.ts` covers response parsing. |
-| **Push notification delivery** | Requires VAPID keys and a real browser subscription. See TEST-01 — this path has no automated coverage either. |
-| **Account deletion** | Destructive and irreversible; I did not execute it. The confirmation gate and `on delete cascade` chain were verified by reading the migrations. |
-| **Real Core Web Vitals** | Localhost production build only. No throttling, no real devices, no CDN. Numbers in PERF-04 are a relative baseline, not field data. |
-| **Deployment, backups, recovery** | No deployment configuration exists in the repository, so there was nothing to audit. |
-| **Dark mode visual sweep** | Contrast was computed for both themes from tokens, but I did not visually inspect every screen in dark mode. |
+| Area                              | Why not verified                                                                                                                                                                     |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Sign up**                       | Requires a fresh, deliverable email address. Sign in / sign out are covered by the e2e auth setup and do work.                                                                       |
+| **Google Calendar OAuth + sync**  | Requires real Google credentials and a consenting account. Code review shows correct CSRF state handling and encrypted token storage; **the round trip itself is untested by me**.   |
+| **Gemini plan generation**        | Requires a live API key and incurs real cost. The route's auth, business gate and schema validation were reviewed statically; `tests/gemini/schema.test.ts` covers response parsing. |
+| **Push notification delivery**    | Requires VAPID keys and a real browser subscription. See TEST-01 — this path has no automated coverage either.                                                                       |
+| **Account deletion**              | Destructive and irreversible; I did not execute it. The confirmation gate and `on delete cascade` chain were verified by reading the migrations.                                     |
+| **Real Core Web Vitals**          | Localhost production build only. No throttling, no real devices, no CDN. Numbers in PERF-04 are a relative baseline, not field data.                                                 |
+| **Deployment, backups, recovery** | No deployment configuration exists in the repository, so there was nothing to audit.                                                                                                 |
+| **Dark mode visual sweep**        | Contrast was computed for both themes from tokens, but I did not visually inspect every screen in dark mode.                                                                         |
 
 ---
 
-*No code was changed in the course of this audit.*
+_No code was changed in the course of this audit._

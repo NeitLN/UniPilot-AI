@@ -51,7 +51,12 @@ export function SyncStatusBar({
         {/* The real Google mark, not a generic calendar glyph — it's the same
             service the header button connects to, and the concept shows the
             brand mark in both places. */}
-        <IconChip icon={<GoogleCalendarMark className="h-[18px] w-[18px]" />} tone="sky" size="md" square />
+        <IconChip
+          icon={<GoogleCalendarMark className="h-[18px] w-[18px]" />}
+          tone="sky"
+          size="md"
+          square
+        />
         <div className="min-w-0 flex-1">
           <p className="text-[12.5px] font-bold text-foreground">Google Calendar</p>
           {/* Formatted in the runtime's local timezone — expected to differ

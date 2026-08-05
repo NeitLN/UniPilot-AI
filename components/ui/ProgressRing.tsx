@@ -80,7 +80,11 @@ export function ProgressRing({
           className={`motion-safe:transition-[stroke-dashoffset] motion-safe:duration-300 motion-safe:ease-out ${FILL_CLASSES[tone]}`}
         />
       </svg>
-      {children && <div className="absolute inset-0 flex items-center justify-center text-center">{children}</div>}
+      {children && (
+        <div className="absolute inset-0 flex items-center justify-center text-center">
+          {children}
+        </div>
+      )}
     </div>
   );
 }

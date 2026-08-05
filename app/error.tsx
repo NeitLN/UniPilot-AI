@@ -51,12 +51,10 @@ export default function Error({
 
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3 px-6 text-center">
-      <p className="font-display text-2xl font-bold text-foreground">
-        Something went wrong.
-      </p>
+      <p className="font-display text-2xl font-bold text-foreground">Something went wrong.</p>
       <p className="max-w-sm text-sm font-semibold text-ink-2">
-        This page hit an unexpected error. Your data is safe — try again, or
-        head back to the Dashboard.
+        This page hit an unexpected error. Your data is safe — try again, or head back to the
+        Dashboard.
       </p>
       <div className="mt-2 flex gap-2.5">
         <button

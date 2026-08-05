@@ -34,14 +34,19 @@ export function TodayAgendaCard({
       {blocks.length === 0 ? (
         <div className="py-6 text-center">
           <p className="font-display text-sm font-bold text-white">Nothing today</p>
-          <p className="mt-1 text-[12.5px] font-semibold text-dusk-text">No classes on the calendar for today.</p>
+          <p className="mt-1 text-[12.5px] font-semibold text-dusk-text">
+            No classes on the calendar for today.
+          </p>
         </div>
       ) : (
         // Timeline rail: one continuous line behind the row dots, rather
         // than the previous set of detached pill rows — it's what makes the
         // list read as a sequence through the day (concept §8).
         <ul className="relative mt-3 flex flex-col gap-3 pl-4">
-          <span aria-hidden="true" className="absolute bottom-2 left-[3px] top-2 w-px bg-white/15" />
+          <span
+            aria-hidden="true"
+            className="absolute bottom-2 left-[3px] top-2 w-px bg-white/15"
+          />
           {blocks.map((b) => {
             const tone = b.courseId ? courseTone(b.courseId) : null;
             return (

@@ -37,7 +37,10 @@ export function RiskTrendChart({ points }: { points: RiskTrendPoint[] }) {
       </div>
 
       <div className="relative mt-4" style={{ height: CHART_HEIGHT }}>
-        <div className="absolute inset-x-0 border-t border-dashed border-coral" style={{ top: thresholdTop }} />
+        <div
+          className="absolute inset-x-0 border-t border-dashed border-coral"
+          style={{ top: thresholdTop }}
+        />
         <svg
           viewBox={`0 0 ${(points.length - 1) * 60} ${CHART_HEIGHT}`}
           preserveAspectRatio="none"
@@ -73,14 +76,14 @@ export function RiskTrendChart({ points }: { points: RiskTrendPoint[] }) {
       <div className="mt-2 flex justify-between">
         {points.map((p) => (
           <span key={p.scoreDate} className="flex-1 text-center text-[10.5px] font-bold text-ink-3">
-            {new Date(`${p.scoreDate}T12:00:00`).toLocaleDateString(undefined, { weekday: "short" })}
+            {new Date(`${p.scoreDate}T12:00:00`).toLocaleDateString(undefined, {
+              weekday: "short",
+            })}
           </span>
         ))}
       </div>
 
-      <p className="sr-only">
-        {points.map((p) => `${p.scoreDate}: ${p.score}.`).join(" ")}
-      </p>
+      <p className="sr-only">{points.map((p) => `${p.scoreDate}: ${p.score}.`).join(" ")}</p>
     </div>
   );
 }

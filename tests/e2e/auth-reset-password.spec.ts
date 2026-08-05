@@ -28,7 +28,9 @@ test.describe("Forgot password", () => {
     await page.goto("/forgot-password");
     // The field is `required`, so reach the server action the way a
     // scripted client would rather than trusting the browser to stop it.
-    await page.getByLabel("Email").evaluate((el: HTMLInputElement) => el.removeAttribute("required"));
+    await page
+      .getByLabel("Email")
+      .evaluate((el: HTMLInputElement) => el.removeAttribute("required"));
     await page.getByRole("button", { name: "Send reset link" }).click();
 
     await expect(formAlert(page)).toContainText("Enter your email");

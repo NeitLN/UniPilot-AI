@@ -68,7 +68,10 @@ export function AvailabilityBands({
                     key={i}
                     aria-hidden="true"
                     className={`absolute inset-y-0 rounded-full ${PERIOD_FILL[b.period]}`}
-                    style={{ left: `${pct(b.startMinute)}%`, width: `${pct(b.endMinute) - pct(b.startMinute)}%` }}
+                    style={{
+                      left: `${pct(b.startMinute)}%`,
+                      width: `${pct(b.endMinute) - pct(b.startMinute)}%`,
+                    }}
                   />
                 ))}
                 <span className="sr-only">
@@ -89,10 +92,12 @@ export function AvailabilityBands({
           <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-mint" /> Free morning
         </span>
         <span className="flex items-center gap-1.5">
-          <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-tangerine" /> Free afternoon
+          <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-tangerine" /> Free
+          afternoon
         </span>
         <span className="flex items-center gap-1.5">
-          <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-coral" /> Low energy (after 6pm)
+          <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-coral" /> Low energy
+          (after 6pm)
         </span>
       </div>
     </div>

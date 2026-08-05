@@ -11,7 +11,8 @@ export interface ForgotPasswordState {
 async function siteOrigin(): Promise<string> {
   const hdrs = await headers();
   const host = hdrs.get("host") ?? "localhost:3000";
-  const protocol = hdrs.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
+  const protocol =
+    hdrs.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
   return `${protocol}://${host}`;
 }
 

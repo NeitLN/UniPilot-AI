@@ -64,14 +64,12 @@ export function AssignmentForm({
   // be replayed into whichever account is signed in when connectivity returns.
   const queueOwner = useQueueOwner();
   const isEdit = Boolean(initialValues);
-  const action = isEdit
-    ? updateAssignment.bind(null, initialValues!.id)
-    : createAssignment;
+  const action = isEdit ? updateAssignment.bind(null, initialValues!.id) : createAssignment;
 
-  const [state, formAction, pending] = useActionState<
-    AssignmentFormState,
-    FormData
-  >(action, INITIAL_STATE);
+  const [state, formAction, pending] = useActionState<AssignmentFormState, FormData>(
+    action,
+    INITIAL_STATE,
+  );
 
   const [progress, setProgress] = useState(initialValues?.progress ?? 0);
   const [repeat, setRepeat] = useState<EventRepeat>("none");
@@ -82,8 +80,7 @@ export function AssignmentForm({
     if (!state.ok) return;
     // Ask for notification permission right here — the moment the user has
     // just saved an assignment with a reminder — not on first app load.
-    const reminderInput =
-      formRef.current?.querySelector<HTMLInputElement>('[name="reminderAt"]');
+    const reminderInput = formRef.current?.querySelector<HTMLInputElement>('[name="reminderAt"]');
     if (reminderInput?.value) {
       void ensurePushSubscription();
     }
@@ -94,9 +91,7 @@ export function AssignmentForm({
     if (!state.errors) return;
     const firstField = FIELD_ORDER.find((name) => state.errors[name]);
     if (firstField) {
-      formRef.current
-        ?.querySelector<HTMLElement>(`[name="${firstField}"]`)
-        ?.focus();
+      formRef.current?.querySelector<HTMLElement>(`[name="${firstField}"]`)?.focus();
     }
   }, [state.errors]);
 
@@ -248,11 +243,7 @@ export function AssignmentForm({
           </Field>
 
           {repeat !== "none" && (
-            <Field
-              label="Repeat until"
-              error={state.errors.repeatUntil}
-              className="flex-1"
-            >
+            <Field label="Repeat until" error={state.errors.repeatUntil} className="flex-1">
               <input
                 name="repeatUntil"
                 type="date"
@@ -332,4 +323,3 @@ export function AssignmentForm({
     </form>
   );
 }
-

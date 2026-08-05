@@ -41,10 +41,9 @@ export function DeleteAssignmentDialog({
         Delete &ldquo;{assignmentTitle}&rdquo; permanently?
       </h2>
       <p className="mt-2 text-sm font-semibold text-ink-2">
-        This removes the assignment itself — its title, notes, and due date — for good. Any
-        focus sessions you logged against it are kept and still count toward your streak and
-        minutes; they&rsquo;ll just show as &ldquo;Deleted assignment&rdquo; instead of this
-        title.
+        This removes the assignment itself — its title, notes, and due date — for good. Any focus
+        sessions you logged against it are kept and still count toward your streak and minutes;
+        they&rsquo;ll just show as &ldquo;Deleted assignment&rdquo; instead of this title.
       </p>
 
       {error && <FieldError className="mt-2 text-xs">{error}</FieldError>}

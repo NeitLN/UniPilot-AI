@@ -4,14 +4,25 @@
  * point here is "you hit the plan". */
 function Dartboard() {
   return (
-    <span aria-hidden="true" className="relative flex h-[120px] w-[120px] shrink-0 items-center justify-center">
+    <span
+      aria-hidden="true"
+      className="relative flex h-[120px] w-[120px] shrink-0 items-center justify-center"
+    >
       <span className="absolute inset-0 rounded-full bg-card" />
       <span className="absolute inset-[14px] rounded-full bg-lime" />
       <span className="absolute inset-[26px] rounded-full bg-card" />
       <span className="absolute inset-[38px] rounded-full bg-violet" />
       <svg viewBox="0 0 120 120" className="absolute inset-0 h-full w-full overflow-visible">
         {/* Shaft from the upper right into the bullseye, with fletching. */}
-        <line x1="112" y1="8" x2="60" y2="60" className="stroke-ink" strokeWidth="5" strokeLinecap="round" />
+        <line
+          x1="112"
+          y1="8"
+          x2="60"
+          y2="60"
+          className="stroke-ink"
+          strokeWidth="5"
+          strokeLinecap="round"
+        />
         <path d="M112 8 L96 6 L114 24 Z" className="fill-ink" />
       </svg>
     </span>

@@ -23,7 +23,10 @@ async function loadResource(
         .from("courses")
         .select("code, name, credits, semester, created_at")
         .order("semester");
-      return { rows: data ?? [], columns: ["code", "name", "credits", "semester", "created_at"] as const };
+      return {
+        rows: data ?? [],
+        columns: ["code", "name", "credits", "semester", "created_at"] as const,
+      };
     }
     case "assignments": {
       const { data } = await supabase
@@ -32,7 +35,16 @@ async function loadResource(
         .order("due_at");
       return {
         rows: data ?? [],
-        columns: ["title", "due_at", "weight", "score", "priority", "status", "progress", "archived_at"] as const,
+        columns: [
+          "title",
+          "due_at",
+          "weight",
+          "score",
+          "priority",
+          "status",
+          "progress",
+          "archived_at",
+        ] as const,
       };
     }
     case "grades": {
@@ -40,21 +52,30 @@ async function loadResource(
         .from("grades")
         .select("semester, grade_point, credit_hours, created_at")
         .order("semester");
-      return { rows: data ?? [], columns: ["semester", "grade_point", "credit_hours", "created_at"] as const };
+      return {
+        rows: data ?? [],
+        columns: ["semester", "grade_point", "credit_hours", "created_at"] as const,
+      };
     }
     case "schedule": {
       const { data } = await supabase
         .from("class_blocks")
         .select("title, location, start_at, end_at, is_all_day")
         .order("start_at");
-      return { rows: data ?? [], columns: ["title", "location", "start_at", "end_at", "is_all_day"] as const };
+      return {
+        rows: data ?? [],
+        columns: ["title", "location", "start_at", "end_at", "is_all_day"] as const,
+      };
     }
     case "focus": {
       const { data } = await supabase
         .from("focus_sessions")
         .select("started_at, ended_at, duration_seconds, result")
         .order("started_at");
-      return { rows: data ?? [], columns: ["started_at", "ended_at", "duration_seconds", "result"] as const };
+      return {
+        rows: data ?? [],
+        columns: ["started_at", "ended_at", "duration_seconds", "result"] as const,
+      };
     }
   }
 }
@@ -92,10 +113,7 @@ export async function GET(request: NextRequest) {
       );
     }
     const { rows, columns } = await loadResource(supabase, typeParam);
-    const csv = toCsv(
-      rows as unknown as Record<string, unknown>[],
-      columns as unknown as string[],
-    );
+    const csv = toCsv(rows as unknown as Record<string, unknown>[], columns as unknown as string[]);
     // UTF-8 BOM: without it, Excel guesses the wrong codepage and mangles
     // Vietnamese diacritics on open, even though the bytes are valid UTF-8.
     return new NextResponse("﻿" + csv, {

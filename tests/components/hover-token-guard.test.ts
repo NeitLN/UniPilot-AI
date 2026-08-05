@@ -36,9 +36,6 @@ describe("hover token guard", () => {
         });
       }
     }
-    expect(
-      offenders,
-      offenders.map((o) => `${o.file}:${o.line}`).join("\n"),
-    ).toHaveLength(0);
+    expect(offenders, offenders.map((o) => `${o.file}:${o.line}`).join("\n")).toHaveLength(0);
   });
 });

@@ -20,7 +20,18 @@ import { test, expect } from "@playwright/test";
  * renders instead.
  */
 
-const ROUTES = ["/", "/assignments", "/courses", "/focus", "/gpa", "/planner", "/reports", "/risk", "/schedule", "/settings"];
+const ROUTES = [
+  "/",
+  "/assignments",
+  "/courses",
+  "/focus",
+  "/gpa",
+  "/planner",
+  "/reports",
+  "/risk",
+  "/schedule",
+  "/settings",
+];
 
 const MEASURE = `() => {
   const lum = (c) => {

@@ -42,7 +42,8 @@ function makeClient(rows: { notifications: unknown[]; push_subscriptions: unknow
   const writes: Recorded[] = [];
 
   function builder(table: string) {
-    const state: { op?: "update" | "delete"; payload?: Record<string, unknown>; ids?: string[] } = {};
+    const state: { op?: "update" | "delete"; payload?: Record<string, unknown>; ids?: string[] } =
+      {};
     const chain: Record<string, unknown> = {
       select: () => chain,
       eq: () => chain,
@@ -91,7 +92,13 @@ function makeClient(rows: { notifications: unknown[]; push_subscriptions: unknow
   };
 }
 
-const SUB = { id: "sub-1", user_id: "u1", endpoint: "https://push.example/1", p256dh: "k", auth: "a" };
+const SUB = {
+  id: "sub-1",
+  user_id: "u1",
+  endpoint: "https://push.example/1",
+  p256dh: "k",
+  auth: "a",
+};
 
 beforeEach(() => {
   sendPushNotification.mockReset();

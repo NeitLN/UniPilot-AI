@@ -10,9 +10,7 @@ import { supabaseUrl, supabaseServiceRoleKey } from "./env";
  * accidental Client Component import fail at build time.
  */
 export function createServiceClient() {
-  return createClient<Database>(
-    supabaseUrl(),
-    supabaseServiceRoleKey(),
-    { auth: { autoRefreshToken: false, persistSession: false } },
-  );
+  return createClient<Database>(supabaseUrl(), supabaseServiceRoleKey(), {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
 }

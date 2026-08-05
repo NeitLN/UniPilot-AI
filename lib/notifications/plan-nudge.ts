@@ -64,9 +64,7 @@ export async function sweepPlanNudges(
 
   const planIds = live.map((p) => p.id);
   const userIds = [...new Set(live.map((p) => p.user_id))];
-  const earliestWeekStart = live
-    .map((p) => `${p.week_start.slice(0, 10)}T00:00:00.000Z`)
-    .sort()[0];
+  const earliestWeekStart = live.map((p) => `${p.week_start.slice(0, 10)}T00:00:00.000Z`).sort()[0];
 
   const [{ data: planned }, { data: focus }, { data: prefs }] = await Promise.all([
     supabase.from("study_sessions").select("plan_id, start_at").in("plan_id", planIds),

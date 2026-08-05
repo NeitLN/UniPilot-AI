@@ -57,8 +57,7 @@ function openDb(): Promise<IDBDatabase> {
     // "syncing" forever with no error anywhere. Rejecting lets the caller
     // fail and retry on the next flush, by which time the other tab has
     // usually navigated or closed.
-    req.onblocked = () =>
-      reject(new Error("Offline queue upgrade blocked by another open tab."));
+    req.onblocked = () => reject(new Error("Offline queue upgrade blocked by another open tab."));
   });
 }
 

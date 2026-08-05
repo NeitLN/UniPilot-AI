@@ -284,11 +284,7 @@ async function seed() {
   if (gradeErr) throw gradeErr;
 
   // 14 focus sessions across the last 6 days -> 6-day streak, 12 completed + 2 partial
-  const focusAssignmentIds = [
-    assignments[3].id,
-    assignments[0].id,
-    assignments[4].id,
-  ];
+  const focusAssignmentIds = [assignments[3].id, assignments[0].id, assignments[4].id];
   const sessions = [];
   let remainingPartial = 2;
   for (let day = 5; day >= 0; day--) {
@@ -319,16 +315,12 @@ async function seed() {
     sessions.push({ ...sessions[sessions.length - 1] });
   }
 
-  const { error: focusErr } = await supabase
-    .from("focus_sessions")
-    .insert(sessions);
+  const { error: focusErr } = await supabase.from("focus_sessions").insert(sessions);
   if (focusErr) throw focusErr;
   console.log(`Focus sessions: ${sessions.length}`);
 
   console.log("\nSeed complete.");
-  console.log(
-    `Log in at /login with:\n  email:    ${DEV_EMAIL}\n  password: ${DEV_PASSWORD}`,
-  );
+  console.log(`Log in at /login with:\n  email:    ${DEV_EMAIL}\n  password: ${DEV_PASSWORD}`);
 }
 
 seed().catch((err) => {

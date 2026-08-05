@@ -11,7 +11,10 @@ test.describe("Weekly report", () => {
     // "Study time", not "Completed": the latter is also the per-row label on
     // each completed-assignment row, so it resolves to several nodes and the
     // strict-mode error was being swallowed by the catch below into a false.
-    const hasStats = await page.getByText("Study time", { exact: true }).isVisible().catch(() => false);
+    const hasStats = await page
+      .getByText("Study time", { exact: true })
+      .isVisible()
+      .catch(() => false);
     const isEmpty = await page
       .getByText("Nothing to report yet", { exact: false })
       .isVisible()

@@ -2,12 +2,7 @@ import Link from "next/link";
 import { BarChart3, TrendingDown, TrendingUp } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { computeAndStoreRisk, todayDateString } from "@/lib/risk/compute";
-import {
-  riskDelta,
-  riskDeltaLabel,
-  type RiskDelta,
-  type RiskResult,
-} from "@/lib/rules/risk";
+import { riskDelta, riskDeltaLabel, type RiskDelta, type RiskResult } from "@/lib/rules/risk";
 
 const FACTORS = [
   { key: "workload", label: "Workload", tone: "bg-tangerine" },
@@ -109,9 +104,7 @@ export async function RiskHud() {
           return (
             <div key={f.key} className="w-[104px]">
               <p className="text-[11px] font-bold text-dusk-hud">{f.label}</p>
-              <p className="font-display text-base font-bold text-white">
-                {result ? value : "—"}
-              </p>
+              <p className="font-display text-base font-bold text-white">{result ? value : "—"}</p>
               <div className="mt-1.5 flex gap-[3px]">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <span

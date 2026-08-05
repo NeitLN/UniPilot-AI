@@ -40,10 +40,12 @@ export function StudyRhythmChart({
           its own, so the series had to say what its numbers are. */}
       <div className="mt-2 flex gap-4 text-[11px] font-semibold text-ink-2">
         <span className="flex items-center gap-1.5">
-          <span aria-hidden="true" className="h-2.5 w-2.5 rounded-[3px] bg-violet" /> This week (min)
+          <span aria-hidden="true" className="h-2.5 w-2.5 rounded-[3px] bg-violet" /> This week
+          (min)
         </span>
         <span className="flex items-center gap-1.5">
-          <span aria-hidden="true" className="h-0 w-4 border-t-2 border-violet-soft" /> Last week (min)
+          <span aria-hidden="true" className="h-0 w-4 border-t-2 border-violet-soft" /> Last week
+          (min)
         </span>
       </div>
 
@@ -145,7 +147,10 @@ export function StudyRhythmChart({
 
       <div className="mt-1.5 flex gap-2" style={{ paddingLeft: AXIS_WIDTH }}>
         {thisWeek.map((d) => (
-          <span key={d.dayKey} className="min-w-0 flex-1 text-center text-[10px] font-semibold text-ink-3">
+          <span
+            key={d.dayKey}
+            className="min-w-0 flex-1 text-center text-[10px] font-semibold text-ink-3"
+          >
             {d.label}
           </span>
         ))}

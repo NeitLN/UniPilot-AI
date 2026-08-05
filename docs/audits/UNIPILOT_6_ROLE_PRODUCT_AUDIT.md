@@ -30,13 +30,13 @@ service-worker offline caching, and any browser other than Chromium. None of the
 were skipped for convenience — each needs an external account, a second device, or a
 failure I cannot induce safely against a shared database.
 
-| | Count |
-|---|---:|
-| **P0 — Critical** | **0** |
-| **P1 — High** | **1** |
-| **P2 — Medium** | **4** |
-| **P3 — Low** | **4** |
-| Suggestions / intentional deviations | 6 |
+|                                      | Count |
+| ------------------------------------ | ----: |
+| **P0 — Critical**                    | **0** |
+| **P1 — High**                        | **1** |
+| **P2 — Medium**                      | **4** |
+| **P3 — Low**                         | **4** |
+| Suggestions / intentional deviations |     6 |
 
 **Verdict: `READY FOR CLOSED BETA`** — conditional on fixing OFF-001 first, since it
 is a cross-user data problem and closed beta is exactly where students start sharing
@@ -46,13 +46,13 @@ lab machines.
 
 ## 2. Audited Version
 
-| | |
-|---|---|
-| **Commit audited** | `a3c905da3a04665dc151f644cbe0d0500a4225da` |
-| **Branch** | `feat/ui-redesign-and-audit` |
-| **Working tree** | clean (0 modified files at audit start) |
-| **`origin/main`** | `bf09fad6ad6b3c5767d319ecf57d2dda0b73cce4` |
-| **Relationship** | HEAD is **39 commits ahead** of `origin/main`, 0 behind |
+|                    |                                                         |
+| ------------------ | ------------------------------------------------------- |
+| **Commit audited** | `a3c905da3a04665dc151f644cbe0d0500a4225da`              |
+| **Branch**         | `feat/ui-redesign-and-audit`                            |
+| **Working tree**   | clean (0 modified files at audit start)                 |
+| **`origin/main`**  | `bf09fad6ad6b3c5767d319ecf57d2dda0b73cce4`              |
+| **Relationship**   | HEAD is **39 commits ahead** of `origin/main`, 0 behind |
 
 ### Version mismatch — read this before using the report
 
@@ -60,11 +60,11 @@ The commit named in the audit brief, `bf09fad`, **is `origin/main`**. It is not 
 newest code. The branch under audit carries 39 further commits, and the brief's own
 description of the repository is already stale against it:
 
-| Brief says | Actual at `a3c905d` |
-|---|---|
-| migrations `0001`–`0018` | `0001`–**`0021`** (adds FK indexes, rate limiting, plan nudges) |
-| — | `lib/rate-limit.ts`, `lib/observability/*`, `lib/notifications/plan-nudge.ts` exist |
-| — | `/api/health`, `/api/errors` route handlers exist |
+| Brief says               | Actual at `a3c905d`                                                                 |
+| ------------------------ | ----------------------------------------------------------------------------------- |
+| migrations `0001`–`0018` | `0001`–**`0021`** (adds FK indexes, rate limiting, plan nudges)                     |
+| —                        | `lib/rate-limit.ts`, `lib/observability/*`, `lib/notifications/plan-nudge.ts` exist |
+| —                        | `/api/health`, `/api/errors` route handlers exist                                   |
 
 **Findings in this report describe the branch, not production.** Production currently
 serves `main`. Where a finding is branch-only I say so explicitly.
@@ -73,18 +73,18 @@ serves `main`. Where a finding is branch-only I say so explicitly.
 
 ## 3. Environment
 
-| | |
-|---|---|
-| OS | Windows 11 (10.0.26200) |
-| Node | v24.12.0 |
-| npm | 11.6.2 |
-| Next.js | 16.2.12 |
-| React | 19.2.4 |
-| Tailwind | v4 |
-| supabase-js | ^2.111.0 |
-| Vitest | ^4.1.10 |
-| Playwright | ^1.62.0 |
-| Browser tested | Chromium only |
+|                  |                                          |
+| ---------------- | ---------------------------------------- |
+| OS               | Windows 11 (10.0.26200)                  |
+| Node             | v24.12.0                                 |
+| npm              | 11.6.2                                   |
+| Next.js          | 16.2.12                                  |
+| React            | 19.2.4                                   |
+| Tailwind         | v4                                       |
+| supabase-js      | ^2.111.0                                 |
+| Vitest           | ^4.1.10                                  |
+| Playwright       | ^1.62.0                                  |
+| Browser tested   | Chromium only                            |
 | Supabase project | one project; dev and production share it |
 
 ### Test-account safety
@@ -102,14 +102,14 @@ is accounted for in §20.1.
 
 Raw output: `docs/audits/evidence/baseline.log`
 
-| Command | Exit | Duration | Result |
-|---|---:|---:|---|
-| `npm run format:check` | **1** | 4s | **FAIL — 302 of 599 tracked files** |
-| `npx tsc --noEmit` | 0 | 3s | clean |
-| `npm run lint` | 0 | 8s | clean |
-| `npm test` | 0 | 11s | **451 passed**, 40 files |
-| `npm run build` | 0 | 10s | compiled successfully |
-| `npx playwright test` | 0 | 258s | **47 passed** |
+| Command                |  Exit | Duration | Result                              |
+| ---------------------- | ----: | -------: | ----------------------------------- |
+| `npm run format:check` | **1** |       4s | **FAIL — 302 of 599 tracked files** |
+| `npx tsc --noEmit`     |     0 |       3s | clean                               |
+| `npm run lint`         |     0 |       8s | clean                               |
+| `npm test`             |     0 |      11s | **451 passed**, 40 files            |
+| `npm run build`        |     0 |      10s | compiled successfully               |
+| `npx playwright test`  |     0 |     258s | **47 passed**                       |
 
 `npm ci` was not re-run: `node_modules` was already installed from this exact
 lockfile and reinstalling would have destroyed nothing but gained nothing.
@@ -125,42 +125,42 @@ recording status and redirect target. Raw: `evidence/route-auth.json`.
 
 ### Pages
 
-| Route | anonymous | authenticated | Verdict |
-|---|---|---|---|
-| `/login` | 200 | 307 → `/` | correct |
-| `/forgot-password` | 200 | 307 → `/` | correct |
-| `/reset-password` | 200 | 200 | correct — a signed-in user may still reset |
-| `/` | 307 → `/login` | 200 | protected |
-| `/onboarding` | 307 → `/login` | 200 | protected |
-| `/assignments` | 307 → `/login` | 200 | protected |
-| `/planner` | 307 → `/login` | 200 | protected |
-| `/schedule` | 307 → `/login` | 200 | protected |
-| `/courses` | 307 → `/login` | 200 | protected |
-| `/focus` | 307 → `/login` | 200 | protected |
-| `/gpa` | 307 → `/login` | 200 | protected |
-| `/risk` | 307 → `/login` | 200 | protected |
-| `/reports` | 307 → `/login` | 200 | protected |
-| `/notifications` | 307 → `/login` | 200 | protected |
-| `/settings` | 307 → `/login` | 200 | protected |
+| Route              | anonymous      | authenticated | Verdict                                    |
+| ------------------ | -------------- | ------------- | ------------------------------------------ |
+| `/login`           | 200            | 307 → `/`     | correct                                    |
+| `/forgot-password` | 200            | 307 → `/`     | correct                                    |
+| `/reset-password`  | 200            | 200           | correct — a signed-in user may still reset |
+| `/`                | 307 → `/login` | 200           | protected                                  |
+| `/onboarding`      | 307 → `/login` | 200           | protected                                  |
+| `/assignments`     | 307 → `/login` | 200           | protected                                  |
+| `/planner`         | 307 → `/login` | 200           | protected                                  |
+| `/schedule`        | 307 → `/login` | 200           | protected                                  |
+| `/courses`         | 307 → `/login` | 200           | protected                                  |
+| `/focus`           | 307 → `/login` | 200           | protected                                  |
+| `/gpa`             | 307 → `/login` | 200           | protected                                  |
+| `/risk`            | 307 → `/login` | 200           | protected                                  |
+| `/reports`         | 307 → `/login` | 200           | protected                                  |
+| `/notifications`   | 307 → `/login` | 200           | protected                                  |
+| `/settings`        | 307 → `/login` | 200           | protected                                  |
 
 **12 of 12 protected pages reject anonymous access.** No gaps.
 
 ### API routes
 
-| Route | anonymous | authenticated | Notes |
-|---|---|---|---|
-| `GET /api/health` | 200 | 200 | intentionally public (liveness) |
-| `GET /api/export` | 307 → `/login` | 200 | |
-| `GET /api/calendar/sync` | 307 → `/login` | 405 | POST-only; correct |
-| `GET /api/calendar/oauth/start` | 307 → `/login` | 307 → Google | |
-| `GET /api/calendar/oauth/callback` | 307 → `/login` | 307 → `/schedule?error=state_mismatch` | **CSRF state validated** |
-| `GET /api/cron/notifications` | **401** | **401** | `CRON_SECRET`, not a session |
-| `GET /auth/confirm` | 307 → `/reset-password` | 307 → `/reset-password` | |
-| `POST /api/plan/generate` | 307 → `/login` | 200 | ran a real Gemini call — see §20.1 |
-| `POST /api/risk/compute` | 307 → `/login` | 200 | |
-| `POST /api/push/subscribe` | 307 → `/login` | 400 | rejects an empty body |
-| `POST /api/push/send` | 307 → `/login` | 200 | |
-| `POST /api/errors` | 307 → `/login` | 204 | always 204 by design |
+| Route                              | anonymous               | authenticated                          | Notes                              |
+| ---------------------------------- | ----------------------- | -------------------------------------- | ---------------------------------- |
+| `GET /api/health`                  | 200                     | 200                                    | intentionally public (liveness)    |
+| `GET /api/export`                  | 307 → `/login`          | 200                                    |                                    |
+| `GET /api/calendar/sync`           | 307 → `/login`          | 405                                    | POST-only; correct                 |
+| `GET /api/calendar/oauth/start`    | 307 → `/login`          | 307 → Google                           |                                    |
+| `GET /api/calendar/oauth/callback` | 307 → `/login`          | 307 → `/schedule?error=state_mismatch` | **CSRF state validated**           |
+| `GET /api/cron/notifications`      | **401**                 | **401**                                | `CRON_SECRET`, not a session       |
+| `GET /auth/confirm`                | 307 → `/reset-password` | 307 → `/reset-password`                |                                    |
+| `POST /api/plan/generate`          | 307 → `/login`          | 200                                    | ran a real Gemini call — see §20.1 |
+| `POST /api/risk/compute`           | 307 → `/login`          | 200                                    |                                    |
+| `POST /api/push/subscribe`         | 307 → `/login`          | 400                                    | rejects an empty body              |
+| `POST /api/push/send`              | 307 → `/login`          | 200                                    |                                    |
+| `POST /api/errors`                 | 307 → `/login`          | 204                                    | always 204 by design               |
 
 **No API route is reachable unauthenticated.** The OAuth callback rejecting a forged
 request with `state_mismatch` is a real CSRF defence, confirmed by execution.
@@ -172,19 +172,19 @@ request with `state_mismatch` is a real CSRF defence, confirmed by execution.
 **Unit — 451 tests across 40 files.** `lib/rules/` coverage is complete: 15 of 15
 modules have a matching spec.
 
-| Area | Files |
-|---|---|
-| `tests/rules/` | 15 modules, 1:1 with `lib/rules/` |
-| `tests/components/` | 6 — incl. two guard tests (semantic colour, hover token) |
-| `tests/calendar/`, `push/`, `offline/`, `risk/`, `gemini/`, `audio/`, `notifications/`, `observability/`, `ui/` | infrastructure |
+| Area                                                                                                            | Files                                                    |
+| --------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| `tests/rules/`                                                                                                  | 15 modules, 1:1 with `lib/rules/`                        |
+| `tests/components/`                                                                                             | 6 — incl. two guard tests (semantic colour, hover token) |
+| `tests/calendar/`, `push/`, `offline/`, `risk/`, `gemini/`, `audio/`, `notifications/`, `observability/`, `ui/` | infrastructure                                           |
 
 **E2E — 47 tests, Chromium only.**
 
-| Spec | Tests |
-|---|---:|
-| settings | 7 |
-| assignments | 6 |
-| courses, focus, layout, reports | 3 each |
+| Spec                                                     |  Tests |
+| -------------------------------------------------------- | -----: |
+| settings                                                 |      7 |
+| assignments                                              |      6 |
+| courses, focus, layout, reports                          | 3 each |
 | dark-mode-contrast, gpa, health, planner, risk, schedule | 1 each |
 
 ---
@@ -193,25 +193,25 @@ modules have a matching spec.
 
 Not "untested code" — **flows a shipped regression could pass straight through**.
 
-| Gap | Risk if broken | Priority |
-|---|---|---|
-| **Sign-up** | new users cannot join; nothing detects it | **P1** |
-| **Forgot / reset password** | account lockout, unrecoverable | **P1** |
-| **Onboarding** | first-run experience; every new account hits it | **P1** |
-| **Offline queue replay** | see OFF-001 — the one finding with real user impact | **P1** |
-| Account deletion | irreversible, and legally load-bearing | P2 |
-| Export (JSON/CSV) | silent data corruption, CSV injection | P2 |
-| Notifications page + deep links | dead-end navigation | P2 |
-| Full Focus cycle incl. breaks | timer is a daily-use surface | P2 |
-| Multi-tab Focus timer | double-counted sessions | P2 |
-| Cross-user authorization at HTTP level | RLS verified at SQL level only | P2 |
-| Calendar OAuth + sync failure | silent desync | P2 |
-| Push permission denied path | broken settings toggle | P3 |
-| Firefox / WebKit | Safari is dominant on student iPhones | P3 |
-| Keyboard-only, screen reader, reduced motion | accessibility regressions | P3 |
+| Gap                                          | Risk if broken                                      | Priority |
+| -------------------------------------------- | --------------------------------------------------- | -------- |
+| **Sign-up**                                  | new users cannot join; nothing detects it           | **P1**   |
+| **Forgot / reset password**                  | account lockout, unrecoverable                      | **P1**   |
+| **Onboarding**                               | first-run experience; every new account hits it     | **P1**   |
+| **Offline queue replay**                     | see OFF-001 — the one finding with real user impact | **P1**   |
+| Account deletion                             | irreversible, and legally load-bearing              | P2       |
+| Export (JSON/CSV)                            | silent data corruption, CSV injection               | P2       |
+| Notifications page + deep links              | dead-end navigation                                 | P2       |
+| Full Focus cycle incl. breaks                | timer is a daily-use surface                        | P2       |
+| Multi-tab Focus timer                        | double-counted sessions                             | P2       |
+| Cross-user authorization at HTTP level       | RLS verified at SQL level only                      | P2       |
+| Calendar OAuth + sync failure                | silent desync                                       | P2       |
+| Push permission denied path                  | broken settings toggle                              | P3       |
+| Firefox / WebKit                             | Safari is dominant on student iPhones               | P3       |
+| Keyboard-only, screen reader, reduced motion | accessibility regressions                           | P3       |
 
 The four P1 gaps share a shape: **they are the flows a user hits before the tested
-ones**. The suite protects the app well *after* a working account exists.
+ones**. The suite protects the app well _after_ a working account exists.
 
 ---
 
@@ -231,24 +231,24 @@ exercised (§20).
 
 The database enforces its own invariants rather than trusting the application:
 
-| Table | Constraint |
-|---|---|
-| `grades` | `grade_point` 0–4; `credit_hours > 0` |
-| `assignments` | `weight` 0–100; `progress` 0–100; `score` null or 0–100 |
-| `courses` | `credits > 0` |
-| `focus_sessions` | `duration_seconds > 0` |
-| `profiles` | `target_gpa` 0–4; `program_total_credits` null or > 0; `weekly_availability_hours ≥ 0`; `default_focus_minutes ∈ {25,45,60}`; `daily_focus_goal_cycles` 1–12; `avatar_color` enumerated |
+| Table            | Constraint                                                                                                                                                                              |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `grades`         | `grade_point` 0–4; `credit_hours > 0`                                                                                                                                                   |
+| `assignments`    | `weight` 0–100; `progress` 0–100; `score` null or 0–100                                                                                                                                 |
+| `courses`        | `credits > 0`                                                                                                                                                                           |
+| `focus_sessions` | `duration_seconds > 0`                                                                                                                                                                  |
+| `profiles`       | `target_gpa` 0–4; `program_total_credits` null or > 0; `weekly_availability_hours ≥ 0`; `default_focus_minutes ∈ {25,45,60}`; `daily_focus_goal_cycles` 1–12; `avatar_color` enumerated |
 
 **13 CHECK constraints.** Every boundary the brief asks about (grade point out of
 range, zero/negative credits, weight above 100) is refused by Postgres itself, not
 only by a form. Server Actions validate too — `createGrade` calls `validateGrade`
-server-side *and* checks `courseBelongsToCaller`. That is two independent layers.
+server-side _and_ checks `courseBelongsToCaller`. That is two independent layers.
 
 ### 8.3 AI Planner — `CONFIRMED` well defended
 
 The model is explicitly distrusted, which is the correct posture:
 
-1. Rate limited per user *before* the paid call (`RATE_LIMITS.planGenerate`, 10/hour).
+1. Rate limited per user _before_ the paid call (`RATE_LIMITS.planGenerate`, 10/hour).
 2. Output parsed by a total function that returns `null` rather than throwing.
 3. **Sessions referencing an assignment the model was not given are dropped** —
    `assignmentIds.has(s.assignmentId)` in `route.ts`.
@@ -261,8 +261,8 @@ classified rather than collapsed into a 500.
 
 ### 8.12 Offline / PWA — `CONFIRMED` defective → **OFF-001**
 
-The README promises: *"edits made offline queue up and sync automatically once you're
-back online."* The queue works. **What it does not do is remember whose edits they are.**
+The README promises: _"edits made offline queue up and sync automatically once you're
+back online."_ The queue works. **What it does not do is remember whose edits they are.**
 
 ```
 // lib/offline/idb.ts
@@ -306,15 +306,15 @@ Full finding in §14.
 **This is a heuristic walkthrough of real screens, not user research.** No human used
 this product. Nothing below should be quoted as a user finding.
 
-| Flow | Goal | Steps | Friction | Drop-off risk | Recommendation |
-|---|---|---:|---|---|---|
-| New user → useful Dashboard | see value once | 3 onboarding steps + 1 | Collects availability, one course, one task before showing anything | **Medium** | Let the Dashboard render with one course; defer availability to first Planner use |
-| Assignment → Planner → confirm → Schedule → Focus | turn a deadline into time | 6–8 | The draft/confirm split is the app's best idea but its least explained | Medium | Say what confirming *does* ("adds 6 blocks to your Schedule") before the click |
-| Focus done → Dashboard → Weekly Report | feel progress | 2 | Report is weekly; a first session shows nothing | **High** | Acknowledge the first session immediately |
-| Course → Grade → Forecast | answer "what do I need?" | 4 | Forecast needs target GPA **and** program credits, neither collected at onboarding | **High** | Partly addressed on this branch by `OnTrackSetupCard`, which now names the missing field instead of rendering nothing |
-| High workload → recommendation → action | reduce load | 3 | `topSuggestion` names a factor, not a task | Medium | Link the suggestion to the specific assignment driving it |
-| Calendar connect → sync → plan | avoid double-booking | 4 | Value invisible until a plan is generated | Medium | Show imported class count immediately |
-| Notification → deep link → resolve | close a loop | 2 | Good | Low | — |
+| Flow                                              | Goal                      |                  Steps | Friction                                                                           | Drop-off risk | Recommendation                                                                                                        |
+| ------------------------------------------------- | ------------------------- | ---------------------: | ---------------------------------------------------------------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------- |
+| New user → useful Dashboard                       | see value once            | 3 onboarding steps + 1 | Collects availability, one course, one task before showing anything                | **Medium**    | Let the Dashboard render with one course; defer availability to first Planner use                                     |
+| Assignment → Planner → confirm → Schedule → Focus | turn a deadline into time |                    6–8 | The draft/confirm split is the app's best idea but its least explained             | Medium        | Say what confirming _does_ ("adds 6 blocks to your Schedule") before the click                                        |
+| Focus done → Dashboard → Weekly Report            | feel progress             |                      2 | Report is weekly; a first session shows nothing                                    | **High**      | Acknowledge the first session immediately                                                                             |
+| Course → Grade → Forecast                         | answer "what do I need?"  |                      4 | Forecast needs target GPA **and** program credits, neither collected at onboarding | **High**      | Partly addressed on this branch by `OnTrackSetupCard`, which now names the missing field instead of rendering nothing |
+| High workload → recommendation → action           | reduce load               |                      3 | `topSuggestion` names a factor, not a task                                         | Medium        | Link the suggestion to the specific assignment driving it                                                             |
+| Calendar connect → sync → plan                    | avoid double-booking      |                      4 | Value invisible until a plan is generated                                          | Medium        | Show imported class count immediately                                                                                 |
+| Notification → deep link → resolve                | close a loop              |                      2 | Good                                                                               | Low           | —                                                                                                                     |
 
 **Strongest UX answer in the product:** the Planner's draft state. It refuses to
 pretend AI output is a commitment. Most student AI tools get this wrong.
@@ -335,13 +335,13 @@ loads. 22 full-page screenshots were captured and reviewed; they are not committ
 
 ### Automated results — `CONFIRMED` clean
 
-| Check | mobile 375 | tablet 768 | desktop 1440 |
-|---|---|---|---|
-| Horizontal overflow | none | none | none |
-| Touch targets < 24px | none | none | none |
-| Console errors | none | none | none |
-| `<h1>` per page | exactly 1 | exactly 1 | exactly 1 |
-| Broken images | none¹ | none | none |
+| Check                | mobile 375 | tablet 768 | desktop 1440 |
+| -------------------- | ---------- | ---------- | ------------ |
+| Horizontal overflow  | none       | none       | none         |
+| Touch targets < 24px | none       | none       | none         |
+| Console errors       | none       | none       | none         |
+| `<h1>` per page      | exactly 1  | exactly 1  | exactly 1    |
+| Broken images        | none¹      | none       | none         |
 
 ¹ One `<img>` reported zero natural size on `/focus` at 375px. **This was my probe
 being wrong, not a defect**: the Pilo mascot carries `hidden … sm:block`, so below
@@ -399,7 +399,7 @@ built screens, and should be treated as hypotheses to test with humans.
 
 - **Best moment:** required-average forecast.
 - **Blocker:** needs both target GPA and program credits, neither collected during
-  onboarding. Previously the card rendered *nothing*; this branch now explains what is
+  onboarding. Previously the card rendered _nothing_; this branch now explains what is
   missing.
 - **Score: 7/10.**
 
@@ -418,19 +418,19 @@ built screens, and should be treated as hypotheses to test with humans.
 
 ## 12. Product Manager Review
 
-| Feature | Verdict | Why |
-|---|---|---|
-| AI Planner | **KEEP** | The differentiator. Draft/confirm is the right shape. |
-| Assignments + recurring | **KEEP** | Table stakes, well built. |
-| Focus Timer | **KEEP** | Highest-frequency surface; drives every other metric. |
-| Weekly Report | **IMPROVE** | Weekly cadence is too slow to build a habit alone. |
-| Workload Risk | **IMPROVE** | Score without a named action. Now shows a delta on this branch — the right direction. |
-| GPA On-track | **IMPROVE** | Depends on fields onboarding never asks for. |
-| Google Calendar | **KEEP** | Import is what makes the Planner's output trustworthy. |
-| Notifications | **SIMPLIFY** | Two of five categories were dead switches; removed on this branch. |
-| Offline mode | **VALIDATE** | Real engineering cost, unproven demand, and currently the source of the one P1. |
-| Pilo mascot | **KEEP** | Cheap identity, no maintenance burden. |
-| Dashboard briefing | **MERGE** | Overlaps "Today" and "Due soon". |
+| Feature                 | Verdict      | Why                                                                                   |
+| ----------------------- | ------------ | ------------------------------------------------------------------------------------- |
+| AI Planner              | **KEEP**     | The differentiator. Draft/confirm is the right shape.                                 |
+| Assignments + recurring | **KEEP**     | Table stakes, well built.                                                             |
+| Focus Timer             | **KEEP**     | Highest-frequency surface; drives every other metric.                                 |
+| Weekly Report           | **IMPROVE**  | Weekly cadence is too slow to build a habit alone.                                    |
+| Workload Risk           | **IMPROVE**  | Score without a named action. Now shows a delta on this branch — the right direction. |
+| GPA On-track            | **IMPROVE**  | Depends on fields onboarding never asks for.                                          |
+| Google Calendar         | **KEEP**     | Import is what makes the Planner's output trustworthy.                                |
+| Notifications           | **SIMPLIFY** | Two of five categories were dead switches; removed on this branch.                    |
+| Offline mode            | **VALIDATE** | Real engineering cost, unproven demand, and currently the source of the one P1.       |
+| Pilo mascot             | **KEEP**     | Cheap identity, no maintenance burden.                                                |
+| Dashboard briefing      | **MERGE**    | Overlaps "Today" and "Due soon".                                                      |
 
 **Three to improve now:** (1) onboarding → first value, (2) Workload Risk → one named
 action, (3) Focus → immediate acknowledgement rather than waiting for a weekly report.
@@ -441,7 +441,7 @@ action, (3) Focus → immediate acknowledgement rather than waiting for a weekly
 economy. Each adds a retention mechanic that competes with the one honest mechanic the
 app already has.
 
-- **North star:** weekly *planned-and-kept* study sessions.
+- **North star:** weekly _planned-and-kept_ study sessions.
 - **Activation:** first confirmed plan **plus** one completed focus session inside it.
 - **Retention:** proportion of students with ≥1 confirmed plan in 3 of any 4 weeks.
 
@@ -455,12 +455,12 @@ I did not read the policies and call them fine. I assumed the `authenticated` Po
 role with a second user's JWT claims and attacked the first user's data, inside a
 transaction that was rolled back (`evidence/rls-cross-user.log`).
 
-| Attack | Result |
-|---|---|
-| Read 10 tables' rows belonging to another user | **0 rows visible, all 10** |
-| `update assignments` / `delete grades` / `update profiles` on another user | **0 rows affected** |
-| Insert a row *owned by* another user | **refused** — RLS violation |
-| Attach a `study_session` to another user's `study_plan` | **refused** — RLS violation |
+| Attack                                                                     | Result                      |
+| -------------------------------------------------------------------------- | --------------------------- |
+| Read 10 tables' rows belonging to another user                             | **0 rows visible, all 10**  |
+| `update assignments` / `delete grades` / `update profiles` on another user | **0 rows affected**         |
+| Insert a row _owned by_ another user                                       | **refused** — RLS violation |
+| Attach a `study_session` to another user's `study_plan`                    | **refused** — RLS violation |
 
 `RESULT: NO CROSS-USER ACCESS`. Post-rollback state verified empty.
 
@@ -476,7 +476,7 @@ EXISTS (SELECT 1 FROM study_plans p
         WHERE p.id = study_sessions.plan_id AND p.user_id = auth.uid())
 ```
 
-`WITH CHECK` as well as `USING` is what stops an attacker *inserting* into someone
+`WITH CHECK` as well as `USING` is what stops an attacker _inserting_ into someone
 else's plan, and it is present.
 
 ### 13.2 Gemini — `CONFIRMED` sound
@@ -488,7 +488,7 @@ the paid call.
 
 `SUGGESTION (TL-003)`: `validateSessions` itself does not verify ownership. It is only
 ever called with pre-filtered input, so this is not a live bug — but it is a function
-that *looks* safe to reuse and is not. An unknown `assignmentId` yields
+that _looks_ safe to reuse and is not. An unknown `assignmentId` yields
 `assignmentDueAt[id] === undefined`, which skips the due-date check and returns
 `valid: true`. Worth an ownership parameter or a comment.
 
@@ -528,120 +528,120 @@ bury any real change in review.
 
 ### OFF-001 — Offline queue is not bound to a user and survives sign-out
 
-| Field | Value |
-|---|---|
-| **ID** | OFF-001 |
-| **Status** | **CONFIRMED** (persistence reproduced; replay path established from code) |
-| **Roles** | Senior QA Engineer, Technical Lead |
-| **Priority** | **P1** |
-| **Route** | all authenticated pages; `lib/offline/*` |
-| **Files** | `lib/offline/idb.ts`, `lib/offline/queue.ts`, `app/(app)/settings/actions.ts` |
-| **Finding** | Queued offline mutations carry no user identity, live in a per-origin IndexedDB database, and are never cleared on sign-out. They replay as whoever is signed in at flush time. |
-| **Preconditions** | Shared browser profile — a library PC, a shared laptop, a phone lent to a friend. |
-| **Reproduction** | 1. Sign in as A. 2. Go offline. 3. Create or edit an assignment, or log a focus session. 4. Sign out without reconnecting. 5. Sign in as B. 6. Regain connectivity. |
-| **Expected** | A's queued work is either discarded at sign-out or replayed only into A's account. |
-| **Actual** | Queue persists across sign-out with no owner (`hasUserId: False`); `applyMutation` calls Server Actions that use the **current** session. |
-| **Evidence** | `evidence/offline-queue.log`; `idb.ts:13-18` (no `userId`); no `clearQueue`/`deleteDatabase` call anywhere in `app/`, `components/`, `lib/`. |
-| **User impact** | `createAssignment` puts A's coursework — title, notes, due date — into B's account. `logFocusSession` corrupts B's stats, streak and risk score. `updateAssignment` is refused by RLS, which throws and **stalls the queue permanently** behind a poison entry. |
-| **Root cause** | The queue was designed around a single-user device; identity was never part of the record. |
-| **Recommendation** | Store `userId` on every queued mutation; skip (and surface) entries whose owner is not the current user; clear the queue on sign-out; give repeatedly-failing entries a dead-letter path so one poison record cannot stall the rest. |
-| **Acceptance** | An automated test signs in as A, queues offline, signs out, signs in as B, goes online, and asserts B's account is unchanged and A's queue is preserved or explicitly discarded. |
-| **Effort** | **M** |
-| **Confidence** | **High** |
+| Field              | Value                                                                                                                                                                                                                                                           |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **ID**             | OFF-001                                                                                                                                                                                                                                                         |
+| **Status**         | **CONFIRMED** (persistence reproduced; replay path established from code)                                                                                                                                                                                       |
+| **Roles**          | Senior QA Engineer, Technical Lead                                                                                                                                                                                                                              |
+| **Priority**       | **P1**                                                                                                                                                                                                                                                          |
+| **Route**          | all authenticated pages; `lib/offline/*`                                                                                                                                                                                                                        |
+| **Files**          | `lib/offline/idb.ts`, `lib/offline/queue.ts`, `app/(app)/settings/actions.ts`                                                                                                                                                                                   |
+| **Finding**        | Queued offline mutations carry no user identity, live in a per-origin IndexedDB database, and are never cleared on sign-out. They replay as whoever is signed in at flush time.                                                                                 |
+| **Preconditions**  | Shared browser profile — a library PC, a shared laptop, a phone lent to a friend.                                                                                                                                                                               |
+| **Reproduction**   | 1. Sign in as A. 2. Go offline. 3. Create or edit an assignment, or log a focus session. 4. Sign out without reconnecting. 5. Sign in as B. 6. Regain connectivity.                                                                                             |
+| **Expected**       | A's queued work is either discarded at sign-out or replayed only into A's account.                                                                                                                                                                              |
+| **Actual**         | Queue persists across sign-out with no owner (`hasUserId: False`); `applyMutation` calls Server Actions that use the **current** session.                                                                                                                       |
+| **Evidence**       | `evidence/offline-queue.log`; `idb.ts:13-18` (no `userId`); no `clearQueue`/`deleteDatabase` call anywhere in `app/`, `components/`, `lib/`.                                                                                                                    |
+| **User impact**    | `createAssignment` puts A's coursework — title, notes, due date — into B's account. `logFocusSession` corrupts B's stats, streak and risk score. `updateAssignment` is refused by RLS, which throws and **stalls the queue permanently** behind a poison entry. |
+| **Root cause**     | The queue was designed around a single-user device; identity was never part of the record.                                                                                                                                                                      |
+| **Recommendation** | Store `userId` on every queued mutation; skip (and surface) entries whose owner is not the current user; clear the queue on sign-out; give repeatedly-failing entries a dead-letter path so one poison record cannot stall the rest.                            |
+| **Acceptance**     | An automated test signs in as A, queues offline, signs out, signs in as B, goes online, and asserts B's account is unchanged and A's queue is preserved or explicitly discarded.                                                                                |
+| **Effort**         | **M**                                                                                                                                                                                                                                                           |
+| **Confidence**     | **High**                                                                                                                                                                                                                                                        |
 
 ### FMT-001 — `format:check` fails on half the repo and CI never runs it
 
-| Field | Value |
-|---|---|
-| **Status** | **CONFIRMED** · **Roles** Technical Lead · **Priority** **P2** |
-| **Files** | `.prettierrc.json`, `.github/workflows/ci.yml` |
-| **Finding** | 302 of 599 tracked files fail `npm run format:check`; CI runs lint/tsc/test/build but not format. |
-| **Evidence** | `evidence/baseline.log`; `.prettierrc.json` has no `printWidth`; codebase written at ~100, Prettier defaults to 80; an LF-normalised copy still fails, ruling out line endings. |
-| **Impact** | The documented `npm run format` would emit a 302-file diff, hiding real changes. New contributors hit a failing script on a clean checkout. |
-| **Recommendation** | Set `printWidth` to the width actually used, reformat once in a single isolated commit, then add `format:check` to CI so it cannot drift again. |
-| **Effort** | S (config) + M (one-time reformat) · **Confidence** High |
+| Field              | Value                                                                                                                                                                           |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Status**         | **CONFIRMED** · **Roles** Technical Lead · **Priority** **P2**                                                                                                                  |
+| **Files**          | `.prettierrc.json`, `.github/workflows/ci.yml`                                                                                                                                  |
+| **Finding**        | 302 of 599 tracked files fail `npm run format:check`; CI runs lint/tsc/test/build but not format.                                                                               |
+| **Evidence**       | `evidence/baseline.log`; `.prettierrc.json` has no `printWidth`; codebase written at ~100, Prettier defaults to 80; an LF-normalised copy still fails, ruling out line endings. |
+| **Impact**         | The documented `npm run format` would emit a 302-file diff, hiding real changes. New contributors hit a failing script on a clean checkout.                                     |
+| **Recommendation** | Set `printWidth` to the width actually used, reformat once in a single isolated commit, then add `format:check` to CI so it cannot drift again.                                 |
+| **Effort**         | S (config) + M (one-time reformat) · **Confidence** High                                                                                                                        |
 
 ### HYD-001 — React hydration mismatch on a form
 
-| Field | Value |
-|---|---|
-| **Status** | **PROBABLE** · **Roles** QA, Technical Lead · **Priority** **P2** |
-| **Evidence** | `evidence/e2e.log:2` — React hydration diff containing `- novalidate="true"` during the E2E run. |
-| **Reproduction** | **Not reproducible on demand.** I loaded all 11 routes in dev and opened + submitted the Assignment, Course, Grade and Event dialogs, capturing every console message: no hydration diagnostic appeared. |
-| **Impact** | React discards server HTML and re-renders the subtree on the client — a visible flash and lost input focus if it happens mid-interaction. Dev-only as a *warning*; the re-render happens in production silently. |
-| **Recommendation** | Re-run the E2E suite with the dev server log captured per spec to identify which flow emits it. Do not guess at a fix while the trigger is unknown. |
-| **Effort** | S to diagnose · **Confidence** Medium — the log is real, the trigger is not yet known |
+| Field              | Value                                                                                                                                                                                                            |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Status**         | **PROBABLE** · **Roles** QA, Technical Lead · **Priority** **P2**                                                                                                                                                |
+| **Evidence**       | `evidence/e2e.log:2` — React hydration diff containing `- novalidate="true"` during the E2E run.                                                                                                                 |
+| **Reproduction**   | **Not reproducible on demand.** I loaded all 11 routes in dev and opened + submitted the Assignment, Course, Grade and Event dialogs, capturing every console message: no hydration diagnostic appeared.         |
+| **Impact**         | React discards server HTML and re-renders the subtree on the client — a visible flash and lost input focus if it happens mid-interaction. Dev-only as a _warning_; the re-render happens in production silently. |
+| **Recommendation** | Re-run the E2E suite with the dev server log captured per spec to identify which flow emits it. Do not guess at a fix while the trigger is unknown.                                                              |
+| **Effort**         | S to diagnose · **Confidence** Medium — the log is real, the trigger is not yet known                                                                                                                            |
 
 ### DOC-001 — README references a file that does not exist
 
-| Field | Value |
-|---|---|
-| **Status** | **CONFIRMED** · **Roles** QA · **Priority** **P3** |
-| **Evidence** | `README.md:116` points to `docs/TRACEABILITY.md`; the file is absent. |
-| **Impact** | The stated map from functional requirement → covering test cannot be followed. |
-| **Recommendation** | Restore the file or drop the reference. |
-| **Effort** | XS · **Confidence** High |
+| Field              | Value                                                                          |
+| ------------------ | ------------------------------------------------------------------------------ |
+| **Status**         | **CONFIRMED** · **Roles** QA · **Priority** **P3**                             |
+| **Evidence**       | `README.md:116` points to `docs/TRACEABILITY.md`; the file is absent.          |
+| **Impact**         | The stated map from functional requirement → covering test cannot be followed. |
+| **Recommendation** | Restore the file or drop the reference.                                        |
+| **Effort**         | XS · **Confidence** High                                                       |
 
 ### TL-003 — `validateSessions` does not verify assignment ownership
 
-| Field | Value |
-|---|---|
-| **Status** | **SUGGESTION** · **Roles** Technical Lead · **Priority** **P3** |
-| **Evidence** | `lib/rules/plan.ts:94-97` — an unknown `assignmentId` makes `dueAt` undefined, skipping the due-date check and returning `valid: true`. The only caller pre-filters, so no live bug. |
-| **Recommendation** | Take the allowed ID set as a parameter, or document that the caller must filter first. |
-| **Effort** | XS · **Confidence** High |
+| Field              | Value                                                                                                                                                                                |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Status**         | **SUGGESTION** · **Roles** Technical Lead · **Priority** **P3**                                                                                                                      |
+| **Evidence**       | `lib/rules/plan.ts:94-97` — an unknown `assignmentId` makes `dueAt` undefined, skipping the due-date check and returning `valid: true`. The only caller pre-filters, so no live bug. |
+| **Recommendation** | Take the allowed ID set as a parameter, or document that the caller must filter first.                                                                                               |
+| **Effort**         | XS · **Confidence** High                                                                                                                                                             |
 
 ### VER-001 — Audited branch is 39 commits ahead of production
 
-| Field | Value |
-|---|---|
-| **Status** | **CONFIRMED** · **Priority** **P3** (process) |
-| **Evidence** | `git rev-list --count origin/main..HEAD` = 39; `/api/health` on the deployed site returns a redirect, i.e. production predates that route. |
-| **Impact** | Findings here describe the branch. Production runs `main` and does not contain migrations `0019`–`0021`, rate limiting, or the fixes on this branch. |
-| **Recommendation** | Merge before treating this audit as a production assessment. |
+| Field              | Value                                                                                                                                                |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Status**         | **CONFIRMED** · **Priority** **P3** (process)                                                                                                        |
+| **Evidence**       | `git rev-list --count origin/main..HEAD` = 39; `/api/health` on the deployed site returns a redirect, i.e. production predates that route.           |
+| **Impact**         | Findings here describe the branch. Production runs `main` and does not contain migrations `0019`–`0021`, rate limiting, or the fixes on this branch. |
+| **Recommendation** | Merge before treating this audit as a production assessment.                                                                                         |
 
 ### Confirmed non-issues
 
-| Checked | Result |
-|---|---|
-| Cross-user read/write on 15 tables | `CONFIRMED` blocked — see §13.1 |
-| Anonymous access to any route | `CONFIRMED` blocked — 12/12 pages, 12/12 APIs |
-| OAuth callback CSRF | `CONFIRMED` — rejects with `state_mismatch` |
-| Boundary values (GPA, credits, weight, progress) | `CONFIRMED` — 13 DB CHECK constraints + server-side validation |
-| Horizontal overflow, touch targets, console errors | `CONFIRMED` clean — 66 page loads |
-| Duplicate daily risk score | `CONFIRMED` prevented — unique `(user_id, score_date)` + upsert |
-| Gemini returning another user's assignment ID | `CONFIRMED` filtered at the route |
-| `/focus` mascot "failing to load" on mobile | `INTENTIONAL_DEVIATION` — `hidden sm:block`; my probe was wrong |
-| Single label on completed rows | `INTENTIONAL_DEVIATION` — schema has one terminal state |
+| Checked                                            | Result                                                          |
+| -------------------------------------------------- | --------------------------------------------------------------- |
+| Cross-user read/write on 15 tables                 | `CONFIRMED` blocked — see §13.1                                 |
+| Anonymous access to any route                      | `CONFIRMED` blocked — 12/12 pages, 12/12 APIs                   |
+| OAuth callback CSRF                                | `CONFIRMED` — rejects with `state_mismatch`                     |
+| Boundary values (GPA, credits, weight, progress)   | `CONFIRMED` — 13 DB CHECK constraints + server-side validation  |
+| Horizontal overflow, touch targets, console errors | `CONFIRMED` clean — 66 page loads                               |
+| Duplicate daily risk score                         | `CONFIRMED` prevented — unique `(user_id, score_date)` + upsert |
+| Gemini returning another user's assignment ID      | `CONFIRMED` filtered at the route                               |
+| `/focus` mascot "failing to load" on mobile        | `INTENTIONAL_DEVIATION` — `hidden sm:block`; my probe was wrong |
+| Single label on completed rows                     | `INTENTIONAL_DEVIATION` — schema has one terminal state         |
 
 ---
 
 ## 15. P0–P3 Backlog
 
-| # | ID | P | Finding | Effort |
-|---|---|---|---|---|
-| — | — | **P0** | *none* | — |
-| 1 | OFF-001 | **P1** | Offline queue replays into the wrong account | M |
-| 2 | GAP-001 | P2 | No E2E for sign-up / password reset / onboarding | M |
-| 3 | FMT-001 | P2 | `format:check` fails on 302 files; unenforced in CI | S+M |
-| 4 | HYD-001 | P2 | Hydration mismatch on a form (trigger unknown) | S |
-| 5 | GAP-002 | P2 | No E2E for export or account deletion | S |
-| 6 | DOC-001 | P3 | README → missing `docs/TRACEABILITY.md` | XS |
-| 7 | TL-003 | P3 | `validateSessions` ownership assumption undocumented | XS |
-| 8 | VER-001 | P3 | Branch 39 commits ahead of production | — |
-| 9 | GAP-003 | P3 | Chromium-only E2E; no Firefox/WebKit | M |
+| #   | ID      | P      | Finding                                              | Effort |
+| --- | ------- | ------ | ---------------------------------------------------- | ------ |
+| —   | —       | **P0** | _none_                                               | —      |
+| 1   | OFF-001 | **P1** | Offline queue replays into the wrong account         | M      |
+| 2   | GAP-001 | P2     | No E2E for sign-up / password reset / onboarding     | M      |
+| 3   | FMT-001 | P2     | `format:check` fails on 302 files; unenforced in CI  | S+M    |
+| 4   | HYD-001 | P2     | Hydration mismatch on a form (trigger unknown)       | S      |
+| 5   | GAP-002 | P2     | No E2E for export or account deletion                | S      |
+| 6   | DOC-001 | P3     | README → missing `docs/TRACEABILITY.md`              | XS     |
+| 7   | TL-003  | P3     | `validateSessions` ownership assumption undocumented | XS     |
+| 8   | VER-001 | P3     | Branch 39 commits ahead of production                | —      |
+| 9   | GAP-003 | P3     | Chromium-only E2E; no Firefox/WebKit                 | M      |
 
 ---
 
 ## 16. Feature Recommendations
 
-| Feature | User problem | Value | Freq | Effort | Risk | MVP? | Success metric |
-|---|---|---|---|---|---|---|---|
-| First-session acknowledgement | Focus effort invisible until the weekly report | High | Daily | S | Low | **Yes** | D1 → D2 return rate |
-| Risk → one named task | Score without an action | High | Weekly | M | Low | **Yes** | % of warnings followed by an action within 24h |
-| Deferred onboarding | Availability demanded before value shown | High | Once | M | Med | **Yes** | Onboarding completion rate |
-| "Explain this plan" | AI trust | Med | Weekly | S | Low | No | Plan confirm rate |
-| Shared course templates | Repetitive setup | Med | Termly | L | Med | No | Courses created per user |
+| Feature                       | User problem                                   | Value | Freq   | Effort | Risk | MVP?    | Success metric                                 |
+| ----------------------------- | ---------------------------------------------- | ----- | ------ | ------ | ---- | ------- | ---------------------------------------------- |
+| First-session acknowledgement | Focus effort invisible until the weekly report | High  | Daily  | S      | Low  | **Yes** | D1 → D2 return rate                            |
+| Risk → one named task         | Score without an action                        | High  | Weekly | M      | Low  | **Yes** | % of warnings followed by an action within 24h |
+| Deferred onboarding           | Availability demanded before value shown       | High  | Once   | M      | Med  | **Yes** | Onboarding completion rate                     |
+| "Explain this plan"           | AI trust                                       | Med   | Weekly | S      | Low  | No      | Plan confirm rate                              |
+| Shared course templates       | Repetitive setup                               | Med   | Termly | L      | Med  | No      | Courses created per user                       |
 
 ---
 
@@ -669,21 +669,21 @@ bury any real change in review.
 
 ## 18. Release Readiness Scorecard
 
-| Category | Score | Basis |
-|---|---:|---|
-| Functional correctness | 8 | 451 unit + 47 E2E green; core flows sound; one real defect |
-| Data consistency | 9 | 13 DB CHECK constraints, optimistic concurrency, idempotent risk scoring |
-| UX flow | 6 | Three-way Assignments/Planner/Schedule split unexplained; onboarding front-loads input |
-| Visual design | 9 | Coherent, distinctive, zero overflow across 66 page loads |
-| Gen Z fit | 8 | Current without being childish; mascot supports rather than decorates |
-| Responsive design | 9 | Clean at 375/768/1440 in both themes |
-| Accessibility | 7 | Contrast + touch targets + heading structure verified; screen reader and keyboard unverified |
-| Performance | 5 | **Unverified** — 83-row tables prove nothing |
-| Security and privacy | 7 | Authorization excellent; **OFF-001 is a privacy defect** |
-| Test quality | 7 | Excellent on pure logic, absent on entry flows |
-| Maintainability | 7 | Comments explain *why*; FMT-001 undermines review |
-| Product value | 8 | Planner + Risk are genuinely differentiated |
-| **Release readiness** | **7** | One P1 between here and closed beta |
+| Category               | Score | Basis                                                                                        |
+| ---------------------- | ----: | -------------------------------------------------------------------------------------------- |
+| Functional correctness |     8 | 451 unit + 47 E2E green; core flows sound; one real defect                                   |
+| Data consistency       |     9 | 13 DB CHECK constraints, optimistic concurrency, idempotent risk scoring                     |
+| UX flow                |     6 | Three-way Assignments/Planner/Schedule split unexplained; onboarding front-loads input       |
+| Visual design          |     9 | Coherent, distinctive, zero overflow across 66 page loads                                    |
+| Gen Z fit              |     8 | Current without being childish; mascot supports rather than decorates                        |
+| Responsive design      |     9 | Clean at 375/768/1440 in both themes                                                         |
+| Accessibility          |     7 | Contrast + touch targets + heading structure verified; screen reader and keyboard unverified |
+| Performance            |     5 | **Unverified** — 83-row tables prove nothing                                                 |
+| Security and privacy   |     7 | Authorization excellent; **OFF-001 is a privacy defect**                                     |
+| Test quality           |     7 | Excellent on pure logic, absent on entry flows                                               |
+| Maintainability        |     7 | Comments explain _why_; FMT-001 undermines review                                            |
+| Product value          |     8 | Planner + Risk are genuinely differentiated                                                  |
+| **Release readiness**  | **7** | One P1 between here and closed beta                                                          |
 
 ---
 
@@ -713,31 +713,31 @@ was tested, not about what works.
 
 Full disclosure, since this ran against a database shared with a real account:
 
-| Write | Disposal |
-|---|---|
-| `POST /api/plan/generate` during route probing created a **real draft plan (7 sessions) via a live Gemini call** | Deleted by id; sessions cascaded. Verified `plans: 0`. |
-| RLS attack transaction | `ROLLBACK`; post-state verified `{pwned: 0, forged: 0, plans: 0}` |
-| IndexedDB queue entry | `deleteDatabase`; re-read returned `[]`; no `AUDIT-PROBE` assignment reached the database |
-| E2E suite | Ran against the dedicated `@unipilot.local` account only |
+| Write                                                                                                            | Disposal                                                                                  |
+| ---------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `POST /api/plan/generate` during route probing created a **real draft plan (7 sessions) via a live Gemini call** | Deleted by id; sessions cascaded. Verified `plans: 0`.                                    |
+| RLS attack transaction                                                                                           | `ROLLBACK`; post-state verified `{pwned: 0, forged: 0, plans: 0}`                         |
+| IndexedDB queue entry                                                                                            | `deleteDatabase`; re-read returned `[]`; no `AUDIT-PROBE` assignment reached the database |
+| E2E suite                                                                                                        | Ran against the dedicated `@unipilot.local` account only                                  |
 
 Final residue check: `{probe: 0, plans: 0}`. **No data belonging to the real Gmail
 account was read, modified, or deleted.**
 
 ### 20.2 Not verified — and why
 
-| Area | Why not | Needed |
-|---|---|---|
-| Google Calendar OAuth, sync, token refresh, revocation | Requires a real Google account; the brief forbids using one without a safe test environment | Dedicated Google test account |
-| Push notification delivery, permission denial, invalid-subscription cleanup | Needs real browser push infrastructure and a second device | Test device + VAPID sandbox |
-| Gemini timeout / malformed JSON / injection at runtime | Inducing them needs either fault injection or repeated paid calls | Mock harness |
-| Service-worker offline caching, hard reload offline, install | Not exercised; distinct from the queue, which *was* tested | Manual session |
-| Multi-tab Focus timer, clock changes, tab closed mid-session | Needs orchestrated multi-context timing | Dedicated harness |
-| Sign-up, email confirmation, password reset delivery | Sending real mail from a shared project | Mail sandbox |
-| Account deletion | Destructive and irreversible on a shared database | Isolated database |
-| Query performance, N+1, index effectiveness | Largest table is 83 rows — any measurement would mislead | Seeded dataset at realistic scale |
-| Firefox, WebKit, real mobile hardware | Playwright configured for Chromium only | Cross-browser CI |
-| Screen reader, keyboard-only navigation | Automated checks cover contrast and target size, not operability | Manual AT pass |
-| Whether Vercel Production points at this Supabase project | All 12 environment variables are marked Sensitive; Vercel refuses to reveal them, dashboard included | Owner confirmation |
+| Area                                                                        | Why not                                                                                              | Needed                            |
+| --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | --------------------------------- |
+| Google Calendar OAuth, sync, token refresh, revocation                      | Requires a real Google account; the brief forbids using one without a safe test environment          | Dedicated Google test account     |
+| Push notification delivery, permission denial, invalid-subscription cleanup | Needs real browser push infrastructure and a second device                                           | Test device + VAPID sandbox       |
+| Gemini timeout / malformed JSON / injection at runtime                      | Inducing them needs either fault injection or repeated paid calls                                    | Mock harness                      |
+| Service-worker offline caching, hard reload offline, install                | Not exercised; distinct from the queue, which _was_ tested                                           | Manual session                    |
+| Multi-tab Focus timer, clock changes, tab closed mid-session                | Needs orchestrated multi-context timing                                                              | Dedicated harness                 |
+| Sign-up, email confirmation, password reset delivery                        | Sending real mail from a shared project                                                              | Mail sandbox                      |
+| Account deletion                                                            | Destructive and irreversible on a shared database                                                    | Isolated database                 |
+| Query performance, N+1, index effectiveness                                 | Largest table is 83 rows — any measurement would mislead                                             | Seeded dataset at realistic scale |
+| Firefox, WebKit, real mobile hardware                                       | Playwright configured for Chromium only                                                              | Cross-browser CI                  |
+| Screen reader, keyboard-only navigation                                     | Automated checks cover contrast and target size, not operability                                     | Manual AT pass                    |
+| Whether Vercel Production points at this Supabase project                   | All 12 environment variables are marked Sensitive; Vercel refuses to reveal them, dashboard included | Owner confirmation                |
 
 ---
 
@@ -761,12 +761,12 @@ Everything above describes commit `a3c905d` and was written before any code
 changed. This section records what was fixed afterwards, on request, so the report
 is not read as still-current.
 
-| Finding | Commit | Status |
-|---|---|---|
-| **OFF-001** (P1) | `22f0226` | **Fixed** |
+| Finding                                                  | Commit    | Status    |
+| -------------------------------------------------------- | --------- | --------- |
+| **OFF-001** (P1)                                         | `22f0226` | **Fixed** |
 | **GAP-001** (P2) — sign-up / reset / onboarding untested | `d65a3d4` | **Fixed** |
-| AUTH-001 — new, found by the sign-up spec | `d65a3d4` | **Fixed** |
-| FMT-001, HYD-001, DOC-001, TL-003 | — | open |
+| AUTH-001 — new, found by the sign-up spec                | `d65a3d4` | **Fixed** |
+| FMT-001, HYD-001, DOC-001, TL-003                        | —         | open      |
 
 ### OFF-001
 
@@ -806,11 +806,11 @@ Supabase is avoiding.
 
 ### Verification after remediation
 
-| | Before | After |
-|---|---:|---:|
-| Unit tests | 451 | **456** |
-| E2E tests | 47 | **61** |
-| `tsc`, `lint`, `build` | clean | clean |
+|                        | Before |   After |
+| ---------------------- | -----: | ------: |
+| Unit tests             |    451 | **456** |
+| E2E tests              |     47 |  **61** |
+| `tsc`, `lint`, `build` |  clean |   clean |
 
 Two of the four new E2E specs failed on first run and **both were the spec's fault**,
 not the app's: `getByRole("alert")` also matches Next.js's own route announcer, and

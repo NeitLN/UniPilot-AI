@@ -22,66 +22,68 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   // once rather than fetched again by each component that queues.
   return (
     <QueueOwnerProvider userId={user?.id ?? ""}>
-    <div className="flex min-h-[calc(100vh/var(--app-zoom))] w-full">
-      {/* A-01: without this, keyboard/screen-reader users had to tab past
+      <div className="flex min-h-[calc(100vh/var(--app-zoom))] w-full">
+        {/* A-01: without this, keyboard/screen-reader users had to tab past
           the sidebar's 8 nav links + sign-out + notification bell (11 tabs)
           on every single page just to reach the actual content. */}
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-ctl focus:bg-ink focus:px-4 focus:py-2.5 focus:text-sm focus:font-bold focus:text-white"
-      >
-        Skip to main content
-      </a>
-      <ServiceWorkerRegister />
-      <aside className="hidden md:flex w-[246px] shrink-0 flex-col bg-ink px-4 py-6">
-        <div className="px-1.5 pb-6">
-          <Logo tone="light" size={40} />
-          <Suspense
-            fallback={<SemesterLabelSkeleton className="mt-1 h-3 w-24 rounded-full bg-white/10" />}
-          >
-            <SemesterLabel className="mt-1 text-[11.5px] font-semibold text-[#9C90C4]" />
-          </Suspense>
-        </div>
-
-        <SidebarNav />
-        {user?.email && <UserFooter email={user.email} />}
-      </aside>
-
-      <div className="flex flex-1 flex-col min-w-0">
-        <OfflineBanner />
-        <header className="flex items-center justify-between gap-3 border-b border-border-subtle-2 bg-card px-6 py-4 md:hidden">
-          <Logo tone="dark" size={32} />
-          <div className="flex items-center gap-2">
-            <Link
-              href="/settings"
-              aria-label="Settings"
-              className="flex h-11 w-11 items-center justify-center rounded-full bg-line text-foreground hover:bg-line-hover"
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-ctl focus:bg-ink focus:px-4 focus:py-2.5 focus:text-sm focus:font-bold focus:text-white"
+        >
+          Skip to main content
+        </a>
+        <ServiceWorkerRegister />
+        <aside className="hidden md:flex w-[246px] shrink-0 flex-col bg-ink px-4 py-6">
+          <div className="px-1.5 pb-6">
+            <Logo tone="light" size={40} />
+            <Suspense
+              fallback={
+                <SemesterLabelSkeleton className="mt-1 h-3 w-24 rounded-full bg-white/10" />
+              }
             >
-              <SettingsIcon />
-            </Link>
+              <SemesterLabel className="mt-1 text-[11.5px] font-semibold text-[#9C90C4]" />
+            </Suspense>
+          </div>
+
+          <SidebarNav />
+          {user?.email && <UserFooter email={user.email} />}
+        </aside>
+
+        <div className="flex flex-1 flex-col min-w-0">
+          <OfflineBanner />
+          <header className="flex items-center justify-between gap-3 border-b border-border-subtle-2 bg-card px-6 py-4 md:hidden">
+            <Logo tone="dark" size={32} />
+            <div className="flex items-center gap-2">
+              <Link
+                href="/settings"
+                aria-label="Settings"
+                className="flex h-11 w-11 items-center justify-center rounded-full bg-line text-foreground hover:bg-line-hover"
+              >
+                <SettingsIcon />
+              </Link>
+              <Suspense fallback={null}>
+                <NotificationBell />
+              </Suspense>
+            </div>
+          </header>
+
+          <div className="hidden items-center justify-end border-b border-border-subtle-2 bg-card px-7 py-3 md:flex">
             <Suspense fallback={null}>
               <NotificationBell />
             </Suspense>
           </div>
-        </header>
 
-        <div className="hidden items-center justify-end border-b border-border-subtle-2 bg-card px-7 py-3 md:flex">
-          <Suspense fallback={null}>
-            <NotificationBell />
-          </Suspense>
+          <main
+            id="main-content"
+            tabIndex={-1}
+            className="flex-1 bg-canvas px-4 py-6 pb-24 md:px-7 md:py-6 md:pb-6"
+          >
+            {children}
+          </main>
+
+          <MobileBottomNav />
         </div>
-
-        <main
-          id="main-content"
-          tabIndex={-1}
-          className="flex-1 bg-canvas px-4 py-6 pb-24 md:px-7 md:py-6 md:pb-6"
-        >
-          {children}
-        </main>
-
-        <MobileBottomNav />
       </div>
-    </div>
     </QueueOwnerProvider>
   );
 }

@@ -32,9 +32,7 @@ export function buildPlanPrompt(input: PlanPromptInput): string {
 
   const classLines =
     input.classBlocks.length > 0
-      ? input.classBlocks
-          .map((b) => `- "${b.title}" ${b.startAt} to ${b.endAt}`)
-          .join("\n")
+      ? input.classBlocks.map((b) => `- "${b.title}" ${b.startAt} to ${b.endAt}`).join("\n")
       : "- none";
 
   return `You are Pilo, a calm and practical study planning assistant for a university student.

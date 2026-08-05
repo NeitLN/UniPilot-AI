@@ -90,8 +90,8 @@ export function LogSessionDialog({ assignments }: { assignments: FocusAssignment
         <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
           <h2 className="font-display text-lg font-bold text-foreground">Log a past session</h2>
           <p className="text-[12.5px] font-semibold text-ink-3">
-            Studied without the timer running — on paper, offline, somewhere else? Add it here
-            so it counts toward your streak and minutes.
+            Studied without the timer running — on paper, offline, somewhere else? Add it here so it
+            counts toward your streak and minutes.
           </p>
 
           <label className="flex flex-col gap-1 text-xs font-bold text-ink-2">
@@ -177,4 +177,3 @@ export function LogSessionDialog({ assignments }: { assignments: FocusAssignment
     </>
   );
 }
-

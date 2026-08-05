@@ -39,7 +39,13 @@ function GoalGauge({
       aria-label={`${completedMinutes} of your ${goalMinutes} minute weekly goal, ${pct}%`}
     >
       <svg viewBox={`0 0 ${width} ${cy + stroke / 2}`} className="absolute inset-0 h-full w-full">
-        <path d={path} fill="none" strokeWidth={stroke} strokeLinecap="round" className="stroke-ink" />
+        <path
+          d={path}
+          fill="none"
+          strokeWidth={stroke}
+          strokeLinecap="round"
+          className="stroke-ink"
+        />
         <path
           d={path}
           fill="none"
@@ -51,8 +57,12 @@ function GoalGauge({
         />
       </svg>
       <div className="absolute inset-x-0 bottom-0 text-center">
-        <p className="font-display text-[34px] font-bold leading-none tabular-nums">{completedMinutes}</p>
-        <p className="mt-1 text-[12.5px] font-semibold text-white/80 tabular-nums">/ {goalMinutes} min</p>
+        <p className="font-display text-[34px] font-bold leading-none tabular-nums">
+          {completedMinutes}
+        </p>
+        <p className="mt-1 text-[12.5px] font-semibold text-white/80 tabular-nums">
+          / {goalMinutes} min
+        </p>
         <p className="mt-0.5 text-[11.5px] font-semibold text-white/70">Weekly goal</p>
       </div>
     </div>
@@ -74,7 +84,9 @@ export function WeeklyRecapHero({
   goalMinutes: number | null;
 }) {
   const pct =
-    goalMinutes && goalMinutes > 0 ? Math.min(100, Math.round((completedMinutes / goalMinutes) * 100)) : null;
+    goalMinutes && goalMinutes > 0
+      ? Math.min(100, Math.round((completedMinutes / goalMinutes) * 100))
+      : null;
 
   return (
     <div className="flex flex-wrap items-center gap-5 rounded-card bg-violet p-5 text-white sm:p-6">
@@ -96,7 +108,8 @@ export function WeeklyRecapHero({
             figure in minutes against a minute goal, and the two disagreeing
             in unit made them read as two different numbers. */}
         <p className="mt-2 text-[13px] font-medium text-white/88">
-          {completedMinutes} focused minute{completedMinutes === 1 ? "" : "s"} and {completedCount} assignment
+          {completedMinutes} focused minute{completedMinutes === 1 ? "" : "s"} and {completedCount}{" "}
+          assignment
           {completedCount === 1 ? "" : "s"} completed.
         </p>
         {streak > 0 && (

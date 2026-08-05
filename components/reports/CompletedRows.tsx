@@ -43,7 +43,9 @@ export function CompletedRows({ rows }: { rows: CompletedRow[] }) {
               <Check className="h-3.5 w-3.5" strokeWidth={3} />
             </span>
             <span className="shrink-0 text-[12.5px] font-semibold text-ink-3">Completed</span>
-            <span className="min-w-0 flex-1 truncate text-[13px] font-bold text-foreground">{r.title}</span>
+            <span className="min-w-0 flex-1 truncate text-[13px] font-bold text-foreground">
+              {r.title}
+            </span>
             {tone && (
               <span className="flex shrink-0 items-center gap-1.5 text-[12px] font-semibold text-ink-3">
                 <span aria-hidden="true" className={`h-2 w-2 rounded-full ${tone.solid}`} />
@@ -51,7 +53,10 @@ export function CompletedRows({ rows }: { rows: CompletedRow[] }) {
               </span>
             )}
             {/* Local-time formatting differs SSR vs hydration by design. */}
-            <span className="shrink-0 text-[12px] font-semibold text-ink-3" suppressHydrationWarning>
+            <span
+              className="shrink-0 text-[12px] font-semibold text-ink-3"
+              suppressHydrationWarning
+            >
               {new Date(r.completedAt).toLocaleString(undefined, {
                 month: "short",
                 day: "numeric",

@@ -60,8 +60,8 @@ export function DeleteCourseDialog({ course, usage, open, onClose }: DeleteCours
             Can&rsquo;t delete &ldquo;{course.name}&rdquo;
           </h2>
           <p className="mt-2 text-sm font-semibold text-ink-2">
-            This course still has {usageParts(usage).join(" and ")} linked to it. Move or
-            remove those first.
+            This course still has {usageParts(usage).join(" and ")} linked to it. Move or remove
+            those first.
           </p>
           {/* No onClick={onClose} here on purpose — these navigate to a
               different route entirely, so the whole page (dialog included)
@@ -90,8 +90,8 @@ export function DeleteCourseDialog({ course, usage, open, onClose }: DeleteCours
             Delete &ldquo;{course.name}&rdquo;?
           </h2>
           <p className="mt-2 text-sm font-semibold text-ink-2">
-            This course has no assignments, grades, or schedule blocks linked to it —
-            deleting it can&rsquo;t be undone.
+            This course has no assignments, grades, or schedule blocks linked to it — deleting it
+            can&rsquo;t be undone.
           </p>
           {error && <FieldError className="mt-2 text-xs">{error}</FieldError>}
           <div className="mt-4 flex gap-2.5">

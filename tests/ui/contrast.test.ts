@@ -59,12 +59,16 @@ const DARK_SURFACES = ["card", "canvas", "line", "violet-tint"] as const;
 describe("muted text tokens meet WCAG AA on every surface they land on", () => {
   it.each(LIGHT_SURFACES)("light: --ink-3 on --%s", (surface) => {
     const ratio = contrastRatio(token("ink-3", 0), token(surface, 0));
-    expect(ratio, `--ink-3 on --${surface} is ${ratio.toFixed(2)}:1`).toBeGreaterThanOrEqual(AA_NORMAL);
+    expect(ratio, `--ink-3 on --${surface} is ${ratio.toFixed(2)}:1`).toBeGreaterThanOrEqual(
+      AA_NORMAL,
+    );
   });
 
   it.each(DARK_SURFACES)("dark: --ink-3 on --%s", (surface) => {
     const ratio = contrastRatio(token("ink-3", 1), token(surface, 1));
-    expect(ratio, `--ink-3 on --${surface} is ${ratio.toFixed(2)}:1`).toBeGreaterThanOrEqual(AA_NORMAL);
+    expect(ratio, `--ink-3 on --${surface} is ${ratio.toFixed(2)}:1`).toBeGreaterThanOrEqual(
+      AA_NORMAL,
+    );
   });
 
   // The dusk-* family only ever sits on the permanently-dark --ink panels
@@ -73,7 +77,9 @@ describe("muted text tokens meet WCAG AA on every surface they land on", () => {
     "--%s on --ink",
     (name) => {
       const ratio = contrastRatio(token(name, 0), token("ink", 0));
-      expect(ratio, `--${name} on --ink is ${ratio.toFixed(2)}:1`).toBeGreaterThanOrEqual(AA_NORMAL);
+      expect(ratio, `--${name} on --ink is ${ratio.toFixed(2)}:1`).toBeGreaterThanOrEqual(
+        AA_NORMAL,
+      );
     },
   );
 

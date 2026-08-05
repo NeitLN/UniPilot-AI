@@ -36,14 +36,10 @@ export const PLAN_NUDGE_MIN_ELAPSED = 3;
 export const PLAN_NUDGE_MIN_DAYS_LEFT = 2;
 
 export type PlanNudgeSkipReason =
-  | "nothing_elapsed"
-  | "too_few_elapsed"
-  | "on_track"
-  | "too_late_in_week";
+  "nothing_elapsed" | "too_few_elapsed" | "on_track" | "too_late_in_week";
 
 export type PlanNudgeDecision =
-  | { nudge: true; kept: number; elapsed: number }
-  | { nudge: false; reason: PlanNudgeSkipReason };
+  { nudge: true; kept: number; elapsed: number } | { nudge: false; reason: PlanNudgeSkipReason };
 
 export interface PlanNudgeInput {
   /** Planned sessions that have already come and gone. */
@@ -67,7 +63,8 @@ export function planNudgeDecision({
 }: PlanNudgeInput): PlanNudgeDecision {
   if (elapsed <= 0) return { nudge: false, reason: "nothing_elapsed" };
   if (elapsed < PLAN_NUDGE_MIN_ELAPSED) return { nudge: false, reason: "too_few_elapsed" };
-  if (daysLeftInWeek < PLAN_NUDGE_MIN_DAYS_LEFT) return { nudge: false, reason: "too_late_in_week" };
+  if (daysLeftInWeek < PLAN_NUDGE_MIN_DAYS_LEFT)
+    return { nudge: false, reason: "too_late_in_week" };
   if (kept / elapsed >= PLAN_NUDGE_THRESHOLD) return { nudge: false, reason: "on_track" };
 
   return { nudge: true, kept, elapsed };

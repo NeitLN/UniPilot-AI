@@ -36,11 +36,19 @@ export interface NextDeadline {
 
 /** Soonest not-done, non-archived assignment — null means "All caught up",
  * a real state, not an empty placeholder. */
-export function nextCourseDeadline(assignments: CourseAssignmentLite[], now: Date = new Date()): NextDeadline | null {
+export function nextCourseDeadline(
+  assignments: CourseAssignmentLite[],
+  now: Date = new Date(),
+): NextDeadline | null {
   const pending = sortByDueDate(assignments.filter((a) => !a.archivedAt && a.status !== "done"));
   const next = pending[0];
   if (!next) return null;
-  return { assignmentId: next.id, title: next.title, dueAt: next.dueAt, overdue: isOverdue(next, now) };
+  return {
+    assignmentId: next.id,
+    title: next.title,
+    dueAt: next.dueAt,
+    overdue: isOverdue(next, now),
+  };
 }
 
 export interface CourseLoadEntry {
@@ -70,7 +78,11 @@ export function courseLoadSummary(
     countByCourseCourse.set(a.courseId, (countByCourseCourse.get(a.courseId) ?? 0) + 1);
   }
   const distribution: CourseLoadEntry[] = courses
-    .map((c) => ({ courseId: c.id, courseName: nameById.get(c.id) ?? c.name, count: countByCourseCourse.get(c.id) ?? 0 }))
+    .map((c) => ({
+      courseId: c.id,
+      courseName: nameById.get(c.id) ?? c.name,
+      count: countByCourseCourse.get(c.id) ?? 0,
+    }))
     .filter((e) => e.count > 0)
     .sort((a, b) => b.count - a.count);
 
@@ -89,5 +101,7 @@ export function filterCourses<T extends { name: string; code: string | null }>(
 ): T[] {
   const q = query.trim().toLowerCase();
   if (!q) return courses;
-  return courses.filter((c) => c.name.toLowerCase().includes(q) || (c.code ?? "").toLowerCase().includes(q));
+  return courses.filter(
+    (c) => c.name.toLowerCase().includes(q) || (c.code ?? "").toLowerCase().includes(q),
+  );
 }

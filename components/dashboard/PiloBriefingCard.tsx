@@ -66,8 +66,8 @@ export async function PiloBriefingCard() {
           <p className="mt-1.5 text-[13px] font-medium leading-relaxed text-white/88">
             {pick ? (
               <>
-                Start with <span className="font-bold text-white">{pick.title}</span> — it&rsquo;s due{" "}
-                {relativeDueLabel(pick.dueAt, now)}.
+                Start with <span className="font-bold text-white">{pick.title}</span> — it&rsquo;s
+                due {relativeDueLabel(pick.dueAt, now)}.
               </>
             ) : (
               "All clear — nothing outstanding right now. Add your next assignment when you're ready."

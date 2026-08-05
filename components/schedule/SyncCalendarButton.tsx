@@ -56,7 +56,11 @@ export function SyncCalendarButton({ connected }: { connected: boolean }) {
         }}
         className={className}
       >
-        {pending ? <RotateCw className="h-4 w-4 animate-spin" aria-hidden="true" /> : <GoogleCalendarMark />}
+        {pending ? (
+          <RotateCw className="h-4 w-4 animate-spin" aria-hidden="true" />
+        ) : (
+          <GoogleCalendarMark />
+        )}
         {pending ? "Syncing…" : "Sync Google Calendar"}
       </button>
       {error && (

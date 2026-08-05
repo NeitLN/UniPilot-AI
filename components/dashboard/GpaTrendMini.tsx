@@ -91,7 +91,9 @@ export function GpaTrendMini({
                   strokeWidth={2}
                   strokeLinejoin="round"
                   vectorEffect="non-scaling-stroke"
-                  points={points.map((p, i) => `${xAt(i)},${100 - ratio(p.gpa, domain) * 100}`).join(" ")}
+                  points={points
+                    .map((p, i) => `${xAt(i)},${100 - ratio(p.gpa, domain) * 100}`)
+                    .join(" ")}
                 />
               </svg>
 
@@ -146,10 +148,14 @@ export function GpaTrendMini({
           </div>
           {targetGpa !== null && (
             <div className="flex items-center gap-2">
-              <span aria-hidden="true" className="h-0 w-3 shrink-0 border-t border-dashed border-tangerine" />
+              <span
+                aria-hidden="true"
+                className="h-0 w-3 shrink-0 border-t border-dashed border-tangerine"
+              />
               <dt className="flex-1 text-[11.5px] font-semibold text-ink-2">Target GPA</dt>
               <dd className="text-[12.5px] font-bold tabular-nums text-foreground">
-                {targetGpa.toFixed(2)} <span className="text-[10px] font-bold text-ink-3">/4.0</span>
+                {targetGpa.toFixed(2)}{" "}
+                <span className="text-[10px] font-bold text-ink-3">/4.0</span>
               </dd>
             </div>
           )}

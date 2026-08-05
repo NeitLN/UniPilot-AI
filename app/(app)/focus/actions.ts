@@ -21,9 +21,7 @@ export interface LogFocusSessionResult {
   error?: string;
 }
 
-export async function logFocusSession(
-  input: LogFocusSessionInput,
-): Promise<LogFocusSessionResult> {
+export async function logFocusSession(input: LogFocusSessionInput): Promise<LogFocusSessionResult> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -38,10 +36,7 @@ export async function logFocusSession(
   const ended = new Date(input.endedAt);
   // Recomputed server-side, never trusting a client-supplied result/duration
   // (BR-04): only a genuine 25:00 elapsed counts as `completed`.
-  const durationSeconds = Math.max(
-    1,
-    Math.round((ended.getTime() - started.getTime()) / 1000),
-  );
+  const durationSeconds = Math.max(1, Math.round((ended.getTime() - started.getTime()) / 1000));
   const result = classify(durationSeconds, input.targetDurationSeconds);
 
   const { error } = await supabase.from("focus_sessions").insert({

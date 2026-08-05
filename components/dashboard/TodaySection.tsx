@@ -46,10 +46,19 @@ export async function TodaySection() {
         .eq("plan_id", activePlan.id)
         .gte("start_at", from)
         .lt("start_at", to)
-    : { data: [] as { id: string; assignment_id: string | null; start_at: string; end_at: string }[] };
+    : {
+        data: [] as {
+          id: string;
+          assignment_id: string | null;
+          start_at: string;
+          end_at: string;
+        }[],
+      };
 
   const sessionAssignmentIds = [
-    ...new Set((sessionRows ?? []).map((s) => s.assignment_id).filter((id): id is string => Boolean(id))),
+    ...new Set(
+      (sessionRows ?? []).map((s) => s.assignment_id).filter((id): id is string => Boolean(id)),
+    ),
   ];
   const { data: assignmentRows } = sessionAssignmentIds.length
     ? await supabase.from("assignments").select("id, title").in("id", sessionAssignmentIds)

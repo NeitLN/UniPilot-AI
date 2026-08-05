@@ -1,10 +1,7 @@
 // BR-01 — assignment validation, overdue/priority labelling, sort order.
 // Imported by both the client form and the server action so the rule is
 // defined exactly once (docs/UniPilot/UniPilot_AI_ROADMAP.md §1 principle 3).
-import type {
-  AssignmentPriority,
-  AssignmentStatus,
-} from "@/lib/supabase/types";
+import type { AssignmentPriority, AssignmentStatus } from "@/lib/supabase/types";
 import type { EventRepeat } from "@/lib/rules/event";
 import { dayKey, defaultTimeZone, shiftDayKey } from "@/lib/rules/focus";
 
@@ -35,13 +32,7 @@ export interface AssignmentInput {
   repeatUntil: string;
 }
 
-export const REQUIRED = [
-  "title",
-  "courseId",
-  "dueAt",
-  "weight",
-  "priority",
-] as const;
+export const REQUIRED = ["title", "courseId", "dueAt", "weight", "priority"] as const;
 
 export type FieldErrors = Partial<
   Record<
@@ -119,12 +110,8 @@ export function overdueDays(a: Pick<AssignmentLike, "dueAt">, now = new Date()):
   return Math.max(1, Math.floor(ms / 86_400_000));
 }
 
-export function sortByDueDate<T extends Pick<AssignmentLike, "dueAt">>(
-  list: T[],
-): T[] {
-  return [...list].sort(
-    (a, b) => new Date(a.dueAt).getTime() - new Date(b.dueAt).getTime(),
-  );
+export function sortByDueDate<T extends Pick<AssignmentLike, "dueAt">>(list: T[]): T[] {
+  return [...list].sort((a, b) => new Date(a.dueAt).getTime() - new Date(b.dueAt).getTime());
 }
 
 /** Text label only — never rely on color alone (BR-01). */
@@ -250,8 +237,7 @@ export function pickPiloAssignment<T extends AssignmentLike & { id: string }>(
   const active = list.filter((a) => !a.archivedAt && a.status !== "done");
   if (active.length === 0) return null;
 
-  const byDueDateDesc = (x: T, y: T) =>
-    new Date(y.dueAt).getTime() - new Date(x.dueAt).getTime();
+  const byDueDateDesc = (x: T, y: T) => new Date(y.dueAt).getTime() - new Date(x.dueAt).getTime();
 
   const overdue = active.filter((a) => isOverdue(a, now));
   const overdueHigh = overdue.filter((a) => a.priority === "high");
@@ -308,7 +294,12 @@ export const QUICK_WIN_PROGRESS_THRESHOLD = 60;
  */
 export function deriveQuickWins<T extends QuickWinLike>(list: T[], limit = 3): T[] {
   return [...list]
-    .filter((a) => !a.archivedAt && a.status !== "done" && a.progress >= QUICK_WIN_PROGRESS_THRESHOLD)
-    .sort((a, b) => b.progress - a.progress || new Date(a.dueAt).getTime() - new Date(b.dueAt).getTime())
+    .filter(
+      (a) => !a.archivedAt && a.status !== "done" && a.progress >= QUICK_WIN_PROGRESS_THRESHOLD,
+    )
+    .sort(
+      (a, b) =>
+        b.progress - a.progress || new Date(a.dueAt).getTime() - new Date(b.dueAt).getTime(),
+    )
     .slice(0, limit);
 }

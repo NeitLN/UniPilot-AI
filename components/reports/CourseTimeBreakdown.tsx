@@ -30,7 +30,14 @@ export function CourseTimeBreakdown({ courses }: { courses: CourseMinutes[] }) {
     ...(otherMinutes > 0
       ? // Not bg-line: the swatch and its own track share that token, so the
         // "Other" dot and bar were invisible against them.
-        [{ key: "__other__", name: `Other (${rest.length})`, minutes: otherMinutes, dot: "bg-ink-3" }]
+        [
+          {
+            key: "__other__",
+            name: `Other (${rest.length})`,
+            minutes: otherMinutes,
+            dot: "bg-ink-3",
+          },
+        ]
       : []),
   ];
 
@@ -50,10 +57,17 @@ export function CourseTimeBreakdown({ courses }: { courses: CourseMinutes[] }) {
                 <span className="min-w-0 truncate">{e.name}</span>
               </p>
               <p className="mt-1.5 text-[13px] font-bold text-foreground tabular-nums">
-                {formatMinutes(e.minutes)} <span className="font-semibold text-ink-3">({pct}%)</span>
+                {formatMinutes(e.minutes)}{" "}
+                <span className="font-semibold text-ink-3">({pct}%)</span>
               </p>
-              <span aria-hidden="true" className="mt-1.5 block h-1.5 w-full overflow-hidden rounded-full bg-line">
-                <span className={`block h-full rounded-full ${e.dot}`} style={{ width: `${pct}%` }} />
+              <span
+                aria-hidden="true"
+                className="mt-1.5 block h-1.5 w-full overflow-hidden rounded-full bg-line"
+              >
+                <span
+                  className={`block h-full rounded-full ${e.dot}`}
+                  style={{ width: `${pct}%` }}
+                />
               </span>
             </div>
           );

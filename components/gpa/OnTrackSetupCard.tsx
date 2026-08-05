@@ -38,8 +38,8 @@ export function OnTrackSetupCard({
         <div className="min-w-0">
           <p className="font-display text-2xl font-bold text-foreground">Are you on track?</p>
           <p className="mt-1 text-[13px] font-semibold text-ink-2">
-            UniPilot can work out the average you need across your remaining credits — it just
-            needs {missing.join(" and ")}.
+            UniPilot can work out the average you need across your remaining credits — it just needs{" "}
+            {missing.join(" and ")}.
           </p>
         </div>
       </div>

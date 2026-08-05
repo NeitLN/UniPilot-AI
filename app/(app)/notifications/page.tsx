@@ -25,12 +25,8 @@ export default async function NotificationsPage() {
   return (
     <div className="flex flex-col gap-3.5">
       <div>
-        <h1 className="font-display text-3xl font-semibold text-foreground">
-          Notifications
-        </h1>
-        <p className="mt-1 text-sm font-semibold text-ink-2">
-          {notifications.length} total
-        </p>
+        <h1 className="font-display text-3xl font-semibold text-foreground">Notifications</h1>
+        <p className="mt-1 text-sm font-semibold text-ink-2">{notifications.length} total</p>
       </div>
 
       <NotificationsList notifications={notifications} unreadCount={unreadCount} />

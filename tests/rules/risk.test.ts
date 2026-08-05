@@ -38,35 +38,27 @@ describe("evidenceImpact", () => {
 
 describe("canCompute", () => {
   it("requires availability > 0", () => {
-    expect(
-      canCompute({ availableHours: 0, pendingCount: 3, focusHistoryDays: 10 }),
-    ).toBe(false);
+    expect(canCompute({ availableHours: 0, pendingCount: 3, focusHistoryDays: 10 })).toBe(false);
   });
 
   it("requires at least one pending assignment", () => {
-    expect(
-      canCompute({ availableHours: 10, pendingCount: 0, focusHistoryDays: 10 }),
-    ).toBe(false);
+    expect(canCompute({ availableHours: 10, pendingCount: 0, focusHistoryDays: 10 })).toBe(false);
   });
 
   it("requires at least 7 days of focus history", () => {
-    expect(
-      canCompute({ availableHours: 10, pendingCount: 3, focusHistoryDays: 6 }),
-    ).toBe(false);
+    expect(canCompute({ availableHours: 10, pendingCount: 3, focusHistoryDays: 6 })).toBe(false);
   });
 
   it("passes when all three hold", () => {
-    expect(
-      canCompute({ availableHours: 10, pendingCount: 3, focusHistoryDays: 7 }),
-    ).toBe(true);
+    expect(canCompute({ availableHours: 10, pendingCount: 3, focusHistoryDays: 7 })).toBe(true);
   });
 });
 
 describe("riskGateReasons", () => {
   it("returns nothing when all three conditions hold", () => {
-    expect(
-      riskGateReasons({ availableHours: 10, pendingCount: 3, focusHistoryDays: 7 }),
-    ).toEqual([]);
+    expect(riskGateReasons({ availableHours: 10, pendingCount: 3, focusHistoryDays: 7 })).toEqual(
+      [],
+    );
   });
 
   it("names each unmet condition, including days remaining", () => {

@@ -34,10 +34,7 @@ export function MobileBottomNav() {
       aria-label="Mobile"
     >
       {NAV_ITEMS.map((item) => {
-        const isActive =
-          item.href === "/"
-            ? pathname === "/"
-            : pathname?.startsWith(item.href);
+        const isActive = item.href === "/" ? pathname === "/" : pathname?.startsWith(item.href);
 
         return (
           <Link

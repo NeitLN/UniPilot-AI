@@ -67,7 +67,10 @@ export function GpaTrendChart({ points, targetGpa }: GpaTrendChartProps) {
           // for contrast on a tangerine-tint background and turns into an
           // unreadable brown standing alone once bg-card flips dark.
           <p className="flex items-center gap-1.5 text-[11.5px] font-semibold text-ink-2">
-            <span aria-hidden="true" className="inline-block h-0 w-5 border-t-2 border-dashed border-violet" />
+            <span
+              aria-hidden="true"
+              className="inline-block h-0 w-5 border-t-2 border-dashed border-violet"
+            />
             Target {targetGpa.toFixed(2)}
           </p>
         )}

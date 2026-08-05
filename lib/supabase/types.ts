@@ -2,13 +2,7 @@
 // Regenerate with `npx supabase gen types typescript --project-id cpuxjofpolmpxhlhnsel --schema public`
 // once the Supabase CLI is linked, and diff against this file for drift.
 
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[];
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type AssignmentStatus = "not_started" | "in_progress" | "done";
 export type AssignmentPriority = "low" | "medium" | "high";

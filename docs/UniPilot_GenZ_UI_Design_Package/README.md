@@ -18,15 +18,15 @@ Read AGENTS.md, UNIPILOT_8_SCREENS_GENZ_UI_BUILD_ROADMAP.md, app/globals.css, do
 
 Repo đánh số khác package vì có thêm hai ảnh (`00-dashboard-reference`, `01-assignments`), nên mọi số **dịch lên một**:
 
-| Trong package | Trong repo |
-| --- | --- |
-| `01-ai-planner.png` | `docs/design-concepts/02-ai-planner.png` |
-| `02-schedule.png` | `docs/design-concepts/03-schedule.png` |
-| `03-courses.png` | `docs/design-concepts/04-courses.png` |
-| `04-focus-timer.png` | `docs/design-concepts/05-focus-timer.png` |
-| `05-gpa-tracker.png` | `docs/design-concepts/06-gpa-tracker.png` |
+| Trong package          | Trong repo                                  |
+| ---------------------- | ------------------------------------------- |
+| `01-ai-planner.png`    | `docs/design-concepts/02-ai-planner.png`    |
+| `02-schedule.png`      | `docs/design-concepts/03-schedule.png`      |
+| `03-courses.png`       | `docs/design-concepts/04-courses.png`       |
+| `04-focus-timer.png`   | `docs/design-concepts/05-focus-timer.png`   |
+| `05-gpa-tracker.png`   | `docs/design-concepts/06-gpa-tracker.png`   |
 | `06-workload-risk.png` | `docs/design-concepts/07-workload-risk.png` |
 | `07-weekly-report.png` | `docs/design-concepts/08-weekly-report.png` |
-| `08-settings.png` | `docs/design-concepts/09-settings.png` |
+| `08-settings.png`      | `docs/design-concepts/09-settings.png`      |
 
 Các số liệu hiển thị trong ảnh concept chỉ là minh họa. Khi build, Claude phải lấy hoặc suy ra mọi dữ liệu từ source, Supabase và rule hiện có.

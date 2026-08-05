@@ -130,7 +130,9 @@ export function AssignmentCard({
             onClick={handleToggleDone}
             disabled={togglingDone}
             aria-pressed={done}
-            aria-label={done ? `Mark "${assignment.title}" as not done` : `Mark "${assignment.title}" as done`}
+            aria-label={
+              done ? `Mark "${assignment.title}" as not done` : `Mark "${assignment.title}" as done`
+            }
             className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 text-lg font-bold motion-safe:transition-colors motion-safe:duration-200 disabled:opacity-60 ${
               done
                 ? "border-mint bg-mint text-white"
@@ -241,9 +243,7 @@ export function AssignmentCard({
             status: assignment.status,
             progress: assignment.progress,
             notes: assignment.notes ?? "",
-            reminderAt: assignment.reminderAt
-              ? toLocalInputValue(assignment.reminderAt)
-              : "",
+            reminderAt: assignment.reminderAt ? toLocalInputValue(assignment.reminderAt) : "",
             updatedAt: assignment.updatedAt,
             score: assignment.score,
           }}

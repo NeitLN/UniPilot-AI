@@ -35,7 +35,9 @@ export function GpaHero({
             pulled "/4.0" into the last digit, reading as "3.39/40". */}
         <p className="mt-1.5 font-display text-[58px] font-bold leading-none tracking-[-0.04em] tabular-nums">
           {hasGrades ? overallGpa.toFixed(2) : "—"}
-          <span className="ml-2 align-baseline text-xl font-bold tracking-normal text-white/70">/4.0</span>
+          <span className="ml-2 align-baseline text-xl font-bold tracking-normal text-white/70">
+            /4.0
+          </span>
         </p>
         <p className="mt-3 text-[12.5px] font-semibold text-white/80">
           {hasGrades

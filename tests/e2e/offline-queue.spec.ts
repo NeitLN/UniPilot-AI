@@ -38,8 +38,14 @@ async function seedMutation(page: Page, userId: string, title: string) {
             createdAt: new Date().toISOString(),
             attempts: 0,
           });
-          tx.oncomplete = () => { d.close(); resolve("seeded"); };
-          tx.onerror = () => { d.close(); resolve("error"); };
+          tx.oncomplete = () => {
+            d.close();
+            resolve("seeded");
+          };
+          tx.onerror = () => {
+            d.close();
+            resolve("error");
+          };
         };
         req.onerror = () => resolve("open-error");
       }),
@@ -71,7 +77,10 @@ async function readAll(page: Page) {
               })),
             );
           };
-          all.onerror = () => { d.close(); resolve([]); };
+          all.onerror = () => {
+            d.close();
+            resolve([]);
+          };
         };
         req.onerror = () => resolve([]);
       }),
@@ -81,12 +90,13 @@ async function readAll(page: Page) {
 
 async function dropDb(page: Page) {
   await page.evaluate(
-    (db) => new Promise((resolve) => {
-      const r = indexedDB.deleteDatabase(db);
-      r.onsuccess = () => resolve(null);
-      r.onerror = () => resolve(null);
-      r.onblocked = () => resolve(null);
-    }),
+    (db) =>
+      new Promise((resolve) => {
+        const r = indexedDB.deleteDatabase(db);
+        r.onsuccess = () => resolve(null);
+        r.onerror = () => resolve(null);
+        r.onblocked = () => resolve(null);
+      }),
     DB,
   );
 }

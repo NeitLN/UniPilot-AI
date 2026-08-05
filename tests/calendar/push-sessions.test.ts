@@ -32,7 +32,9 @@ interface Written {
   gcalEventId: string;
 }
 
-function makeClient(sessions: { id: string; start_at: string; end_at: string; assignment_id: string | null }[]) {
+function makeClient(
+  sessions: { id: string; start_at: string; end_at: string; assignment_id: string | null }[],
+) {
   const written: Written[] = [];
   /** Resolves the pending update promises on demand, so a test can hold them
    * open and observe whether the inserts kept going. */
@@ -75,9 +77,24 @@ function makeClient(sessions: { id: string; start_at: string; end_at: string; as
 }
 
 const SESSIONS = [
-  { id: "s1", start_at: "2026-08-10T09:00:00.000Z", end_at: "2026-08-10T10:00:00.000Z", assignment_id: null },
-  { id: "s2", start_at: "2026-08-11T09:00:00.000Z", end_at: "2026-08-11T10:00:00.000Z", assignment_id: null },
-  { id: "s3", start_at: "2026-08-12T09:00:00.000Z", end_at: "2026-08-12T10:00:00.000Z", assignment_id: null },
+  {
+    id: "s1",
+    start_at: "2026-08-10T09:00:00.000Z",
+    end_at: "2026-08-10T10:00:00.000Z",
+    assignment_id: null,
+  },
+  {
+    id: "s2",
+    start_at: "2026-08-11T09:00:00.000Z",
+    end_at: "2026-08-11T10:00:00.000Z",
+    assignment_id: null,
+  },
+  {
+    id: "s3",
+    start_at: "2026-08-12T09:00:00.000Z",
+    end_at: "2026-08-12T10:00:00.000Z",
+    assignment_id: null,
+  },
 ];
 
 let insertCount = 0;
@@ -136,7 +153,11 @@ describe("pushConfirmedSessionsToCalendar", () => {
   it("reports a Google failure instead of throwing", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn(async () => ({ ok: false, json: async () => ({}), text: async () => "quota exceeded" })),
+      vi.fn(async () => ({
+        ok: false,
+        json: async () => ({}),
+        text: async () => "quota exceeded",
+      })),
     );
     const client = makeClient(SESSIONS);
 

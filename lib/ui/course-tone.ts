@@ -25,12 +25,54 @@ export const COURSE_TONE_CLASSES: Record<
   CourseTone,
   { bg: string; tint: string; text: string; border: string; solid: string; onSolid: string }
 > = {
-  violet: { bg: "bg-violet", tint: "bg-violet-tint", text: "text-violet-text", border: "border-violet", solid: "bg-violet", onSolid: "text-white" },
-  mint: { bg: "bg-mint", tint: "bg-mint-tint", text: "text-mint-text", border: "border-mint", solid: "bg-mint", onSolid: "text-ink" },
-  tangerine: { bg: "bg-tangerine", tint: "bg-tangerine-tint", text: "text-tangerine-text", border: "border-tangerine", solid: "bg-tangerine", onSolid: "text-ink" },
-  coral: { bg: "bg-coral", tint: "bg-coral-tint", text: "text-coral-text", border: "border-coral", solid: "bg-coral", onSolid: "text-ink" },
-  sky: { bg: "bg-sky", tint: "bg-sky-tint", text: "text-sky-text", border: "border-sky", solid: "bg-sky", onSolid: "text-ink" },
-  lime: { bg: "bg-lime", tint: "bg-lime-tint", text: "text-ink", border: "border-lime", solid: "bg-lime", onSolid: "text-ink" },
+  violet: {
+    bg: "bg-violet",
+    tint: "bg-violet-tint",
+    text: "text-violet-text",
+    border: "border-violet",
+    solid: "bg-violet",
+    onSolid: "text-white",
+  },
+  mint: {
+    bg: "bg-mint",
+    tint: "bg-mint-tint",
+    text: "text-mint-text",
+    border: "border-mint",
+    solid: "bg-mint",
+    onSolid: "text-ink",
+  },
+  tangerine: {
+    bg: "bg-tangerine",
+    tint: "bg-tangerine-tint",
+    text: "text-tangerine-text",
+    border: "border-tangerine",
+    solid: "bg-tangerine",
+    onSolid: "text-ink",
+  },
+  coral: {
+    bg: "bg-coral",
+    tint: "bg-coral-tint",
+    text: "text-coral-text",
+    border: "border-coral",
+    solid: "bg-coral",
+    onSolid: "text-ink",
+  },
+  sky: {
+    bg: "bg-sky",
+    tint: "bg-sky-tint",
+    text: "text-sky-text",
+    border: "border-sky",
+    solid: "bg-sky",
+    onSolid: "text-ink",
+  },
+  lime: {
+    bg: "bg-lime",
+    tint: "bg-lime-tint",
+    text: "text-ink",
+    border: "border-lime",
+    solid: "bg-lime",
+    onSolid: "text-ink",
+  },
 };
 
 /** FNV-1a — small, dependency-free, stable across platforms (unlike

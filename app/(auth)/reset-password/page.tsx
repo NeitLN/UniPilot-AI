@@ -21,9 +21,7 @@ export default async function ResetPasswordPage() {
             <h1 className="mt-4 font-display text-lg font-bold text-foreground">
               Set a new password
             </h1>
-            <p className="mt-2 mb-6 text-sm font-semibold text-ink-2">
-              At least 8 characters.
-            </p>
+            <p className="mt-2 mb-6 text-sm font-semibold text-ink-2">At least 8 characters.</p>
             <ResetPasswordForm />
           </>
         ) : (

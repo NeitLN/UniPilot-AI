@@ -1,11 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef } from "react";
-import {
-  createGrade,
-  updateGrade,
-  type GradeFormState,
-} from "@/app/(app)/gpa/actions";
+import { createGrade, updateGrade, type GradeFormState } from "@/app/(app)/gpa/actions";
 import type { CourseOption } from "@/components/assignments/AssignmentForm";
 import { FieldError } from "@/components/ui/FieldError";
 import { Field, inputClass } from "@/components/ui/Field";
@@ -28,12 +24,7 @@ export interface GradeFormProps {
   onCancel: () => void;
 }
 
-export function GradeForm({
-  courses,
-  initialValues,
-  onSaved,
-  onCancel,
-}: GradeFormProps) {
+export function GradeForm({ courses, initialValues, onSaved, onCancel }: GradeFormProps) {
   const isEdit = Boolean(initialValues);
   const action = isEdit ? updateGrade.bind(null, initialValues!.id) : createGrade;
 
@@ -51,9 +42,7 @@ export function GradeForm({
     if (!state.errors) return;
     const firstField = FIELD_ORDER.find((name) => state.errors[name]);
     if (firstField) {
-      formRef.current
-        ?.querySelector<HTMLElement>(`[name="${firstField}"]`)
-        ?.focus();
+      formRef.current?.querySelector<HTMLElement>(`[name="${firstField}"]`)?.focus();
     }
   }, [state.errors]);
 
@@ -93,11 +82,7 @@ export function GradeForm({
           />
         </Field>
 
-        <Field
-          label="Grade point"
-          error={state.errors.gradePoint}
-          className="w-32"
-        >
+        <Field label="Grade point" error={state.errors.gradePoint} className="w-32">
           <input
             name="gradePoint"
             type="number"
@@ -112,11 +97,7 @@ export function GradeForm({
         </Field>
       </div>
 
-      <Field
-        label="Credit hours"
-        error={state.errors.creditHours}
-        className="w-32"
-      >
+      <Field label="Credit hours" error={state.errors.creditHours} className="w-32">
         <input
           name="creditHours"
           type="number"
@@ -150,4 +131,3 @@ export function GradeForm({
     </form>
   );
 }
-

@@ -12,7 +12,13 @@ export interface SuggestionTarget {
  * — overdue+high priority, then overdue, then high-priority upcoming, then
  * soonest deadline. `null` means there's genuinely no actionable assignment
  * right now, so the CTA falls back to a real (not preselected) destination. */
-export function PiloSuggestionCard({ suggestion, target }: { suggestion: Suggestion; target: SuggestionTarget | null }) {
+export function PiloSuggestionCard({
+  suggestion,
+  target,
+}: {
+  suggestion: Suggestion;
+  target: SuggestionTarget | null;
+}) {
   return (
     <div className="rounded-card bg-violet p-5 text-white">
       <div className="flex items-start gap-3.5">

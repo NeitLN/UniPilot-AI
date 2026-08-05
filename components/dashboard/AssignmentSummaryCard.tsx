@@ -4,15 +4,8 @@ import { Pilo } from "@/components/brand/Pilo";
 import { Tag } from "@/components/ui/Tag";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { courseTone, COURSE_TONE_CLASSES } from "@/lib/ui/course-tone";
-import {
-  overdueLabel,
-  priorityLabel,
-  statusLabel,
-} from "@/lib/rules/assignment";
-import type {
-  AssignmentPriority,
-  AssignmentStatus,
-} from "@/lib/supabase/types";
+import { overdueLabel, priorityLabel, statusLabel } from "@/lib/rules/assignment";
+import type { AssignmentPriority, AssignmentStatus } from "@/lib/supabase/types";
 
 export interface SummaryAssignment {
   id: string;
@@ -39,9 +32,7 @@ export function AssignmentSummaryCard({
   return (
     <div className="rounded-card bg-card p-5">
       <div className="flex items-center justify-between">
-        <h2 className="font-display text-lg font-bold text-foreground">
-          {title}
-        </h2>
+        <h2 className="font-display text-lg font-bold text-foreground">{title}</h2>
         <Link
           href="/assignments"
           className="flex min-h-11 items-center text-[12.5px] font-extrabold text-violet-text hover:underline"
@@ -53,9 +44,7 @@ export function AssignmentSummaryCard({
       {items.length === 0 ? (
         <FadeIn className="flex flex-col items-center gap-2 py-6 text-center">
           <Pilo mood="sleepy" size={56} />
-          <p className="text-[12.5px] font-semibold text-ink-2">
-            {emptyMessage}
-          </p>
+          <p className="text-[12.5px] font-semibold text-ink-2">{emptyMessage}</p>
         </FadeIn>
       ) : (
         <ul className="mt-1">
@@ -79,9 +68,7 @@ export function AssignmentSummaryCard({
                   <ClipboardList className="h-[18px] w-[18px]" />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-bold text-foreground">
-                    {a.title}
-                  </p>
+                  <p className="truncate text-sm font-bold text-foreground">{a.title}</p>
                   <p className="mt-0.5 truncate text-[11.5px] font-semibold text-ink-3">
                     {a.courseName ?? "No course"} ·{" "}
                     {new Date(a.dueAt).toLocaleString(undefined, {
@@ -111,9 +98,7 @@ export function AssignmentSummaryCard({
 export function AssignmentSummarySkeleton({ title }: { title: string }) {
   return (
     <div className="animate-pulse rounded-card bg-card p-5">
-      <h2 className="font-display text-lg font-bold text-foreground">
-        {title}
-      </h2>
+      <h2 className="font-display text-lg font-bold text-foreground">{title}</h2>
       <div className="mt-3 flex flex-col gap-2.5">
         {[0, 1, 2].map((i) => (
           <div key={i} className="h-10 rounded-ctl bg-line" />

@@ -22,7 +22,11 @@ export function ConnectionsCard({
 }: ConnectionsCardProps) {
   return (
     <div className="flex items-center gap-3 rounded-ctl bg-line px-4 py-3.5">
-      <IconChip icon={<CalendarDays className="h-[18px] w-[18px]" aria-hidden="true" />} tone="sky" square />
+      <IconChip
+        icon={<CalendarDays className="h-[18px] w-[18px]" aria-hidden="true" />}
+        tone="sky"
+        square
+      />
       <div className="min-w-0 flex-1">
         <p className="text-sm font-bold text-foreground">Google Calendar</p>
         <p className="mt-0.5 text-[12.5px] font-semibold text-ink-3" suppressHydrationWarning>

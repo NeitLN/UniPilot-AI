@@ -20,12 +20,19 @@ export interface ClassBlockLite {
  * excluded (brief §2.2: "Next class" is a real timed class, not an
  * all-day marker). */
 export function nextClass(blocks: ClassBlockLite[], now: Date = new Date()): ClassBlockLite | null {
-  const candidates = blocks.filter((b) => !b.isAllDay && new Date(b.endAt).getTime() > now.getTime());
+  const candidates = blocks.filter(
+    (b) => !b.isAllDay && new Date(b.endAt).getTime() > now.getTime(),
+  );
   if (candidates.length === 0) return null;
-  return [...candidates].sort((a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime())[0];
+  return [...candidates].sort(
+    (a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime(),
+  )[0];
 }
 
-export function isHappeningNow(block: Pick<ClassBlockLite, "startAt" | "endAt">, now: Date = new Date()): boolean {
+export function isHappeningNow(
+  block: Pick<ClassBlockLite, "startAt" | "endAt">,
+  now: Date = new Date(),
+): boolean {
   const start = new Date(block.startAt).getTime();
   const end = new Date(block.endAt).getTime();
   return start <= now.getTime() && now.getTime() < end;
@@ -165,7 +172,9 @@ export interface OverlapLayout<T> {
 export function layoutOverlappingEvents<T extends { startAt: string; endAt: string }>(
   events: T[],
 ): OverlapLayout<T>[] {
-  const sorted = [...events].sort((a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime());
+  const sorted = [...events].sort(
+    (a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime(),
+  );
   const columnEndTimes: number[] = []; // columnEndTimes[i] = end time (ms) of the last event placed in column i
   const placements: { event: T; column: number }[] = [];
 

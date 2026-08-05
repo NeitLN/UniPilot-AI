@@ -16,13 +16,7 @@ const VIEWS: { value: ScheduleView; label: string }[] = [
   { value: "month", label: "Month" },
 ];
 
-export function ViewSwitcher({
-  view,
-  date,
-}: {
-  view: ScheduleView;
-  date: string;
-}) {
+export function ViewSwitcher({ view, date }: { view: ScheduleView; date: string }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();

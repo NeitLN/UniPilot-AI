@@ -93,8 +93,7 @@ const MESSAGES: Record<SuggestionType, string> = {
     "Your planned hours are packed for what's available — move a study session to a lighter day.",
   overdue:
     "Overdue work is driving this up — negotiate a deadline extension or cut scope on one item.",
-  focus:
-    "Your focus habit has slipped this week — try a Pomodoro session to rebuild momentum.",
+  focus: "Your focus habit has slipped this week — try a Pomodoro session to rebuild momentum.",
 };
 
 export type ImpactLevel = "strong" | "moderate" | "protective";

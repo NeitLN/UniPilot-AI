@@ -45,26 +45,20 @@ const ALWAYS_ACCESSIBLE_ROUTES = [
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
 
-  const supabase = createServerClient(
-    supabaseUrl(),
-    supabaseAnonKey(),
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value),
-          );
-          response = NextResponse.next({ request });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options),
-          );
-        },
+  const supabase = createServerClient(supabaseUrl(), supabaseAnonKey(), {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
+      },
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+        response = NextResponse.next({ request });
+        cookiesToSet.forEach(({ name, value, options }) =>
+          response.cookies.set(name, value, options),
+        );
       },
     },
-  );
+  });
 
   // getUser() re-validates the JWT against the Auth server — do not
   // replace with getSession(), which only reads the (possibly stale) cookie.
@@ -73,12 +67,8 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const pathname = request.nextUrl.pathname;
-  const isPublicRoute = PUBLIC_ROUTES.some((route) =>
-    pathname.startsWith(route),
-  );
-  const isAlwaysAccessible = ALWAYS_ACCESSIBLE_ROUTES.some((route) =>
-    pathname.startsWith(route),
-  );
+  const isPublicRoute = PUBLIC_ROUTES.some((route) => pathname.startsWith(route));
+  const isAlwaysAccessible = ALWAYS_ACCESSIBLE_ROUTES.some((route) => pathname.startsWith(route));
 
   if (!user && !isPublicRoute && !isAlwaysAccessible) {
     const url = request.nextUrl.clone();

@@ -3,7 +3,11 @@ import { IconChip, type IconChipTone } from "@/components/ui/IconChip";
 import { evidenceImpact, type RiskResult, type SuggestionType } from "@/lib/rules/risk";
 import type { RiskEvidence } from "@/lib/risk/compute";
 
-const IMPACT_LABEL = { strong: "Strong impact", moderate: "Moderate impact", protective: "Protective impact" };
+const IMPACT_LABEL = {
+  strong: "Strong impact",
+  moderate: "Moderate impact",
+  protective: "Protective impact",
+};
 const IMPACT_CLASSES = {
   strong: "bg-coral-tint text-coral-text",
   moderate: "bg-tangerine-tint text-tangerine-text",
@@ -70,7 +74,9 @@ export function EvidenceCard({ result, evidence }: { result: RiskResult; evidenc
 
   return (
     <div className="rounded-card bg-card p-5">
-      <h2 className="font-display text-lg font-bold text-foreground">What&rsquo;s shaping your score</h2>
+      <h2 className="font-display text-lg font-bold text-foreground">
+        What&rsquo;s shaping your score
+      </h2>
       <ul className="mt-3 flex flex-col gap-2.5">
         {items.map((item) => {
           const impact = evidenceImpact(item.type, result[item.type]);
@@ -83,7 +89,9 @@ export function EvidenceCard({ result, evidence }: { result: RiskResult; evidenc
                 <p className="text-[11.5px] font-semibold text-ink-3">{item.detail}</p>
               </div>
               <div className="flex shrink-0 flex-col items-end gap-1">
-                <span className={`rounded-pill px-2.5 py-1 text-[10.5px] font-extrabold ${IMPACT_CLASSES[impact]}`}>
+                <span
+                  className={`rounded-pill px-2.5 py-1 text-[10.5px] font-extrabold ${IMPACT_CLASSES[impact]}`}
+                >
                   {IMPACT_LABEL[impact]}
                 </span>
                 <span className="flex gap-0.5" aria-hidden="true">

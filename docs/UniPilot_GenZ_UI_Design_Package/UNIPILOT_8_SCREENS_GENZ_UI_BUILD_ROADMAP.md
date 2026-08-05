@@ -33,16 +33,16 @@ Phong cách mục tiêu là **Gen Z productivity**: trẻ, rõ, giàu cá tính,
 
 > **Đã hợp nhất.** Các ảnh này nay nằm ở `docs/design-concepts/` gốc repo và **được đánh số dịch lên một** (repo có thêm `00-dashboard-reference` và `01-assignments`) — xem bảng đối chiếu trong `README.md` cùng thư mục. Tên trong bảng dưới là tên gốc lúc giao package, giữ nguyên để các step phía sau vẫn khớp.
 
-| Màn hình | File concept |
-| --- | --- |
-| AI Planner | `01-ai-planner.png` |
-| Schedule | `02-schedule.png` |
-| Courses | `03-courses.png` |
-| Focus Timer | `04-focus-timer.png` |
-| GPA Tracker | `05-gpa-tracker.png` |
+| Màn hình      | File concept           |
+| ------------- | ---------------------- |
+| AI Planner    | `01-ai-planner.png`    |
+| Schedule      | `02-schedule.png`      |
+| Courses       | `03-courses.png`       |
+| Focus Timer   | `04-focus-timer.png`   |
+| GPA Tracker   | `05-gpa-tracker.png`   |
 | Workload Risk | `06-workload-risk.png` |
 | Weekly Report | `07-weekly-report.png` |
-| Settings | `08-settings.png` |
+| Settings      | `08-settings.png`      |
 
 Concept là mục tiêu về bố cục, phân cấp và cảm xúc; các con số trong ảnh chỉ mang tính minh họa. Khi triển khai, toàn bộ số liệu phải lấy hoặc suy ra từ dữ liệu thật.
 
@@ -1292,14 +1292,14 @@ Done khi Settings không còn một cột hẹp `max-w-md`, nhưng vẫn dễ đ
 
 Kiểm tra cùng một dữ liệu ở nhiều nơi:
 
-| Dữ liệu | Nơi phải khớp |
-| --- | --- |
-| Active assignments | Dashboard, Assignments, Courses, Risk |
-| Focus minutes/cycles | Dashboard, Focus, Risk, Weekly Report |
-| GPA | Dashboard, GPA Tracker, Weekly Report |
-| Plan status | Dashboard, AI Planner, Schedule |
-| Weekly availability | Settings, AI Planner, Risk, Weekly Report |
-| Completed assignment | Assignments, Courses, Weekly Report |
+| Dữ liệu              | Nơi phải khớp                             |
+| -------------------- | ----------------------------------------- |
+| Active assignments   | Dashboard, Assignments, Courses, Risk     |
+| Focus minutes/cycles | Dashboard, Focus, Risk, Weekly Report     |
+| GPA                  | Dashboard, GPA Tracker, Weekly Report     |
+| Plan status          | Dashboard, AI Planner, Schedule           |
+| Weekly availability  | Settings, AI Planner, Risk, Weekly Report |
+| Completed assignment | Assignments, Courses, Weekly Report       |
 
 Không được có nhiều định nghĩa `active`, `week`, `completed` hoặc timezone khác nhau.
 
@@ -1416,4 +1416,3 @@ Không dùng câu `all tests passed` nếu không ghi command và số test th�
 ```text
 Read AGENTS.md, this roadmap, the current source, app/globals.css, and docs/ANIMATION_SYSTEM.md completely before editing. Treat the running source as the product truth and the eight concept images as visual targets only. Start with Phase 0 baseline and audit. Then implement one phase at a time, using real data and preserving existing behavior. Do not hard-code concept numbers, do not create fake controls, do not commit or push unless I ask. After each phase, run the relevant tests, capture real desktop/mobile screenshots, and report exact results before continuing.
 ```
-

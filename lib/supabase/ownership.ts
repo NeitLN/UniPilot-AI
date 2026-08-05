@@ -15,11 +15,7 @@ export async function courseBelongsToCaller(
   supabase: SupabaseClient<Database>,
   courseId: string,
 ): Promise<boolean> {
-  const { data } = await supabase
-    .from("courses")
-    .select("id")
-    .eq("id", courseId)
-    .maybeSingle();
+  const { data } = await supabase.from("courses").select("id").eq("id", courseId).maybeSingle();
   return data !== null;
 }
 

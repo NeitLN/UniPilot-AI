@@ -20,9 +20,7 @@ export function gpa(rows: GradeLike[]): number {
 export function gpaContribution(row: GradeLike, allRows: GradeLike[]): number {
   const totalCredits = allRows.reduce((s, r) => s + r.creditHours, 0);
   if (totalCredits === 0) return 0;
-  return Number(
-    (qualityPoints(row.gradePoint, row.creditHours) / totalCredits).toFixed(2),
-  );
+  return Number((qualityPoints(row.gradePoint, row.creditHours) / totalCredits).toFixed(2));
 }
 
 /**
@@ -115,8 +113,7 @@ export function requiredAverage(
   remainingCredits: number,
   currentQP: number,
 ): RequiredAverageResult {
-  const v =
-    (target * (doneCredits + remainingCredits) - currentQP) / remainingCredits;
+  const v = (target * (doneCredits + remainingCredits) - currentQP) / remainingCredits;
   return { value: Number(v.toFixed(2)), achievable: v <= 4.0 };
 }
 
@@ -153,7 +150,9 @@ export function onTrackProgress(
 ): OnTrackResult {
   const remainingCredits = Math.max(0, programTotalCredits - doneCredits);
   const completedPct =
-    programTotalCredits > 0 ? Math.min(100, Math.round((doneCredits / programTotalCredits) * 100)) : 0;
+    programTotalCredits > 0
+      ? Math.min(100, Math.round((doneCredits / programTotalCredits) * 100))
+      : 0;
 
   if (remainingCredits === 0) {
     const overall = doneCredits > 0 ? currentQP / doneCredits : 0;
@@ -166,7 +165,8 @@ export function onTrackProgress(
   }
 
   const req = requiredAverage(targetGpa, doneCredits, remainingCredits, currentQP);
-  const status: OnTrackStatus = req.value > 4 ? "impossible" : req.value > 3.7 ? "at-risk" : "on-track";
+  const status: OnTrackStatus =
+    req.value > 4 ? "impossible" : req.value > 3.7 ? "at-risk" : "on-track";
   return { status, requiredAverage: req.value, remainingCredits, completedPct };
 }
 
@@ -177,9 +177,7 @@ export interface SemesterGpaPoint {
 }
 
 /** One point per semester (that semester's own GPA, not cumulative), sorted ascending. */
-export function gpaBySemester(
-  rows: (GradeLike & { semester: string })[],
-): SemesterGpaPoint[] {
+export function gpaBySemester(rows: (GradeLike & { semester: string })[]): SemesterGpaPoint[] {
   const bySemester = new Map<string, GradeLike[]>();
   for (const r of rows) {
     const list = bySemester.get(r.semester) ?? [];
@@ -292,13 +290,21 @@ export function projectGpaScenarios(
   officialGrades: GradeLike[],
   inProgressCourses: ScenarioCourse[],
 ): GpaScenarios | null {
-  const officialQP = officialGrades.reduce((s, g) => s + qualityPoints(g.gradePoint, g.creditHours), 0);
+  const officialQP = officialGrades.reduce(
+    (s, g) => s + qualityPoints(g.gradePoint, g.creditHours),
+    0,
+  );
   const officialCredits = officialGrades.reduce((s, g) => s + g.creditHours, 0);
 
-  function courseScenarioPct(assignments: ScoredAssignmentLike[], unscoredAssumptionPct: number | null): number | null {
+  function courseScenarioPct(
+    assignments: ScoredAssignmentLike[],
+    unscoredAssumptionPct: number | null,
+  ): number | null {
     const totalWeight = assignments.reduce((s, a) => s + a.weight, 0);
     if (totalWeight === 0) return null;
-    const scored = assignments.filter((a): a is ScoredAssignmentLike & { score: number } => a.score !== null);
+    const scored = assignments.filter(
+      (a): a is ScoredAssignmentLike & { score: number } => a.score !== null,
+    );
     const scoredWeight = scored.reduce((s, a) => s + a.weight, 0);
     const scoredPoints = scored.reduce((s, a) => s + a.score * a.weight, 0);
     const unscoredWeight = totalWeight - scoredWeight;

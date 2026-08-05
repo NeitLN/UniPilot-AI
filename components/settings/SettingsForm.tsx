@@ -8,7 +8,13 @@ import { Field, inputClass } from "@/components/ui/Field";
 
 const INITIAL_STATE: SettingsFormState = { errors: {} };
 
-export function SettingsForm({ initialFullName, email }: { initialFullName: string; email?: string }) {
+export function SettingsForm({
+  initialFullName,
+  email,
+}: {
+  initialFullName: string;
+  email?: string;
+}) {
   const [state, formAction, pending] = useActionState<SettingsFormState, FormData>(
     updateProfile,
     INITIAL_STATE,

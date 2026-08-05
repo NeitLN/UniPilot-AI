@@ -1,8 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import {
-  NotificationBellClient,
-  type NotificationItem,
-} from "./NotificationBellClient";
+import { NotificationBellClient, type NotificationItem } from "./NotificationBellClient";
 
 export async function NotificationBell() {
   const supabase = await createClient();
@@ -34,7 +31,5 @@ export async function NotificationBell() {
 
   const unreadCount = notifications.filter((n) => !n.readAt).length;
 
-  return (
-    <NotificationBellClient notifications={notifications} unreadCount={unreadCount} />
-  );
+  return <NotificationBellClient notifications={notifications} unreadCount={unreadCount} />;
 }

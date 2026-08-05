@@ -52,7 +52,9 @@ export function AvatarColorPicker({ initialColor }: { initialColor: AvatarColor 
 
   return (
     <div className="flex flex-col items-center gap-3">
-      <span className={`flex h-[92px] w-[92px] shrink-0 items-center justify-center rounded-full ${RING_CLASSES[color]} motion-safe:transition-colors motion-safe:duration-200`}>
+      <span
+        className={`flex h-[92px] w-[92px] shrink-0 items-center justify-center rounded-full ${RING_CLASSES[color]} motion-safe:transition-colors motion-safe:duration-200`}
+      >
         <Image
           src="/mascots/pilo-settings-avatar.png"
           alt=""
@@ -73,7 +75,9 @@ export function AvatarColorPicker({ initialColor }: { initialColor: AvatarColor 
             onClick={() => choose(c)}
             className={`relative flex h-6 w-6 items-center justify-center rounded-full ${SWATCH_CLASSES[c]} disabled:opacity-60`}
           >
-            {color === c && <Check className="h-3.5 w-3.5 text-white" aria-hidden="true" strokeWidth={3} />}
+            {color === c && (
+              <Check className="h-3.5 w-3.5 text-white" aria-hidden="true" strokeWidth={3} />
+            )}
           </button>
         ))}
       </div>

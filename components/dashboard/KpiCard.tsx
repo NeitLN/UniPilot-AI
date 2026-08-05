@@ -61,15 +61,15 @@ export function KpiCard({ tone, label, value, unit, hint, barPct, icon }: KpiCar
     // h-full + a bottom-pinned footer: only the Workload risk card carries a
     // progress bar, so without this it was visibly taller than the other
     // three and their hint lines sat at three different heights.
-    <div className={`flex h-full flex-col rounded-card ${TONE_BG[tone]} ${TONE_TEXT[tone]} px-5 py-[18px] pb-5`}>
+    <div
+      className={`flex h-full flex-col rounded-card ${TONE_BG[tone]} ${TONE_TEXT[tone]} px-5 py-[18px] pb-5`}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-[12.5px] font-bold">{label}</p>
           <p className="mt-1 font-display text-[46px] font-bold leading-none tracking-[-0.045em]">
             {value}
-            {unit && (
-              <span className="ml-1.5 text-[13px] font-bold tracking-normal">{unit}</span>
-            )}
+            {unit && <span className="ml-1.5 text-[13px] font-bold tracking-normal">{unit}</span>}
           </p>
         </div>
         {icon && (

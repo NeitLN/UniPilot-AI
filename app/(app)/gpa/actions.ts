@@ -3,11 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { courseBelongsToCaller } from "@/lib/supabase/ownership";
-import {
-  validateGrade,
-  type GradeInput,
-  type GradeFieldErrors,
-} from "@/lib/rules/gpa";
+import { validateGrade, type GradeInput, type GradeFieldErrors } from "@/lib/rules/gpa";
 
 export interface GradeFormState {
   errors: GradeFieldErrors;
@@ -33,8 +29,7 @@ function toRow(input: GradeInput) {
   };
 }
 
-const DUPLICATE_MESSAGE =
-  "You already have a grade for this course in this semester.";
+const DUPLICATE_MESSAGE = "You already have a grade for this course in this semester.";
 
 export async function createGrade(
   _prevState: GradeFormState,
@@ -54,9 +49,7 @@ export async function createGrade(
     return { errors: { courseId: "Pick a course from the list." } };
   }
 
-  const { error } = await supabase
-    .from("grades")
-    .insert({ user_id: user.id, ...toRow(input) });
+  const { error } = await supabase.from("grades").insert({ user_id: user.id, ...toRow(input) });
 
   if (error) {
     return {
@@ -121,9 +114,7 @@ export async function updateTargetGpa(targetGpa: number) {
   // upsert, not update: a signup that predates the on_auth_user_created
   // trigger (0008_profiles_trigger.sql) could still be missing its row —
   // .update() would silently affect 0 rows in that case.
-  const { error } = await supabase
-    .from("profiles")
-    .upsert({ id: user.id, target_gpa: targetGpa });
+  const { error } = await supabase.from("profiles").upsert({ id: user.id, target_gpa: targetGpa });
   if (error) throw new Error(error.message);
 
   revalidatePath("/gpa");

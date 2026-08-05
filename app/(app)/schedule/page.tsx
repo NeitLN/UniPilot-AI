@@ -1,9 +1,5 @@
 import { Suspense } from "react";
-import {
-  getViewRange,
-  parseDateParam,
-  type ScheduleView,
-} from "@/lib/calendar/view";
+import { getViewRange, parseDateParam, type ScheduleView } from "@/lib/calendar/view";
 import { ScheduleContent, ScheduleContentSkeleton } from "@/components/schedule/ScheduleContent";
 
 const VALID_VIEWS: ScheduleView[] = ["day", "week", "month"];

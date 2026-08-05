@@ -18,7 +18,12 @@ export interface PlannerWeekViewProps {
   editable: boolean;
 }
 
-export function PlannerWeekView({ dayTabs, sessionsByDay, initialDayKey, editable }: PlannerWeekViewProps) {
+export function PlannerWeekView({
+  dayTabs,
+  sessionsByDay,
+  initialDayKey,
+  editable,
+}: PlannerWeekViewProps) {
   const [selectedDay, setSelectedDay] = useState(initialDayKey);
   const daySessions = useMemo(() => sessionsByDay[selectedDay] ?? [], [sessionsByDay, selectedDay]);
   const selectedTab = dayTabs.find((d) => d.dayKey === selectedDay) ?? dayTabs[0];
@@ -50,7 +55,10 @@ export function PlannerWeekView({ dayTabs, sessionsByDay, initialDayKey, editabl
             >
               {tab.shortLabel}
               {hasSessions && !isActive && (
-                <span aria-hidden="true" className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-violet" />
+                <span
+                  aria-hidden="true"
+                  className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-violet"
+                />
               )}
             </button>
           );
@@ -60,7 +68,9 @@ export function PlannerWeekView({ dayTabs, sessionsByDay, initialDayKey, editabl
       <p className="mt-3 text-sm font-bold text-foreground">{selectedTab?.longLabel}</p>
 
       {daySessions.length === 0 ? (
-        <p className="mt-3 text-[12.5px] font-semibold text-ink-3">No sessions planned for this day.</p>
+        <p className="mt-3 text-[12.5px] font-semibold text-ink-3">
+          No sessions planned for this day.
+        </p>
       ) : (
         <div className="relative mt-3 flex flex-col gap-3 pl-4">
           {/* Vertical rail connecting each session's time node — concept's
@@ -93,7 +103,11 @@ function PlanSessionCard({ session, editable }: { session: PlanSessionLite; edit
   function handleSave() {
     setError(null);
     startTransition(async () => {
-      const result = await updateStudySession(session.id, new Date(startAt).toISOString(), new Date(endAt).toISOString());
+      const result = await updateStudySession(
+        session.id,
+        new Date(startAt).toISOString(),
+        new Date(endAt).toISOString(),
+      );
       if (!result.ok) {
         setError(result.error ?? "Couldn't save this change.");
         return;
@@ -171,23 +185,42 @@ function PlanSessionCard({ session, editable }: { session: PlanSessionLite; edit
         aria-hidden="true"
         className={`absolute -left-4 top-3.5 h-2 w-2 -translate-x-1/2 rounded-full ${toneClasses ? toneClasses.solid : "bg-violet"}`}
       />
-      <div className={`flex gap-3 rounded-ctl bg-card border-l-4 p-3 ${toneClasses ? toneClasses.border : "border-violet"}`}>
+      <div
+        className={`flex gap-3 rounded-ctl bg-card border-l-4 p-3 ${toneClasses ? toneClasses.border : "border-violet"}`}
+      >
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
             {/* Local-time formatting is expected to differ between SSR and hydration. */}
-            <span className="font-display text-[13.5px] font-bold text-foreground" suppressHydrationWarning>
-              {new Date(session.startAt).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}
+            <span
+              className="font-display text-[13.5px] font-bold text-foreground"
+              suppressHydrationWarning
+            >
+              {new Date(session.startAt).toLocaleTimeString(undefined, {
+                hour: "numeric",
+                minute: "2-digit",
+              })}
               {" – "}
-              {new Date(session.endAt).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}
+              {new Date(session.endAt).toLocaleTimeString(undefined, {
+                hour: "numeric",
+                minute: "2-digit",
+              })}
             </span>
-            <p className="min-w-0 truncate text-[13px] font-bold text-foreground">{session.assignmentTitle}</p>
-            <Tag tone="neutral" className="ml-auto">Assignment</Tag>
+            <p className="min-w-0 truncate text-[13px] font-bold text-foreground">
+              {session.assignmentTitle}
+            </p>
+            <Tag tone="neutral" className="ml-auto">
+              Assignment
+            </Tag>
           </div>
           <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] font-semibold text-ink-3">
             {session.courseName && <span>{session.courseName}</span>}
             <span>{durationMinutes} min</span>
           </div>
-          {session.reason && <p className="mt-1 text-[11.5px] font-medium italic text-ink-2">AI reason: {session.reason}</p>}
+          {session.reason && (
+            <p className="mt-1 text-[11.5px] font-medium italic text-ink-2">
+              AI reason: {session.reason}
+            </p>
+          )}
           {error && (
             <p role="alert" className="mt-1 text-[11px] font-semibold text-coral-text">
               {error}
@@ -207,7 +240,9 @@ function PlanSessionCard({ session, editable }: { session: PlanSessionLite; edit
       </div>
 
       <Modal open={showActions} onClose={() => setShowActions(false)} title="Session actions">
-        <h2 className="font-display text-lg font-bold text-foreground">{session.assignmentTitle}</h2>
+        <h2 className="font-display text-lg font-bold text-foreground">
+          {session.assignmentTitle}
+        </h2>
         <div className="mt-4 flex flex-col gap-2">
           <button
             type="button"

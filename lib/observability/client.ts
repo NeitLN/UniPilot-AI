@@ -10,10 +10,7 @@
  * boundary's job — showing the user something usable — matters more than
  * the report arriving.
  */
-export function reportClientError(
-  error: Error & { digest?: string },
-  source: string,
-): void {
+export function reportClientError(error: Error & { digest?: string }, source: string): void {
   try {
     const body = JSON.stringify({
       message: error.message,

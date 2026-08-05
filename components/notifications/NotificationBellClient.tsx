@@ -7,10 +7,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { FieldError } from "@/components/ui/FieldError";
 import { popoverVariants } from "@/lib/motion/variants";
 import { isFocusWorkActive } from "@/lib/focus/local-session";
-import {
-  markNotificationRead,
-  markAllNotificationsRead,
-} from "@/app/(app)/notifications/actions";
+import { markNotificationRead, markAllNotificationsRead } from "@/app/(app)/notifications/actions";
 
 export interface NotificationItem {
   id: string;
@@ -76,9 +73,7 @@ export function NotificationBellClient({
         await markNotificationRead(id);
         router.refresh();
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Couldn't mark this as read.",
-        );
+        setError(err instanceof Error ? err.message : "Couldn't mark this as read.");
       }
     });
   }
@@ -89,9 +84,7 @@ export function NotificationBellClient({
         await markAllNotificationsRead();
         router.refresh();
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Couldn't mark all as read.",
-        );
+        setError(err instanceof Error ? err.message : "Couldn't mark all as read.");
       }
     });
   }
@@ -100,11 +93,7 @@ export function NotificationBellClient({
     <div className="relative">
       <button
         type="button"
-        aria-label={
-          unreadCount > 0
-            ? `Notifications, ${unreadCount} unread`
-            : "Notifications"
-        }
+        aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : "Notifications"}
         onClick={() => setOpen((v) => !v)}
         className="relative flex h-11 w-11 items-center justify-center rounded-full bg-line text-foreground hover:bg-line-hover"
       >
@@ -138,9 +127,7 @@ export function NotificationBellClient({
               className="absolute right-0 z-50 mt-2 w-80 max-w-[calc(100vw/var(--app-zoom)-2rem)] rounded-card bg-card p-3 shadow-xl"
             >
               <div className="flex items-center justify-between px-1">
-                <p className="font-display text-sm font-bold text-foreground">
-                  Notifications
-                </p>
+                <p className="font-display text-sm font-bold text-foreground">Notifications</p>
                 {unreadCount > 0 && (
                   <button
                     type="button"
@@ -152,11 +139,7 @@ export function NotificationBellClient({
                 )}
               </div>
 
-              {error && (
-                <FieldError className="mt-1.5 ml-1 text-[11px]">
-                  {error}
-                </FieldError>
-              )}
+              {error && <FieldError className="mt-1.5 ml-1 text-[11px]">{error}</FieldError>}
 
               {notifications.length === 0 ? (
                 <p className="px-1 py-6 text-center text-[12.5px] font-semibold text-ink-3">
@@ -214,13 +197,7 @@ export function NotificationBellClient({
 
 function BellIcon() {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      width="18"
-      height="18"
-      fill="none"
-      aria-hidden="true"
-    >
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true">
       <path
         d="M12 3a6 6 0 0 0-6 6v3.5c0 .7-.27 1.37-.76 1.87L4 15.7c-.9.93-.25 2.5 1.04 2.5h13.92c1.3 0 1.95-1.57 1.04-2.5l-1.24-1.33A2.7 2.7 0 0 1 18 12.5V9a6 6 0 0 0-6-6Z"
         stroke="currentColor"

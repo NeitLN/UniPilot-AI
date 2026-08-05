@@ -36,10 +36,15 @@ export function CourseCard({ course }: { course: CourseCardData }) {
   const tone = COURSE_TONE_CLASSES[course.tone];
 
   return (
-    <div data-testid="course-card" className={`flex flex-col gap-3 rounded-card-sm border-2 ${tone.border}/70 ${tone.tint} p-4`}>
+    <div
+      data-testid="course-card"
+      className={`flex flex-col gap-3 rounded-card-sm border-2 ${tone.border}/70 ${tone.tint} p-4`}
+    >
       <div className="flex items-start justify-between gap-2">
         {course.code ? (
-          <span className={`rounded-pill bg-card px-2.5 py-1 text-[10.5px] font-extrabold ${tone.text}`}>
+          <span
+            className={`rounded-pill bg-card px-2.5 py-1 text-[10.5px] font-extrabold ${tone.text}`}
+          >
             {course.code}
           </span>
         ) : (
@@ -61,12 +66,16 @@ export function CourseCard({ course }: { course: CourseCardData }) {
             navigating by heading. The <h2> further down at line 110 is
             inside the detail dialog, where a new heading context starts, so
             that one is already correct. */}
-        <h2 className="font-display text-base font-bold leading-snug text-foreground line-clamp-2">{course.name}</h2>
+        <h2 className="font-display text-base font-bold leading-snug text-foreground line-clamp-2">
+          {course.name}
+        </h2>
         <p className="mt-1 flex items-center gap-2 text-[11.5px] font-semibold text-ink-3">
           <span>
             {course.credits} credit{course.credits === 1 ? "" : "s"}
           </span>
-          <span className={`inline-flex items-center gap-1 rounded-pill bg-card px-2 py-0.5 text-[10.5px] font-extrabold ${tone.text}`}>
+          <span
+            className={`inline-flex items-center gap-1 rounded-pill bg-card px-2 py-0.5 text-[10.5px] font-extrabold ${tone.text}`}
+          >
             {course.usage.assignmentCount} assignment{course.usage.assignmentCount === 1 ? "" : "s"}
           </span>
         </p>

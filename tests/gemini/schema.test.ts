@@ -5,7 +5,12 @@ describe("parseGeminiPlanResponse", () => {
   it("parses clean JSON", () => {
     const raw = JSON.stringify({
       sessions: [
-        { assignmentId: "a1", startAt: "2026-08-01T09:00:00.000Z", endAt: "2026-08-01T10:00:00.000Z", reason: "High priority" },
+        {
+          assignmentId: "a1",
+          startAt: "2026-08-01T09:00:00.000Z",
+          endAt: "2026-08-01T10:00:00.000Z",
+          reason: "High priority",
+        },
       ],
     });
     const result = parseGeminiPlanResponse(raw);
@@ -34,7 +39,11 @@ describe("parseGeminiPlanResponse", () => {
   it("silently drops malformed entries instead of failing the whole batch", () => {
     const raw = JSON.stringify({
       sessions: [
-        { assignmentId: "a1", startAt: "2026-08-01T09:00:00.000Z", endAt: "2026-08-01T10:00:00.000Z" },
+        {
+          assignmentId: "a1",
+          startAt: "2026-08-01T09:00:00.000Z",
+          endAt: "2026-08-01T10:00:00.000Z",
+        },
         { assignmentId: "a2" }, // missing startAt/endAt
         "garbage",
       ],
@@ -46,7 +55,13 @@ describe("parseGeminiPlanResponse", () => {
 
   it("defaults a missing reason to an empty string", () => {
     const raw = JSON.stringify({
-      sessions: [{ assignmentId: "a1", startAt: "2026-08-01T09:00:00.000Z", endAt: "2026-08-01T10:00:00.000Z" }],
+      sessions: [
+        {
+          assignmentId: "a1",
+          startAt: "2026-08-01T09:00:00.000Z",
+          endAt: "2026-08-01T10:00:00.000Z",
+        },
+      ],
     });
     expect(parseGeminiPlanResponse(raw)?.sessions[0].reason).toBe("");
   });

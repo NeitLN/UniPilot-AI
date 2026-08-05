@@ -33,25 +33,22 @@ export async function generatePlanJson(prompt: string): Promise<string> {
   const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
   try {
-    const res = await fetch(
-      `${ENDPOINT_BASE}/${model}:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            response_mime_type: "application/json",
-            // gemini-2.5-flash defaults to thinking on, which took ~18s on a
-            // realistic prompt in testing — disabled since this task is a
-            // well-specified structured-output job, not one needing deep
-            // reasoning (the server re-validates every session anyway).
-            thinkingConfig: { thinkingBudget: 0 },
-          },
-        }),
-        signal: controller.signal,
-      },
-    );
+    const res = await fetch(`${ENDPOINT_BASE}/${model}:generateContent?key=${apiKey}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          response_mime_type: "application/json",
+          // gemini-2.5-flash defaults to thinking on, which took ~18s on a
+          // realistic prompt in testing — disabled since this task is a
+          // well-specified structured-output job, not one needing deep
+          // reasoning (the server re-validates every session anyway).
+          thinkingConfig: { thinkingBudget: 0 },
+        },
+      }),
+      signal: controller.signal,
+    });
 
     if (!res.ok) {
       throw new Error(`Gemini API error (${res.status}): ${await res.text()}`);

@@ -40,7 +40,10 @@ function formatWhen(iso: string, now: Date): string {
   const d = new Date(iso);
   const time = d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const daysAgo = Math.floor((startOfToday.getTime() - new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()) / 86_400_000);
+  const daysAgo = Math.floor(
+    (startOfToday.getTime() - new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()) /
+      86_400_000,
+  );
   if (daysAgo === 0) return `Today, ${time}`;
   if (daysAgo === 1) return `Yesterday, ${time}`;
   return `${d.toLocaleDateString(undefined, { month: "short", day: "numeric" })}, ${time}`;
@@ -133,7 +136,6 @@ export function FocusHistoryCard({ entries }: { entries: FocusHistoryEntry[] }) 
             );
           })}
         </div>
-
       </div>
 
       <p className="sr-only">

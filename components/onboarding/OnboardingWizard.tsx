@@ -7,10 +7,7 @@ import {
   type StudyPreferencesFormState,
 } from "@/app/(app)/settings/actions";
 import { createCourse, type CourseFormState } from "@/app/(app)/schedule/actions";
-import {
-  createAssignment,
-  type AssignmentFormState,
-} from "@/app/(app)/assignments/actions";
+import { createAssignment, type AssignmentFormState } from "@/app/(app)/assignments/actions";
 import { Pilo } from "@/components/brand/Pilo";
 import { FieldError } from "@/components/ui/FieldError";
 import { inputClass } from "@/components/ui/Field";
@@ -29,10 +26,10 @@ export function OnboardingWizard() {
     StudyPreferencesFormState,
     FormData
   >(updateStudyPreferences, SETTINGS_INITIAL);
-  const [courseState, courseAction, coursePending] = useActionState<
-    CourseFormState,
-    FormData
-  >(createCourse, COURSE_INITIAL);
+  const [courseState, courseAction, coursePending] = useActionState<CourseFormState, FormData>(
+    createCourse,
+    COURSE_INITIAL,
+  );
   const [assignmentState, assignmentAction, assignmentPending] = useActionState<
     AssignmentFormState,
     FormData
@@ -79,8 +76,8 @@ export function OnboardingWizard() {
                 How much time can you study each week?
               </h2>
               <p className="text-[12.5px] font-semibold text-ink-3">
-                This gates the AI Planner and the Workload Risk score — you can
-                change it anytime in Settings.
+                This gates the AI Planner and the Workload Risk score — you can change it anytime in
+                Settings.
               </p>
             </div>
             <label className="flex flex-col gap-1 text-xs font-bold text-ink-2">
@@ -109,9 +106,7 @@ export function OnboardingWizard() {
             {[1, 2, 3, 4, 5].map((day) => (
               <input key={day} type="hidden" name="preferredStudyDays" value={day} />
             ))}
-            {settingsState.formError && (
-              <FieldError>{settingsState.formError}</FieldError>
-            )}
+            {settingsState.formError && <FieldError>{settingsState.formError}</FieldError>}
             <button
               type="submit"
               disabled={settingsPending}
@@ -191,9 +186,7 @@ export function OnboardingWizard() {
                 </FieldError>
               )}
             </label>
-            {courseState.formError && (
-              <FieldError>{courseState.formError}</FieldError>
-            )}
+            {courseState.formError && <FieldError>{courseState.formError}</FieldError>}
             <button
               type="submit"
               disabled={coursePending}
@@ -257,9 +250,7 @@ export function OnboardingWizard() {
                 />
               </label>
             </div>
-            {assignmentState.formError && (
-              <FieldError>{assignmentState.formError}</FieldError>
-            )}
+            {assignmentState.formError && <FieldError>{assignmentState.formError}</FieldError>}
             <button
               type="submit"
               disabled={assignmentPending}
@@ -273,10 +264,12 @@ export function OnboardingWizard() {
         {step === 4 && (
           <div className="flex flex-col items-center gap-3 py-2 text-center">
             <Pilo mood="happy" size={72} />
-            <h2 className="font-display text-lg font-bold text-foreground">You&rsquo;re all set!</h2>
+            <h2 className="font-display text-lg font-bold text-foreground">
+              You&rsquo;re all set!
+            </h2>
             <p className="text-[12.5px] font-semibold text-ink-3">
-              Try a 25-minute focus session on your new assignment, or generate
-              an AI study plan whenever you&rsquo;re ready.
+              Try a 25-minute focus session on your new assignment, or generate an AI study plan
+              whenever you&rsquo;re ready.
             </p>
             <button
               type="button"
@@ -291,4 +284,3 @@ export function OnboardingWizard() {
     </div>
   );
 }
-

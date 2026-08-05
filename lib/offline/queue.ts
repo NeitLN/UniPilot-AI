@@ -6,12 +6,7 @@ import {
   getAssignmentUpdatedAt,
 } from "@/app/(app)/assignments/actions";
 import { logFocusSession, type LogFocusSessionInput } from "@/app/(app)/focus/actions";
-import {
-  deleteMutation,
-  getQueuedMutations,
-  recordAttempt,
-  type QueuedMutation,
-} from "./idb";
+import { deleteMutation, getQueuedMutations, recordAttempt, type QueuedMutation } from "./idb";
 
 export interface FlushResult {
   synced: number;

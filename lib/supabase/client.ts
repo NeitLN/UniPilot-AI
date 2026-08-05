@@ -7,8 +7,5 @@ import { supabaseUrl, supabaseAnonKey } from "./env";
  * key — never import this from server-only code that needs elevated access.
  */
 export function createClient() {
-  return createBrowserClient<Database>(
-    supabaseUrl(),
-    supabaseAnonKey(),
-  );
+  return createBrowserClient<Database>(supabaseUrl(), supabaseAnonKey());
 }

@@ -13,12 +13,12 @@ Mỗi phase là một nhánh Git riêng, merge vào `main` khi xong toàn bộ c
 
 Mỗi phase có 4 phần:
 
-| Phần | Ý nghĩa |
-|---|---|
-| **Mục tiêu** | Sau phase này app làm được gì |
-| **Bao phủ** | FR / BR / NFR / TC nào trong SRS được hoàn thành |
-| **Việc cần làm** | Checklist thực thi |
-| **Điều kiện hoàn thành** | Test thủ công phải pass mới được merge |
+| Phần                     | Ý nghĩa                                          |
+| ------------------------ | ------------------------------------------------ |
+| **Mục tiêu**             | Sau phase này app làm được gì                    |
+| **Bao phủ**              | FR / BR / NFR / TC nào trong SRS được hoàn thành |
+| **Việc cần làm**         | Checklist thực thi                               |
+| **Điều kiện hoàn thành** | Test thủ công phải pass mới được merge           |
 
 Quy ước commit: `feat(assignments): add create form` · `fix(gpa): round to 2 decimals` · `chore(db): add focus_sessions table`
 
@@ -139,29 +139,33 @@ borderRadius: { card: '30px', ctl: '16px', pill: '20px' }
 
 **Quy tắc màu theo ngữ nghĩa** (không dùng màu tuỳ hứng):
 
-| Màu | Dùng cho |
-|---|---|
-| Violet | Hành động chính, AI planner, study block |
-| Lime | Nhấn duy nhất — focus, CTA xác nhận, mũ Pilo |
-| Coral | Overdue, GPA tụt, cảnh báo đỏ |
-| Tangerine | High priority, workload-risk |
-| Mint | Trạng thái tốt, sync thành công |
-| Sky | Class block từ Google Calendar |
+| Màu       | Dùng cho                                     |
+| --------- | -------------------------------------------- |
+| Violet    | Hành động chính, AI planner, study block     |
+| Lime      | Nhấn duy nhất — focus, CTA xác nhận, mũ Pilo |
+| Coral     | Overdue, GPA tụt, cảnh báo đỏ                |
+| Tangerine | High priority, workload-risk                 |
+| Mint      | Trạng thái tốt, sync thành công              |
+| Sky       | Class block từ Google Calendar               |
 
 **Nền đặt Pilo phải là trắng.** Trên nền lime mũ bị chìm, trên nền violet thân bị chìm.
 
 ---
 
 ## PHASE 0 — Khởi tạo dự án
+
 **Ước lượng: 1 ngày**
 
 ### Mục tiêu
+
 Repo chạy được `npm run dev`, có font, có màu, có Pilo, có layout rỗng của 7 route.
 
 ### Bao phủ
+
 TC-01
 
 ### Việc cần làm
+
 - [ ] `npx create-next-app@latest unipilot-ai --ts --tailwind --app --eslint`
 - [ ] `npm i @fontsource/fredoka @fontsource/nunito` → import trong `app/layout.tsx`
 - [ ] Dán bảng token ở mục 3 vào `tailwind.config.ts`
@@ -175,17 +179,21 @@ TC-01
 - [ ] Prettier + ESLint + `npm run lint` sạch
 
 ### Điều kiện hoàn thành
+
 Bấm 7 mục sidebar chuyển route đúng, mục đang mở có nền lime chữ ink. Pilo hiện ở logo và không vỡ nét ở 20px.
 
 ---
 
 ## PHASE 1 — Database, Auth, RLS
+
 **Ước lượng: 1.5 ngày**
 
 ### Mục tiêu
+
 Đăng nhập được, mỗi bảng có RLS, sinh type TypeScript từ schema.
 
 ### Bao phủ
+
 TC-04, NFR-07, NFR-08, NFR-06
 
 ### Schema
@@ -318,6 +326,7 @@ create table notifications (
 ```
 
 ### Việc cần làm
+
 - [ ] Tạo project Supabase, chạy migration trên
 - [ ] Bật RLS cho **tất cả** bảng, policy: `using (user_id = auth.uid())` (bảng `profiles` dùng `id = auth.uid()`, bảng `study_sessions` join qua `study_plans`)
 - [ ] Index: `assignments(user_id, due_at)`, `focus_sessions(user_id, started_at)`, `class_blocks(user_id, start_at)`
@@ -327,6 +336,7 @@ create table notifications (
 - [ ] Seed script: 4 course, 12 assignment (3 overdue), 4 grade, 14 focus session — để dev không phải nhập tay
 
 ### Biến môi trường
+
 ```
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
@@ -340,30 +350,36 @@ VAPID_PRIVATE_KEY=
 ```
 
 ### Điều kiện hoàn thành
+
 Đăng xuất → vào `/` bị đẩy về `/login`. Tạo user thứ hai, user này **không** đọc được dữ liệu của user thứ nhất (test bằng Supabase SQL editor với `set role`).
 
 ---
 
 ## PHASE 2 — Assignment Management
+
 **Ước lượng: 2.5 ngày** · Đây là phase quan trọng nhất, mọi module sau đều đọc dữ liệu từ đây.
 
 ### Mục tiêu
+
 CRUD đầy đủ + validate theo BR-01.
 
 ### Bao phủ
+
 FR-01, FR-02, FR-17, FR-18, FR-19 · BR-01 · UC-01 · US-01, US-02 · UA-1
 
 ### `lib/rules/assignment.ts`
+
 ```ts
 // BR-01
-export const REQUIRED = ['title','courseId','dueAt','weight','priority'] as const;
+export const REQUIRED = ["title", "courseId", "dueAt", "weight", "priority"] as const;
 export function validateAssignment(input: AssignmentInput): FieldErrors {}
 export function isOverdue(a: Assignment, now = new Date()): boolean {}
 export function sortByDueDate(list: Assignment[]): Assignment[] {}
-export function statusLabel(a: Assignment): string {}  // trả TEXT, không trả màu
+export function statusLabel(a: Assignment): string {} // trả TEXT, không trả màu
 ```
 
 ### Việc cần làm
+
 - [ ] Form tạo/sửa: title, course, due date, weight %, priority, status, progress slider 0–100, notes, reminder time
 - [ ] Validate field-level, hiện lỗi ngay dưới ô nhập (không dùng alert)
 - [ ] Danh sách sắp xếp theo `due_at` tăng dần, mặc định ẩn item đã archive
@@ -374,20 +390,25 @@ export function statusLabel(a: Assignment): string {}  // trả TEXT, không tr�
 - [ ] Unit test cho `lib/rules/assignment.ts`
 
 ### Điều kiện hoàn thành
+
 Lưu thiếu bất kỳ field bắt buộc nào → chặn, báo đúng field. Đặt progress 101 → chặn. Archive mà không bấm xác nhận → không có gì thay đổi. Item quá hạn hiển thị chữ `Overdue`, không chỉ đổi màu.
 
 ---
 
 ## PHASE 3 — Dashboard shell
+
 **Ước lượng: 1.5 ngày**
 
 ### Mục tiêu
+
 Dựng đúng màn hình trong `UniPilot_AI_Dashboard_v3.png`, phần nào chưa có dữ liệu thì để skeleton.
 
 ### Bao phủ
+
 NFR-01, NFR-03, NFR-04
 
 ### Việc cần làm
+
 - [ ] `KpiCard` — 4 thẻ màu đặc: violet GPA, coral tasks, mint focus, tangerine risk
 - [ ] `DueSoonList` — 5 assignment gần hạn nhất (nối vào Phase 2)
 - [ ] `TodayList`, `RiskHud`, `FocusCard`, `PlanCard`, `GpaTrendCard` — dựng khung, dữ liệu giả có gắn `TODO: phase N`
@@ -397,20 +418,25 @@ NFR-01, NFR-03, NFR-04
 - [ ] Empty state dùng Pilo mood `sleepy` + một câu mời hành động
 
 ### Điều kiện hoàn thành
+
 Mở DevTools ở 375×667, không có scroll ngang, mọi nút chạm được bằng ngón cái. Lighthouse Performance ≥ 85 trên bản build production.
 
 ---
 
 ## PHASE 4 — Schedule + Google Calendar
+
 **Ước lượng: 2 ngày**
 
 ### Mục tiêu
+
 Đồng bộ lịch học từ Google Calendar, xem Day/Week/Month, hiện assignment gắn với từng buổi.
 
 ### Bao phủ
+
 FR-07, FR-08 · BR-03 · TC-02 · UC-03 · US-05 · UA-3
 
 ### Việc cần làm
+
 - [ ] OAuth 2.0 flow, scope `calendar.readonly`, lưu refresh token phía server
 - [ ] `/api/calendar/sync` — pull event, upsert vào `class_blocks` theo `gcal_event_id`
 - [ ] Ba view Day / Week / Month, giữ nguyên ngày đang chọn khi đổi view
@@ -421,31 +447,37 @@ FR-07, FR-08 · BR-03 · TC-02 · UC-03 · US-05 · UA-3
 - [ ] Sync lỗi → giữ nguyên cache cũ + banner cảnh báo, tuyệt đối không xoá dữ liệu
 
 ### Điều kiện hoàn thành
+
 Ngắt mạng rồi mở Schedule: vẫn thấy lịch lần sync gần nhất, kèm dòng "Last synced …" và cảnh báo. Không có màn hình trắng.
 
 ---
 
 ## PHASE 5 — Focus Session (Pomodoro)
+
 **Ước lượng: 1.5 ngày**
 
 ### Mục tiêu
+
 Timer 25 phút gắn với một assignment cụ thể, ghi log, tính streak.
 
 ### Bao phủ
+
 FR-09, FR-10, FR-11 · BR-04 · UC-04 · US-06 · UA-4
 
 ### `lib/rules/focus.ts`
+
 ```ts
 export const POMODORO_SECONDS = 25 * 60;
 // BR-04: chỉ 'completed' mới tính streak
-export function classify(elapsed: number): 'completed' | 'partial' {
-  return elapsed >= POMODORO_SECONDS ? 'completed' : 'partial';
+export function classify(elapsed: number): "completed" | "partial" {
+  return elapsed >= POMODORO_SECONDS ? "completed" : "partial";
 }
 export function streakDays(sessions: FocusSession[], today: Date): number {}
 export function weeklyStats(sessions: FocusSession[]): WeeklyFocusStats {}
 ```
 
 ### Việc cần làm
+
 - [ ] Không chọn assignment → nút Start bị vô hiệu kèm lý do hiển thị (BR-04)
 - [ ] Vòng tròn đếm ngược SVG, `stroke-dashoffset` chạy theo thời gian còn lại
 - [ ] Lưu `started_at` xuống localStorage ngay khi bấm Start → reload trang không mất phiên
@@ -455,20 +487,25 @@ export function weeklyStats(sessions: FocusSession[]): WeeklyFocusStats {}
 - [ ] Unit test: dừng ở 24:59 phải ra `partial` và **không** tăng streak
 
 ### Điều kiện hoàn thành
+
 Chạy 1 phiên đủ 25 phút (tạm hạ hằng số xuống 10s để test) → streak +1. Dừng sớm → streak giữ nguyên, phút vẫn được ghi.
 
 ---
 
 ## PHASE 6 — GPA Tracker
+
 **Ước lượng: 1.5 ngày**
 
 ### Mục tiêu
+
 Nhập điểm, tính GPA kỳ và tích luỹ, xem breakdown và dự báo.
 
 ### Bao phủ
+
 FR-12, FR-13, FR-14 · BR-05 · UC-05 · US-07, US-08 · UA-5
 
 ### `lib/rules/gpa.ts`
+
 ```ts
 // BR-05
 export const qualityPoints = (gp: number, credits: number) => gp * credits;
@@ -476,12 +513,15 @@ export const qualityPoints = (gp: number, credits: number) => gp * credits;
 export function gpa(rows: Grade[]): number {
   const qp = rows.reduce((s, r) => s + r.gradePoint * r.creditHours, 0);
   const cr = rows.reduce((s, r) => s + r.creditHours, 0);
-  return cr === 0 ? 0 : Number((qp / cr).toFixed(2));   // luôn 2 chữ số
+  return cr === 0 ? 0 : Number((qp / cr).toFixed(2)); // luôn 2 chữ số
 }
 
 // Required = [target × (done + remaining) − currentQP] ÷ remaining
 export function requiredAverage(
-  target: number, doneCredits: number, remainingCredits: number, currentQP: number
+  target: number,
+  doneCredits: number,
+  remainingCredits: number,
+  currentQP: number,
 ): { value: number; achievable: boolean } {
   const v = (target * (doneCredits + remainingCredits) - currentQP) / remainingCredits;
   return { value: Number(v.toFixed(2)), achievable: v <= 4.0 };
@@ -489,6 +529,7 @@ export function requiredAverage(
 ```
 
 ### Việc cần làm
+
 - [ ] Form nhập: course, semester, grade point (0.0–4.0), credit hours (> 0) — validate biên
 - [ ] Bảng breakdown: grade point, credits, quality points, phần đóng góp vào GPA
 - [ ] Biểu đồ trend theo từng kỳ (231 → 232 → 241 → 242)
@@ -498,40 +539,48 @@ export function requiredAverage(
 - [ ] Unit test đúng theo ví dụ trong BR-05
 
 ### Điều kiện hoàn thành
+
 Nhập `grade_point = 4.5` → bị chặn. GPA luôn hiển thị đúng 2 chữ số thập phân, kể cả `3.50` (không rút thành `3.5`).
 
 ---
 
 ## PHASE 7 — AI Study Planner (Gemini)
+
 **Ước lượng: 3 ngày** · Phase khó nhất, làm sau khi Assignment + Schedule đã ổn định.
 
 ### Mục tiêu
+
 Sinh bản nháp kế hoạch học theo ngày, cho sửa, chỉ kích hoạt khi người dùng bấm Confirm.
 
 ### Bao phủ
+
 FR-04, FR-05, FR-06 · BR-02 · TC-03 · UC-02 · US-03, US-04 · UA-2
 
 ### Điều kiện đầu vào (BR-02 — chặn ở cả client và server)
+
 1. `weekly_availability_hours > 0`
 2. Có ít nhất 1 assignment chưa hoàn thành
-Thiếu một trong hai → không gọi API, hiện hướng dẫn cụ thể phải nhập gì.
+   Thiếu một trong hai → không gọi API, hiện hướng dẫn cụ thể phải nhập gì.
 
 ### `/api/plan/generate`
+
 - [ ] Chỉ nhận POST, kiểm tra session Supabase trước tiên
 - [ ] Gom input: pending assignments (title, due, weight, priority, progress), class blocks tuần đó, availability, target GPA
 - [ ] Prompt yêu cầu Gemini trả **JSON thuần**, không markdown, không lời dẫn
 - [ ] Schema trả về: `{ sessions: [{ assignmentId, startAt, endAt, reason }] }`
-- [ ] Parse an toàn: strip ```` ```json ````, `JSON.parse` trong try/catch
+- [ ] Parse an toàn: strip ` ```json `, `JSON.parse` trong try/catch
 - [ ] Timeout 20s → trả lỗi có nút **Retry** (TC-03)
 - [ ] Lưu `input_snapshot` để sau này giải thích được vì sao AI xếp như vậy
 
 ### Validate phía server sau khi nhận kết quả (không tin AI)
+
 - [ ] Không session nào chồng lên class block
 - [ ] Tổng giờ mỗi ngày ≤ availability ngày đó
 - [ ] Không xếp study session sau hạn nộp của assignment đó
 - [ ] Session nào vi phạm → loại bỏ và đánh dấu để UI hiện lý do
 
 ### UI
+
 - [ ] Card `Pilo's plan` với badge **Draft**, Pilo mood `happy`
 - [ ] Xem theo ngày, sửa/xoá/kéo từng session, mỗi lần sửa validate lại
 - [ ] Nút **Confirm plan** → `status = 'active'`, sinh reminder cho từng session (FR-06)
@@ -539,20 +588,25 @@ Thiếu một trong hai → không gọi API, hiện hướng dẫn cụ thể p
 - [ ] **Nháp không bao giờ tự động active** — BR-02
 
 ### Điều kiện hoàn thành
+
 Đặt availability = 0 → nút Generate bị chặn kèm lý do. Sinh nháp rồi F5 → kế hoạch cũ vẫn active, nháp vẫn là nháp. Ngắt mạng giữa lúc generate → hiện Retry, không crash.
 
 ---
 
 ## PHASE 8 — Workload-Risk Warning
+
 **Ước lượng: 1.5 ngày**
 
 ### Mục tiêu
+
 Tính điểm rủi ro hằng ngày, giải thích thành phần, gợi ý điều chỉnh.
 
 ### Bao phủ
+
 FR-15, FR-16 · BR-06 · UC-06 · US-09 · UA-6
 
 ### `lib/rules/risk.ts`
+
 ```ts
 // BR-06 — chỉ tính khi đủ 3 điều kiện
 export function canCompute(i: RiskInput): boolean {
@@ -561,13 +615,13 @@ export function canCompute(i: RiskInput): boolean {
 
 export function computeRisk(i: RiskInput) {
   const workload = Math.min(100, (i.plannedHours / i.availableHours) * 100);
-  const overdue  = Math.min(100, i.overdueCount * 25);
-  const focus    = Math.max(0, 100 - i.completedCycles7d * 10);
-  const score    = Math.round(0.40 * workload + 0.35 * overdue + 0.25 * focus);
+  const overdue = Math.min(100, i.overdueCount * 25);
+  const focus = Math.max(0, 100 - i.completedCycles7d * 10);
+  const score = Math.round(0.4 * workload + 0.35 * overdue + 0.25 * focus);
   return {
     workload: Math.round(workload),
-    overdue:  Math.round(overdue),
-    focus:    Math.round(focus),
+    overdue: Math.round(overdue),
+    focus: Math.round(focus),
     score,
     warn: score >= 60,
   };
@@ -575,6 +629,7 @@ export function computeRisk(i: RiskInput) {
 ```
 
 ### Việc cần làm
+
 - [ ] `/api/risk/compute` chạy mỗi ngày (Vercel Cron hoặc gọi khi mở dashboard, chống trùng bằng unique `score_date`)
 - [ ] Score ≥ 60 → tạo 1 warning `open`, thử gửi push; push fail vẫn **giữ nguyên warning in-app** (FR-16)
 - [ ] HUD trên dashboard: 3 thanh 5 ô cho 3 factor, hiện đúng trọng số `×0.40 / ×0.35 / ×0.25`
@@ -585,20 +640,25 @@ export function computeRisk(i: RiskInput) {
 - [ ] Unit test: 18h planned / 14h available, 3 overdue, 6 cycles → workload 100 ⇒ kiểm lại số của bạn, đừng hardcode theo mockup
 
 ### Điều kiện hoàn thành
+
 Thiếu 7 ngày lịch sử focus → không tính điểm, hiện "chưa đủ dữ liệu" chứ không trả 0. Tắt quyền notification → warning vẫn nằm trong app.
 
 ---
 
 ## PHASE 9 — Notifications
+
 **Ước lượng: 1 ngày**
 
 ### Mục tiêu
+
 Nhắc deadline theo thời điểm người dùng đặt, có fallback in-app.
 
 ### Bao phủ
+
 FR-03 · TC-05
 
 ### Việc cần làm
+
 - [ ] Đăng ký service worker `public/sw.js`
 - [ ] Web Push + VAPID key, `/api/push/send`
 - [ ] Xin quyền notification **đúng lúc** — sau khi user lưu assignment đầu tiên có reminder, không xin ngay lúc mở app lần đầu
@@ -607,20 +667,25 @@ FR-03 · TC-05
 - [ ] Đánh dấu đã đọc, badge đỏ trên chuông ở topbar
 
 ### Điều kiện hoàn thành
+
 Từ chối quyền notification → app vẫn chạy bình thường, mọi nhắc nhở vẫn thấy trong danh sách in-app.
 
 ---
 
 ## PHASE 10 — Offline mode
+
 **Ước lượng: 1.5 ngày**
 
 ### Mục tiêu
+
 Đọc được dữ liệu đã cache khi mất mạng, thao tác offline được xếp hàng và đồng bộ lại khi có mạng.
 
 ### Bao phủ
+
 NFR-05, NFR-06 · TC-04
 
 ### Việc cần làm
+
 - [ ] `lib/offline/idb.ts` — cache assignments, class blocks, focus sessions
 - [ ] `lib/offline/queue.ts` — hàng đợi mutation: create/update assignment, focus log
 - [ ] Nghe `online` / `offline`, tự flush hàng đợi khi có mạng
@@ -629,17 +694,21 @@ NFR-05, NFR-06 · TC-04
 - [ ] Chặn AI Planner và Calendar Sync khi offline, nói rõ lý do
 
 ### Điều kiện hoàn thành
+
 Bật airplane mode → mở app → vẫn thấy assignment và lịch. Sửa progress một task, bật mạng lại → thay đổi lên server, không mất dữ liệu.
 
 ---
 
 ## PHASE 11 — Hoàn thiện phi chức năng
+
 **Ước lượng: 2 ngày**
 
 ### Bao phủ
+
 NFR-01 → NFR-10
 
 ### Việc cần làm
+
 - [ ] **NFR-01** Dashboard usable < ngưỡng đã cam kết — đo bằng Lighthouse, tối ưu bằng RSC + streaming + cache IndexedDB đọc trước
 - [ ] **NFR-02** Đo thời gian generate plan 20 lần, ghi lại, ít nhất 18 lần đạt
 - [ ] **NFR-03** Test thật ở 375×667
@@ -652,6 +721,7 @@ NFR-01 → NFR-10
 ---
 
 ## PHASE 12 — Đóng gói và nộp
+
 **Ước lượng: 1 ngày**
 
 - [ ] `README.md`: mô tả, ảnh chụp màn hình, cách chạy, biến môi trường
@@ -665,27 +735,27 @@ NFR-01 → NFR-10
 
 ## 12. Bảng truy vết FR → Phase
 
-| FR | Nội dung | Phase | File chính |
-|---|---|---|---|
-| FR-01 | Thêm assignment | 2 | `components/assignments/AssignmentForm.tsx` |
-| FR-02 | Danh sách theo due date | 2 | `lib/rules/assignment.ts` |
-| FR-03 | Push nhắc deadline | 9 | `app/api/push/send/route.ts` |
-| FR-04 | Sinh kế hoạch tuần | 7 | `app/api/plan/generate/route.ts` |
-| FR-05 | Sửa / sinh lại kế hoạch | 7 | `components/planner/PlanEditor.tsx` |
-| FR-06 | Lưu kế hoạch + reminder | 7 | `lib/rules/plan.ts` |
-| FR-07 | Sync Google Calendar | 4 | `app/api/calendar/sync/route.ts` |
-| FR-08 | Gắn class ↔ assignment | 4 | `components/schedule/ClassDetail.tsx` |
-| FR-09 | Pomodoro 25 phút | 5 | `components/focus/FocusTimer.tsx` |
-| FR-10 | Log completed / partial | 5 | `lib/rules/focus.ts` |
-| FR-11 | Thống kê focus | 5 | `components/focus/FocusStats.tsx` |
-| FR-12 | Tính GPA | 6 | `lib/rules/gpa.ts` |
-| FR-13 | Dự báo GPA | 6 | `lib/rules/gpa.ts` |
-| FR-14 | Breakdown theo môn | 6 | `components/gpa/CourseBreakdown.tsx` |
-| FR-15 | Tính risk score | 8 | `lib/rules/risk.ts` |
-| FR-16 | Tạo warning | 8 | `app/api/risk/compute/route.ts` |
-| FR-17 | Sửa assignment | 2 | `components/assignments/AssignmentForm.tsx` |
-| FR-18 | Status + progress | 2 | `lib/rules/assignment.ts` |
-| FR-19 | Archive | 2 | `components/assignments/ArchiveDialog.tsx` |
+| FR    | Nội dung                | Phase | File chính                                  |
+| ----- | ----------------------- | ----- | ------------------------------------------- |
+| FR-01 | Thêm assignment         | 2     | `components/assignments/AssignmentForm.tsx` |
+| FR-02 | Danh sách theo due date | 2     | `lib/rules/assignment.ts`                   |
+| FR-03 | Push nhắc deadline      | 9     | `app/api/push/send/route.ts`                |
+| FR-04 | Sinh kế hoạch tuần      | 7     | `app/api/plan/generate/route.ts`            |
+| FR-05 | Sửa / sinh lại kế hoạch | 7     | `components/planner/PlanEditor.tsx`         |
+| FR-06 | Lưu kế hoạch + reminder | 7     | `lib/rules/plan.ts`                         |
+| FR-07 | Sync Google Calendar    | 4     | `app/api/calendar/sync/route.ts`            |
+| FR-08 | Gắn class ↔ assignment  | 4     | `components/schedule/ClassDetail.tsx`       |
+| FR-09 | Pomodoro 25 phút        | 5     | `components/focus/FocusTimer.tsx`           |
+| FR-10 | Log completed / partial | 5     | `lib/rules/focus.ts`                        |
+| FR-11 | Thống kê focus          | 5     | `components/focus/FocusStats.tsx`           |
+| FR-12 | Tính GPA                | 6     | `lib/rules/gpa.ts`                          |
+| FR-13 | Dự báo GPA              | 6     | `lib/rules/gpa.ts`                          |
+| FR-14 | Breakdown theo môn      | 6     | `components/gpa/CourseBreakdown.tsx`        |
+| FR-15 | Tính risk score         | 8     | `lib/rules/risk.ts`                         |
+| FR-16 | Tạo warning             | 8     | `app/api/risk/compute/route.ts`             |
+| FR-17 | Sửa assignment          | 2     | `components/assignments/AssignmentForm.tsx` |
+| FR-18 | Status + progress       | 2     | `lib/rules/assignment.ts`                   |
+| FR-19 | Archive                 | 2     | `components/assignments/ArchiveDialog.tsx`  |
 
 ---
 
@@ -697,15 +767,15 @@ Phase 0 ──► 1 ──► 2 ──┬──► 3 ──► 4 ──► 5 ─
                  (2 là nền móng)        (7, 8 cần dữ liệu thật từ 2, 4, 5)
 ```
 
-| Nhóm | Phase | Ngày |
-|---|---|---|
-| Nền tảng | 0, 1 | 2.5 |
-| Lõi nghiệp vụ | 2, 3 | 4 |
-| Tích hợp | 4, 5, 6 | 5 |
-| Thông minh | 7, 8 | 4.5 |
-| Hạ tầng | 9, 10 | 2.5 |
-| Hoàn thiện | 11, 12 | 3 |
-| **Tổng** | | **≈ 21.5 ngày công** |
+| Nhóm          | Phase   | Ngày                 |
+| ------------- | ------- | -------------------- |
+| Nền tảng      | 0, 1    | 2.5                  |
+| Lõi nghiệp vụ | 2, 3    | 4                    |
+| Tích hợp      | 4, 5, 6 | 5                    |
+| Thông minh    | 7, 8    | 4.5                  |
+| Hạ tầng       | 9, 10   | 2.5                  |
+| Hoàn thiện    | 11, 12  | 3                    |
+| **Tổng**      |         | **≈ 21.5 ngày công** |
 
 ---
 

@@ -29,9 +29,7 @@ export function Logo({ tone = "light", size = 40, className }: LogoProps) {
           className="object-contain"
         />
       </span>
-      <span
-        className={`font-display font-semibold text-xl tracking-tight ${wordColor}`}
-      >
+      <span className={`font-display font-semibold text-xl tracking-tight ${wordColor}`}>
         UniPilot <span className={aiColor}>AI</span>
       </span>
     </div>

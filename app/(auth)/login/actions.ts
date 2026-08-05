@@ -16,10 +16,7 @@ function readCredentials(formData: FormData) {
   return { email, password };
 }
 
-export async function login(
-  _prevState: AuthFormState,
-  formData: FormData,
-): Promise<AuthFormState> {
+export async function login(_prevState: AuthFormState, formData: FormData): Promise<AuthFormState> {
   const { email, password } = readCredentials(formData);
   if (!email || !password) {
     return { error: "Enter both email and password." };
@@ -68,8 +65,7 @@ export async function signup(
   // enumeration leak Supabase is avoiding.
   if (!data.session) {
     return {
-      notice:
-        "Check your email to confirm your account. If you already have one, sign in instead.",
+      notice: "Check your email to confirm your account. If you already have one, sign in instead.",
     };
   }
 

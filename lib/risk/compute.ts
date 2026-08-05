@@ -2,12 +2,7 @@ import "server-only";
 import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
-import {
-  canCompute,
-  computeRisk,
-  type RiskGateInput,
-  type RiskResult,
-} from "@/lib/rules/risk";
+import { canCompute, computeRisk, type RiskGateInput, type RiskResult } from "@/lib/rules/risk";
 
 /** Raw inputs behind the score — never a second definition of the formula,
  * just the same numbers already computed below, surfaced so the "What's
@@ -66,11 +61,7 @@ export const computeAndStoreRisk = cache(async function computeAndStoreRisk(
     { data: activePlan },
   ] = await Promise.all([
     supabase.from("profiles").select("weekly_availability_hours").maybeSingle(),
-    supabase
-      .from("assignments")
-      .select("id")
-      .is("archived_at", null)
-      .neq("status", "done"),
+    supabase.from("assignments").select("id").is("archived_at", null).neq("status", "done"),
     supabase
       .from("assignments")
       .select("id")
@@ -97,10 +88,11 @@ export const computeAndStoreRisk = cache(async function computeAndStoreRisk(
   const availableHours = profile?.weekly_availability_hours ?? 0;
   const pendingCount = pendingAssignments?.length ?? 0;
   const overdueCount = overdueAssignments?.length ?? 0;
-  const focusHistoryDays = new Set(
-    (focusHistoryRows ?? []).map((r) => r.started_at.slice(0, 10)),
-  ).size;
-  const completedFocusSessions7d = (recentFocusSessions ?? []).filter((s) => s.result === "completed");
+  const focusHistoryDays = new Set((focusHistoryRows ?? []).map((r) => r.started_at.slice(0, 10)))
+    .size;
+  const completedFocusSessions7d = (recentFocusSessions ?? []).filter(
+    (s) => s.result === "completed",
+  );
   const completedCycles7d = completedFocusSessions7d.length;
   const completedFocusMinutes7d = Math.round(
     completedFocusSessions7d.reduce((sum, s) => sum + s.duration_seconds / 60, 0),
@@ -113,10 +105,7 @@ export const computeAndStoreRisk = cache(async function computeAndStoreRisk(
       .select("start_at, end_at")
       .eq("plan_id", activePlan.id);
     plannedHours = (sessions ?? []).reduce(
-      (sum, s) =>
-        sum +
-        (new Date(s.end_at).getTime() - new Date(s.start_at).getTime()) /
-          3_600_000,
+      (sum, s) => sum + (new Date(s.end_at).getTime() - new Date(s.start_at).getTime()) / 3_600_000,
       0,
     );
   }
@@ -202,6 +191,13 @@ export const computeAndStoreRisk = cache(async function computeAndStoreRisk(
     status: "ok",
     result,
     scoreId: scoreRow.id,
-    evidence: { availableHours, plannedHours, pendingCount, overdueCount, completedCycles7d, completedFocusMinutes7d },
+    evidence: {
+      availableHours,
+      plannedHours,
+      pendingCount,
+      overdueCount,
+      completedCycles7d,
+      completedFocusMinutes7d,
+    },
   };
 });

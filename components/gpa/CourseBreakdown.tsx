@@ -49,7 +49,10 @@ export function CourseBreakdown({
   const hiddenCount = grades.length - visibleGrades.length;
   // Denominator behind the Contribution column, spelled out in its tooltip so
   // the percentages aren't an unexplained figure.
-  const totalQualityPoints = grades.reduce((s, g) => s + qualityPoints(g.gradePoint, g.creditHours), 0);
+  const totalQualityPoints = grades.reduce(
+    (s, g) => s + qualityPoints(g.gradePoint, g.creditHours),
+    0,
+  );
 
   return (
     <div className="min-w-0 rounded-card bg-card p-5">
@@ -76,7 +79,8 @@ export function CourseBreakdown({
                     >
                       <Info className="h-3.5 w-3.5 text-ink-3" aria-hidden="true" />
                       <span className="sr-only">
-                        Contribution is each course&rsquo;s share of the quality points behind your GPA.
+                        Contribution is each course&rsquo;s share of the quality points behind your
+                        GPA.
                       </span>
                     </span>
                   </span>
@@ -103,7 +107,9 @@ export function CourseBreakdown({
                           <BookOpen className="h-[18px] w-[18px]" />
                         </span>
                         <span className="min-w-0">
-                          <span className="block truncate font-bold text-foreground">{g.courseName}</span>
+                          <span className="block truncate font-bold text-foreground">
+                            {g.courseName}
+                          </span>
                           {/* Semester lost its own column to the concept's
                               four; it stays here as the course's subtitle. */}
                           <span className="block truncate text-[11.5px] font-semibold text-ink-3">
@@ -113,7 +119,9 @@ export function CourseBreakdown({
                         </span>
                       </span>
                     </td>
-                    <td className="py-2.5 pr-3 font-semibold text-ink-2 tabular-nums">{g.creditHours}</td>
+                    <td className="py-2.5 pr-3 font-semibold text-ink-2 tabular-nums">
+                      {g.creditHours}
+                    </td>
                     <td className="py-2.5 pr-3">
                       <span className="flex items-center gap-2">
                         <span
@@ -121,7 +129,9 @@ export function CourseBreakdown({
                         >
                           {letterGrade(g.gradePoint)}
                         </span>
-                        <span className="font-semibold text-ink-2 tabular-nums">{g.gradePoint.toFixed(2)}</span>
+                        <span className="font-semibold text-ink-2 tabular-nums">
+                          {g.gradePoint.toFixed(2)}
+                        </span>
                       </span>
                     </td>
                     <td className="py-2.5 pr-3">
@@ -130,7 +140,10 @@ export function CourseBreakdown({
                           aria-hidden="true"
                           className="h-2 w-full min-w-[56px] max-w-[110px] overflow-hidden rounded-full bg-line"
                         >
-                          <span className={`block h-full rounded-full ${tone.solid}`} style={{ width: `${pct}%` }} />
+                          <span
+                            className={`block h-full rounded-full ${tone.solid}`}
+                            style={{ width: `${pct}%` }}
+                          />
                         </span>
                         <span
                           className="shrink-0 font-semibold text-ink-2 tabular-nums"
@@ -171,7 +184,9 @@ export function CourseBreakdown({
       <Modal open={actionsFor !== null} onClose={() => setActionsFor(null)} title="Actions">
         {actionsFor && (
           <>
-            <h2 className="font-display text-lg font-bold text-foreground">{actionsFor.courseName}</h2>
+            <h2 className="font-display text-lg font-bold text-foreground">
+              {actionsFor.courseName}
+            </h2>
             <div className="mt-4 flex flex-col gap-2">
               <button
                 type="button"
@@ -263,9 +278,7 @@ function DeleteGradeDialog({
       <p className="mt-2 text-sm font-semibold text-ink-2">
         {`"${grade.courseName}" (${grade.semester}) will be removed from your GPA calculation.`}
       </p>
-      {error && (
-        <FieldError className="mt-2 text-xs">{error}</FieldError>
-      )}
+      {error && <FieldError className="mt-2 text-xs">{error}</FieldError>}
       <div className="mt-4 flex gap-2.5">
         <button
           type="button"

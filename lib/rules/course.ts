@@ -8,9 +8,7 @@ export interface CourseInput {
   semester: string;
 }
 
-export type CourseFieldErrors = Partial<
-  Record<"name" | "credits" | "semester", string>
->;
+export type CourseFieldErrors = Partial<Record<"name" | "credits" | "semester", string>>;
 
 export function validateCourse(input: CourseInput): CourseFieldErrors {
   const errors: CourseFieldErrors = {};

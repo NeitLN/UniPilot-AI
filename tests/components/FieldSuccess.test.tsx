@@ -7,7 +7,7 @@ import { FieldSuccess } from "@/components/ui/FieldSuccess";
 // Mirrors FieldError's tint+text pairing (see FieldError.test.tsx) so a
 // future success message can't drift back to a bare color either.
 describe("FieldSuccess", () => {
-  it("renders role=\"status\" with the given text", () => {
+  it('renders role="status" with the given text', () => {
     render(<FieldSuccess>Saved.</FieldSuccess>);
     const status = screen.getByRole("status");
     expect(status).toHaveTextContent("Saved.");

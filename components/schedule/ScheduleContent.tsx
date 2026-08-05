@@ -41,7 +41,8 @@ export async function ScheduleContent({
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const todayEnd = new Date(todayStart);
   todayEnd.setDate(todayEnd.getDate() + 1);
-  const todayNeedsOwnQuery = todayStart.getTime() < start.getTime() || todayEnd.getTime() > end.getTime();
+  const todayNeedsOwnQuery =
+    todayStart.getTime() < start.getTime() || todayEnd.getTime() > end.getTime();
 
   // RLS scopes every query below to the signed-in user — no need to filter
   // by user_id explicitly (same convention as the assignments/dashboard pages).
@@ -74,10 +75,7 @@ export async function ScheduleContent({
           .lt("start_at", todayEnd.toISOString())
           .order("start_at", { ascending: true })
       : Promise.resolve({ data: null }),
-    supabase
-      .from("assignments")
-      .select("id, title, due_at, course_id")
-      .is("archived_at", null),
+    supabase.from("assignments").select("id, title, due_at, course_id").is("archived_at", null),
     // For TodayAgendaCard's "Start focus" deep link — same deterministic
     // pick already used by Assignments' Pilo card, reused here rather than
     // inventing a second "which assignment matters most" rule.
@@ -119,7 +117,9 @@ export async function ScheduleContent({
   });
 
   const blocks: ClassBlockData[] = (blockRows ?? []).map(toClassBlockData);
-  const todaysBlocksSource = todayNeedsOwnQuery ? (todayBlockRows ?? []).map(toClassBlockData) : blocks;
+  const todaysBlocksSource = todayNeedsOwnQuery
+    ? (todayBlockRows ?? []).map(toClassBlockData)
+    : blocks;
 
   const assignmentsByCourse: Record<string, AssignmentLink[]> = {};
   for (const a of assignmentRows ?? []) {
@@ -140,7 +140,11 @@ export async function ScheduleContent({
 
   const todaysAgenda = todayBlocks(todaysBlocksSource, now, timeZone);
   const nextClassBlock = nextClass(todaysBlocksSource, now);
-  const { freeMinutes, blockCount } = freeMinutesForDay(dayKey(now, timeZone), todaysBlocksSource, timeZone);
+  const { freeMinutes, blockCount } = freeMinutesForDay(
+    dayKey(now, timeZone),
+    todaysBlocksSource,
+    timeZone,
+  );
 
   // Week-total free time for the right-rail FreeTimeCard — same per-day
   // computation as the "free blocks" stat above, summed across the 7 days
@@ -213,7 +217,11 @@ export async function ScheduleContent({
         </div>
 
         <div className="flex min-w-0 flex-col gap-3.5">
-          <TodayAgendaCard blocks={todaysAgenda} focusAssignmentId={focusPick?.id ?? null} now={now} />
+          <TodayAgendaCard
+            blocks={todaysAgenda}
+            focusAssignmentId={focusPick?.id ?? null}
+            now={now}
+          />
           <FreeTimeCard
             freeMinutesTotal={weekFreeMinutes}
             freeBlockCount={weekFreeBlockCount}
@@ -231,7 +239,6 @@ export async function ScheduleContent({
     </>
   );
 }
-
 
 export function ScheduleContentSkeleton() {
   return (

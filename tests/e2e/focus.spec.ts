@@ -11,7 +11,8 @@ test.describe("Run a focus session", () => {
     await expect(page.getByRole("heading", { name: "Focus timer" })).toBeVisible();
 
     const select = page.locator("select");
-    const hasAssignments = (await select.locator("option").count()) > 0 &&
+    const hasAssignments =
+      (await select.locator("option").count()) > 0 &&
       (await select.locator("option").first().getAttribute("value")) !== "";
 
     // The button has always read "Start focus"; this asserted an exact name
@@ -22,7 +23,9 @@ test.describe("Run a focus session", () => {
     }
 
     await page.getByRole("button", { name: "Start focus", exact: true }).click();
-    await expect(page.getByText("25:00")).not.toBeVisible({ timeout: 5_000 }).catch(() => {});
+    await expect(page.getByText("25:00"))
+      .not.toBeVisible({ timeout: 5_000 })
+      .catch(() => {});
 
     await page.getByRole("button", { name: "Stop", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Stop this session?" })).toBeVisible();
@@ -61,7 +64,9 @@ test.describe("Focus timer target sizes", () => {
           if (b.width === 0 || b.height === 0) return;
           if (b.width < 24 || b.height < 24)
             out.push({
-              name: (el.getAttribute("aria-label") || el.textContent || el.tagName).trim().slice(0, 40),
+              name: (el.getAttribute("aria-label") || el.textContent || el.tagName)
+                .trim()
+                .slice(0, 40),
               w: Math.round(b.width),
               h: Math.round(b.height),
             });

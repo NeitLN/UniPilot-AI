@@ -11,7 +11,9 @@ import {
   type ClassBlockLite,
 } from "@/lib/rules/schedule-presentation";
 
-function block(overrides: Partial<ClassBlockLite> & Pick<ClassBlockLite, "startAt" | "endAt">): ClassBlockLite {
+function block(
+  overrides: Partial<ClassBlockLite> & Pick<ClassBlockLite, "startAt" | "endAt">,
+): ClassBlockLite {
   return {
     id: crypto.randomUUID(),
     title: "Class",
@@ -29,7 +31,11 @@ describe("nextClass / isHappeningNow", () => {
   it("picks the soonest class that hasn't ended, ignoring all-day blocks", () => {
     const b1 = block({ startAt: "2026-08-03T11:00:00.000Z", endAt: "2026-08-03T12:00:00.000Z" });
     const b2 = block({ startAt: "2026-08-03T09:00:00.000Z", endAt: "2026-08-03T13:00:00.000Z" }); // already happening
-    const allDay = block({ startAt: "2026-08-03T00:00:00.000Z", endAt: "2026-08-04T00:00:00.000Z", isAllDay: true });
+    const allDay = block({
+      startAt: "2026-08-03T00:00:00.000Z",
+      endAt: "2026-08-04T00:00:00.000Z",
+      isAllDay: true,
+    });
     const result = nextClass([b1, b2, allDay], now);
     expect(result?.id).toBe(b2.id); // happening now, ends later than "now" — soonest by start time
   });
@@ -79,7 +85,11 @@ describe("freeMinutesForDay", () => {
   });
 
   it("ignores all-day events (they don't consume timed free time)", () => {
-    const allDay = block({ startAt: "2026-08-03T00:00:00.000Z", endAt: "2026-08-04T00:00:00.000Z", isAllDay: true });
+    const allDay = block({
+      startAt: "2026-08-03T00:00:00.000Z",
+      endAt: "2026-08-04T00:00:00.000Z",
+      isAllDay: true,
+    });
     expect(freeMinutesForDay("2026-08-03", [allDay], "UTC").freeMinutes).toBe(720);
   });
 });

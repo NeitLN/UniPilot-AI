@@ -14,8 +14,8 @@ export function ForgotPasswordForm() {
     return (
       <div className="text-center">
         <p className="text-sm font-semibold text-ink-2">
-          If that email has an account, we&rsquo;ve sent a link to reset the password. It
-          expires in an hour.
+          If that email has an account, we&rsquo;ve sent a link to reset the password. It expires in
+          an hour.
         </p>
         <Link
           href="/login"

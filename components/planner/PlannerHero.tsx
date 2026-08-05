@@ -116,9 +116,14 @@ export function PlannerHero({
           </span>
           <h2 className="font-display text-lg font-bold">Plan confirmed!</h2>
         </div>
-        <p className="mt-3 text-[12.5px] font-medium text-white/88">{calendarPushMessage(confirmResult)}</p>
+        <p className="mt-3 text-[12.5px] font-medium text-white/88">
+          {calendarPushMessage(confirmResult)}
+        </p>
         {skipped && (
-          <Link href="/schedule" className="mt-2 inline-block text-[12.5px] font-bold text-lime hover:underline">
+          <Link
+            href="/schedule"
+            className="mt-2 inline-block text-[12.5px] font-bold text-lime hover:underline"
+          >
             Connect Google Calendar →
           </Link>
         )}
@@ -145,7 +150,14 @@ export function PlannerHero({
     );
   }
 
-  const badgeLabel = lifecycle === "draft" ? "Draft" : lifecycle === "active" ? "Active" : lifecycle === "ended" ? "Ended" : null;
+  const badgeLabel =
+    lifecycle === "draft"
+      ? "Draft"
+      : lifecycle === "active"
+        ? "Active"
+        : lifecycle === "ended"
+          ? "Ended"
+          : null;
   const description =
     lifecycle === "draft"
       ? `${sessionCount} focused session${sessionCount === 1 ? "" : "s"}, built around your deadlines.`
@@ -156,7 +168,9 @@ export function PlannerHero({
           : "Generate a weekly study plan whenever you're ready.";
 
   return (
-    <div className={`overflow-hidden rounded-card p-5 sm:p-6 ${lifecycle === "ended" || lifecycle === "empty" ? "bg-violet/70" : "bg-violet"} text-white`}>
+    <div
+      className={`overflow-hidden rounded-card p-5 sm:p-6 ${lifecycle === "ended" || lifecycle === "empty" ? "bg-violet/70" : "bg-violet"} text-white`}
+    >
       <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:gap-7">
         {/* Negative bottom margin cancels the card's own padding so Pilo
             stands ON the card's bottom edge (concept 02-ai-planner) rather

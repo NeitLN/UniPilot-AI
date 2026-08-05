@@ -94,7 +94,9 @@ describe("daysLeftInPlanWeek", () => {
   });
 
   it("accepts a full timestamp as well as a bare date", () => {
-    expect(daysLeftInPlanWeek("2026-08-03T00:00:00+00:00", new Date("2026-08-06T00:00:00Z"))).toBe(4);
+    expect(daysLeftInPlanWeek("2026-08-03T00:00:00+00:00", new Date("2026-08-06T00:00:00Z"))).toBe(
+      4,
+    );
   });
 });
 

@@ -15,9 +15,7 @@ export default async function LoginPage({
         <div className="flex justify-center">
           <Logo tone="dark" size={44} />
         </div>
-        <p className="mt-2 mb-6 text-sm font-semibold text-ink-2">
-          Personal Student Life OS
-        </p>
+        <p className="mt-2 mb-6 text-sm font-semibold text-ink-2">Personal Student Life OS</p>
         {/* FR-27: neutral wording, consistent with AC-3 on the password
             reset flow — doesn't confirm which account existed or was
             deleted, just that the action completed. */}

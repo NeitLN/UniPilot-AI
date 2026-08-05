@@ -126,7 +126,9 @@ export function WeekTimeGrid({
             const today = isSameDay(day, now);
             return (
               <div key={day.toISOString()} className="pb-2 text-center">
-                <p className={`text-[12px] font-bold ${today ? "text-violet-text" : "text-foreground"}`}>
+                <p
+                  className={`text-[12px] font-bold ${today ? "text-violet-text" : "text-foreground"}`}
+                >
                   {day.toLocaleDateString(undefined, { weekday: "short" })} {day.getDate()}
                 </p>
               </div>
@@ -205,11 +207,16 @@ export function WeekTimeGrid({
                       {/* Wraps to two lines when the block is tall enough to
                           show them — a truncated "Require…" tells you far
                           less than the concept's wrapped course name. */}
-                      <p className={`text-[10px] font-extrabold leading-tight ${pos.heightPct > 9 ? "line-clamp-2" : "truncate"}`}>
+                      <p
+                        className={`text-[10px] font-extrabold leading-tight ${pos.heightPct > 9 ? "line-clamp-2" : "truncate"}`}
+                      >
                         {b.title}
                       </p>
                       {/* Local-time formatting differs SSR vs hydration by design. */}
-                      <p className="truncate text-[9px] font-semibold opacity-80" suppressHydrationWarning>
+                      <p
+                        className="truncate text-[9px] font-semibold opacity-80"
+                        suppressHydrationWarning
+                      >
                         {formatClockShort(start)}
                         {pos.heightPct > 8 && `–${formatClockShort(end)}`}
                       </p>
@@ -249,8 +256,14 @@ export function WeekTimeGrid({
                         </p>
                         {/* Local-time formatting differs SSR vs hydration by
                             design, same as every other time label here. */}
-                        <p className="truncate text-[9px] font-semibold text-coral-text/80" suppressHydrationWarning>
-                          {new Date(d.dueAt).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}
+                        <p
+                          className="truncate text-[9px] font-semibold text-coral-text/80"
+                          suppressHydrationWarning
+                        >
+                          {new Date(d.dueAt).toLocaleTimeString(undefined, {
+                            hour: "numeric",
+                            minute: "2-digit",
+                          })}
                         </p>
                       </div>
                     ))}
@@ -260,12 +273,14 @@ export function WeekTimeGrid({
             );
           })}
 
-          {showCurrentTime && nowMinutes >= SCHEDULE_WINDOW_START_MIN && nowMinutes <= SCHEDULE_WINDOW_END_MIN && (
-            <div
-              className="pointer-events-none absolute inset-x-0 z-20 flex -translate-y-1/2 items-center"
-              style={{ top: `${positionEvent(nowMinutes, nowMinutes + 1).topPct}%` }}
-            >
-              {/* The rule is a coral fill, but this clock label is *text*.
+          {showCurrentTime &&
+            nowMinutes >= SCHEDULE_WINDOW_START_MIN &&
+            nowMinutes <= SCHEDULE_WINDOW_END_MIN && (
+              <div
+                className="pointer-events-none absolute inset-x-0 z-20 flex -translate-y-1/2 items-center"
+                style={{ top: `${positionEvent(nowMinutes, nowMinutes + 1).topPct}%` }}
+              >
+                {/* The rule is a coral fill, but this clock label is *text*.
                   Standing bare on the card it has no theme-stable shade:
                   --coral-text is a dark shade built to sit on a light tint
                   (2.61:1 measured here in dark mode) and --coral is the
@@ -275,18 +290,18 @@ export function WeekTimeGrid({
                   --coral-deep is the sanctioned solid fill for small white
                   text (5.18:1), and unlike a pastel tint chip it still reads
                   as one piece with the rule it labels. */}
-              <span className="w-12 shrink-0 pr-1.5 text-right">
-                <span
-                  className="rounded-pill bg-coral-deep px-1 py-px text-[9.5px] font-extrabold whitespace-nowrap text-white"
-                  suppressHydrationWarning
-                >
-                  {clockLabel(now)}
+                <span className="w-12 shrink-0 pr-1.5 text-right">
+                  <span
+                    className="rounded-pill bg-coral-deep px-1 py-px text-[9.5px] font-extrabold whitespace-nowrap text-white"
+                    suppressHydrationWarning
+                  >
+                    {clockLabel(now)}
+                  </span>
                 </span>
-              </span>
-              <span aria-hidden="true" className="h-1.5 w-1.5 shrink-0 rounded-full bg-coral" />
-              <span aria-hidden="true" className="h-[2px] flex-1 bg-coral" />
-            </div>
-          )}
+                <span aria-hidden="true" className="h-1.5 w-1.5 shrink-0 rounded-full bg-coral" />
+                <span aria-hidden="true" className="h-[2px] flex-1 bg-coral" />
+              </div>
+            )}
         </div>
       </div>
 

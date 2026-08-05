@@ -88,7 +88,12 @@ describe("reportError", () => {
   it("still logs when the webhook fails, and does not throw", async () => {
     // The whole point: reporting an error must not become a second error.
     vi.stubEnv("ERROR_WEBHOOK_URL", "https://hooks.example/collect");
-    vi.stubGlobal("fetch", vi.fn(async () => { throw new Error("network down"); }));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => {
+        throw new Error("network down");
+      }),
+    );
 
     await expect(reportError(new Error("original"), { source: "test" })).resolves.toBeUndefined();
 

@@ -92,9 +92,7 @@ function phaseDuration(
   session: Pick<StoredSession, "phase" | "breakKind" | "workDurationSeconds">,
 ): number {
   if (session.phase === "work") return session.workDurationSeconds ?? POMODORO_SECONDS;
-  return session.breakKind === "long"
-    ? LONG_BREAK_SECONDS
-    : SHORT_BREAK_SECONDS;
+  return session.breakKind === "long" ? LONG_BREAK_SECONDS : SHORT_BREAK_SECONDS;
 }
 
 function formatClock(seconds: number): string {
@@ -217,8 +215,7 @@ export function FocusTimer({
 
     function tick() {
       const duration = phaseDuration(session!);
-      const elapsed =
-        (Date.now() - new Date(session!.startedAt).getTime()) / 1000;
+      const elapsed = (Date.now() - new Date(session!.startedAt).getTime()) / 1000;
       const left = duration - elapsed;
       setRemaining(left);
       if (left <= 0 && !finishedRef.current) {
@@ -269,9 +266,7 @@ export function FocusTimer({
       const pauseDurationMs = Date.now() - new Date(session.pausedAt).getTime();
       persist({
         ...session,
-        startedAt: new Date(
-          new Date(session.startedAt).getTime() + pauseDurationMs,
-        ).toISOString(),
+        startedAt: new Date(new Date(session.startedAt).getTime() + pauseDurationMs).toISOString(),
         pausedAt: null,
       });
     } else {
@@ -336,22 +331,24 @@ export function FocusTimer({
   const displayRemaining = session
     ? session.pausedAt
       ? duration -
-        (new Date(session.pausedAt).getTime() -
-          new Date(session.startedAt).getTime()) /
-          1000
+        (new Date(session.pausedAt).getTime() - new Date(session.startedAt).getTime()) / 1000
       : remaining
     : selectedDurationMinutes * 60;
   const progress = Math.max(0, Math.min(1, displayRemaining / duration));
   const dashOffset = CIRCUMFERENCE * (1 - progress);
-  const activeAssignment = assignments.find(
-    (a) => a.id === (session?.assignmentId ?? selectedId),
-  );
+  const activeAssignment = assignments.find((a) => a.id === (session?.assignmentId ?? selectedId));
 
   return (
     <div
       className={`flex h-full flex-col rounded-card p-5 text-center ${isBreak ? "bg-mint" : "bg-lime"}`}
     >
-      <audio ref={audioElRef} src={FOCUS_TRACKS[trackIndex].src} loop preload="none" className="hidden" />
+      <audio
+        ref={audioElRef}
+        src={FOCUS_TRACKS[trackIndex].src}
+        loop
+        preload="none"
+        className="hidden"
+      />
 
       {/* Top: assignment picker (idle) or the running/break title — height
           varies with content, unlike the timer block below it. */}
@@ -359,7 +356,10 @@ export function FocusTimer({
         {!isRunning && (
           <div className="mb-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <label htmlFor="focus-assignment" className="text-left text-[12.5px] font-bold text-ink">
+              <label
+                htmlFor="focus-assignment"
+                className="text-left text-[12.5px] font-bold text-ink"
+              >
                 What are you working on?
               </label>
               {/* 25/45/60 overrides the Settings default for this one
@@ -378,7 +378,9 @@ export function FocusTimer({
                     aria-checked={selectedDurationMinutes === mins}
                     onClick={() => setSelectedDurationMinutes(mins)}
                     className={`flex min-h-9 items-center justify-center rounded-pill px-3 text-[11.5px] font-extrabold motion-safe:transition-colors motion-safe:duration-200 ${
-                      selectedDurationMinutes === mins ? "bg-ink text-white" : "text-ink/70 hover:bg-card/60"
+                      selectedDurationMinutes === mins
+                        ? "bg-ink text-white"
+                        : "text-ink/70 hover:bg-card/60"
                     }`}
                   >
                     {mins}m
@@ -671,9 +673,7 @@ export function FocusTimer({
         onClose={() => setConfirmingStop(false)}
         title="Stop focus session"
       >
-        <h2 className="font-display text-lg font-bold text-foreground">
-          Stop this session?
-        </h2>
+        <h2 className="font-display text-lg font-bold text-foreground">Stop this session?</h2>
         <p className="mt-2 text-sm font-semibold text-ink-2">
           {`This logs a partial session for ${formatClock(duration - displayRemaining)} — it won't count toward your streak.`}
         </p>
