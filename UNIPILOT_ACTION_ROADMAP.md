@@ -78,6 +78,16 @@ Lý do đưa 2.1 và 2.2 lên đầu dù chúng thuộc nhóm "nâng cấp": hi�
 
 **Phát sinh ngoài lộ trình (đợt 2):** chỉ báo giờ hiện tại của `/schedule` rớt contrast dark mode (2.61:1). Test hồi quy 10 route trước đó không bắt được vì nhãn này chỉ render khi giờ hiện tại nằm trong khung 08:00–20:00 — lần chạy trước rơi ngoài khung.
 
+### Tình trạng migration (kiểm tra 2026-08-05)
+
+Tôi từng ghi ở đây rằng "0019/0020/0021 mới chỉ chạy trên DB dev, production cần áp". **Câu đó sai** — repo chỉ tham chiếu đúng **một** project Supabase (`cpuxjofpolmpxhlhnsel`); không có DB dev tách riêng. Cả ba đã nằm trên chính cái DB mà app dùng. Đã kiểm từng đối tượng chứ không tin vào trí nhớ: 11/11 index của 0019, bảng `rate_limits` + hàm `consume_rate_limit` (`security definer`, 0 policy — đúng thiết kế) của 0020, và 2 cột + unique index của 0021.
+
+**Vấn đề thật nằm ở chỗ khác.** Sổ `supabase_migrations.schema_migrations` chỉ ghi tới **0014**, trong khi 0015–0021 đều được áp bằng SQL thô. Supabase CLI vì thế tưởng 7 migration này chưa chạy, và một lệnh `supabase db push` sẽ cố áp lại — 0015/0017/0018 không có `if not exists` nên sẽ lỗi ngay. Đã xác minh cả 7 thực sự đã áp (đủ đối tượng trong schema) rồi mới vá sổ; giờ 21 version khớp 21 file.
+
+**Đính chính thêm:** khuyến nghị `create index concurrently` cho 0019 là thừa ở quy mô hiện tại — bảng lớn nhất có 83 dòng, 3 người dùng, nên khoá khi tạo index không đáng kể. Nó chỉ đáng bận tâm khi bảng lên hàng trăm nghìn dòng.
+
+**Chưa xác minh được:** biến `NEXT_PUBLIC_SUPABASE_URL` của môi trường Production trên Vercel có trỏ đúng project này không. Đọc env production bị chặn quyền, và tôi không lách.
+
 ---
 
 # PHẦN 1 — LỖI THẬT
@@ -266,7 +276,7 @@ Postgres **không** tự tạo index cho foreign key — chỉ cho primary key v
 
 Hiện **chưa ai thấy chậm** (41 assignment, 55 focus session). Đây là vách đá phía trước, không phải sự cố đang diễn ra.
 
-**Việc cần làm.** Một migration bổ sung, `supabase/migrations/0019_missing_fk_indexes.sql`, tạo cả 11 index. Dùng `create index concurrently` nếu áp lên production đang có tải thật.
+**Việc cần làm.** Một migration bổ sung, `supabase/migrations/0019_missing_fk_indexes.sql`, tạo cả 11 index. Dùng `create index concurrently` nếu áp lên production đang có tải thật — *ghi chú sau khi kiểm tra: bảng lớn nhất mới có 83 dòng, nên điều này chưa cần thiết.*
 
 **Xong khi.** Truy vấn audit `pg_constraint` trả về 0 dòng; `explain analyze` trên một truy vấn `courses` cho thấy index scan.
 
