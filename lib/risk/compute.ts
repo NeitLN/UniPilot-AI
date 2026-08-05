@@ -25,7 +25,10 @@ export type RiskComputeResult =
   | { status: "insufficient_data"; gate: RiskGateInput }
   | { status: "ok"; result: RiskResult; scoreId: string; evidence: RiskEvidence };
 
-function todayDateString(): string {
+/** Exported so a caller comparing against stored rows keys off exactly the
+ * same local date this writes them under — deriving it twice is how the
+ * two quietly disagree across a midnight boundary. */
+export function todayDateString(): string {
   const d = new Date();
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;

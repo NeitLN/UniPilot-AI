@@ -127,3 +127,79 @@ export function topSuggestion(
   const type = ranked[0].type;
   return { type, message: MESSAGES[type] };
 }
+
+/**
+ * PROD-01 — the risk *delta*.
+ *
+ * The audit said workload risk sat behind a sidebar link with no front
+ * door. That part was wrong: the dashboard already leads with a full
+ * "Weekly balance" HUD carrying the score and all three factors. What it
+ * never showed is the one thing a score is nearly useless without —
+ * whether it is getting better or worse. 47 means nothing on its own; 47
+ * after 31 means something.
+ */
+
+/** Below this, a change is noise. The score moves a point or two on
+ * ordinary day-to-day variation in pending work, and a HUD that announces
+ * every one of those trains people to ignore it. */
+export const RISK_DELTA_MIN = 5;
+
+export interface RiskHistoryPoint {
+  /** `risk_scores.score_date`, a plain date. */
+  scoreDate: string;
+  score: number;
+}
+
+export type RiskDelta = {
+  change: number;
+  direction: "up" | "down";
+  /** Days between the two readings. Scores are only written on days the
+   * app is opened, so this is frequently not 1 and the UI has to say so
+   * rather than implying "since yesterday". */
+  daysApart: number;
+  /** Up is worse here: the score measures overload, not progress. */
+  worse: boolean;
+} | null;
+
+/**
+ * Change from the most recent *earlier* reading to today's score.
+ *
+ * Compares against the previous reading rather than a fixed "yesterday"
+ * because rows only exist for days the student opened the app — on a
+ * Monday after a quiet weekend, "yesterday" has no row at all and a
+ * yesterday-based delta would silently show nothing exactly when the
+ * change is most interesting.
+ */
+export function riskDelta(
+  todayScore: number,
+  todayDate: string,
+  history: RiskHistoryPoint[],
+): RiskDelta {
+  const earlier = history
+    .filter((p) => p.scoreDate.slice(0, 10) < todayDate.slice(0, 10))
+    .sort((a, b) => (a.scoreDate < b.scoreDate ? 1 : -1))[0];
+  if (!earlier) return null;
+
+  const change = todayScore - earlier.score;
+  if (Math.abs(change) < RISK_DELTA_MIN) return null;
+
+  const daysApart = Math.round(
+    (new Date(`${todayDate.slice(0, 10)}T00:00:00Z`).getTime() -
+      new Date(`${earlier.scoreDate.slice(0, 10)}T00:00:00Z`).getTime()) /
+      86_400_000,
+  );
+
+  return {
+    change: Math.abs(change),
+    direction: change > 0 ? "up" : "down",
+    daysApart,
+    worse: change > 0,
+  };
+}
+
+/** "since yesterday" / "over 3 days" — never a bare number the student has
+ * to guess the timeframe of. */
+export function riskDeltaLabel(delta: NonNullable<RiskDelta>): string {
+  const span = delta.daysApart === 1 ? "since yesterday" : `over ${delta.daysApart} days`;
+  return `${delta.direction === "up" ? "+" : "−"}${delta.change} ${span}`;
+}
