@@ -48,10 +48,6 @@ export function LogSessionDialog({ assignments }: { assignments: FocusAssignment
     // Same validateManualSession the server re-checks with — mirrored here
     // only for instant per-field feedback, never trusted as the real gate.
     const fieldErrors = validateManualSession({ startedAt, durationMinutes });
-    if (!assignmentId) {
-      setFormError("Pick an assignment.");
-      return;
-    }
     if (Object.keys(fieldErrors).length > 0) {
       setErrors(fieldErrors);
       return;
@@ -59,7 +55,12 @@ export function LogSessionDialog({ assignments }: { assignments: FocusAssignment
     setErrors(INITIAL_ERRORS);
 
     startTransition(async () => {
-      const result = await logManualFocusSession({ assignmentId, startedAt, durationMinutes });
+      const result = await logManualFocusSession({
+        // Empty string is the "General study" choice, not a missing value.
+        assignmentId: assignmentId || null,
+        startedAt,
+        durationMinutes,
+      });
       if (!result.ok) {
         setFormError(result.error ?? "Couldn't log this session.");
         return;
@@ -98,13 +99,12 @@ export function LogSessionDialog({ assignments }: { assignments: FocusAssignment
             Assignment
             <select
               name="assignmentId"
-              required
-              disabled={assignments.length === 0}
-              className="w-full rounded-ctl border border-border-subtle bg-card px-3.5 py-2.5 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-violet disabled:opacity-60"
+              className="w-full rounded-ctl border border-border-subtle bg-card px-3.5 py-2.5 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-violet"
             >
-              <option value="" disabled>
-                {assignments.length === 0 ? "No active assignments" : "Select an assignment…"}
-              </option>
+              {/* Selectable, not a disabled placeholder — studying without a
+                  specific assignment still counts toward streak and minutes,
+                  same as the timer's own "General study" option. */}
+              <option value="">General study (no assignment)</option>
               {assignments.map((a) => (
                 <option key={a.id} value={a.id}>
                   {a.title}
@@ -166,7 +166,7 @@ export function LogSessionDialog({ assignments }: { assignments: FocusAssignment
             </button>
             <button
               type="submit"
-              disabled={pending || assignments.length === 0}
+              disabled={pending}
               className="flex min-h-11 flex-1 items-center justify-center rounded-ctl bg-ink py-2.5 text-sm font-bold text-white hover:bg-ink/90 disabled:opacity-60"
             >
               {pending ? "Saving…" : "Log session"}

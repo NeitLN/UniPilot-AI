@@ -6,7 +6,10 @@ import { assignmentBelongsToCaller } from "@/lib/supabase/ownership";
 import { classify, validateManualSession } from "@/lib/rules/focus";
 
 export interface LogFocusSessionInput {
-  assignmentId: string;
+  /** Null for a "General study" session — Pomodoro no longer requires an
+   * assignment to log against (focus_sessions.assignment_id has allowed
+   * null since 0012_focus_session_preserve_history.sql). */
+  assignmentId: string | null;
   startedAt: string; // ISO
   endedAt: string; // ISO
   /** The work-phase duration the timer was actually running toward
@@ -28,7 +31,9 @@ export async function logFocusSession(input: LogFocusSessionInput): Promise<LogF
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "Session expired — sign in again." };
 
-  if (!(await assignmentBelongsToCaller(supabase, input.assignmentId))) {
+  // No assignment at all is a valid "General study" session; only check
+  // ownership when one was actually named.
+  if (input.assignmentId && !(await assignmentBelongsToCaller(supabase, input.assignmentId))) {
     return { ok: false, error: "That assignment isn't yours." };
   }
 
@@ -70,7 +75,8 @@ export async function logFocusSession(input: LogFocusSessionInput): Promise<LogF
 // to count toward the streak or minute totals at all — Pomodoro was the
 // only path that could ever create a focus_sessions row.
 export interface LogManualFocusSessionInput {
-  assignmentId: string;
+  /** Null for a "General study" session — see LogFocusSessionInput. */
+  assignmentId: string | null;
   startedAt: string; // ISO
   durationMinutes: number;
 }
@@ -84,7 +90,7 @@ export async function logManualFocusSession(
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "Session expired — sign in again." };
 
-  if (!(await assignmentBelongsToCaller(supabase, input.assignmentId))) {
+  if (input.assignmentId && !(await assignmentBelongsToCaller(supabase, input.assignmentId))) {
     return { ok: false, error: "That assignment isn't yours." };
   }
 

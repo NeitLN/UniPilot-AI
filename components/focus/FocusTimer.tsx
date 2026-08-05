@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
@@ -38,7 +37,9 @@ type Phase = "work" | "break";
 type BreakKind = "short" | "long";
 
 interface StoredSession {
-  assignmentId: string;
+  /** Null for a "General study" session — Pomodoro doesn't require an
+   * assignment to log against. */
+  assignmentId: string | null;
   startedAt: string;
   phase: Phase;
   breakKind?: BreakKind;
@@ -68,9 +69,9 @@ function readStoredSession(): StoredSession | null {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Partial<StoredSession>;
-    if (!parsed.assignmentId || !parsed.startedAt || !parsed.phase) return null;
+    if (!parsed.startedAt || !parsed.phase) return null;
     return {
-      assignmentId: parsed.assignmentId,
+      assignmentId: parsed.assignmentId || null,
       startedAt: parsed.startedAt,
       phase: parsed.phase,
       breakKind: parsed.breakKind,
@@ -151,7 +152,10 @@ export function FocusTimer({
     if (stored) {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing from an external store (localStorage) on mount
       setSession(stored);
-      setSelectedId(stored.assignmentId);
+      // The picker models "General study" as the empty string; the stored
+      // session models it as null. Map rather than widen selectedId, so the
+      // <select>'s value stays a plain string it can actually match.
+      setSelectedId(stored.assignmentId ?? "");
     }
   }, []);
 
@@ -232,10 +236,11 @@ export function FocusTimer({
   }, [session]);
 
   function handleStart() {
-    if (!selectedId) return;
+    // An empty selection is "General study", a deliberate choice — not
+    // "nothing picked yet" — so there is nothing left to gate here.
     setFinishedPhase(null);
     persist({
-      assignmentId: selectedId,
+      assignmentId: selectedId || null,
       startedAt: new Date().toISOString(),
       phase: "work",
       workDurationSeconds: selectedDurationMinutes * 60,
@@ -249,7 +254,7 @@ export function FocusTimer({
   function handleStartBreak(kind: BreakKind) {
     setFinishedPhase(null);
     persist({
-      assignmentId: selectedId,
+      assignmentId: selectedId || null,
       startedAt: new Date().toISOString(),
       phase: "break",
       breakKind: kind,
@@ -336,7 +341,15 @@ export function FocusTimer({
     : selectedDurationMinutes * 60;
   const progress = Math.max(0, Math.min(1, displayRemaining / duration));
   const dashOffset = CIRCUMFERENCE * (1 - progress);
-  const activeAssignment = assignments.find((a) => a.id === (session?.assignmentId ?? selectedId));
+  // `session ? session.assignmentId : selectedId`, not `??`: a running
+  // "General study" session has assignmentId === null, and that null must
+  // win — falling through to the (hidden, frozen) picker's selectedId would
+  // only coincidentally be correct because the picker can't change while a
+  // session is running, which is exactly the kind of "works by accident"
+  // this is worth not depending on.
+  const activeAssignment = assignments.find(
+    (a) => a.id === (session ? session.assignmentId : selectedId),
+  );
 
   return (
     <div
@@ -401,18 +414,19 @@ export function FocusTimer({
                 id="focus-assignment"
                 value={selectedId}
                 onChange={(e) => setSelectedId(e.target.value)}
-                disabled={assignments.length === 0}
-                className="min-h-[52px] w-full appearance-none rounded-pill bg-card pl-12 pr-11 text-base font-semibold text-foreground outline-none focus-visible:ring-2 focus-visible:ring-violet disabled:opacity-60"
+                className="min-h-[52px] w-full appearance-none rounded-pill bg-card pl-12 pr-11 text-base font-semibold text-foreground outline-none focus-visible:ring-2 focus-visible:ring-violet"
               >
-                {assignments.length === 0 ? (
-                  <option value="">No active assignments</option>
-                ) : (
-                  assignments.map((a) => (
-                    <option key={a.id} value={a.id}>
-                      {a.title}
-                    </option>
-                  ))
-                )}
+                {/* A real, always-selectable choice — not a disabled
+                    placeholder — since a session with no assignment is a
+                    first-class option (lib/rules/focus.ts's
+                    ORPHANED_SESSION_KEY groups it as "Unassigned" wherever
+                    it's later reported on), not a state to route around. */}
+                <option value="">General study (no assignment)</option>
+                {assignments.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.title}
+                  </option>
+                ))}
               </select>
               <ChevronDown
                 aria-hidden="true"
@@ -430,9 +444,9 @@ export function FocusTimer({
               : ` — nice work on ${activeAssignment?.title ?? "that cycle"}`}
           </p>
         )}
-        {isRunning && !isBreak && activeAssignment && (
+        {isRunning && !isBreak && (
           <p className="mb-2 truncate text-[12.5px] font-bold text-ink/70">
-            {activeAssignment.title}
+            {activeAssignment?.title ?? "General study"}
           </p>
         )}
       </div>
@@ -531,8 +545,7 @@ export function FocusTimer({
             <button
               type="button"
               onClick={handleStart}
-              disabled={!selectedId}
-              className="mx-auto mt-4 flex w-full max-w-[340px] items-center justify-center gap-2.5 rounded-pill bg-ink py-3.5 text-base font-extrabold text-white disabled:opacity-45"
+              className="mx-auto mt-4 flex w-full max-w-[340px] items-center justify-center gap-2.5 rounded-pill bg-ink py-3.5 text-base font-extrabold text-white"
             >
               {/* Dark glyph on a white disc, per the concept — a bare white
                   triangle on the dark pill read as part of the label. */}
@@ -619,23 +632,6 @@ export function FocusTimer({
               <Bell className="h-3 w-3" aria-hidden="true" />
               Notifications will stay quiet while you focus.
             </p>
-            {!selectedId && (
-              <p className="mt-2 text-[11.5px] font-semibold text-ink/70">
-                {assignments.length === 0 ? (
-                  <>
-                    Add an assignment first — Pomodoro needs one to log against.{" "}
-                    <Link
-                      href="/assignments"
-                      className="font-extrabold text-violet-text hover:underline"
-                    >
-                      Add one now →
-                    </Link>
-                  </>
-                ) : (
-                  "Pick an assignment first."
-                )}
-              </p>
-            )}
           </>
         )}
 
