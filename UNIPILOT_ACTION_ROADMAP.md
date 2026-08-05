@@ -66,14 +66,15 @@ Lý do đưa 2.1 và 2.2 lên đầu dù chúng thuộc nhóm "nâng cấp": hi�
 
 **Phát sinh ngoài lộ trình:** dark mode có 49 lỗi contrast thật (audit ghi là *chưa kiểm được*). Đã sửa toàn bộ và thêm test hồi quy đo thật trên 10 route.
 
-**Số liệu:** 414 unit test (từ 327), 35 file test (từ 26), 47 e2e. tsc, lint và build sạch.
+**Số liệu:** 440 unit test (từ 327), 38 file test (từ 26), 47 e2e. tsc, lint và build sạch.
 
 **Phần 3: đã làm 3.4.** Các bước còn lại (3.1, 3.2, 3.3, 3.5) là đặt cược sản phẩm cần bạn quyết trước khi viết code. Chọn 3.4 trước vì nó gần một lỗi UX hơn là tính năng mới.
 
 | Bước | Trạng thái | Ghi chú |
 |---|---|---|
 | 3.4 | xong một nửa | **Luận điểm gốc sai một phần** — onboarding *có* thu `weekly_availability_hours` (bước 1), nên AI Planner không hề bị chặn. Ngõ cụt thật chỉ nằm ở thẻ "On track". Đã sửa theo vế thứ hai của đề xuất (thẻ tự nói ra thứ nó thiếu); vế "onboarding thu thêm 2 trường" vẫn để ngỏ vì đó là quyết định sản phẩm |
-| 3.1 / 3.2 / 3.3 / 3.5 | chưa bắt đầu | chờ bạn quyết |
+| 3.2 | xong | Nhắc giữa tuần khi bám kế hoạch tụt dưới 50%. Chống trùng bằng unique index — **bản partial đầu tiên của tôi sai**, Postgres không suy ra được nên mọi insert đều ném lỗi; phát hiện bằng cách thử trên DB thật chứ mock unit test không bắt được |
+| 3.1 / 3.3 / 3.5 | chưa bắt đầu | chờ bạn quyết |
 
 **Phát sinh ngoài lộ trình (đợt 2):** chỉ báo giờ hiện tại của `/schedule` rớt contrast dark mode (2.61:1). Test hồi quy 10 route trước đó không bắt được vì nhãn này chỉ render khi giờ hiện tại nằm trong khung 08:00–20:00 — lần chạy trước rơi ngoài khung.
 
@@ -445,6 +446,22 @@ Deploy thiếu key Supabase sẽ cho ra một lỗi khó hiểu từ sâu trong 
 **Luận điểm.** `planAdherence` đã được tính và hiển thị trong Weekly report. Nhưng sinh viên đang tụt lại **không được báo trong tuần** — chỉ biết sau đó, trong một bản báo cáo họ có thể không mở. Dữ liệu để nhắc **đã tồn tại**.
 
 **Đề xuất.** Nhắc trong tuần khi tỉ lệ bám kế hoạch rơi dưới ngưỡng, qua kênh thông báo đã có.
+
+**Đã làm.** Cron thông báo (15 phút/lần) nay tạo tối đa **một** nhắc cho mỗi tuần kế hoạch, khi tỉ lệ bám tụt **dưới 50%**. Ba chốt chặn, tất cả đều để ngăn một cái nhắc gây nhiễu — vì nhắc sai không hề miễn phí: đó chính là cách sinh viên tắt hẳn quyền thông báo, và kéo theo cả những nhắc đang hoạt động tốt:
+
+| Chốt chặn | Vì sao |
+|---|---|
+| ≥ 3 buổi đã trôi qua | 1/2 hiện ra là "sụp 50%" nhưng thực chất chỉ là một ngày lỡ |
+| ≥ 2 ngày còn lại | Nhắc vào ngày cuối tuần kế hoạch là trách móc, không phải nhắc — không còn gì để làm |
+| Mục "Plan check-ins" trong Settings | Người dùng tắt được; mặc định bật |
+
+**Ba điều đáng ghi lại:**
+
+1. **Một lỗi thật suýt lọt.** Index chống trùng ban đầu tôi viết là *partial* (`where dedupe_key is not null`) vì nó diễn đạt đúng ý định hơn. Nhưng Postgres chỉ suy ra được partial index khi `ON CONFLICT` lặp lại đúng predicate, mà `onConflict` của supabase-js chỉ nhận tên cột — nên **mọi insert đều ném lỗi**. Mock unit test không bắt được (mock không kiểm conflict target); chỉ lộ ra khi thử trên Postgres thật. Bỏ predicate là đủ: `NULL` vốn khác nhau trong unique index, nên mọi `kind` cũ vẫn lặp tự do (đã kiểm chứng cả hai chiều).
+2. **Không lặp lại N+1.** Sweep là 4 truy vấn gom lô, không phải vòng lặp theo user — tập ở đây là "mọi người có kế hoạch đang chạy", nên vòng lặp sẽ đúng hình dạng N+1 mà audit đã bắt ở `lib/calendar/push.ts`, lại nằm trên đường chạy không ai theo dõi. Có test khoá số round trip là hằng số với 25 user.
+3. **Giới hạn đã biết, không giấu.** Ghép ngày cần timezone, mà cron không có "người xem" nào để lấy cookie timezone — nên nó dùng timezone của server. Với sinh viên ở múi giờ xa, một buổi học sát nửa đêm có thể rơi sang ngày bên cạnh, lệch `kept` một buổi. Cố tình **không** vá bằng cách nới lỏng phép ghép, vì để cái nhắc báo một con số khác với Weekly report còn tệ hơn.
+
+**Phát hiện kèm theo (chưa sửa).** `weekly_report` và `focus_reminders` trong `notification_preferences` là **công tắc chết**: người dùng bật/tắt được trong Settings nhưng chúng không chặn bất cứ thứ gì. Đây là UI nói dối, nên xử lý riêng.
 
 ---
 
