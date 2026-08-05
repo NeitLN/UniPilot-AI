@@ -11,6 +11,7 @@ import {
 import { AddGradeButton } from "@/components/gpa/AddGradeButton";
 import { GpaHero } from "@/components/gpa/GpaHero";
 import { OnTrackCard } from "@/components/gpa/OnTrackCard";
+import { OnTrackSetupCard } from "@/components/gpa/OnTrackSetupCard";
 import { CourseBreakdown, type GradeRow } from "@/components/gpa/CourseBreakdown";
 import { GpaTrendChart } from "@/components/gpa/GpaTrendChart";
 import { ForecastCard } from "@/components/gpa/ForecastCard";
@@ -119,7 +120,17 @@ export async function GpaContent() {
           targetGpa={targetGpa}
           className="sm:flex-1"
         />
-        {onTrack && targetGpa && <OnTrackCard result={onTrack} targetGpa={targetGpa} />}
+        {onTrack && targetGpa ? (
+          <OnTrackCard result={onTrack} targetGpa={targetGpa} />
+        ) : (
+          // Not omitted when the inputs are missing: an absent card told the
+          // student nothing, so the feature was invisible rather than
+          // switched off. See OnTrackSetupCard.
+          <OnTrackSetupCard
+            hasTargetGpa={targetGpa !== null}
+            hasProgramCredits={programTotalCredits !== null}
+          />
+        )}
       </div>
 
       <div className="flex flex-col gap-3.5 lg:grid lg:grid-cols-[1.45fr_1fr] lg:items-start">
