@@ -57,3 +57,7 @@ next-env.d.ts
 docs/screenshots/zoom/
 docs/screenshots/review*/
 docs/screenshots/baseline/
+# Audit screenshots: 4.0 MB across 22 files, versus 69 KB of logs. Every
+# confirmed finding cites a log, not a picture — the visual pass came back
+# clean and ui-*.json already records that numerically.
+docs/audits/evidence/*.png

@@ -1,0 +1,200 @@
+{
+ "tablet|light|/": {
+  "overflow": 0,
+  "offenders": [],
+  "small": [],
+  "smallCount": 0,
+  "imgs": [],
+  "h1": 1,
+  "console_errors": []
+ },
+ "tablet|light|/assignments": {
+  "overflow": 0,
+  "offenders": [],
+  "small": [],
+  "smallCount": 0,
+  "imgs": [],
+  "h1": 1,
+  "console_errors": []
+ },
+ "tablet|light|/planner": {
+  "overflow": 0,
+  "offenders": [],
+  "small": [],
+  "smallCount": 0,
+  "imgs": [],
+  "h1": 1,
+  "console_errors": []
+ },
+ "tablet|light|/schedule": {
+  "overflow": 0,
+  "offenders": [],
+  "small": [],
+  "smallCount": 0,
+  "imgs": [],
+  "h1": 1,
+  "console_errors": []
+ },
+ "tablet|light|/courses": {
+  "overflow": 0,
+  "offenders": [],
+  "small": [],
+  "smallCount": 0,
+  "imgs": [],
+  "h1": 1,
+  "console_errors": []
+ },
+ "tablet|light|/focus": {
+  "overflow": 0,
+  "offenders": [],
+  "small": [],
+  "smallCount": 0,
+  "imgs": [],
+  "h1": 1,
+  "console_errors": []
+ },
+ "tablet|light|/gpa": {
+  "overflow": 0,
+  "offenders": [],
+  "small": [],
+  "smallCount": 0,
+  "imgs": [],
+  "h1": 1,
+  "console_errors": []
+ },
+ "tablet|light|/risk": {
+  "overflow": 0,
+  "offenders": [],
+  "small": [],
+  "smallCount": 0,
+  "imgs": [],
+  "h1": 1,
+  "console_errors": []
+ },
+ "tablet|light|/reports": {
+  "overflow": 0,
+  "offenders": [],
+  "small": [],
+  "smallCount": 0,
+  "imgs": [],
+  "h1": 1,
+  "console_errors": []
+ },
+ "tablet|light|/notifications": {
+  "overflow": 0,
+  "offenders": [],
+  "small": [],
+  "smallCount": 0,
+  "imgs": [],
+  "h1": 1,
+  "console_errors": []
+ },
+ "tablet|light|/settings": {
+  "overflow": 0,
+  "offenders": [],
+  "small": [],
+  "smallCount": 0,
+  "imgs": [],
+  "h1": 1,
+  "console_errors": []
+ },
+ "tablet|dark|/": {
+  "overflow": 0,
+  "offenders": [],
+  "small": [],
+  "smallCount": 0,
+  "imgs": [],
+  "h1": 1,
+  "console_errors": []
+ },
+ "tablet|dark|/assignments": {
+  "overflow": 0,
+  "offenders": [],
+  "small": [],
+  "smallCount": 0,
+  "imgs": [],
+  "h1": 1,
+  "console_errors": []
+ },
+ "tablet|dark|/planner": {
+  "overflow": 0,
+  "offenders": [],
+  "small": [],
+  "smallCount": 0,
+  "imgs": [],
+  "h1": 1,
+  "console_errors": []
+ },
+ "tablet|dark|/schedule": {
+  "overflow": 0,
+  "offenders": [],
+  "small": [],
+  "smallCount": 0,
+  "imgs": [],
+  "h1": 1,
+  "console_errors": []
+ },
+ "tablet|dark|/courses": {
+  "overflow": 0,
+  "offenders": [],
+  "small": [],
+  "smallCount": 0,
+  "imgs": [],
+  "h1": 1,
+  "console_errors": []
+ },
+ "tablet|dark|/focus": {
+  "overflow": 0,
+  "offenders": [],
+  "small": [],
+  "smallCount": 0,
+  "imgs": [],
+  "h1": 1,
+  "console_errors": []
+ },
+ "tablet|dark|/gpa": {
+  "overflow": 0,
+  "offenders": [],
+  "small": [],
+  "smallCount": 0,
+  "imgs": [],
+  "h1": 1,
+  "console_errors": []
+ },
+ "tablet|dark|/risk": {
+  "overflow": 0,
+  "offenders": [],
+  "small": [],
+  "smallCount": 0,
+  "imgs": [],
+  "h1": 1,
+  "console_errors": []
+ },
+ "tablet|dark|/reports": {
+  "overflow": 0,
+  "offenders": [],
+  "small": [],
+  "smallCount": 0,
+  "imgs": [],
+  "h1": 1,
+  "console_errors": []
+ },
+ "tablet|dark|/notifications": {
+  "overflow": 0,
+  "offenders": [],
+  "small": [],
+  "smallCount": 0,
+  "imgs": [],
+  "h1": 1,
+  "console_errors": []
+ },
+ "tablet|dark|/settings": {
+  "overflow": 0,
+  "offenders": [],
+  "small": [],
+  "smallCount": 0,
+  "imgs": [],
+  "h1": 1,
+  "console_errors": []
+ }
+}

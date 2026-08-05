@@ -1,0 +1,57 @@
+### npm run format:check ###
+[[33mwarn[39m] tests/rules/plan-nudge.test.ts
+[[33mwarn[39m] tests/rules/plan-presentation.test.ts
+[[33mwarn[39m] tests/rules/plan.test.ts
+[[33mwarn[39m] tests/rules/preferences.test.ts
+[[33mwarn[39m] tests/rules/report-range.test.ts
+[[33mwarn[39m] tests/rules/risk-delta.test.ts
+[[33mwarn[39m] tests/rules/risk.test.ts
+[[33mwarn[39m] tests/rules/schedule-presentation.test.ts
+[[33mwarn[39m] tests/ui/contrast.test.ts
+[[33mwarn[39m] UNIPILOT_ACTION_ROADMAP.md
+[[33mwarn[39m] UNIPILOT_COMPLETE_PRODUCT_AUDIT.md
+[[33mwarn[39m] Code style issues found in 302 files. Run Prettier with --write to fix.
+EXIT=1 DURATION=4s
+
+### npx tsc --noEmit ###
+
+EXIT=0 DURATION=3s
+
+### npm run lint ###
+
+> unipilot-ai@0.1.0 lint
+> eslint
+EXIT=0 DURATION=8s
+
+### npm test ###
+
+> unipilot-ai@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.10 C:/Users/Viet Tien/UniPilot-AI
+
+
+ Test Files  40 passed (40)
+      Tests  451 passed (451)
+   Start at  21:10:51
+   Duration  9.67s (transform 1.17s, setup 27.44s, import 4.06s, tests 1.36s, environment 87.06s)
+EXIT=0 DURATION=11s
+
+### npm run build ###
+├ ƒ /notifications
+├ ƒ /onboarding
+├ ƒ /planner
+├ ƒ /reports
+├ ƒ /reset-password
+├ ƒ /risk
+├ ƒ /schedule
+└ ƒ /settings
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+EXIT=0 DURATION=10s
+
