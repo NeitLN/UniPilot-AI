@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import type { Suggestion } from "@/lib/rules/risk";
+import type { Suggestion, SuggestionAction } from "@/lib/rules/risk";
 
 export interface SuggestionTarget {
   id: string;
@@ -15,9 +15,14 @@ export interface SuggestionTarget {
 export function PiloSuggestionCard({
   suggestion,
   target,
+  action,
 }: {
   suggestion: Suggestion;
   target: SuggestionTarget | null;
+  /** Where the CTA goes, chosen by `suggestionAction` from the same factor
+   * that produced `suggestion` — passed in rather than derived here so the
+   * pairing is unit-tested instead of living in JSX. */
+  action: SuggestionAction;
 }) {
   return (
     <div className="rounded-card bg-violet p-5 text-white">
@@ -42,11 +47,15 @@ export function PiloSuggestionCard({
           </p>
         </div>
       </div>
+      {/* The destination follows the advice rather than always being the
+          timer. "Cut scope on one item" over a button that starts a Pomodoro
+          is advice the student cannot act on, which is barely better than
+          showing them the bare score. */}
       <Link
-        href={target ? `/focus?assignment=${target.id}` : "/assignments"}
+        href={action.href}
         className="mt-4 flex min-h-11 w-full items-center justify-center rounded-ctl bg-lime px-3 py-3 text-center text-sm font-extrabold text-ink hover:bg-lime-deep"
       >
-        {target ? `Start with ${target.title}` : "Review this week"}
+        {action.label}
       </Link>
     </div>
   );

@@ -1,3 +1,5 @@
+import { pickPiloAssignment, type AssignmentLike } from "./assignment";
+
 // BR-06 — daily workload-risk score: gate, weighted formula, and the
 // highest-contributing factor's suggestion.
 // docs/UniPilot/UniPilot_AI_ROADMAP.md §PHASE 8.
@@ -201,4 +203,99 @@ export function riskDelta(
 export function riskDeltaLabel(delta: NonNullable<RiskDelta>): string {
   const span = delta.daysApart === 1 ? "since yesterday" : `over ${delta.daysApart} days`;
   return `${delta.direction === "up" ? "+" : "−"}${delta.change} ${span}`;
+}
+
+/**
+ * PROD-01 follow-up — making the suggestion act on something.
+ *
+ * The card already named an assignment, but it picked one with
+ * `pickPiloAssignment`, a general "what should I work on next" tiering that
+ * knows nothing about which factor is driving the score. So two of the three
+ * factors sent the student somewhere that contradicted the sentence above
+ * the button: "negotiate an extension or cut scope" under a button that
+ * started a Pomodoro, "move a study session to a lighter day" under the
+ * same one. Advice you cannot act on is only marginally better than a bare
+ * number, which was the original complaint.
+ */
+
+/** Extends the shared shape rather than restating it, so the two picks stay
+ * interchangeable and cannot drift apart on a field like `status`. */
+export interface RiskTargetLike extends AssignmentLike {
+  id: string;
+  title: string;
+}
+
+export interface SuggestionAction {
+  href: string;
+  label: string;
+}
+
+/**
+ * The assignment this factor is actually about.
+ *
+ * For `overdue` that is the *oldest* thing still outstanding — it has been
+ * contributing the longest and is the one the student keeps stepping over.
+ * `pickPiloAssignment` deliberately does the opposite (newest overdue
+ * first, as the most salvageable), which is right for "what next" and wrong
+ * for "what is dragging this score".
+ *
+ * The other two factors are about the shape of the week rather than one
+ * item, so they fall back to the ordinary next-up pick.
+ */
+export function pickRiskTarget<T extends RiskTargetLike>(
+  type: SuggestionType,
+  list: T[],
+  now: Date = new Date(),
+): T | null {
+  const active = list.filter((a) => !a.archivedAt && a.status !== "done");
+  if (active.length === 0) return null;
+
+  if (type === "overdue") {
+    const overdue = active
+      .filter((a) => new Date(a.dueAt).getTime() < now.getTime())
+      .sort((x, y) => new Date(x.dueAt).getTime() - new Date(y.dueAt).getTime());
+    if (overdue.length > 0) return overdue[0];
+  }
+
+  return pickPiloAssignment(active, now);
+}
+
+/**
+ * Where the button goes, matched to the advice rather than always pointing
+ * at the focus timer.
+ *
+ * `overdue` goes to the assignment itself — rescheduling or cutting scope
+ * happens there, not in a timer. `workload` goes to the planner, because
+ * moving a session to a lighter day is a planner action and belongs to the
+ * week, not to one assignment. `focus` is the one case where starting a
+ * session really is the next step.
+ */
+export function suggestionAction(
+  type: SuggestionType,
+  target: { id: string; title: string } | null,
+): SuggestionAction {
+  if (!target) {
+    // Nothing outstanding to act on: send them somewhere real rather than
+    // preselecting an assignment that does not exist.
+    return type === "workload"
+      ? { href: "/planner", label: "Open your plan" }
+      : { href: "/assignments", label: "Review this week" };
+  }
+
+  switch (type) {
+    case "overdue":
+      // Searched rather than filtered, so the row is findable however many
+      // assignments the list is paginating.
+      return {
+        href: `/assignments?q=${encodeURIComponent(target.title)}`,
+        label: `Reschedule ${target.title}`,
+      };
+    case "workload":
+      return { href: "/planner", label: "Move a session in Planner" };
+    case "focus":
+      return {
+        href: `/focus?assignment=${target.id}`,
+        label: `Start a session on ${target.title}`,
+      };
+  }
 }

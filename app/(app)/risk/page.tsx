@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { computeAndStoreRisk } from "@/lib/risk/compute";
-import { riskGateReasons, topSuggestion } from "@/lib/rules/risk";
-import { pickPiloAssignment } from "@/lib/rules/assignment";
+import { pickRiskTarget, riskGateReasons, suggestionAction, topSuggestion } from "@/lib/rules/risk";
 import { CheckCircle2, ShieldCheck, Settings2 } from "lucide-react";
 import { Pilo } from "@/components/brand/Pilo";
 import { WarningActions } from "@/components/risk/WarningActions";
@@ -119,7 +118,12 @@ export default async function RiskPage() {
     score: r.score,
   }));
 
-  const suggestionTarget = pickPiloAssignment(
+  // Picked from the factor that is actually driving the score, not from the
+  // generic "what next" tiering — an overdue-driven score should name the
+  // thing that has been outstanding longest, which is the opposite of what
+  // pickPiloAssignment favours.
+  const suggestionTarget = pickRiskTarget(
+    suggestion.type,
     (activeAssignments ?? []).map((a) => ({
       id: a.id,
       title: a.title,
@@ -130,6 +134,7 @@ export default async function RiskPage() {
     })),
     new Date(),
   );
+  const suggestionCta = suggestionAction(suggestion.type, suggestionTarget);
 
   const lighterWeekActions: LighterWeekAction[] = [];
   if (evidence.overdueCount > 0) {
@@ -170,7 +175,11 @@ export default async function RiskPage() {
         </div>
 
         <div className="flex min-w-0 flex-col gap-3.5">
-          <PiloSuggestionCard suggestion={suggestion} target={suggestionTarget} />
+          <PiloSuggestionCard
+            suggestion={suggestion}
+            target={suggestionTarget}
+            action={suggestionCta}
+          />
           {warning?.status === "open" && (
             <div className="rounded-card-sm bg-card p-4">
               <p className="text-[12.5px] font-semibold text-ink-2">Handled this already?</p>
