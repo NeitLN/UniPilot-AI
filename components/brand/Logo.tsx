@@ -12,7 +12,7 @@ export interface LogoProps {
  * "AI" is violet on light backgrounds, lime on dark backgrounds (docs/ROADMAP.md §3).
  */
 export function Logo({ tone = "light", size = 40, className }: LogoProps) {
-  const aiColor = tone === "light" ? "text-lime" : "text-violet";
+  const aiColor = tone === "light" ? "text-lime" : "text-violet-text";
   const wordColor = tone === "light" ? "text-white" : "text-foreground";
 
   return (
@@ -29,9 +29,7 @@ export function Logo({ tone = "light", size = 40, className }: LogoProps) {
           className="object-contain"
         />
       </span>
-      <span
-        className={`font-display font-semibold text-xl tracking-tight ${wordColor}`}
-      >
+      <span className={`font-display font-semibold text-xl tracking-tight ${wordColor}`}>
         UniPilot <span className={aiColor}>AI</span>
       </span>
     </div>

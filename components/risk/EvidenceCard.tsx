@@ -3,17 +3,23 @@ import { IconChip, type IconChipTone } from "@/components/ui/IconChip";
 import { evidenceImpact, type RiskResult, type SuggestionType } from "@/lib/rules/risk";
 import type { RiskEvidence } from "@/lib/risk/compute";
 
-const IMPACT_LABEL = { strong: "Strong impact", moderate: "Moderate impact", protective: "Protective impact" };
+const IMPACT_LABEL = {
+  strong: "Strong impact",
+  moderate: "Moderate impact",
+  protective: "Protective impact",
+};
 const IMPACT_CLASSES = {
   strong: "bg-coral-tint text-coral-text",
   moderate: "bg-tangerine-tint text-tangerine-text",
   protective: "bg-mint-tint text-mint-text",
 };
-const IMPACT_HEADLINE_CLASSES = {
-  strong: "text-coral-text",
-  moderate: "text-tangerine-text",
-  protective: "text-mint-text",
-};
+/* The headline sits on bg-line, which flips to a dark surface in dark mode,
+   while coral-text/tangerine-text/mint-text are fixed dark shades chosen for
+   a light tint. That pairing rendered dark-on-dark — mint-text measured
+   1:1 on the dark --line. The impact tone is already carried by the chip and
+   the IconChip beside it, both of which keep the correct tint+text pairing,
+   so the headline itself just needs a token that flips with its surface. */
+const HEADLINE_CLASS = "text-foreground";
 const IMPACT_CHIP_TONE: Record<keyof typeof IMPACT_CLASSES, IconChipTone> = {
   strong: "coral",
   moderate: "tangerine",
@@ -68,7 +74,9 @@ export function EvidenceCard({ result, evidence }: { result: RiskResult; evidenc
 
   return (
     <div className="rounded-card bg-card p-5">
-      <h2 className="font-display text-lg font-bold text-foreground">What&rsquo;s shaping your score</h2>
+      <h2 className="font-display text-lg font-bold text-foreground">
+        What&rsquo;s shaping your score
+      </h2>
       <ul className="mt-3 flex flex-col gap-2.5">
         {items.map((item) => {
           const impact = evidenceImpact(item.type, result[item.type]);
@@ -77,11 +85,13 @@ export function EvidenceCard({ result, evidence }: { result: RiskResult; evidenc
             <li key={item.type} className="flex items-center gap-3 rounded-ctl bg-line p-3">
               <IconChip icon={item.icon} tone={IMPACT_CHIP_TONE[impact]} />
               <div className="min-w-0 flex-1">
-                <p className={`text-sm font-bold ${IMPACT_HEADLINE_CLASSES[impact]}`}>{item.headline}</p>
+                <p className={`text-sm font-bold ${HEADLINE_CLASS}`}>{item.headline}</p>
                 <p className="text-[11.5px] font-semibold text-ink-3">{item.detail}</p>
               </div>
               <div className="flex shrink-0 flex-col items-end gap-1">
-                <span className={`rounded-pill px-2.5 py-1 text-[10.5px] font-extrabold ${IMPACT_CLASSES[impact]}`}>
+                <span
+                  className={`rounded-pill px-2.5 py-1 text-[10.5px] font-extrabold ${IMPACT_CLASSES[impact]}`}
+                >
                   {IMPACT_LABEL[impact]}
                 </span>
                 <span className="flex gap-0.5" aria-hidden="true">

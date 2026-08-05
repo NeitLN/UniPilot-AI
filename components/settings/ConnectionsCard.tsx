@@ -22,7 +22,11 @@ export function ConnectionsCard({
 }: ConnectionsCardProps) {
   return (
     <div className="flex items-center gap-3 rounded-ctl bg-line px-4 py-3.5">
-      <IconChip icon={<CalendarDays className="h-[18px] w-[18px]" aria-hidden="true" />} tone="sky" square />
+      <IconChip
+        icon={<CalendarDays className="h-[18px] w-[18px]" aria-hidden="true" />}
+        tone="sky"
+        square
+      />
       <div className="min-w-0 flex-1">
         <p className="text-sm font-bold text-foreground">Google Calendar</p>
         <p className="mt-0.5 text-[12.5px] font-semibold text-ink-3" suppressHydrationWarning>
@@ -51,7 +55,7 @@ export function ConnectionsCard({
           )}
           <Link
             href="/schedule"
-            className="flex min-h-11 items-center rounded-ctl border border-violet/30 bg-card px-3.5 text-xs font-bold text-violet hover:bg-violet-tint"
+            className="flex min-h-11 items-center rounded-ctl border border-violet/30 bg-card px-3.5 text-xs font-bold text-violet-text hover:bg-violet-tint"
           >
             Manage
           </Link>

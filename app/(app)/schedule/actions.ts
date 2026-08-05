@@ -4,10 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { syncCalendarForUser } from "@/lib/calendar/sync";
 import { courseBelongsToCaller } from "@/lib/supabase/ownership";
-import {
-  scheduleEventReminder,
-  rescheduleEventReminder,
-} from "@/lib/notifications/sync";
+import { scheduleEventReminder, rescheduleEventReminder } from "@/lib/notifications/sync";
 import {
   validateEvent,
   generateOccurrences,
@@ -16,11 +13,7 @@ import {
   type EventFieldErrors,
   type EventRepeat,
 } from "@/lib/rules/event";
-import {
-  validateCourse,
-  type CourseInput,
-  type CourseFieldErrors,
-} from "@/lib/rules/course";
+import { validateCourse, type CourseInput, type CourseFieldErrors } from "@/lib/rules/course";
 
 export interface SyncNowResult {
   status: "ok" | "error";
@@ -44,18 +37,13 @@ export async function syncNow(): Promise<SyncNowResult> {
     return {
       status: "error",
       message:
-        result.reason === "not_connected"
-          ? "Google Calendar isn't connected."
-          : result.message,
+        result.reason === "not_connected" ? "Google Calendar isn't connected." : result.message,
     };
   }
   return { status: "ok", eventCount: result.eventCount };
 }
 
-export async function assignCourseToBlock(
-  blockId: string,
-  courseId: string | null,
-) {
+export async function assignCourseToBlock(blockId: string, courseId: string | null) {
   const supabase = await createClient();
 
   if (courseId && !(await courseBelongsToCaller(supabase, courseId))) {
@@ -165,14 +153,7 @@ export async function createEvent(
 
   await Promise.all(
     created.map((row) =>
-      scheduleEventReminder(
-        supabase,
-        user.id,
-        row.id,
-        input.title,
-        row.start_at,
-        reminderMinutes,
-      ),
+      scheduleEventReminder(supabase, user.id, row.id, input.title, row.start_at, reminderMinutes),
     ),
   );
 

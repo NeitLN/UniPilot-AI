@@ -10,7 +10,7 @@ const FILL_CLASSES: Record<ProgressTone, string> = {
 const TEXT_CLASSES: Record<ProgressTone, string> = {
   coral: "text-coral-text",
   tangerine: "text-tangerine-text",
-  violet: "text-violet",
+  violet: "text-violet-text",
   muted: "text-ink-2",
 };
 
@@ -23,13 +23,16 @@ export interface ProgressBarProps {
   emphasizePercent?: boolean;
 }
 
-export function ProgressBar({ value, tone, className, emphasizePercent = false }: ProgressBarProps) {
+export function ProgressBar({
+  value,
+  tone,
+  className,
+  emphasizePercent = false,
+}: ProgressBarProps) {
   const pct = Math.max(0, Math.min(100, Math.round(value)));
 
   return (
-    <div
-      className={`flex w-full items-center gap-2 sm:w-[92px] ${className ?? ""}`}
-    >
+    <div className={`flex w-full items-center gap-2 sm:w-[92px] ${className ?? ""}`}>
       <div
         role="progressbar"
         aria-valuenow={pct}

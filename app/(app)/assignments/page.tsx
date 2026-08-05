@@ -41,9 +41,7 @@ interface AssignmentsPageProps {
   }>;
 }
 
-export default async function AssignmentsPage({
-  searchParams,
-}: AssignmentsPageProps) {
+export default async function AssignmentsPage({ searchParams }: AssignmentsPageProps) {
   const { course, status, q, page: pageParam, when } = await searchParams;
   const page = Math.max(1, Number(pageParam) || 1);
   const supabase = await createClient();
@@ -212,9 +210,7 @@ export default async function AssignmentsPage({
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-3xl font-semibold text-foreground">
-            Assignments
-          </h1>
+          <h1 className="font-display text-3xl font-semibold text-foreground">Assignments</h1>
           <p className="mt-1 text-sm font-semibold text-ink-2">
             {activeCount} active · {attentionCount} need attention
           </p>
@@ -275,12 +271,20 @@ export default async function AssignmentsPage({
             assignments.length > 0 &&
             (showPrioritySections ? (
               <>
-                <AssignmentSection title="Needs attention" tone="attention" count={buckets.attention.length}>
+                <AssignmentSection
+                  title="Needs attention"
+                  tone="attention"
+                  count={buckets.attention.length}
+                >
                   {buckets.attention.map((a) => (
                     <AssignmentCard key={a.id} assignment={a} courses={courses} />
                   ))}
                 </AssignmentSection>
-                <AssignmentSection title="Due this week" tone="neutral" count={buckets.thisWeek.length}>
+                <AssignmentSection
+                  title="Due this week"
+                  tone="neutral"
+                  count={buckets.thisWeek.length}
+                >
                   {buckets.thisWeek.map((a) => (
                     <AssignmentCard key={a.id} assignment={a} courses={courses} />
                   ))}

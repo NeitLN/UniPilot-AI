@@ -1,0 +1,278 @@
+{
+  "pages_public": {
+    "/login": {
+      "anon": {
+        "status": 200,
+        "redirect": ""
+      },
+      "auth": {
+        "status": 307,
+        "redirect": "/"
+      }
+    },
+    "/forgot-password": {
+      "anon": {
+        "status": 200,
+        "redirect": ""
+      },
+      "auth": {
+        "status": 307,
+        "redirect": "/"
+      }
+    },
+    "/reset-password": {
+      "anon": {
+        "status": 200,
+        "redirect": ""
+      },
+      "auth": {
+        "status": 200,
+        "redirect": ""
+      }
+    }
+  },
+  "pages_protected": {
+    "/": {
+      "anon": {
+        "status": 307,
+        "redirect": "/login"
+      },
+      "auth": {
+        "status": 200,
+        "redirect": ""
+      }
+    },
+    "/onboarding": {
+      "anon": {
+        "status": 307,
+        "redirect": "/login"
+      },
+      "auth": {
+        "status": 200,
+        "redirect": ""
+      }
+    },
+    "/assignments": {
+      "anon": {
+        "status": 307,
+        "redirect": "/login"
+      },
+      "auth": {
+        "status": 200,
+        "redirect": ""
+      }
+    },
+    "/planner": {
+      "anon": {
+        "status": 307,
+        "redirect": "/login"
+      },
+      "auth": {
+        "status": 200,
+        "redirect": ""
+      }
+    },
+    "/schedule": {
+      "anon": {
+        "status": 307,
+        "redirect": "/login"
+      },
+      "auth": {
+        "status": 200,
+        "redirect": ""
+      }
+    },
+    "/courses": {
+      "anon": {
+        "status": 307,
+        "redirect": "/login"
+      },
+      "auth": {
+        "status": 200,
+        "redirect": ""
+      }
+    },
+    "/focus": {
+      "anon": {
+        "status": 307,
+        "redirect": "/login"
+      },
+      "auth": {
+        "status": 200,
+        "redirect": ""
+      }
+    },
+    "/gpa": {
+      "anon": {
+        "status": 307,
+        "redirect": "/login"
+      },
+      "auth": {
+        "status": 200,
+        "redirect": ""
+      }
+    },
+    "/risk": {
+      "anon": {
+        "status": 307,
+        "redirect": "/login"
+      },
+      "auth": {
+        "status": 200,
+        "redirect": ""
+      }
+    },
+    "/reports": {
+      "anon": {
+        "status": 307,
+        "redirect": "/login"
+      },
+      "auth": {
+        "status": 200,
+        "redirect": ""
+      }
+    },
+    "/notifications": {
+      "anon": {
+        "status": 307,
+        "redirect": "/login"
+      },
+      "auth": {
+        "status": 200,
+        "redirect": ""
+      }
+    },
+    "/settings": {
+      "anon": {
+        "status": 307,
+        "redirect": "/login"
+      },
+      "auth": {
+        "status": 200,
+        "redirect": ""
+      }
+    }
+  },
+  "api": {
+    "GET /api/health": {
+      "anon": {
+        "status": 200,
+        "redirect": ""
+      },
+      "auth": {
+        "status": 200,
+        "redirect": ""
+      }
+    },
+    "GET /api/export": {
+      "anon": {
+        "status": 307,
+        "redirect": "/login"
+      },
+      "auth": {
+        "status": 200,
+        "redirect": ""
+      }
+    },
+    "GET /api/calendar/sync": {
+      "anon": {
+        "status": 307,
+        "redirect": "/login"
+      },
+      "auth": {
+        "status": 405,
+        "redirect": ""
+      }
+    },
+    "GET /api/calendar/oauth/start": {
+      "anon": {
+        "status": 307,
+        "redirect": "/login"
+      },
+      "auth": {
+        "status": 307,
+        "redirect": "https://accounts.google.com/o/oauth2/v2/"
+      }
+    },
+    "GET /api/calendar/oauth/callback": {
+      "anon": {
+        "status": 307,
+        "redirect": "/login"
+      },
+      "auth": {
+        "status": 307,
+        "redirect": "/schedule?error=state_mismatch"
+      }
+    },
+    "GET /api/cron/notifications": {
+      "anon": {
+        "status": 401,
+        "redirect": ""
+      },
+      "auth": {
+        "status": 401,
+        "redirect": ""
+      }
+    },
+    "GET /auth/confirm": {
+      "anon": {
+        "status": 307,
+        "redirect": "/reset-password"
+      },
+      "auth": {
+        "status": 307,
+        "redirect": "/reset-password"
+      }
+    },
+    "POST /api/plan/generate": {
+      "anon": {
+        "status": 307,
+        "redirect": "/login"
+      },
+      "auth": {
+        "status": 200,
+        "redirect": ""
+      }
+    },
+    "POST /api/risk/compute": {
+      "anon": {
+        "status": 307,
+        "redirect": "/login"
+      },
+      "auth": {
+        "status": 200,
+        "redirect": ""
+      }
+    },
+    "POST /api/push/subscribe": {
+      "anon": {
+        "status": 307,
+        "redirect": "/login"
+      },
+      "auth": {
+        "status": 400,
+        "redirect": ""
+      }
+    },
+    "POST /api/push/send": {
+      "anon": {
+        "status": 307,
+        "redirect": "/login"
+      },
+      "auth": {
+        "status": 200,
+        "redirect": ""
+      }
+    },
+    "POST /api/errors": {
+      "anon": {
+        "status": 307,
+        "redirect": "/login"
+      },
+      "auth": {
+        "status": 204,
+        "redirect": ""
+      }
+    }
+  }
+}

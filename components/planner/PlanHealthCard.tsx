@@ -20,19 +20,33 @@ export function PlanHealthCard({
         <h2 className="font-display text-lg font-bold text-ink">Plan health</h2>
         <dl className="mt-3 flex flex-col gap-3 text-ink">
           <div className="flex items-center gap-2.5">
-            <IconChip icon={<CalendarDays className="h-4 w-4" aria-hidden="true" />} tone="white" size="sm" />
+            <IconChip
+              icon={<CalendarDays className="h-4 w-4" aria-hidden="true" />}
+              tone="white"
+              size="sm"
+            />
             <dt className="sr-only">Sessions</dt>
             <dd className="font-display text-2xl font-bold leading-none">{sessionCount}</dd>
             <dd className="text-[12.5px] font-semibold text-ink/70">sessions</dd>
           </div>
           <div className="flex items-center gap-2.5">
-            <IconChip icon={<Clock className="h-4 w-4" aria-hidden="true" />} tone="white" size="sm" />
+            <IconChip
+              icon={<Clock className="h-4 w-4" aria-hidden="true" />}
+              tone="white"
+              size="sm"
+            />
             <dt className="sr-only">Total focus time</dt>
-            <dd className="font-display text-2xl font-bold leading-none">{formatMinutes(totalMinutes)}</dd>
+            <dd className="font-display text-2xl font-bold leading-none">
+              {formatMinutes(totalMinutes)}
+            </dd>
             <dd className="text-[12.5px] font-semibold text-ink/70">total focus time</dd>
           </div>
           <div className="flex items-center gap-2.5">
-            <IconChip icon={<CheckCircle2 className="h-4 w-4" aria-hidden="true" />} tone="white" size="sm" />
+            <IconChip
+              icon={<CheckCircle2 className="h-4 w-4" aria-hidden="true" />}
+              tone="white"
+              size="sm"
+            />
             <dt className="sr-only">Deadlines covered</dt>
             <dd className="font-display text-2xl font-bold leading-none">{coveredCount}</dd>
             <dd className="text-[12.5px] font-semibold text-ink/70">deadlines covered</dd>
@@ -47,7 +61,9 @@ export function PlanHealthCard({
           strokeWidth={9}
           tone="ink"
           track="light"
-          label={coveragePct === null ? "No deadlines due this week" : `Plan coverage, ${coveragePct}%`}
+          label={
+            coveragePct === null ? "No deadlines due this week" : `Plan coverage, ${coveragePct}%`
+          }
         >
           <div>
             <p className="font-display text-xl font-bold text-ink">
@@ -56,7 +72,9 @@ export function PlanHealthCard({
             <p className="text-[9.5px] font-bold uppercase tracking-wide text-ink/70">coverage</p>
           </div>
         </ProgressRing>
-        <p className="mt-1.5 text-center text-[11px] font-bold text-ink/80">{planHealthLabel(coveragePct)}</p>
+        <p className="mt-1.5 text-center text-[11px] font-bold text-ink/80">
+          {planHealthLabel(coveragePct)}
+        </p>
       </div>
     </div>
   );

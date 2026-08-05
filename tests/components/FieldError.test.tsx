@@ -17,14 +17,14 @@ import { FieldError } from "@/components/ui/FieldError";
 // outright — the test below was updated to guard the pairing, not a
 // blanket absence of -text.
 describe("FieldError", () => {
-  it("always renders role=\"alert\", as a <p> by default", () => {
+  it('always renders role="alert", as a <p> by default', () => {
     render(<FieldError>Title is required.</FieldError>);
     const alert = screen.getByRole("alert");
     expect(alert.tagName).toBe("P");
     expect(alert).toHaveTextContent("Title is required.");
   });
 
-  it("renders as a <span> with as=\"span\", still role=\"alert\"", () => {
+  it('renders as a <span> with as="span", still role="alert"', () => {
     render(<FieldError as="span">Pick a course.</FieldError>);
     const alert = screen.getByRole("alert");
     expect(alert.tagName).toBe("SPAN");

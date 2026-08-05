@@ -19,7 +19,11 @@ export function DeleteAccountSection({ userEmail }: { userEmail: string }) {
         onClick={() => setOpen(true)}
         className="flex items-center gap-3 rounded-ctl bg-coral-tint px-4 py-3 text-left hover:bg-coral-tint/80"
       >
-        <IconChip icon={<Trash2 className="h-[18px] w-[18px]" aria-hidden="true" />} tone="coral" size="sm" />
+        <IconChip
+          icon={<Trash2 className="h-[18px] w-[18px]" aria-hidden="true" />}
+          tone="coral"
+          size="sm"
+        />
         <span className="min-w-0 flex-1">
           <span className="block text-sm font-bold text-coral-text">Delete account</span>
           <span className="block text-[11.5px] font-semibold text-coral-text/80">

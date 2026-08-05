@@ -44,7 +44,11 @@ export async function updateStudySession(
         .neq("id", sessionId),
       supabase.from("class_blocks").select("start_at, end_at"),
       session.assignment_id
-        ? supabase.from("assignments").select("due_at").eq("id", session.assignment_id).maybeSingle()
+        ? supabase
+            .from("assignments")
+            .select("due_at")
+            .eq("id", session.assignment_id)
+            .maybeSingle()
         : Promise.resolve({ data: null }),
     ]);
 
@@ -103,11 +107,11 @@ export async function deleteStudySession(sessionId: string) {
 // but the user had no way to tell whether their sessions also reached
 // Google without opening Google Calendar and checking themselves.
 export type ConfirmPlanResult =
-  | { pushed: number }
-  | { pushSkipped: "not_connected" }
-  | { pushFailed: string };
+  { pushed: number } | { pushSkipped: "not_connected" } | { pushFailed: string };
 
-function toConfirmPlanResult(result: Awaited<ReturnType<typeof pushConfirmedSessionsToCalendar>>): ConfirmPlanResult {
+function toConfirmPlanResult(
+  result: Awaited<ReturnType<typeof pushConfirmedSessionsToCalendar>>,
+): ConfirmPlanResult {
   if (result.ok) return { pushed: result.pushed };
   if (result.reason === "not_connected") return { pushSkipped: "not_connected" };
   return { pushFailed: result.message };
@@ -126,7 +130,11 @@ export async function confirmPlan(planId: string): Promise<ConfirmPlanResult> {
     .select("start_at, assignment_id")
     .eq("plan_id", planId);
 
-  const assignmentIds = [...new Set((sessions ?? []).map((s) => s.assignment_id).filter((id): id is string => Boolean(id)))];
+  const assignmentIds = [
+    ...new Set(
+      (sessions ?? []).map((s) => s.assignment_id).filter((id): id is string => Boolean(id)),
+    ),
+  ];
   const { data: assignments } = assignmentIds.length
     ? await supabase.from("assignments").select("id, title").in("id", assignmentIds)
     : { data: [] as { id: string; title: string }[] };
@@ -184,7 +192,9 @@ export async function confirmPlan(planId: string): Promise<ConfirmPlanResult> {
   // must never depend on that continuing to hold in the future.
   let pushResult: ConfirmPlanResult;
   try {
-    pushResult = toConfirmPlanResult(await pushConfirmedSessionsToCalendar(supabase, user.id, planId));
+    pushResult = toConfirmPlanResult(
+      await pushConfirmedSessionsToCalendar(supabase, user.id, planId),
+    );
   } catch (err) {
     pushResult = {
       pushFailed: err instanceof Error ? err.message : "Unknown push error",
@@ -209,7 +219,9 @@ export async function retryCalendarPush(planId: string): Promise<ConfirmPlanResu
   if (!user) throw new Error("Session expired — sign in again.");
 
   try {
-    const result = toConfirmPlanResult(await pushConfirmedSessionsToCalendar(supabase, user.id, planId));
+    const result = toConfirmPlanResult(
+      await pushConfirmedSessionsToCalendar(supabase, user.id, planId),
+    );
     revalidatePath("/planner");
     return result;
   } catch (err) {

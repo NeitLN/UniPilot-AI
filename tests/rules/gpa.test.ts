@@ -1,11 +1,15 @@
 import { describe, expect, it } from "vitest";
 import {
   dragsGpaDown,
+  BELOW_AVERAGE_MARGIN,
   estimateGradePoint,
   gpa,
   gpaBySemester,
   gpaChartDomain,
+  letterGrade,
   gpaContribution,
+  gpaContributionPct,
+  semesterLabel,
   onTrackProgress,
   predictedCourseScore,
   projectGpaScenarios,
@@ -19,7 +23,12 @@ import {
 
 describe("projectGpaScenarios", () => {
   it("returns null when no in-progress course has any assignment weight", () => {
-    expect(projectGpaScenarios([], [{ courseId: "c1", courseName: "A", creditHours: 3, assignments: [] }])).toBeNull();
+    expect(
+      projectGpaScenarios(
+        [],
+        [{ courseId: "c1", courseName: "A", creditHours: 3, assignments: [] }],
+      ),
+    ).toBeNull();
   });
 
   it("worst <= likely <= best for a partially-scored course", () => {
@@ -119,7 +128,10 @@ describe("strongestCourseInsight", () => {
   });
 
   it("ignores predicted courses with too little scored weight to be meaningful", () => {
-    const insight = strongestCourseInsight([], [{ courseName: "Database", predictedScore: 100, scoredWeight: 5 }]);
+    const insight = strongestCourseInsight(
+      [],
+      [{ courseName: "Database", predictedScore: 100, scoredWeight: 5 }],
+    );
     expect(insight).toBeNull();
   });
 
@@ -173,13 +185,38 @@ describe("gpaContribution", () => {
 });
 
 describe("dragsGpaDown", () => {
-  it("is true when the course's grade point is below the overall average", () => {
+  it("is true when the course sits a meaningful step below the average", () => {
+    // 2.8 against 3.26 is 0.46 below — past the margin.
     expect(dragsGpaDown({ gradePoint: 2.8, creditHours: 4 }, 3.26)).toBe(true);
   });
 
   it("is false when at or above the overall average", () => {
     expect(dragsGpaDown({ gradePoint: 3.7, creditHours: 3 }, 3.26)).toBe(false);
     expect(dragsGpaDown({ gradePoint: 3.26, creditHours: 3 }, 3.26)).toBe(false);
+  });
+
+  // UX-02: the rule was a plain `<`, so it fired on roughly half of every
+  // list — 6 of 9 rows on a realistic spread. These pin the margin that
+  // makes the label mean something.
+  it("ignores a course that is only marginally below", () => {
+    // 3.1 against 3.26 is 0.16 below — inside the margin, not worth a flag.
+    expect(dragsGpaDown({ gradePoint: 3.1, creditHours: 3 }, 3.26)).toBe(false);
+  });
+
+  it("does not fire exactly at the margin, only past it", () => {
+    expect(dragsGpaDown({ gradePoint: 3.26 - BELOW_AVERAGE_MARGIN, creditHours: 3 }, 3.26)).toBe(
+      false,
+    );
+  });
+
+  it("flags a minority of a realistic spread, not most of it", () => {
+    // The nine-course dataset from the audit, where the old rule tagged 6.
+    const overall = 3.39;
+    const points = [3.0, 3.35, 3.3, 3.35, 3.7, 4.0, 3.7, 3.0, 3.3];
+    const flagged = points.filter((gradePoint) =>
+      dragsGpaDown({ gradePoint, creditHours: 3 }, overall),
+    ).length;
+    expect(flagged).toBeLessThan(points.length / 2);
   });
 });
 
@@ -360,5 +397,59 @@ describe("gpaChartDomain", () => {
 
   it("falls back to the full range for an empty list", () => {
     expect(gpaChartDomain([])).toEqual({ min: 0, max: 4 });
+  });
+});
+
+describe("letterGrade", () => {
+  it("maps the standard 4.0 steps", () => {
+    expect(letterGrade(4.0)).toBe("A");
+    expect(letterGrade(3.7)).toBe("A-");
+    expect(letterGrade(3.3)).toBe("B+");
+    expect(letterGrade(3.0)).toBe("B");
+    expect(letterGrade(2.0)).toBe("C");
+    expect(letterGrade(1.0)).toBe("D");
+    expect(letterGrade(0)).toBe("F");
+  });
+
+  it("takes the lower letter between steps rather than rounding up", () => {
+    expect(letterGrade(3.65)).toBe("B+");
+    expect(letterGrade(3.99)).toBe("A-");
+  });
+});
+
+describe("gpaContributionPct", () => {
+  const rows: GradeLike[] = [
+    { gradePoint: 3.7, creditHours: 3 },
+    { gradePoint: 3.7, creditHours: 3 },
+    { gradePoint: 3.0, creditHours: 3 },
+    { gradePoint: 3.3, creditHours: 2 },
+    { gradePoint: 4.0, creditHours: 2 },
+  ];
+
+  it("is the row's share of total quality points", () => {
+    // 3 x 3.7 = 11.1 of 45.8 total quality points.
+    expect(gpaContributionPct(rows[0], rows)).toBe(24);
+    expect(gpaContributionPct(rows[3], rows)).toBe(14);
+  });
+
+  it("sums to about 100 across every row", () => {
+    const total = rows.reduce((s, r) => s + gpaContributionPct(r, rows), 0);
+    expect(Math.abs(total - 100)).toBeLessThanOrEqual(2);
+  });
+
+  it("returns 0 rather than dividing by zero when nothing is graded", () => {
+    expect(gpaContributionPct({ gradePoint: 0, creditHours: 0 }, [])).toBe(0);
+  });
+});
+
+describe("semesterLabel", () => {
+  it("spells out bare numeric codes", () => {
+    expect(semesterLabel("253")).toBe("Semester 253");
+    expect(semesterLabel(" 251 ")).toBe("Semester 251");
+  });
+
+  it("leaves a name that already reads as one alone", () => {
+    expect(semesterLabel("Fall 2025")).toBe("Fall 2025");
+    expect(semesterLabel("2025S1")).toBe("2025S1");
   });
 });

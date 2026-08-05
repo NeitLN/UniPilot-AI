@@ -26,9 +26,16 @@ export function FreeTimeCard({
   return (
     <div className="rounded-card bg-card p-4">
       <div className="flex items-center gap-3">
-        <IconChip icon={<CalendarRange className="h-[18px] w-[18px]" aria-hidden="true" />} tone="mint" />
+        <IconChip
+          icon={<CalendarRange className="h-[18px] w-[18px]" aria-hidden="true" />}
+          tone="mint"
+          square
+        />
         <div>
-          <p className="font-display text-2xl font-bold leading-none text-foreground">{formatMinutes(freeMinutesTotal)}</p>
+          <p className="text-[11.5px] font-semibold text-ink-3">Free time</p>
+          <p className="mt-0.5 font-display text-2xl font-bold leading-none text-foreground">
+            {formatMinutes(freeMinutesTotal)}
+          </p>
           <p className="mt-1 text-[11.5px] font-bold text-ink-3">available this week</p>
         </div>
       </div>

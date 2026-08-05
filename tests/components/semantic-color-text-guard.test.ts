@@ -23,9 +23,7 @@ const BARE_SEMANTIC_TEXT = /text-(mint|coral|tangerine)(?![-a-zA-Z])/;
 // flagged in the Phase 14 commit and left for that phase.
 // (AssignmentItem.tsx's own instance of this was fixed in the Assignments
 // redesign — AssignmentCard.tsx now pairs bg-coral-tint/text-coral-text.)
-const KNOWN_EXCEPTIONS = new Set([
-  "components/settings/DeleteAccountSection.tsx",
-]);
+const KNOWN_EXCEPTIONS = new Set(["components/settings/DeleteAccountSection.tsx"]);
 
 function walk(dir: string, out: string[] = []): string[] {
   for (const entry of readdirSync(dir)) {
@@ -58,9 +56,6 @@ describe("semantic color text guard", () => {
         });
       }
     }
-    expect(
-      offenders,
-      offenders.map((o) => `${o.file}:${o.line}`).join("\n"),
-    ).toHaveLength(0);
+    expect(offenders, offenders.map((o) => `${o.file}:${o.line}`).join("\n")).toHaveLength(0);
   });
 });

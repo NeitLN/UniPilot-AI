@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { deliverAllDueNotifications } from "@/lib/push/deliver";
+import { sweepPlanNudges } from "@/lib/notifications/plan-nudge";
 
 /**
  * FR-03: the actual scheduled trigger — /api/push/send only delivers for
@@ -21,6 +22,12 @@ export async function GET(request: NextRequest) {
   }
 
   const supabase = createServiceClient();
+
+  // PROD-02: creating the in-week plan nudges *before* the delivery sweep
+  // means one created on this pass goes out on this pass, rather than
+  // waiting 15 minutes for the next one. The sweep is idempotent (a unique
+  // index, migration 0021), so it is safe to run this often.
+  const nudges = await sweepPlanNudges(supabase);
   const result = await deliverAllDueNotifications(supabase);
-  return NextResponse.json(result);
+  return NextResponse.json({ ...result, nudges });
 }

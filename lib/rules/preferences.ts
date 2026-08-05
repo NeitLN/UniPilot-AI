@@ -16,7 +16,10 @@ export interface StudyPreferencesInput {
 }
 
 export type StudyPreferencesErrors = Partial<
-  Record<"defaultFocusMinutes" | "dailyFocusGoalCycles" | "preferredStudyDays" | "programTotalCredits", string>
+  Record<
+    "defaultFocusMinutes" | "dailyFocusGoalCycles" | "preferredStudyDays" | "programTotalCredits",
+    string
+  >
 >;
 
 export function validateStudyPreferences(input: StudyPreferencesInput): StudyPreferencesErrors {

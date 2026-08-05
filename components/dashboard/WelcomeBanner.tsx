@@ -8,9 +8,7 @@ import { Pilo } from "@/components/brand/Pilo";
  * their own (NFR-04). */
 export async function WelcomeBanner() {
   const supabase = await createClient();
-  const { count } = await supabase
-    .from("courses")
-    .select("id", { count: "exact", head: true });
+  const { count } = await supabase.from("courses").select("id", { count: "exact", head: true });
 
   if (count && count > 0) return null;
 
@@ -20,8 +18,8 @@ export async function WelcomeBanner() {
       <div className="flex-1">
         <h2 className="font-display text-lg font-bold">Welcome to UniPilot AI</h2>
         <p className="mt-0.5 text-[12.5px] font-medium text-white/85">
-          Set your availability, add a course, and log your first assignment —
-          three steps, about a minute.
+          Set your availability, add a course, and log your first assignment — three steps, about a
+          minute.
         </p>
       </div>
       <Link

@@ -6,9 +6,7 @@ setup("authenticate", async ({ page }) => {
   const email = process.env.E2E_EMAIL;
   const password = process.env.E2E_PASSWORD;
   if (!email || !password) {
-    throw new Error(
-      "Set E2E_EMAIL / E2E_PASSWORD in .env.local — see .env.local.example.",
-    );
+    throw new Error("Set E2E_EMAIL / E2E_PASSWORD in .env.local — see .env.local.example.");
   }
 
   await page.goto("/login");

@@ -5,9 +5,7 @@ import pg from "pg";
 
 const file = process.argv[2];
 if (!file) {
-  console.error(
-    "Usage: DATABASE_URL=... node scripts/run-migration.mjs <path-to-sql>",
-  );
+  console.error("Usage: DATABASE_URL=... node scripts/run-migration.mjs <path-to-sql>");
   process.exit(1);
 }
 

@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { THEME_STORAGE_KEY } from "@/lib/theme";
+import { reportClientError } from "@/lib/observability/client";
 
 /**
  * SR-02 (docs/PRODUCT_REVIEW_3.md): the app had zero error boundaries
@@ -21,9 +22,11 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // No observability pipeline yet (see docs/PRODUCT_REVIEW_3.md) — the
-    // browser console is the only trace of what broke.
+    // Ships to /api/errors so this lands in the same structured log stream
+    // as server errors. The console line stays for local development, where
+    // there is no log collector to read.
     console.error(error);
+    reportClientError(error, "app/error.tsx");
   }, [error]);
 
   useEffect(() => {
@@ -48,12 +51,10 @@ export default function Error({
 
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3 px-6 text-center">
-      <p className="font-display text-2xl font-bold text-foreground">
-        Something went wrong.
-      </p>
+      <p className="font-display text-2xl font-bold text-foreground">Something went wrong.</p>
       <p className="max-w-sm text-sm font-semibold text-ink-2">
-        This page hit an unexpected error. Your data is safe — try again, or
-        head back to the Dashboard.
+        This page hit an unexpected error. Your data is safe — try again, or head back to the
+        Dashboard.
       </p>
       <div className="mt-2 flex gap-2.5">
         <button

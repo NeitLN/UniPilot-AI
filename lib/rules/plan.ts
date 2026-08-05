@@ -135,9 +135,7 @@ export function computePlanProgress(
   now: Date = new Date(),
 ): PlanProgress {
   const totalCount = sessions.length;
-  const pastCount = sessions.filter(
-    (s) => new Date(s.startAt).getTime() < now.getTime(),
-  ).length;
+  const pastCount = sessions.filter((s) => new Date(s.startAt).getTime() < now.getTime()).length;
   const lifecycle: PlanLifecycle =
     totalCount === 0 ? "empty" : pastCount === totalCount ? "ended" : "active";
   return { lifecycle, pastCount, totalCount };
@@ -156,9 +154,7 @@ export interface NotificationDraft {
 }
 
 /** FR-06 — one in-app reminder row per confirmed session (delivery lands in Phase 9). */
-export function buildSessionReminders(
-  sessions: SessionReminderInput[],
-): NotificationDraft[] {
+export function buildSessionReminders(sessions: SessionReminderInput[]): NotificationDraft[] {
   return sessions.map((s) => ({
     kind: "study_session",
     title: `Study session: ${s.assignmentTitle}`,

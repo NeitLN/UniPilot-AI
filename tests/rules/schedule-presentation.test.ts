@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  formatClockShort,
   freeMinutesForDay,
   isCurrentDisplayedRange,
   isHappeningNow,
@@ -10,7 +11,9 @@ import {
   type ClassBlockLite,
 } from "@/lib/rules/schedule-presentation";
 
-function block(overrides: Partial<ClassBlockLite> & Pick<ClassBlockLite, "startAt" | "endAt">): ClassBlockLite {
+function block(
+  overrides: Partial<ClassBlockLite> & Pick<ClassBlockLite, "startAt" | "endAt">,
+): ClassBlockLite {
   return {
     id: crypto.randomUUID(),
     title: "Class",
@@ -28,7 +31,11 @@ describe("nextClass / isHappeningNow", () => {
   it("picks the soonest class that hasn't ended, ignoring all-day blocks", () => {
     const b1 = block({ startAt: "2026-08-03T11:00:00.000Z", endAt: "2026-08-03T12:00:00.000Z" });
     const b2 = block({ startAt: "2026-08-03T09:00:00.000Z", endAt: "2026-08-03T13:00:00.000Z" }); // already happening
-    const allDay = block({ startAt: "2026-08-03T00:00:00.000Z", endAt: "2026-08-04T00:00:00.000Z", isAllDay: true });
+    const allDay = block({
+      startAt: "2026-08-03T00:00:00.000Z",
+      endAt: "2026-08-04T00:00:00.000Z",
+      isAllDay: true,
+    });
     const result = nextClass([b1, b2, allDay], now);
     expect(result?.id).toBe(b2.id); // happening now, ends later than "now" — soonest by start time
   });
@@ -78,7 +85,11 @@ describe("freeMinutesForDay", () => {
   });
 
   it("ignores all-day events (they don't consume timed free time)", () => {
-    const allDay = block({ startAt: "2026-08-03T00:00:00.000Z", endAt: "2026-08-04T00:00:00.000Z", isAllDay: true });
+    const allDay = block({
+      startAt: "2026-08-03T00:00:00.000Z",
+      endAt: "2026-08-04T00:00:00.000Z",
+      isAllDay: true,
+    });
     expect(freeMinutesForDay("2026-08-03", [allDay], "UTC").freeMinutes).toBe(720);
   });
 });
@@ -148,5 +159,23 @@ describe("isCurrentDisplayedRange", () => {
     const range = { start: "2026-08-03T00:00:00.000Z", end: "2026-08-10T00:00:00.000Z" };
     expect(isCurrentDisplayedRange(range, new Date("2026-08-01T00:00:00.000Z"))).toBe(false);
     expect(isCurrentDisplayedRange(range, new Date("2026-08-11T00:00:00.000Z"))).toBe(false);
+  });
+});
+
+describe("formatClockShort", () => {
+  it("drops the AM/PM marker but keeps the 12-hour clock", () => {
+    expect(formatClockShort(new Date(2026, 7, 4, 9, 0), "en-US")).toBe("9:00");
+    expect(formatClockShort(new Date(2026, 7, 4, 13, 30), "en-US")).toBe("1:30");
+    expect(formatClockShort(new Date(2026, 7, 4, 0, 5), "en-US")).toBe("12:05");
+  });
+
+  it("leaves no stray separator where the marker was", () => {
+    const out = formatClockShort(new Date(2026, 7, 4, 22, 15), "en-US");
+    expect(out).toBe("10:15");
+    expect(out).toBe(out.trim());
+  });
+
+  it("is a no-op for locales that already use a 24-hour clock", () => {
+    expect(formatClockShort(new Date(2026, 7, 4, 13, 30), "en-GB")).toBe("13:30");
   });
 });

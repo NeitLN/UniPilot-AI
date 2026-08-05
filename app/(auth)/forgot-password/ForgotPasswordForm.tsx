@@ -14,12 +14,12 @@ export function ForgotPasswordForm() {
     return (
       <div className="text-center">
         <p className="text-sm font-semibold text-ink-2">
-          If that email has an account, we&rsquo;ve sent a link to reset the password. It
-          expires in an hour.
+          If that email has an account, we&rsquo;ve sent a link to reset the password. It expires in
+          an hour.
         </p>
         <Link
           href="/login"
-          className="mt-4 inline-block text-xs font-bold text-violet hover:underline"
+          className="mt-4 inline-block text-xs font-bold text-violet-text hover:underline"
         >
           Back to sign in
         </Link>

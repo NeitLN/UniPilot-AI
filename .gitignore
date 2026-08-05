@@ -50,3 +50,14 @@ next-env.d.ts
 
 .vercel
 .env*
+
+# Iteration screenshots from local design/verification runs — not product assets.
+# 74 of these had accumulated (8.5 MB) with nothing referencing them; the
+# per-run subfolders are the pattern that produced them, so they stay out.
+docs/screenshots/zoom/
+docs/screenshots/review*/
+docs/screenshots/baseline/
+# Audit screenshots: 4.0 MB across 22 files, versus 69 KB of logs. Every
+# confirmed finding cites a log, not a picture — the visual pass came back
+# clean and ui-*.json already records that numerically.
+docs/audits/evidence/*.png

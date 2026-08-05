@@ -35,13 +35,9 @@ test.describe("Layout regressions (docs/PRODUCT_REVIEW.md)", () => {
   // of GPA, because the per-bar column's fixed height didn't reserve room
   // for the value label above the bar, so flexbox silently clamped every
   // bar to the same leftover space.
-  test("QA-01: GPA trend bars render at different heights for different GPAs", async ({
-    page,
-  }) => {
+  test("QA-01: GPA trend bars render at different heights for different GPAs", async ({ page }) => {
     await page.goto("/gpa");
-    await expect(
-      page.getByRole("heading", { name: "GPA tracker" }),
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: "GPA tracker" })).toBeVisible();
 
     const semesterLow = `E2E${Date.now() % 90000}A`;
     const semesterHigh = `E2E${Date.now() % 90000}B`;
@@ -50,17 +46,12 @@ test.describe("Layout regressions (docs/PRODUCT_REVIEW.md)", () => {
       [semesterLow, "2.0"],
       [semesterHigh, "4.0"],
     ] as const) {
-      await page
-        .getByRole("button", { name: "Add grade", exact: true })
-        .click();
+      await page.getByRole("button", { name: "Add grade", exact: true }).click();
       await page.locator('select[name="courseId"]').selectOption({ index: 1 });
       await page.locator('input[name="semester"]').fill(semester);
       await page.locator('input[name="gradePoint"]').fill(gradePoint);
       await page.locator('input[name="creditHours"]').fill("3");
-      await page
-        .getByRole("button", { name: "Add grade", exact: true })
-        .last()
-        .click();
+      await page.getByRole("button", { name: "Add grade", exact: true }).last().click();
       await expect(page.getByRole("cell", { name: semester })).toBeVisible({
         timeout: 10_000,
       });
@@ -113,14 +104,10 @@ test.describe("Layout regressions (docs/PRODUCT_REVIEW.md)", () => {
   // from their longest option and refuse to shrink, so a plain flex-1
   // search input got squeezed to ~36-49px below desktop widths.
   for (const width of [390, 768, 1280]) {
-    test(`QA-02: assignment search stays usable at ${width}px wide`, async ({
-      page,
-    }) => {
+    test(`QA-02: assignment search stays usable at ${width}px wide`, async ({ page }) => {
       await page.setViewportSize({ width, height: 900 });
       await page.goto("/assignments");
-      await expect(
-        page.getByRole("heading", { name: "Assignments" }),
-      ).toBeVisible();
+      await expect(page.getByRole("heading", { name: "Assignments" })).toBeVisible();
 
       const box = await page.getByLabel("Search assignments").boundingBox();
       expect(box).not.toBeNull();
@@ -141,10 +128,7 @@ test.describe("Layout regressions (docs/PRODUCT_REVIEW.md)", () => {
           const de = document.documentElement;
           return de.scrollWidth > de.clientWidth + 1;
         });
-        expect(
-          overflowing,
-          `${route} overflows horizontally at ${width}px`,
-        ).toBe(false);
+        expect(overflowing, `${route} overflows horizontally at ${width}px`).toBe(false);
       }
     });
   }

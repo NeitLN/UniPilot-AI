@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   activityTone,
   breakKindForCycle,
+  chartAxisTicks,
   classify,
   completedCyclesToday,
   dailyActivity,
@@ -45,7 +46,11 @@ describe("classify", () => {
 describe("dailyActivity / activityTone / completedCyclesToday", () => {
   const now = new Date("2026-08-03T12:00:00.000Z"); // Monday
 
-  function session(startedAt: string, result: "completed" | "partial", minutes = 25): FocusSessionLike {
+  function session(
+    startedAt: string,
+    result: "completed" | "partial",
+    minutes = 25,
+  ): FocusSessionLike {
     return { assignmentId: "a1", startedAt, durationSeconds: minutes * 60, result };
   }
 
@@ -139,9 +144,19 @@ describe("weeklyStats", () => {
 
   it("tallies completed vs partial cycles and minutes", () => {
     const sessions: FocusSessionLike[] = [
-      { assignmentId: "a1", startedAt: now.toISOString(), durationSeconds: 1500, result: "completed" },
+      {
+        assignmentId: "a1",
+        startedAt: now.toISOString(),
+        durationSeconds: 1500,
+        result: "completed",
+      },
       { assignmentId: "a1", startedAt: now.toISOString(), durationSeconds: 600, result: "partial" },
-      { assignmentId: "a2", startedAt: now.toISOString(), durationSeconds: 1500, result: "completed" },
+      {
+        assignmentId: "a2",
+        startedAt: now.toISOString(),
+        durationSeconds: 1500,
+        result: "completed",
+      },
     ];
     const stats = weeklyStats(sessions, { now });
     expect(stats.completedCycles).toBe(2);
@@ -180,8 +195,18 @@ describe("weeklyStats", () => {
   // sentinel key instead of a real assignment id.
   it("still counts an orphaned session (assignmentId: null) toward cycles and minutes", () => {
     const sessions: FocusSessionLike[] = [
-      { assignmentId: null, startedAt: now.toISOString(), durationSeconds: 1500, result: "completed" },
-      { assignmentId: "a1", startedAt: now.toISOString(), durationSeconds: 1500, result: "completed" },
+      {
+        assignmentId: null,
+        startedAt: now.toISOString(),
+        durationSeconds: 1500,
+        result: "completed",
+      },
+      {
+        assignmentId: "a1",
+        startedAt: now.toISOString(),
+        durationSeconds: 1500,
+        result: "completed",
+      },
     ];
     const stats = weeklyStats(sessions, { now });
     expect(stats.completedCycles).toBe(2);
@@ -191,7 +216,12 @@ describe("weeklyStats", () => {
 
   it("merges multiple orphaned sessions under the same sentinel key", () => {
     const sessions: FocusSessionLike[] = [
-      { assignmentId: null, startedAt: now.toISOString(), durationSeconds: 1500, result: "completed" },
+      {
+        assignmentId: null,
+        startedAt: now.toISOString(),
+        durationSeconds: 1500,
+        result: "completed",
+      },
       { assignmentId: null, startedAt: now.toISOString(), durationSeconds: 300, result: "partial" },
     ];
     const stats = weeklyStats(sessions, { now });
@@ -204,8 +234,20 @@ describe("weeklyStats", () => {
   // not to treat manual entries differently in any of the other totals.
   it("tracks manualMinutes for source: 'manual' sessions, on top of the normal totals", () => {
     const sessions: FocusSessionLike[] = [
-      { assignmentId: "a1", startedAt: now.toISOString(), durationSeconds: 1500, result: "completed", source: "manual" },
-      { assignmentId: "a1", startedAt: now.toISOString(), durationSeconds: 1500, result: "completed", source: "timer" },
+      {
+        assignmentId: "a1",
+        startedAt: now.toISOString(),
+        durationSeconds: 1500,
+        result: "completed",
+        source: "manual",
+      },
+      {
+        assignmentId: "a1",
+        startedAt: now.toISOString(),
+        durationSeconds: 1500,
+        result: "completed",
+        source: "timer",
+      },
     ];
     const stats = weeklyStats(sessions, { now });
     expect(stats.completedCycles).toBe(2);
@@ -215,7 +257,12 @@ describe("weeklyStats", () => {
 
   it("treats a session with no source at all the same as 'timer' — manualMinutes stays 0", () => {
     const sessions: FocusSessionLike[] = [
-      { assignmentId: "a1", startedAt: now.toISOString(), durationSeconds: 1500, result: "completed" },
+      {
+        assignmentId: "a1",
+        startedAt: now.toISOString(),
+        durationSeconds: 1500,
+        result: "completed",
+      },
     ];
     const stats = weeklyStats(sessions, { now });
     expect(stats.manualMinutes).toBe(0);
@@ -236,9 +283,7 @@ describe("streakDays timezone handling", () => {
     // "Today" for the Pacific user is still July 28 at the moment this session
     // finished; anchor `today` there and check the session counts as today.
     const todayInLA = new Date("2026-07-28T23:35:00.000Z"); // still the 28th in LA
-    expect(
-      streakDays(sessions, { today: todayInLA, timeZone: "America/Los_Angeles" }),
-    ).toBe(1);
+    expect(streakDays(sessions, { today: todayInLA, timeZone: "America/Los_Angeles" })).toBe(1);
   });
 
   it("would misfile the same session under a naive UTC bucketing (regression guard)", () => {
@@ -301,9 +346,19 @@ describe("weeklyMinutesSeries", () => {
   it("buckets sessions into contiguous rolling weeks, oldest first", () => {
     const sessions: FocusSessionLike[] = [
       // this week (Jul 24-30)
-      { assignmentId: "a", startedAt: "2026-07-30T09:00:00.000Z", durationSeconds: 1500, result: "completed" },
+      {
+        assignmentId: "a",
+        startedAt: "2026-07-30T09:00:00.000Z",
+        durationSeconds: 1500,
+        result: "completed",
+      },
       // one week back (Jul 17-23)
-      { assignmentId: "a", startedAt: "2026-07-20T09:00:00.000Z", durationSeconds: 3000, result: "completed" },
+      {
+        assignmentId: "a",
+        startedAt: "2026-07-20T09:00:00.000Z",
+        durationSeconds: 3000,
+        result: "completed",
+      },
     ];
     const series = weeklyMinutesSeries(sessions, { now, timeZone: "UTC", weeks: 3 });
     expect(series).toHaveLength(3);
@@ -378,5 +433,35 @@ describe("validateManualSession", () => {
     expect(
       validateManualSession({ startedAt: "not-a-date", durationMinutes: 30 }, now).startedAt,
     ).toBeDefined();
+  });
+});
+
+describe("chartAxisTicks", () => {
+  it("picks round steps so the top tick reads at a glance", () => {
+    // The concept's Learning rhythm axis: a ~60-minute peak yields 0/20/40/60,
+    // not 0/17/34/51 scaled to the tallest bar.
+    expect(chartAxisTicks(60)).toEqual([0, 20, 40, 60]);
+    expect(chartAxisTicks(55)).toEqual([0, 20, 40, 60]);
+  });
+
+  it("always spans at least up to the largest value", () => {
+    for (const max of [3, 7, 45, 123, 999, 1450]) {
+      const ticks = chartAxisTicks(max);
+      expect(ticks[ticks.length - 1]).toBeGreaterThanOrEqual(max);
+      expect(ticks[0]).toBe(0);
+    }
+  });
+
+  it("keeps a labelled axis for an empty week instead of a bare baseline", () => {
+    const ticks = chartAxisTicks(0);
+    expect(ticks.length).toBeGreaterThanOrEqual(2);
+    expect(ticks[0]).toBe(0);
+    expect(ticks[ticks.length - 1]).toBeGreaterThan(0);
+  });
+
+  it("uses evenly spaced steps", () => {
+    const ticks = chartAxisTicks(240);
+    const gaps = ticks.slice(1).map((t, i) => t - ticks[i]);
+    expect(new Set(gaps).size).toBe(1);
   });
 });

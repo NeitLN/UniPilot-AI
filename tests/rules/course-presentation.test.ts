@@ -7,7 +7,9 @@ import {
   type CourseAssignmentLite,
 } from "@/lib/rules/course-presentation";
 
-function assignment(overrides: Partial<CourseAssignmentLite> & Pick<CourseAssignmentLite, "dueAt">): CourseAssignmentLite {
+function assignment(
+  overrides: Partial<CourseAssignmentLite> & Pick<CourseAssignmentLite, "dueAt">,
+): CourseAssignmentLite {
   return {
     id: crypto.randomUUID(),
     courseId: "c1",
@@ -23,14 +25,22 @@ function assignment(overrides: Partial<CourseAssignmentLite> & Pick<CourseAssign
 describe("courseProgress", () => {
   it("returns null (not 0) when there are no active assignments", () => {
     expect(courseProgress([])).toBeNull();
-    expect(courseProgress([assignment({ dueAt: "2026-08-01T00:00:00Z", archivedAt: "2026-08-01T00:00:00Z" })])).toBeNull();
+    expect(
+      courseProgress([
+        assignment({ dueAt: "2026-08-01T00:00:00Z", archivedAt: "2026-08-01T00:00:00Z" }),
+      ]),
+    ).toBeNull();
   });
 
   it("averages progress across active assignments only", () => {
     const list = [
       assignment({ dueAt: "2026-08-01T00:00:00Z", progress: 100 }),
       assignment({ dueAt: "2026-08-02T00:00:00Z", progress: 50 }),
-      assignment({ dueAt: "2026-08-03T00:00:00Z", progress: 0, archivedAt: "2026-08-01T00:00:00Z" }),
+      assignment({
+        dueAt: "2026-08-03T00:00:00Z",
+        progress: 0,
+        archivedAt: "2026-08-01T00:00:00Z",
+      }),
     ];
     expect(courseProgress(list)).toBe(75);
   });

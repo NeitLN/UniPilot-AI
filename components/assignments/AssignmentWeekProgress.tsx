@@ -4,13 +4,7 @@ import { ProgressRing } from "@/components/ui/ProgressRing";
  * dataset covering the viewer's whole account, not just the current page of
  * results (brief §13), so this stays a pure display component fed real
  * numbers from the page. */
-export function AssignmentWeekProgress({
-  total,
-  completed,
-}: {
-  total: number;
-  completed: number;
-}) {
+export function AssignmentWeekProgress({ total, completed }: { total: number; completed: number }) {
   const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
 
   return (

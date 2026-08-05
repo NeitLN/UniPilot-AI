@@ -1,0 +1,26 @@
+--- READ: attacker selecting victim's rows (expect 0 everywhere) ---
+ok    assignments                  rows_visible=0
+ok    courses                      rows_visible=0
+ok    grades                       rows_visible=0
+ok    focus_sessions               rows_visible=0
+ok    profiles                     rows_visible=0
+ok    notifications                rows_visible=0
+ok    risk_scores                  rows_visible=0
+ok    push_subscriptions           rows_visible=0
+ok    google_calendar_connections  rows_visible=0
+ok    study_sessions (via plan)    rows_visible=0
+
+--- WRITE: attacker mutating victim's rows (expect 0 affected) ---
+ok    update assignments           affected=0
+ok    delete grades                affected=0
+ok    update profiles              affected=0
+
+--- WRITE: attacker forging a row owned by the victim (expect refusal) ---
+ok    insert assignment as victim    refused: new row violates row-level security policy fo
+ok    insert grade as victim         refused: new row violates row-level security policy fo
+
+--- CHILD TABLE: attach study_session to victim's plan (expect refusal) ---
+ok    refused: new row violates row-level security policy for table "study_
+
+RESULT: NO CROSS-USER ACCESS
+POST-ROLLBACK STATE: {"pwned":0,"forged":0,"plans":0}

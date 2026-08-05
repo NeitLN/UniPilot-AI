@@ -22,7 +22,10 @@ export function PredictedGrades({ courses }: { courses: PredictedGradeCourse[] }
 
   return (
     <div className="rounded-card border border-border-subtle-2 bg-card p-4">
-      <h2 className="font-display text-sm font-bold text-foreground">Predicted grades</h2>
+      {/* "Course predictions", not "Predicted grades": the scenario trio
+          above owns that title in the concept, and two cards under the same
+          heading gave no way to tell which one a reading came from. */}
+      <h2 className="font-display text-sm font-bold text-foreground">Course predictions</h2>
       <p className="mt-0.5 text-[11.5px] font-semibold text-ink-3">
         Rough estimate from graded assignments — not yet an official grade.
       </p>

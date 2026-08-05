@@ -7,10 +7,7 @@ import {
   type StudyPreferencesFormState,
 } from "@/app/(app)/settings/actions";
 import { createCourse, type CourseFormState } from "@/app/(app)/schedule/actions";
-import {
-  createAssignment,
-  type AssignmentFormState,
-} from "@/app/(app)/assignments/actions";
+import { createAssignment, type AssignmentFormState } from "@/app/(app)/assignments/actions";
 import { Pilo } from "@/components/brand/Pilo";
 import { FieldError } from "@/components/ui/FieldError";
 import { inputClass } from "@/components/ui/Field";
@@ -29,10 +26,10 @@ export function OnboardingWizard() {
     StudyPreferencesFormState,
     FormData
   >(updateStudyPreferences, SETTINGS_INITIAL);
-  const [courseState, courseAction, coursePending] = useActionState<
-    CourseFormState,
-    FormData
-  >(createCourse, COURSE_INITIAL);
+  const [courseState, courseAction, coursePending] = useActionState<CourseFormState, FormData>(
+    createCourse,
+    COURSE_INITIAL,
+  );
   const [assignmentState, assignmentAction, assignmentPending] = useActionState<
     AssignmentFormState,
     FormData
@@ -64,7 +61,19 @@ export function OnboardingWizard() {
               >
                 {done ? "✓" : n}
               </span>
-              {n < STEPS.length && <span className="h-0.5 w-6 bg-line" />}
+              {/* `STEPS` held these labels all along and used them only as
+                  React keys, so three anonymous dots were all a new student
+                  got: the number of steps was knowable, what they asked for
+                  was not. Hidden below sm, where three labels would wrap
+                  into a block taller than the form itself. */}
+              <span
+                className={`hidden text-[11.5px] font-bold sm:inline ${
+                  active ? "text-foreground" : "text-ink-3"
+                }`}
+              >
+                {label}
+              </span>
+              {n < STEPS.length && <span className="h-0.5 w-4 bg-line" />}
             </div>
           );
         })}
@@ -79,8 +88,8 @@ export function OnboardingWizard() {
                 How much time can you study each week?
               </h2>
               <p className="text-[12.5px] font-semibold text-ink-3">
-                This gates the AI Planner and the Workload Risk score — you can
-                change it anytime in Settings.
+                This gates the AI Planner and the Workload Risk score — you can change it anytime in
+                Settings.
               </p>
             </div>
             <label className="flex flex-col gap-1 text-xs font-bold text-ink-2">
@@ -109,9 +118,7 @@ export function OnboardingWizard() {
             {[1, 2, 3, 4, 5].map((day) => (
               <input key={day} type="hidden" name="preferredStudyDays" value={day} />
             ))}
-            {settingsState.formError && (
-              <FieldError>{settingsState.formError}</FieldError>
-            )}
+            {settingsState.formError && <FieldError>{settingsState.formError}</FieldError>}
             <button
               type="submit"
               disabled={settingsPending}
@@ -191,9 +198,7 @@ export function OnboardingWizard() {
                 </FieldError>
               )}
             </label>
-            {courseState.formError && (
-              <FieldError>{courseState.formError}</FieldError>
-            )}
+            {courseState.formError && <FieldError>{courseState.formError}</FieldError>}
             <button
               type="submit"
               disabled={coursePending}
@@ -257,9 +262,7 @@ export function OnboardingWizard() {
                 />
               </label>
             </div>
-            {assignmentState.formError && (
-              <FieldError>{assignmentState.formError}</FieldError>
-            )}
+            {assignmentState.formError && <FieldError>{assignmentState.formError}</FieldError>}
             <button
               type="submit"
               disabled={assignmentPending}
@@ -273,11 +276,53 @@ export function OnboardingWizard() {
         {step === 4 && (
           <div className="flex flex-col items-center gap-3 py-2 text-center">
             <Pilo mood="happy" size={72} />
-            <h2 className="font-display text-lg font-bold text-foreground">You&rsquo;re all set!</h2>
+            <h2 className="font-display text-lg font-bold text-foreground">
+              You&rsquo;re all set!
+            </h2>
             <p className="text-[12.5px] font-semibold text-ink-3">
-              Try a 25-minute focus session on your new assignment, or generate
-              an AI study plan whenever you&rsquo;re ready.
+              Here&rsquo;s how the four screens fit together.
             </p>
+
+            {/* The app's biggest comprehension problem is that Assignments,
+                Planner and Schedule look like three places to put the same
+                thing. They are four stages of one loop, and nothing anywhere
+                said so — a student had to infer it from use. This is the one
+                moment they are guaranteed to be looking. */}
+            <ol className="flex w-full flex-col gap-2 text-left">
+              {[
+                {
+                  name: "Assignments",
+                  what: "what you owe, and when",
+                  tone: "bg-coral-tint text-coral-text",
+                },
+                {
+                  name: "Planner",
+                  what: "AI proposes when to do it — nothing is booked until you confirm",
+                  tone: "bg-violet-tint text-violet-text",
+                },
+                {
+                  name: "Schedule",
+                  what: "your confirmed week, classes and study blocks together",
+                  tone: "bg-sky-tint text-sky-text",
+                },
+                {
+                  name: "Focus",
+                  what: "sit down and do one block",
+                  tone: "bg-mint-tint text-mint-text",
+                },
+              ].map((s, i) => (
+                <li key={s.name} className="flex items-start gap-2.5">
+                  <span
+                    className={`mt-px flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-extrabold ${s.tone}`}
+                  >
+                    {i + 1}
+                  </span>
+                  <p className="text-[12.5px] font-semibold text-ink-2">
+                    <span className="font-bold text-foreground">{s.name}</span> — {s.what}
+                  </p>
+                </li>
+              ))}
+            </ol>
             <button
               type="button"
               onClick={() => router.push("/")}
@@ -291,4 +336,3 @@ export function OnboardingWizard() {
     </div>
   );
 }
-

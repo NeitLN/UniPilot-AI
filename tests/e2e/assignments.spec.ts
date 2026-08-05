@@ -12,9 +12,17 @@ function rowFor(page: Page, title: string) {
 
 async function createAssignment(
   page: Page,
-  overrides: { title: string; priority?: "low" | "medium" | "high"; repeat?: string; repeatUntil?: string },
+  overrides: {
+    title: string;
+    priority?: "low" | "medium" | "high";
+    repeat?: string;
+    repeatUntil?: string;
+  },
 ) {
-  await page.getByRole("dialog", { name: "New assignment" }).waitFor({ state: "hidden" }).catch(() => {});
+  await page
+    .getByRole("dialog", { name: "New assignment" })
+    .waitFor({ state: "hidden" })
+    .catch(() => {});
   await page.getByRole("button", { name: "Add assignment", exact: true }).first().click();
   const dialog = page.getByRole("dialog", { name: "New assignment" });
   await expect(dialog).toBeVisible();
@@ -40,7 +48,10 @@ async function openActions(page: Page, title: string) {
   // .first(): a recurring series creates several rows sharing the exact
   // same title (brief FR-24) — the earliest occurrence is the one whose
   // "Archive this and following" covers the rest of the series.
-  await rowFor(page, title).first().getByRole("button", { name: `Actions for ${title}` }).click();
+  await rowFor(page, title)
+    .first()
+    .getByRole("button", { name: `Actions for ${title}` })
+    .click();
   const menu = page.getByRole("dialog").filter({ hasText: title });
   await expect(menu).toBeVisible();
   return menu;
@@ -97,20 +108,29 @@ test.describe("Permanently delete an archived assignment", () => {
     let menu = await openActions(page, title);
     await expect(menu.getByRole("button", { name: "Delete permanently" })).toHaveCount(0);
     await menu.getByRole("button", { name: "Archive", exact: true }).click();
-    await page.getByRole("dialog", { name: "Archive assignment" }).getByRole("button", { name: "Archive", exact: true }).click();
+    await page
+      .getByRole("dialog", { name: "Archive assignment" })
+      .getByRole("button", { name: "Archive", exact: true })
+      .click();
     // Scoped to the card (not a page-wide text search) — an active
     // assignment's title can legitimately also appear in Pilo's pick card
     // (brief §6.4), so a bare page-wide getByText(title) is ambiguous by
     // design once that card exists.
     await expect(rowFor(page, title)).toHaveCount(0, { timeout: 10_000 });
 
-    await page.goto("/assignments?status=archived");
+    // Searched, not just filtered. The archived list is paginated, and every
+    // run of this suite leaves more archived rows behind — so "it is on page
+    // one" quietly stops being true and the test starts failing for a reason
+    // that has nothing to do with what it is checking.
+    await page.goto(`/assignments?status=archived&q=${encodeURIComponent(title)}`);
     await expect(rowFor(page, title)).toBeVisible();
 
     menu = await openActions(page, title);
     await menu.getByRole("button", { name: "Delete permanently", exact: true }).click();
     const deleteDialog = page.getByRole("dialog", { name: "Delete permanently" });
-    await expect(deleteDialog.getByRole("heading", { name: /^Delete /, exact: false })).toBeVisible();
+    await expect(
+      deleteDialog.getByRole("heading", { name: /^Delete /, exact: false }),
+    ).toBeVisible();
     await deleteDialog.getByRole("button", { name: "Delete permanently", exact: true }).click();
 
     // Scoped to the card (not a page-wide text search) — an active
@@ -154,7 +174,12 @@ test.describe("FR-24: recurring assignments", () => {
     page,
   }) => {
     await page.goto("/assignments");
-    await createAssignment(page, { title, priority: "low", repeat: "weekly", repeatUntil: "2026-09-15" });
+    await createAssignment(page, {
+      title,
+      priority: "low",
+      repeat: "weekly",
+      repeatUntil: "2026-09-15",
+    });
 
     const rows = page.getByTestId("assignment-card").filter({ hasText: title });
     await expect(rows.first()).toBeVisible({ timeout: 10_000 });
@@ -170,7 +195,9 @@ test.describe("FR-24: recurring assignments", () => {
     await menu.getByRole("button", { name: "Archive", exact: true }).click();
     const archiveDialog = page.getByRole("dialog", { name: "Archive assignment" });
     await expect(archiveDialog.getByRole("heading", { name: "Archive assignment?" })).toBeVisible();
-    await archiveDialog.getByRole("button", { name: "Archive this and following", exact: true }).click();
+    await archiveDialog
+      .getByRole("button", { name: "Archive this and following", exact: true })
+      .click();
 
     await expect(page.getByTestId("assignment-card").filter({ hasText: title })).toHaveCount(0, {
       timeout: 10_000,
@@ -203,7 +230,9 @@ test.describe("Quick-complete toggle", () => {
     const completedRow = rowFor(page, title);
     await expect(completedRow).toBeVisible({ timeout: 10_000 });
     await expect(completedRow.getByText("Done", { exact: true })).toBeVisible();
-    await expect(completedRow.getByRole("button", { name: `Mark "${title}" as not done` })).toBeVisible();
+    await expect(
+      completedRow.getByRole("button", { name: `Mark "${title}" as not done` }),
+    ).toBeVisible();
   });
 });
 

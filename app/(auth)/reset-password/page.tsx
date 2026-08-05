@@ -10,7 +10,7 @@ export default async function ResetPasswordPage() {
   } = await supabase.auth.getUser();
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-canvas px-4">
+    <div className="flex min-h-[calc(100vh/var(--app-zoom))] items-center justify-center bg-canvas px-4">
       <div className="w-full max-w-sm rounded-card bg-card p-8 text-center">
         <div className="flex justify-center">
           <Logo tone="dark" size={44} />
@@ -21,9 +21,7 @@ export default async function ResetPasswordPage() {
             <h1 className="mt-4 font-display text-lg font-bold text-foreground">
               Set a new password
             </h1>
-            <p className="mt-2 mb-6 text-sm font-semibold text-ink-2">
-              At least 8 characters.
-            </p>
+            <p className="mt-2 mb-6 text-sm font-semibold text-ink-2">At least 8 characters.</p>
             <ResetPasswordForm />
           </>
         ) : (

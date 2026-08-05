@@ -20,14 +20,81 @@ export function gpa(rows: GradeLike[]): number {
 export function gpaContribution(row: GradeLike, allRows: GradeLike[]): number {
   const totalCredits = allRows.reduce((s, r) => s + r.creditHours, 0);
   if (totalCredits === 0) return 0;
-  return Number(
-    (qualityPoints(row.gradePoint, row.creditHours) / totalCredits).toFixed(2),
-  );
+  return Number((qualityPoints(row.gradePoint, row.creditHours) / totalCredits).toFixed(2));
 }
 
-/** A course drags the overall average down if its own grade point sits below it. */
+/**
+ * This course's share of the total quality points behind the GPA, as a
+ * whole percent. Distinct from `gpaContribution`, which answers the same
+ * question in GPA points (0.89 of the 3.46) — this is the proportion the
+ * concept's breakdown bar fills, so a row's bar can be read against its
+ * neighbours. Shares across all rows sum to 100 (up to rounding).
+ */
+export function gpaContributionPct(row: GradeLike, allRows: GradeLike[]): number {
+  const totalQP = allRows.reduce((s, r) => s + qualityPoints(r.gradePoint, r.creditHours), 0);
+  if (totalQP === 0) return 0;
+  return Math.round((qualityPoints(row.gradePoint, row.creditHours) / totalQP) * 100);
+}
+
+/**
+ * Letter for a 4.0-scale grade point (A, A-, B+, …), for the breakdown's
+ * grade chip. Thresholds are the standard US scale the rest of this module
+ * already assumes; a point between two steps takes the lower letter rather
+ * than rounding up, so a 3.65 never displays as a flat A-.
+ */
+const LETTER_STEPS: { min: number; letter: string }[] = [
+  { min: 4.0, letter: "A" },
+  { min: 3.7, letter: "A-" },
+  { min: 3.3, letter: "B+" },
+  { min: 3.0, letter: "B" },
+  { min: 2.7, letter: "B-" },
+  { min: 2.3, letter: "C+" },
+  { min: 2.0, letter: "C" },
+  { min: 1.7, letter: "C-" },
+  { min: 1.3, letter: "D+" },
+  { min: 1.0, letter: "D" },
+];
+
+export function letterGrade(gradePoint: number): string {
+  for (const step of LETTER_STEPS) {
+    if (gradePoint >= step.min) return step.letter;
+  }
+  return "F";
+}
+
+/**
+ * Display label for a semester value. These are free text, so a blind
+ * "Semester " prefix would turn a "Fall 2025" entry into "Semester Fall
+ * 2025" — only bare numeric codes like `253` (how the sidebar already reads
+ * them) get the word put in front.
+ */
+export function semesterLabel(semester: string): string {
+  const trimmed = semester.trim();
+  return /^\d+$/.test(trimmed) ? `Semester ${trimmed}` : trimmed;
+}
+
+/**
+ * How far below the cumulative GPA a course has to sit before it is worth
+ * pointing at.
+ *
+ * UX-02 (UNIPILOT_COMPLETE_PRODUCT_AUDIT.md): the rule used to be a plain
+ * `<`, which is mathematically correct and useless in practice — by
+ * definition roughly half of anyone's courses sit below their own mean. On a
+ * realistic nine-course spread the "Below average" tag appeared on 6 rows.
+ * A label that applies to two thirds of the list is decoration, not
+ * information.
+ *
+ * 0.3 is a judgement call, not a fact: it is about one letter-grade step on
+ * the 4.0 scale (3.7 -> 3.3 -> 3.0), so it marks courses that are a real
+ * step behind rather than a rounding difference. Change this one number to
+ * retune; set it to 0 to restore the old behaviour exactly.
+ */
+export const BELOW_AVERAGE_MARGIN = 0.3;
+
+/** A course drags the overall average down when it sits a meaningful step
+ * below it — see BELOW_AVERAGE_MARGIN for why "meaningful" is 0.3. */
 export function dragsGpaDown(row: GradeLike, overallGpa: number): boolean {
-  return row.gradePoint < overallGpa;
+  return row.gradePoint < overallGpa - BELOW_AVERAGE_MARGIN;
 }
 
 export interface RequiredAverageResult {
@@ -46,8 +113,7 @@ export function requiredAverage(
   remainingCredits: number,
   currentQP: number,
 ): RequiredAverageResult {
-  const v =
-    (target * (doneCredits + remainingCredits) - currentQP) / remainingCredits;
+  const v = (target * (doneCredits + remainingCredits) - currentQP) / remainingCredits;
   return { value: Number(v.toFixed(2)), achievable: v <= 4.0 };
 }
 
@@ -84,7 +150,9 @@ export function onTrackProgress(
 ): OnTrackResult {
   const remainingCredits = Math.max(0, programTotalCredits - doneCredits);
   const completedPct =
-    programTotalCredits > 0 ? Math.min(100, Math.round((doneCredits / programTotalCredits) * 100)) : 0;
+    programTotalCredits > 0
+      ? Math.min(100, Math.round((doneCredits / programTotalCredits) * 100))
+      : 0;
 
   if (remainingCredits === 0) {
     const overall = doneCredits > 0 ? currentQP / doneCredits : 0;
@@ -97,7 +165,8 @@ export function onTrackProgress(
   }
 
   const req = requiredAverage(targetGpa, doneCredits, remainingCredits, currentQP);
-  const status: OnTrackStatus = req.value > 4 ? "impossible" : req.value > 3.7 ? "at-risk" : "on-track";
+  const status: OnTrackStatus =
+    req.value > 4 ? "impossible" : req.value > 3.7 ? "at-risk" : "on-track";
   return { status, requiredAverage: req.value, remainingCredits, completedPct };
 }
 
@@ -108,9 +177,7 @@ export interface SemesterGpaPoint {
 }
 
 /** One point per semester (that semester's own GPA, not cumulative), sorted ascending. */
-export function gpaBySemester(
-  rows: (GradeLike & { semester: string })[],
-): SemesterGpaPoint[] {
+export function gpaBySemester(rows: (GradeLike & { semester: string })[]): SemesterGpaPoint[] {
   const bySemester = new Map<string, GradeLike[]>();
   for (const r of rows) {
     const list = bySemester.get(r.semester) ?? [];
@@ -223,13 +290,21 @@ export function projectGpaScenarios(
   officialGrades: GradeLike[],
   inProgressCourses: ScenarioCourse[],
 ): GpaScenarios | null {
-  const officialQP = officialGrades.reduce((s, g) => s + qualityPoints(g.gradePoint, g.creditHours), 0);
+  const officialQP = officialGrades.reduce(
+    (s, g) => s + qualityPoints(g.gradePoint, g.creditHours),
+    0,
+  );
   const officialCredits = officialGrades.reduce((s, g) => s + g.creditHours, 0);
 
-  function courseScenarioPct(assignments: ScoredAssignmentLike[], unscoredAssumptionPct: number | null): number | null {
+  function courseScenarioPct(
+    assignments: ScoredAssignmentLike[],
+    unscoredAssumptionPct: number | null,
+  ): number | null {
     const totalWeight = assignments.reduce((s, a) => s + a.weight, 0);
     if (totalWeight === 0) return null;
-    const scored = assignments.filter((a): a is ScoredAssignmentLike & { score: number } => a.score !== null);
+    const scored = assignments.filter(
+      (a): a is ScoredAssignmentLike & { score: number } => a.score !== null,
+    );
     const scoredWeight = scored.reduce((s, a) => s + a.weight, 0);
     const scoredPoints = scored.reduce((s, a) => s + a.score * a.weight, 0);
     const unscoredWeight = totalWeight - scoredWeight;

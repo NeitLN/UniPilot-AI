@@ -15,28 +15,29 @@
 # UniPilot AI
 
 Trước khi viết hoặc sửa UI, luôn đọc `docs/DESIGN.md`.
-Trước khi viết logic nghiệp vụ, luôn đọc `docs/ROADMAP.md` mục 
+Trước khi viết logic nghiệp vụ, luôn đọc `docs/ROADMAP.md` mục
 tương ứng và `lib/rules/`.
 
 Ràng buộc không được vi phạm:
+
 - Không hardcode hex màu trong component. Chỉ dùng token Tailwind.
 - Không đặt logic nghiệp vụ trong component. Đưa vào `lib/rules/`.
 - Không gọi Gemini hoặc Google API từ client. Chỉ qua Route Handler.
 ```
 
-Khi bắt đầu một task UI, prompt kiểu: *"Đọc docs/DESIGN.md rồi dựng
-component KpiCard theo spec mục 5.1"*. Claude Code sẽ có đủ số đo.
+Khi bắt đầu một task UI, prompt kiểu: _"Đọc docs/DESIGN.md rồi dựng
+component KpiCard theo spec mục 5.1"_. Claude Code sẽ có đủ số đo.
 
 ---
 
 ## 1. Nhận diện
 
-| | |
-|---|---|
-| Tên sản phẩm | **UniPilot AI** |
-| Linh vật | **Pilo** — cú nhỏ đội mũ phi công |
-| Tính cách | Bình tĩnh, thực tế, hơi tếu. Không hype, không dùng emoji trong UI. |
-| Giọng văn | Ngắn, chủ động, xưng hô trực tiếp. "This week is packed" chứ không phải "Warning: high workload detected". |
+|              |                                                                                                            |
+| ------------ | ---------------------------------------------------------------------------------------------------------- |
+| Tên sản phẩm | **UniPilot AI**                                                                                            |
+| Linh vật     | **Pilo** — cú nhỏ đội mũ phi công                                                                          |
+| Tính cách    | Bình tĩnh, thực tế, hơi tếu. Không hype, không dùng emoji trong UI.                                        |
+| Giọng văn    | Ngắn, chủ động, xưng hô trực tiếp. "This week is packed" chứ không phải "Warning: high workload detected". |
 
 Pilo xuất hiện ở: logo sidebar, card AI plan, empty state, màn hình onboarding,
 và khoảnh khắc ăn mừng (xong task, lên streak). **Không** rải Pilo khắp nơi.
@@ -47,29 +48,29 @@ và khoảnh khắc ăn mừng (xong task, lên streak). **Không** rải Pilo k
 
 ### 2.1 Bảng token
 
-| Token | Hex | Dùng cho |
-|---|---|---|
-| `violet` | `#6C3CF5` | Hành động chính, AI planner, study block |
-| `violet-deep` | `#5A2FE0` | Cánh Pilo, hover của violet |
-| `violet-soft` | `#8B62FF` | Bụng Pilo, fill phụ |
-| `violet-tint` | `#EDE7FF` | Nền tag "In progress", nền chip nhạt |
-| `lime` | `#D8FF4A` | Nhấn **duy nhất**: focus card, CTA xác nhận, nav active, mũ Pilo |
-| `lime-deep` | `#B8E62E` | Viền mũ Pilo, hover của lime |
-| `lime-tint` | `#EAFBCF` | Nền mood "happy" |
-| `ink` | `#171429` | Chữ chính, nút tối |
-| `ink-2` | `#4A4460` | Chữ phụ |
-| `ink-3` | `#8A83A3` | Chữ mờ, metadata |
-| `night` | `#1D1338` | Nền sidebar, nền risk HUD |
-| `canvas` | `#F2F0FB` | Nền toàn trang |
-| `coral` | `#FF5470` | Overdue, GPA tụt, badge thông báo |
-| `coral-tint` | `#FFE7EB` | Nền tag "Overdue" |
-| `tangerine` | `#FFB020` | High priority, workload-risk, mỏ và chân Pilo |
-| `tangerine-tint` | `#FFF1D6` | Nền tag "High priority" |
-| `mint` | `#22DDA6` | Trạng thái tốt, sync thành công |
-| `mint-tint` | `#DEFBF1` | Nền badge thành công |
-| `sky` | `#45C2FF` | Class block từ Google Calendar, kính Pilo |
-| `line` | `#F0EEF7` | Đường kẻ ngăn trong card |
-| `border-cb` | `#DCD8EC` | Viền checkbox |
+| Token            | Hex       | Dùng cho                                                         |
+| ---------------- | --------- | ---------------------------------------------------------------- |
+| `violet`         | `#6C3CF5` | Hành động chính, AI planner, study block                         |
+| `violet-deep`    | `#5A2FE0` | Cánh Pilo, hover của violet                                      |
+| `violet-soft`    | `#8B62FF` | Bụng Pilo, fill phụ                                              |
+| `violet-tint`    | `#EDE7FF` | Nền tag "In progress", nền chip nhạt                             |
+| `lime`           | `#D8FF4A` | Nhấn **duy nhất**: focus card, CTA xác nhận, nav active, mũ Pilo |
+| `lime-deep`      | `#B8E62E` | Viền mũ Pilo, hover của lime                                     |
+| `lime-tint`      | `#EAFBCF` | Nền mood "happy"                                                 |
+| `ink`            | `#171429` | Chữ chính, nút tối                                               |
+| `ink-2`          | `#4A4460` | Chữ phụ                                                          |
+| `ink-3`          | `#8A83A3` | Chữ mờ, metadata                                                 |
+| `night`          | `#1D1338` | Nền sidebar, nền risk HUD                                        |
+| `canvas`         | `#F2F0FB` | Nền toàn trang                                                   |
+| `coral`          | `#FF5470` | Overdue, GPA tụt, badge thông báo                                |
+| `coral-tint`     | `#FFE7EB` | Nền tag "Overdue"                                                |
+| `tangerine`      | `#FFB020` | High priority, workload-risk, mỏ và chân Pilo                    |
+| `tangerine-tint` | `#FFF1D6` | Nền tag "High priority"                                          |
+| `mint`           | `#22DDA6` | Trạng thái tốt, sync thành công                                  |
+| `mint-tint`      | `#DEFBF1` | Nền badge thành công                                             |
+| `sky`            | `#45C2FF` | Class block từ Google Calendar, kính Pilo                        |
+| `line`           | `#F0EEF7` | Đường kẻ ngăn trong card                                         |
+| `border-cb`      | `#DCD8EC` | Viền checkbox                                                    |
 
 Màu chỉ dùng trong sidebar tối: `#9C90C4` (chữ phụ), `#B7ACD8` (nav item),
 `#6C5F94` (nhãn nhóm), `#33245C` (viền + nút phụ), `#2A1D4D` (khối sync),
@@ -96,29 +97,29 @@ npm i @fontsource/fredoka @fontsource/nunito
 
 ```ts
 // app/layout.tsx
-import '@fontsource/fredoka/400.css';
-import '@fontsource/fredoka/600.css';
-import '@fontsource/fredoka/700.css';
-import '@fontsource/nunito/400.css';
-import '@fontsource/nunito/500.css';
-import '@fontsource/nunito/600.css';
-import '@fontsource/nunito/700.css';
-import '@fontsource/nunito/800.css';
+import "@fontsource/fredoka/400.css";
+import "@fontsource/fredoka/600.css";
+import "@fontsource/fredoka/700.css";
+import "@fontsource/nunito/400.css";
+import "@fontsource/nunito/500.css";
+import "@fontsource/nunito/600.css";
+import "@fontsource/nunito/700.css";
+import "@fontsource/nunito/800.css";
 ```
 
-| Vai trò | Font | Weight | Size | Letter-spacing |
-|---|---|---|---|---|
-| Tên app (sidebar) | Fredoka | 700 | 20px | -0.03em |
-| Lời chào (topbar) | Fredoka | 700 | 30px | -0.03em |
-| Tiêu đề card | Fredoka | 700 | 18px | -0.03em |
-| Tiêu đề HUD | Fredoka | 700 | 19px | -0.03em |
-| Số KPI lớn | Fredoka | 700 | 46px | -0.045em |
-| Số timer | Fredoka | 700 | 40px | -0.045em |
-| Số thống kê | Fredoka | 700 | 20px | -0.03em |
-| Nội dung chính | Nunito | 700 | 14px | 0 |
-| Nội dung phụ | Nunito | 600 | 11.5px | 0 |
-| Tag / nhãn | Nunito | 800 | 11px | 0 |
-| Nhãn nhóm nav | Nunito | 800 | 10px | 1.4px, uppercase |
+| Vai trò           | Font    | Weight | Size   | Letter-spacing   |
+| ----------------- | ------- | ------ | ------ | ---------------- |
+| Tên app (sidebar) | Fredoka | 700    | 20px   | -0.03em          |
+| Lời chào (topbar) | Fredoka | 700    | 30px   | -0.03em          |
+| Tiêu đề card      | Fredoka | 700    | 18px   | -0.03em          |
+| Tiêu đề HUD       | Fredoka | 700    | 19px   | -0.03em          |
+| Số KPI lớn        | Fredoka | 700    | 46px   | -0.045em         |
+| Số timer          | Fredoka | 700    | 40px   | -0.045em         |
+| Số thống kê       | Fredoka | 700    | 20px   | -0.03em          |
+| Nội dung chính    | Nunito  | 700    | 14px   | 0                |
+| Nội dung phụ      | Nunito  | 600    | 11.5px | 0                |
+| Tag / nhãn        | Nunito  | 800    | 11px   | 0                |
+| Nhãn nhóm nav     | Nunito  | 800    | 10px   | 1.4px, uppercase |
 
 **Fredoka chỉ có tới weight 700.** Đặt 800 sẽ bị giả bold, nhìn bệt. Nunito thì
 dùng được 800.
@@ -129,20 +130,20 @@ Fredoka chỉ dùng cho tiêu đề và con số. Toàn bộ phần đọc dài 
 
 ## 4. Hình khối, khoảng cách
 
-| Thuộc tính | Giá trị |
-|---|---|
-| Bo góc card | `30px` |
-| Bo góc nút, ô nhập | `14px` (16px cho nút to trong card màu) |
-| Bo góc nav item | `16px` |
-| Bo góc pill / tag | `20px` (full round) |
-| Bo góc chip icon | `13–14px` |
-| Bo góc checkbox | `7px` |
-| Khoảng cách giữa card | `14px` |
-| Khoảng cách giữa nhóm lớn | `16px` |
-| Padding card | `20px 22px` |
-| Padding KPI card | `18px 20px 20px` |
-| Padding trang | `24px 26px 26px` |
-| Đường kẻ trong card | `1.5px solid #F0EEF7` |
+| Thuộc tính                | Giá trị                                 |
+| ------------------------- | --------------------------------------- |
+| Bo góc card               | `30px`                                  |
+| Bo góc nút, ô nhập        | `14px` (16px cho nút to trong card màu) |
+| Bo góc nav item           | `16px`                                  |
+| Bo góc pill / tag         | `20px` (full round)                     |
+| Bo góc chip icon          | `13–14px`                               |
+| Bo góc checkbox           | `7px`                                   |
+| Khoảng cách giữa card     | `14px`                                  |
+| Khoảng cách giữa nhóm lớn | `16px`                                  |
+| Padding card              | `20px 22px`                             |
+| Padding KPI card          | `18px 20px 20px`                        |
+| Padding trang             | `24px 26px 26px`                        |
+| Đường kẻ trong card       | `1.5px solid #F0EEF7`                   |
 
 **Không dùng box-shadow.** Phân tách bằng màu nền và bo góc. Toàn bộ mockup
 không có một shadow nào.
@@ -172,6 +173,7 @@ không có một shadow nào.
 - Vùng chính `flex: 1; padding: 24px 26px 26px; gap: 16px`
 
 ### Mobile (≤768px)
+
 - Sidebar → bottom nav 6 tab, cao 64px, nền `night`, tab active chữ `lime`
 - Tất cả grid → 1 cột
 - KPI 4 thẻ → grid 2×2
@@ -251,12 +253,12 @@ progress    width 92, thanh height 7 radius 5 nền #F0EEF7, % 700 10.5px phải
 
 Bảng màu tag:
 
-| Trạng thái | Nền | Chữ |
-|---|---|---|
-| Overdue | `#FFE7EB` | `#C2003A` |
+| Trạng thái    | Nền       | Chữ       |
+| ------------- | --------- | --------- |
+| Overdue       | `#FFE7EB` | `#C2003A` |
 | High priority | `#FFF1D6` | `#8A5300` |
-| In progress | `#EDE7FF` | `#6C3CF5` |
-| Not started | `#F0EEF7` | `#4A4460` |
+| In progress   | `#EDE7FF` | `#6C3CF5` |
+| Not started   | `#F0EEF7` | `#4A4460` |
 
 ### 6.5 Focus card (lime)
 
@@ -405,21 +407,21 @@ Bỏ cánh, chân, kính. Dùng cho mọi vị trí **≤ 56px**.
 
 ```tsx
 // components/brand/Pilo.tsx
-type Mood = 'ready' | 'happy' | 'sleepy';
+type Mood = "ready" | "happy" | "sleepy";
 
 const SRC: Record<Mood, string> = {
-  ready:  '/pilo-mascot.svg',
-  happy:  '/pilo-mascot-happy.svg',
-  sleepy: '/pilo-mascot-sleepy.svg',
+  ready: "/pilo-mascot.svg",
+  happy: "/pilo-mascot-happy.svg",
+  sleepy: "/pilo-mascot-sleepy.svg",
 };
 
-export function Pilo({ mood = 'ready', size = 120 }: { mood?: Mood; size?: number }) {
+export function Pilo({ mood = "ready", size = 120 }: { mood?: Mood; size?: number }) {
   return (
     <img
       src={SRC[mood]}
       width={size}
       height={size}
-      alt=""            // trang trí, có text đi kèm ở mọi chỗ dùng
+      alt="" // trang trí, có text đi kèm ở mọi chỗ dùng
       aria-hidden="true"
     />
   );
@@ -432,12 +434,12 @@ export function PiloIcon({ size = 34 }: { size?: number }) {
 
 ### 7.6 Quy tắc dùng Pilo
 
-| Được | Không được |
-|---|---|
-| Nền trắng, canvas, tint nhạt | Nền lime (mũ chìm), nền violet (thân chìm) |
-| Dùng `pilo-icon` cho ≤56px | Thu nhỏ bản toàn thân xuống dưới 56px |
-| Đổi mood theo trạng thái thật | Dùng mood happy cho lỗi hoặc cảnh báo |
-| Giữ đúng tỉ lệ vuông | Kéo méo, xoay, đổi màu thân |
+| Được                          | Không được                                 |
+| ----------------------------- | ------------------------------------------ |
+| Nền trắng, canvas, tint nhạt  | Nền lime (mũ chìm), nền violet (thân chìm) |
+| Dùng `pilo-icon` cho ≤56px    | Thu nhỏ bản toàn thân xuống dưới 56px      |
+| Đổi mood theo trạng thái thật | Dùng mood happy cho lỗi hoặc cảnh báo      |
+| Giữ đúng tỉ lệ vuông          | Kéo méo, xoay, đổi màu thân                |
 
 Pilo **không xuất hiện** trong màn hình workload-risk cao. Cảnh báo quá tải mà
 có mascot vui vẻ đứng cạnh là sai giọng.
@@ -448,48 +450,48 @@ có mascot vui vẻ đứng cạnh là sai giọng.
 
 ```ts
 // tailwind.config.ts
-import type { Config } from 'tailwindcss';
+import type { Config } from "tailwindcss";
 
 export default {
-  content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}'],
+  content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}"],
   theme: {
     extend: {
       colors: {
-        violet:    { DEFAULT: '#6C3CF5', deep: '#5A2FE0', soft: '#8B62FF', tint: '#EDE7FF' },
-        lime:      { DEFAULT: '#D8FF4A', deep: '#B8E62E', tint: '#EAFBCF' },
-        ink:       { DEFAULT: '#171429', 2: '#4A4460', 3: '#8A83A3' },
-        night:     '#1D1338',
-        canvas:    '#F2F0FB',
-        coral:     { DEFAULT: '#FF5470', tint: '#FFE7EB', text: '#C2003A' },
-        tangerine: { DEFAULT: '#FFB020', tint: '#FFF1D6', text: '#8A5300' },
-        mint:      { DEFAULT: '#22DDA6', tint: '#DEFBF1', text: '#08372A' },
-        sky:       '#45C2FF',
-        line:      '#F0EEF7',
+        violet: { DEFAULT: "#6C3CF5", deep: "#5A2FE0", soft: "#8B62FF", tint: "#EDE7FF" },
+        lime: { DEFAULT: "#D8FF4A", deep: "#B8E62E", tint: "#EAFBCF" },
+        ink: { DEFAULT: "#171429", 2: "#4A4460", 3: "#8A83A3" },
+        night: "#1D1338",
+        canvas: "#F2F0FB",
+        coral: { DEFAULT: "#FF5470", tint: "#FFE7EB", text: "#C2003A" },
+        tangerine: { DEFAULT: "#FFB020", tint: "#FFF1D6", text: "#8A5300" },
+        mint: { DEFAULT: "#22DDA6", tint: "#DEFBF1", text: "#08372A" },
+        sky: "#45C2FF",
+        line: "#F0EEF7",
         // riêng cho vùng nền tối
         dusk: {
-          text:   '#B7ACD8',
-          muted:  '#9C90C4',
-          label:  '#6C5F94',
-          border: '#33245C',
-          panel:  '#2A1D4D',
-          seg:    '#382A5E',
-          hud:    '#A79CCB',
-          btn:    '#C9BEE8',
+          text: "#B7ACD8",
+          muted: "#9C90C4",
+          label: "#6C5F94",
+          border: "#33245C",
+          panel: "#2A1D4D",
+          seg: "#382A5E",
+          hud: "#A79CCB",
+          btn: "#C9BEE8",
         },
       },
       fontFamily: {
-        display: ['Fredoka', 'sans-serif'],
-        sans:    ['Nunito', 'sans-serif'],
+        display: ["Fredoka", "sans-serif"],
+        sans: ["Nunito", "sans-serif"],
       },
       borderRadius: {
-        card: '30px',
-        ctl:  '16px',
-        btn:  '14px',
-        pill: '20px',
+        card: "30px",
+        ctl: "16px",
+        btn: "14px",
+        pill: "20px",
       },
       letterSpacing: {
-        display: '-0.03em',
-        num:     '-0.045em',
+        display: "-0.03em",
+        num: "-0.045em",
       },
     },
   },
@@ -499,9 +501,17 @@ export default {
 Thêm vào `globals.css`:
 
 ```css
-body { @apply bg-canvas text-ink font-sans antialiased; }
-h1, h2, h3 { @apply font-display tracking-display; }
-.num { @apply font-display tracking-num; }
+body {
+  @apply bg-canvas text-ink font-sans antialiased;
+}
+h1,
+h2,
+h3 {
+  @apply font-display tracking-display;
+}
+.num {
+  @apply font-display tracking-num;
+}
 ```
 
 ---
@@ -510,13 +520,13 @@ h1, h2, h3 { @apply font-display tracking-display; }
 
 Sáu rule này quyết định UI phải hiển thị cái gì, không chỉ là logic ngầm.
 
-| Rule | UI phải làm gì |
-|---|---|
-| **BR-01** | Overdue và High priority là **nhãn chữ** riêng, phân biệt được khi in trắng đen. Màu chỉ là lớp phụ trợ. |
-| **BR-02** | Kế hoạch AI luôn có badge `Draft` và nút `Confirm plan`. Không có đường nào để nháp tự thành active. |
-| **BR-03** | Mọi màn hình có dữ liệu lịch phải hiện **last-sync time** và trạng thái sync. |
-| **BR-04** | Nút Start focus disable khi chưa chọn assignment, kèm lý do hiển thị. |
-| **BR-05** | GPA luôn hiển thị **đúng 2 chữ số thập phân**, kể cả `3.50`. Không rút gọn. |
+| Rule      | UI phải làm gì                                                                                                          |
+| --------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **BR-01** | Overdue và High priority là **nhãn chữ** riêng, phân biệt được khi in trắng đen. Màu chỉ là lớp phụ trợ.                |
+| **BR-02** | Kế hoạch AI luôn có badge `Draft` và nút `Confirm plan`. Không có đường nào để nháp tự thành active.                    |
+| **BR-03** | Mọi màn hình có dữ liệu lịch phải hiện **last-sync time** và trạng thái sync.                                           |
+| **BR-04** | Nút Start focus disable khi chưa chọn assignment, kèm lý do hiển thị.                                                   |
+| **BR-05** | GPA luôn hiển thị **đúng 2 chữ số thập phân**, kể cả `3.50`. Không rút gọn.                                             |
 | **BR-06** | Card risk phải có dòng "planning aid, not a medical assessment". Thiếu dữ liệu thì hiện "chưa tính được", không hiện 0. |
 
 ---

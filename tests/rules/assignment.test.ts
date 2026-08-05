@@ -82,15 +82,13 @@ describe("validateAssignment", () => {
       validateAssignment({ ...baseInput, repeat: "weekly", repeatUntil: "" }).repeatUntil,
     ).toBeDefined();
     expect(
-      validateAssignment({ ...baseInput, repeat: "weekly", repeatUntil: "2026-09-01" })
-        .repeatUntil,
+      validateAssignment({ ...baseInput, repeat: "weekly", repeatUntil: "2026-09-01" }).repeatUntil,
     ).toBeUndefined();
   });
 
   it("rejects a repeatUntil before the due date", () => {
     expect(
-      validateAssignment({ ...baseInput, repeat: "weekly", repeatUntil: "2026-01-01" })
-        .repeatUntil,
+      validateAssignment({ ...baseInput, repeat: "weekly", repeatUntil: "2026-01-01" }).repeatUntil,
     ).toBeDefined();
   });
 });
@@ -341,14 +339,18 @@ describe("completedAtForTransition", () => {
 
   it("keeps the existing completed_at when already done and staying done", () => {
     const existing = "2026-07-20T00:00:00.000Z";
-    expect(
-      completedAtForTransition({ status: "done", completedAt: existing }, "done", now),
-    ).toBe(existing);
+    expect(completedAtForTransition({ status: "done", completedAt: existing }, "done", now)).toBe(
+      existing,
+    );
   });
 
   it("clears completed_at when transitioning away from done", () => {
     expect(
-      completedAtForTransition({ status: "done", completedAt: "2026-07-20T00:00:00.000Z" }, "in_progress", now),
+      completedAtForTransition(
+        { status: "done", completedAt: "2026-07-20T00:00:00.000Z" },
+        "in_progress",
+        now,
+      ),
     ).toBeNull();
   });
 
@@ -566,7 +568,11 @@ describe("relativeDueLabel", () => {
 });
 
 describe("deriveQuickWins", () => {
-  const row = (id: string, progress: number, overrides: Partial<QuickWinLike> = {}): QuickWinLike => ({
+  const row = (
+    id: string,
+    progress: number,
+    overrides: Partial<QuickWinLike> = {},
+  ): QuickWinLike => ({
     id,
     progress,
     status: "in_progress",

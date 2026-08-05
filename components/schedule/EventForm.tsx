@@ -151,11 +151,7 @@ export function EventForm({ courses, initialValues, onSaved, onCancel }: EventFo
           </Field>
 
           {repeat !== "none" && (
-            <Field
-              label="Repeat until"
-              error={state.errors.repeatUntil}
-              className="min-w-0 flex-1"
-            >
+            <Field label="Repeat until" error={state.errors.repeatUntil} className="min-w-0 flex-1">
               <input
                 name="repeatUntil"
                 type="date"
@@ -277,4 +273,3 @@ function defaultEnd(start?: string): string {
   const d = new Date(base.getTime() + 60 * 60 * 1000);
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
-

@@ -9,7 +9,10 @@ export function CourseLoadSummary({ summary }: { summary: CourseLoadSummaryData 
   return (
     <div className="flex flex-col gap-3 rounded-card bg-card p-4 sm:flex-row sm:items-center sm:gap-6">
       <div className="flex items-center gap-2 shrink-0">
-        <IconChip icon={<BarChart3 className="h-[18px] w-[18px]" aria-hidden="true" />} tone="violet" />
+        <IconChip
+          icon={<BarChart3 className="h-[18px] w-[18px]" aria-hidden="true" />}
+          tone="violet"
+        />
         <h2 className="font-display text-sm font-bold text-foreground">Course load</h2>
       </div>
 

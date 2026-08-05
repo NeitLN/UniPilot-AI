@@ -46,7 +46,7 @@ export function TodayAgendaCard({ entries, now }: { entries: AgendaEntry[]; now:
         <h2 className="font-display text-lg font-bold text-foreground">Today</h2>
         <Link
           href="/schedule"
-          className="flex min-h-11 items-center text-[12.5px] font-extrabold text-violet hover:underline"
+          className="flex min-h-11 items-center text-[12.5px] font-extrabold text-violet-text hover:underline"
         >
           View all
         </Link>
@@ -71,7 +71,10 @@ export function TodayAgendaCard({ entries, now }: { entries: AgendaEntry[]; now:
                 key={`${e.kind}-${e.id}`}
                 className="flex items-center gap-3 border-t border-line py-[11px] first:border-t-0 first:pt-3"
               >
-                <span aria-hidden="true" className={`h-2.5 w-2.5 shrink-0 rounded-full ${dotClass}`} />
+                <span
+                  aria-hidden="true"
+                  className={`h-2.5 w-2.5 shrink-0 rounded-full ${dotClass}`}
+                />
                 {/* Local-time formatting is expected to differ between SSR
                     and hydration — same pattern as every other time label. */}
                 <div
@@ -90,7 +93,9 @@ export function TodayAgendaCard({ entries, now }: { entries: AgendaEntry[]; now:
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-bold text-foreground">{e.title}</p>
                   {e.subtitle && (
-                    <p className="mt-0.5 truncate text-[11.5px] font-semibold text-ink-3">{e.subtitle}</p>
+                    <p className="mt-0.5 truncate text-[11.5px] font-semibold text-ink-3">
+                      {e.subtitle}
+                    </p>
                   )}
                 </div>
                 <Tag tone={status.tone}>{status.label}</Tag>

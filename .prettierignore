@@ -1,3 +1,9 @@
 node_modules
 .next
 public
+
+# Vendored agent skill definitions — installed, not authored here. Formatting
+# them made 118 of the 322 files in the one-time reformat, and every skill
+# update would re-dirty them.
+.agents/
+.claude/

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { toCsv } from "@/lib/export/csv";
+import { consumeRateLimit, rateLimitHeaders, RATE_LIMITS } from "@/lib/rate-limit";
 
 const RESOURCES = ["courses", "assignments", "grades", "schedule", "focus"] as const;
 type Resource = (typeof RESOURCES)[number];
@@ -22,7 +23,10 @@ async function loadResource(
         .from("courses")
         .select("code, name, credits, semester, created_at")
         .order("semester");
-      return { rows: data ?? [], columns: ["code", "name", "credits", "semester", "created_at"] as const };
+      return {
+        rows: data ?? [],
+        columns: ["code", "name", "credits", "semester", "created_at"] as const,
+      };
     }
     case "assignments": {
       const { data } = await supabase
@@ -31,7 +35,16 @@ async function loadResource(
         .order("due_at");
       return {
         rows: data ?? [],
-        columns: ["title", "due_at", "weight", "score", "priority", "status", "progress", "archived_at"] as const,
+        columns: [
+          "title",
+          "due_at",
+          "weight",
+          "score",
+          "priority",
+          "status",
+          "progress",
+          "archived_at",
+        ] as const,
       };
     }
     case "grades": {
@@ -39,21 +52,30 @@ async function loadResource(
         .from("grades")
         .select("semester, grade_point, credit_hours, created_at")
         .order("semester");
-      return { rows: data ?? [], columns: ["semester", "grade_point", "credit_hours", "created_at"] as const };
+      return {
+        rows: data ?? [],
+        columns: ["semester", "grade_point", "credit_hours", "created_at"] as const,
+      };
     }
     case "schedule": {
       const { data } = await supabase
         .from("class_blocks")
         .select("title, location, start_at, end_at, is_all_day")
         .order("start_at");
-      return { rows: data ?? [], columns: ["title", "location", "start_at", "end_at", "is_all_day"] as const };
+      return {
+        rows: data ?? [],
+        columns: ["title", "location", "start_at", "end_at", "is_all_day"] as const,
+      };
     }
     case "focus": {
       const { data } = await supabase
         .from("focus_sessions")
         .select("started_at, ended_at, duration_seconds, result")
         .order("started_at");
-      return { rows: data ?? [], columns: ["started_at", "ended_at", "duration_seconds", "result"] as const };
+      return {
+        rows: data ?? [],
+        columns: ["started_at", "ended_at", "duration_seconds", "result"] as const,
+      };
     }
   }
 }
@@ -70,6 +92,16 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Session expired — sign in again." }, { status: 401 });
   }
 
+  // SEC-01: a ceiling per user, checked right after auth so a rejected
+  // caller never reaches the expensive part below.
+  const limit = await consumeRateLimit(supabase, RATE_LIMITS.export);
+  if (!limit.allowed) {
+    return NextResponse.json(
+      { error: "Too many exports in the last hour — try again shortly." },
+      { status: 429, headers: rateLimitHeaders(RATE_LIMITS.export, limit) },
+    );
+  }
+
   const format = request.nextUrl.searchParams.get("format") === "csv" ? "csv" : "json";
   const typeParam = request.nextUrl.searchParams.get("type") ?? "all";
 
@@ -81,10 +113,7 @@ export async function GET(request: NextRequest) {
       );
     }
     const { rows, columns } = await loadResource(supabase, typeParam);
-    const csv = toCsv(
-      rows as unknown as Record<string, unknown>[],
-      columns as unknown as string[],
-    );
+    const csv = toCsv(rows as unknown as Record<string, unknown>[], columns as unknown as string[]);
     // UTF-8 BOM: without it, Excel guesses the wrong codepage and mangles
     // Vietnamese diacritics on open, even though the bytes are valid UTF-8.
     return new NextResponse("﻿" + csv, {

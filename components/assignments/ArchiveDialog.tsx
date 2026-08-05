@@ -39,16 +39,12 @@ export function ArchiveDialog({
 
   return (
     <Modal open={open} onClose={onClose} title="Archive assignment">
-      <h2 className="font-display text-lg font-bold text-foreground">
-        Archive assignment?
-      </h2>
+      <h2 className="font-display text-lg font-bold text-foreground">Archive assignment?</h2>
       <p className="mt-2 text-sm font-semibold text-ink-2">
         {`"${assignmentTitle}" will be hidden from your list and its reminder cancelled. You can't undo this from here.`}
       </p>
 
-      {error && (
-        <FieldError className="mt-2 text-xs">{error}</FieldError>
-      )}
+      {error && <FieldError className="mt-2 text-xs">{error}</FieldError>}
 
       <div className="mt-4 flex flex-col gap-2.5">
         {isRecurring ? (

@@ -1,10 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
-import { CalendarDays, CheckCircle2 } from "lucide-react";
-import { syncNow } from "@/app/(app)/schedule/actions";
+import { CheckCircle2 } from "lucide-react";
 import { IconChip } from "@/components/ui/IconChip";
+import { GoogleCalendarMark } from "./GoogleCalendarMark";
 import { useOnlineStatus } from "@/lib/offline/useOnlineStatus";
 import type { CalendarSyncStatus } from "@/lib/supabase/types";
 
@@ -24,6 +22,15 @@ export interface SyncStatusBarProps {
   oauthError?: string;
 }
 
+/**
+ * Status only — the connect/sync action lives in the header's
+ * SyncCalendarButton (concept §8 shows this card as a plain status row with
+ * a check, no button). Keeping a second "Sync now" here would be two
+ * controls firing the same server action.
+ *
+ * Still a client component: the offline banner depends on `navigator.onLine`
+ * via useOnlineStatus, which has no server equivalent.
+ */
 export function SyncStatusBar({
   connected,
   lastSyncedAt,
@@ -31,76 +38,46 @@ export function SyncStatusBar({
   lastSyncError,
   oauthError,
 }: SyncStatusBarProps) {
-  const router = useRouter();
   const isOnline = useOnlineStatus();
-  const [pending, startTransition] = useTransition();
-  const [runError, setRunError] = useState<string | null>(null);
-
-  function handleSyncNow() {
-    setRunError(null);
-    startTransition(async () => {
-      const result = await syncNow();
-      if (result.status === "error") setRunError(result.message ?? "Sync failed.");
-      router.refresh();
-    });
-  }
 
   const banner =
     (oauthError && OAUTH_ERROR_MESSAGES[oauthError]) ||
-    runError ||
     (lastSyncStatus === "error" ? lastSyncError : null) ||
     (!isOnline ? "You're offline — Calendar sync needs a connection." : null);
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-card bg-card px-5 py-3.5">
-        <div className="flex min-w-0 items-center gap-3">
-          <IconChip icon={<CalendarDays className="h-[18px] w-[18px]" aria-hidden="true" />} tone="sky" size="sm" />
+      <div className="flex items-center gap-3 rounded-card bg-card px-5 py-3.5">
+        {/* The real Google mark, not a generic calendar glyph — it's the same
+            service the header button connects to, and the concept shows the
+            brand mark in both places. */}
+        <IconChip
+          icon={<GoogleCalendarMark className="h-[18px] w-[18px]" />}
+          tone="sky"
+          size="md"
+          square
+        />
+        <div className="min-w-0 flex-1">
+          <p className="text-[12.5px] font-bold text-foreground">Google Calendar</p>
           {/* Formatted in the runtime's local timezone — expected to differ
               between SSR and hydration, not a real mismatch. */}
-          <div className="text-[12.5px] font-semibold text-ink-2" suppressHydrationWarning>
-            {!connected ? (
-              "Google Calendar isn't connected yet."
-            ) : lastSyncedAt ? (
-              <>
-                Last synced{" "}
-                {new Date(lastSyncedAt).toLocaleString(undefined, {
-                  month: "short",
-                  day: "numeric",
-                  hour: "numeric",
-                  minute: "2-digit",
-                })}
-              </>
-            ) : (
-              "Connected — not synced yet."
-            )}
-          </div>
+          <p className="mt-0.5 text-[11.5px] font-semibold text-ink-3" suppressHydrationWarning>
+            {!connected
+              ? "Not connected yet"
+              : lastSyncStatus === "error"
+                ? "Last sync failed"
+                : lastSyncedAt
+                  ? `Last synced ${new Date(lastSyncedAt).toLocaleString(undefined, {
+                      month: "short",
+                      day: "numeric",
+                      hour: "numeric",
+                      minute: "2-digit",
+                    })}`
+                  : "Connected — not synced yet"}
+          </p>
         </div>
-
-        {connected && lastSyncStatus === "ok" && (
+        {connected && lastSyncStatus !== "error" && (
           <CheckCircle2 className="h-5 w-5 shrink-0 text-mint-text" aria-hidden="true" />
-        )}
-
-        {connected ? (
-          <button
-            type="button"
-            onClick={handleSyncNow}
-            disabled={pending || !isOnline}
-            className="flex min-h-11 items-center rounded-ctl bg-violet px-3.5 py-2 text-xs font-bold text-white hover:bg-violet-deep disabled:opacity-60"
-          >
-            {pending ? "Syncing…" : "Sync now"}
-          </button>
-        ) : isOnline ? (
-          <a
-            href="/api/calendar/oauth/start"
-            className="flex min-h-11 items-center rounded-ctl bg-violet px-3.5 py-2 text-xs font-bold text-white hover:bg-violet-deep"
-          >
-            Connect Google Calendar
-          </a>
-        ) : (
-          <span className="rounded-ctl bg-line px-3.5 py-2 text-xs font-bold text-ink-3">
-            Connect Google Calendar
-          </span>
         )}
       </div>
 

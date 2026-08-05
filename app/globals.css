@@ -9,6 +9,19 @@
    beforeInteractive script in app/layout.tsx (reads localStorage, falls
    back to prefers-color-scheme) so there's no flash of the wrong theme. */
 :root {
+  /* App-wide UI scale, applied via `zoom` on <body> below.
+     `zoom` rather than a root font-size bump because ~400 sizes in this
+     codebase are hardcoded px (text-[12.5px], h-[104px], the chart
+     heights in JS), which a rem-based scale would leave behind — the
+     result would be larger text inside unchanged boxes. `zoom` scales the
+     used value of every length regardless of unit, so px and rem move
+     together.
+     Anything measured in viewport units has to be divided by this (see
+     the `min-h-screen` replacements in the layouts): vh/vw always refer
+     to the real viewport, so inside a zoomed body they over-measure by
+     exactly this factor. */
+  --app-zoom: 1.2;
+
   --background: #f2f0fb;
   --foreground: #1d1338;
 
@@ -16,6 +29,13 @@
   --violet-deep: #5a2fe0;
   --violet-soft: #8b62ff;
   --violet-tint: #ede7ff;
+  /* Violet used as *text* on a page surface, as opposed to --violet the
+     fill. Identical to --violet in light mode (5.83:1 on --card, 4.85:1 on
+     --violet-tint, so nothing changes there). It exists because --violet is
+     a fixed brand colour: on the dark theme's --card it drops to 2.81:1
+     across 18 call sites. Only the text role can flip — the fill has to stay
+     the brand purple — so the two roles need separate tokens. */
+  --violet-text: #6c3cf5;
 
   --lime: #d8ff4a;
   --lime-deep: #b8e62e;
@@ -29,7 +49,14 @@
   --ink-2: #4a4460;
   /* Darkened from an earlier #8a83a3 — that only hit 3.58:1 on white,
      below WCAG AA's 4.5:1 for normal text (Lighthouse a11y audit, Phase 11). */
-  --ink-3: #716b86;
+  /* Was #716b86, which was only ever checked against the white --card
+     (5.06:1) and passed there. It is also used on --canvas, --line and
+     --violet-tint, where it measured 4.49 / 4.40 / 4.21 — all under AA.
+     #67617b clears 4.5 on every surface it lands on (worst case 4.89 on
+     --violet-tint) and stays well clear of --ink-2, so the muted vs
+     secondary hierarchy still reads. tests/ui/contrast.test.ts enforces
+     both properties against these exact values. */
+  --ink-3: #67617b;
 
   --coral: #ff5470;
   --coral-tint: #ffe7eb;
@@ -79,7 +106,11 @@
      under `.dark`. */
   --dusk-text: #b7acd8;
   --dusk-muted: #9c90c4;
-  --dusk-label: #6c5f94;
+  /* Was #6c5f94 = 3.08:1 on --ink, the worst contrast in the product. It
+     labels the weight multipliers on Workload risk's dark hero at 11px,
+     where AA needs 4.5. #9184c0 gives 5.21:1 and still sits below
+     --dusk-muted, so it stays the quietest text on that panel. */
+  --dusk-label: #9184c0;
   --dusk-border: #33245c;
   --dusk-panel: #2a1d4d;
   --dusk-seg: #382a5e;
@@ -101,6 +132,11 @@
      contrast to near-zero, so these small badge/callout chips just stay
      light pastel in both themes instead. */
   --violet-tint: #2c2350;
+  /* Lifted so violet text clears AA on every dark surface it lands on:
+     4.85:1 on --line, 5.27 on --violet-tint, 6.01 on --card, 6.82 on
+     --canvas. --violet itself is untouched, so buttons and fills keep the
+     brand purple. */
+  --violet-text: #a78bfa;
 
   /* --ink itself stays fixed (see :root comment below) — only the
      secondary/tertiary text shades flip. */
@@ -132,6 +168,7 @@
   --color-violet-deep: var(--violet-deep);
   --color-violet-soft: var(--violet-soft);
   --color-violet-tint: var(--violet-tint);
+  --color-violet-text: var(--violet-text);
 
   --color-lime: var(--lime);
   --color-lime-deep: var(--lime-deep);
@@ -185,9 +222,28 @@
   --radius-pill: 20px;
 }
 
+/* Breakpoints scaled by the same factor as --app-zoom (1.2x).
+   CSS `zoom` does NOT change the viewport that media queries evaluate
+   against — unlike real browser zoom — so without this a 1200px window
+   would still match `lg:` while only having 1000px of zoomed layout space
+   to draw a two-column grid in, and it would overflow. Shifting each
+   breakpoint up by the zoom factor restores the "matches when there's
+   genuinely room" behaviour browser zoom gives for free.
+   Values must be literals: Tailwind resolves these at build time to emit
+   the @media rules, so calc(... * var(--app-zoom)) would not work.
+   Base values are Tailwind v4's defaults (40/48/64/80/96rem). */
+@theme {
+  --breakpoint-sm: 48rem; /* 640px x 1.2 =  768px */
+  --breakpoint-md: 57.6rem; /* 768px x 1.2 =  922px */
+  --breakpoint-lg: 76.8rem; /* 1024px x 1.2 = 1229px */
+  --breakpoint-xl: 96rem; /* 1280px x 1.2 = 1536px */
+  --breakpoint-2xl: 115.2rem; /* 1536px x 1.2 = 1843px */
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
+  zoom: var(--app-zoom);
 }
 
 @media (prefers-reduced-motion: reduce) {

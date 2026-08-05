@@ -13,7 +13,9 @@ function cardFor(page: Page, name: string) {
 }
 
 async function openActions(page: Page, name: string) {
-  await cardFor(page, name).getByRole("button", { name: `Actions for ${name}` }).click();
+  await cardFor(page, name)
+    .getByRole("button", { name: `Actions for ${name}` })
+    .click();
   const menu = page.getByRole("dialog").filter({ hasText: name });
   await expect(menu).toBeVisible();
   return menu;
@@ -23,9 +25,7 @@ test.describe("Manage courses", () => {
   const name = `E2E Course ${Date.now()}`;
   const semester = `E2E${Date.now() % 90000}`;
 
-  test("create, edit, and delete a course with no linked data", async ({
-    page,
-  }) => {
+  test("create, edit, and delete a course with no linked data", async ({ page }) => {
     await page.goto("/courses");
     await expect(page.getByRole("heading", { name: "Courses" })).toBeVisible();
 
@@ -34,10 +34,7 @@ test.describe("Manage courses", () => {
     await page.locator('input[name="name"]').fill(name);
     await page.locator('input[name="credits"]').fill("3");
     await page.locator('input[name="semester"]').fill(semester);
-    await page
-      .getByRole("button", { name: "Add course", exact: true })
-      .last()
-      .click();
+    await page.getByRole("button", { name: "Add course", exact: true }).last().click();
 
     await expect(page.getByText(name, { exact: true })).toBeVisible({
       timeout: 10_000,
@@ -76,9 +73,28 @@ test.describe("Manage courses", () => {
     await expect(cardFor(page, newName)).toHaveCount(0, { timeout: 10_000 });
   });
 
-  test("deleting a course with linked data is blocked, not cascaded", async ({
-    page,
-  }) => {
+  // A11y: the course card's title was an <h3> under the page's <h1>, with
+  // no <h2> between them, so navigating by heading level reported a missing
+  // level and made it look like content had been skipped.
+  test("has a gap-free heading outline", async ({ page }) => {
+    await page.goto("/courses");
+    await expect(page.getByRole("heading", { name: "Courses", exact: true })).toBeVisible();
+
+    const jumps = await page.evaluate(() => {
+      const bad: string[] = [];
+      let prev = 0;
+      document.querySelectorAll("h1,h2,h3,h4,h5,h6").forEach((h) => {
+        const level = Number(h.tagName[1]);
+        if (prev && level > prev + 1) bad.push(`h${prev} -> h${level}: ${h.textContent?.trim()}`);
+        prev = level;
+      });
+      return bad;
+    });
+    expect(jumps).toEqual([]);
+    expect(await page.locator("h1").count()).toBe(1);
+  });
+
+  test("deleting a course with linked data is blocked, not cascaded", async ({ page }) => {
     await page.goto("/courses");
     await expect(page.getByRole("heading", { name: "Courses" })).toBeVisible();
 
@@ -88,9 +104,7 @@ test.describe("Manage courses", () => {
     const menu = await openActions(page, "E2E Test Course");
     await menu.getByRole("button", { name: "Delete", exact: true }).click();
 
-    await expect(
-      page.getByRole("heading", { name: /^Can.t delete/ }),
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: /^Can.t delete/ })).toBeVisible();
     await expect(page.getByRole("dialog").getByText(/still has/)).toBeVisible();
     // The blocking dialog only offers "Close" — no delete-anyway escape hatch.
     await expect(

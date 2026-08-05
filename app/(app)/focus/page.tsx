@@ -10,7 +10,8 @@ import { getViewerTimeZone } from "@/lib/timezone";
 import { FocusTimer } from "@/components/focus/FocusTimer";
 import { FocusStats, type FocusStatsData } from "@/components/focus/FocusStats";
 import { DailyGoalCard } from "@/components/focus/DailyGoalCard";
-import { LearningStats, type CourseTimeGrade } from "@/components/focus/LearningStats";
+import { LearningStats } from "@/components/focus/LearningStats";
+import { CourseTimeCard, type CourseTimeGrade } from "@/components/focus/CourseTimeCard";
 import { FocusHistoryCard, type FocusHistoryEntry } from "@/components/focus/FocusHistoryCard";
 import { LogSessionDialog } from "@/components/focus/LogSessionDialog";
 
@@ -22,40 +23,44 @@ export default async function FocusPage() {
   sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
   const sixtyDaysAgoIso = sixtyDaysAgo.toISOString();
 
-  const [{ data: profile }, { data: assignmentRows }, { data: courseRows }, { data: sessionRows }, { data: gradeRows }] =
-    await Promise.all([
-      supabase.from("profiles").select("default_focus_minutes, daily_focus_goal_cycles").maybeSingle(),
-      // Unfiltered on purpose: past focus sessions can point at assignments
-      // that are now done or archived, and those still need a real title/
-      // course for the stats breakdown below (see the picker filter further
-      // down for the active-only subset actually offered to start a session).
-      supabase
-        .from("assignments")
-        .select("id, title, course_id, status, archived_at")
-        .order("due_at", { ascending: true }),
-      supabase.from("courses").select("id, name"),
-      supabase
-        .from("focus_sessions")
-        .select("id, assignment_id, started_at, duration_seconds, result, source")
-        .gte("started_at", sixtyDaysAgoIso)
-        .order("started_at", { ascending: false }),
-      // §5 learning stats: most recent grade per course, to line focus time
-      // up against how that course actually turned out.
-      supabase
-        .from("grades")
-        .select("course_id, grade_point, semester")
-        .order("semester", { ascending: true }),
-    ]);
+  const [
+    { data: profile },
+    { data: assignmentRows },
+    { data: courseRows },
+    { data: sessionRows },
+    { data: gradeRows },
+  ] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("default_focus_minutes, daily_focus_goal_cycles")
+      .maybeSingle(),
+    // Unfiltered on purpose: past focus sessions can point at assignments
+    // that are now done or archived, and those still need a real title/
+    // course for the stats breakdown below (see the picker filter further
+    // down for the active-only subset actually offered to start a session).
+    supabase
+      .from("assignments")
+      .select("id, title, course_id, status, archived_at")
+      .order("due_at", { ascending: true }),
+    supabase.from("courses").select("id, name"),
+    supabase
+      .from("focus_sessions")
+      .select("id, assignment_id, started_at, duration_seconds, result, source")
+      .gte("started_at", sixtyDaysAgoIso)
+      .order("started_at", { ascending: false }),
+    // §5 learning stats: most recent grade per course, to line focus time
+    // up against how that course actually turned out.
+    supabase
+      .from("grades")
+      .select("course_id, grade_point, semester")
+      .order("semester", { ascending: true }),
+  ]);
 
   const allAssignments = assignmentRows ?? [];
-  const activeAssignments = allAssignments.filter(
-    (a) => !a.archived_at && a.status !== "done",
-  );
+  const activeAssignments = allAssignments.filter((a) => !a.archived_at && a.status !== "done");
   const courseNameById = new Map((courseRows ?? []).map((c) => [c.id, c.name]));
   const assignmentTitleById = new Map(allAssignments.map((a) => [a.id, a.title]));
-  const assignmentCourseById = new Map(
-    allAssignments.map((a) => [a.id, a.course_id]),
-  );
+  const assignmentCourseById = new Map(allAssignments.map((a) => [a.id, a.course_id]));
 
   const sessions = (sessionRows ?? []).map((s) => ({
     assignmentId: s.assignment_id,
@@ -68,7 +73,9 @@ export default async function FocusPage() {
   // Already sorted most-recent-first by the query above.
   const focusHistory: FocusHistoryEntry[] = (sessionRows ?? []).map((s) => ({
     id: s.id,
-    assignmentTitle: s.assignment_id ? (assignmentTitleById.get(s.assignment_id) ?? "Deleted assignment") : "Unassigned",
+    assignmentTitle: s.assignment_id
+      ? (assignmentTitleById.get(s.assignment_id) ?? "Deleted assignment")
+      : "Unassigned",
     courseId: s.assignment_id ? (assignmentCourseById.get(s.assignment_id) ?? null) : null,
     startedAt: s.started_at,
     durationSeconds: s.duration_seconds,
@@ -139,32 +146,40 @@ export default async function FocusPage() {
     <div className="flex flex-col gap-3.5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-3xl font-semibold text-foreground">
-            Focus timer
-          </h1>
-          <p className="mt-1 text-sm font-semibold text-ink-2">
-            One session at a time.
-          </p>
+          <h1 className="font-display text-3xl font-semibold text-foreground">Focus timer</h1>
+          <p className="mt-1 text-sm font-semibold text-ink-2">One session at a time.</p>
         </div>
         <LogSessionDialog
           assignments={activeAssignments.map((a) => ({ id: a.id, title: a.title }))}
         />
       </div>
 
-      <div className="flex flex-col gap-3.5 lg:grid lg:grid-cols-[1fr_1.4fr] lg:items-stretch">
+      {/* The timer is the wider column — it was 1fr against a 1.4fr rail,
+          which made the page's primary control the smaller half.
+          items-start, not stretch: stretching the timer to match a taller
+          right column pushed ~140px of empty space in between its dial, its
+          select and its buttons, since the dial block absorbs all slack. The
+          card now sits at its own height, spaced as the concept draws it. */}
+      <div className="flex flex-col gap-3.5 lg:grid lg:grid-cols-[1.4fr_1fr] lg:items-start">
         <FocusTimer
           assignments={activeAssignments.map((a) => ({ id: a.id, title: a.title }))}
           defaultDurationMinutes={defaultFocusMinutes}
         />
         <div className="flex flex-col gap-3.5">
           <FocusStats data={statsData} />
-          <DailyGoalCard completed={completedCyclesToday(sessions, now, timeZone)} goal={dailyGoalCycles} />
+          <DailyGoalCard
+            completed={completedCyclesToday(sessions, now, timeZone)}
+            goal={dailyGoalCycles}
+          />
         </div>
       </div>
 
-      <FocusHistoryCard entries={focusHistory} />
+      <div className="flex flex-col gap-3.5 lg:grid lg:grid-cols-2 lg:items-stretch">
+        <FocusHistoryCard entries={focusHistory} />
+        <LearningStats dailySeries={statsData.dailyActivity} weeklySeries={weeklySeries} />
+      </div>
 
-      <LearningStats weeklySeries={weeklySeries} byCourse={courseTimeGrades} />
+      <CourseTimeCard byCourse={courseTimeGrades} />
     </div>
   );
 }

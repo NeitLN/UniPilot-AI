@@ -21,16 +21,36 @@ const FACTORS: { key: "workload" | "overdue" | "focus"; label: string; weight: s
 /** Same three tiers EvidenceCard's impact badge already uses — High mirrors
  * "strong", Low mirrors "protective", so the hero's per-factor read never
  * disagrees with the evidence list right below it on the same page. */
-const LEVEL_LABEL: Record<ImpactLevel, string> = { strong: "High", moderate: "Moderate", protective: "Low" };
-const LEVEL_DOT_CLASS: Record<ImpactLevel, string> = { strong: "bg-coral", moderate: "bg-tangerine", protective: "bg-mint" };
-const LEVEL_FILL_CLASS: Record<ImpactLevel, string> = { strong: "bg-coral", moderate: "bg-tangerine", protective: "bg-mint" };
+const LEVEL_LABEL: Record<ImpactLevel, string> = {
+  strong: "High",
+  moderate: "Moderate",
+  protective: "Low",
+};
+const LEVEL_DOT_CLASS: Record<ImpactLevel, string> = {
+  strong: "bg-coral",
+  moderate: "bg-tangerine",
+  protective: "bg-mint",
+};
+const LEVEL_FILL_CLASS: Record<ImpactLevel, string> = {
+  strong: "bg-coral",
+  moderate: "bg-tangerine",
+  protective: "bg-mint",
+};
 const PIP_COUNT = 5;
 
 /** Active range is marked by a dot + bold white text, not colored text —
  * sidesteps the semantic-color-text-guard (bare text-mint/coral/tangerine
  * is reserved for the *-tint-paired pattern, tuned for light backgrounds;
  * this hero is dark) while still never relying on color alone. */
-function RangeLabel({ active, dotClass, label }: { active: boolean; dotClass: string; label: string }) {
+function RangeLabel({
+  active,
+  dotClass,
+  label,
+}: {
+  active: boolean;
+  dotClass: string;
+  label: string;
+}) {
   return (
     <span className={`flex items-center gap-1 ${active ? "font-extrabold text-white" : ""}`}>
       {active && <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${dotClass}`} />}
@@ -39,7 +59,13 @@ function RangeLabel({ active, dotClass, label }: { active: boolean; dotClass: st
   );
 }
 
-export function RiskBalanceHero({ result, computedAt }: { result: RiskResult; computedAt: string | null }) {
+export function RiskBalanceHero({
+  result,
+  computedAt,
+}: {
+  result: RiskResult;
+  computedAt: string | null;
+}) {
   const range = riskRange(result.score);
 
   return (
@@ -95,7 +121,10 @@ export function RiskBalanceHero({ result, computedAt }: { result: RiskResult; co
       <div className="mt-5 grid grid-cols-3 gap-4 border-t border-dusk-border pt-4">
         {FACTORS.map((f) => {
           const level = evidenceImpact(f.key, result[f.key]);
-          const filledPips = Math.max(1, Math.min(PIP_COUNT, Math.ceil((result[f.key] / 100) * PIP_COUNT)));
+          const filledPips = Math.max(
+            1,
+            Math.min(PIP_COUNT, Math.ceil((result[f.key] / 100) * PIP_COUNT)),
+          );
           return (
             <div key={f.key}>
               <p className="text-[11px] font-bold text-dusk-hud">

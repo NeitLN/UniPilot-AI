@@ -126,11 +126,17 @@ export function deriveWeeklyWin(input: {
 
   const topDay = [...input.dailyMinutes].sort((a, b) => b.minutes - a.minutes)[0];
   if (topDay && topDay.minutes > 0) {
-    return { kind: "top_day", message: `${topDay.label} was your strongest day — ${formatMinutes(topDay.minutes)} focused.` };
+    return {
+      kind: "top_day",
+      message: `${topDay.label} was your strongest day — ${formatMinutes(topDay.minutes)} focused.`,
+    };
   }
 
   if (input.planAdherencePct !== null && input.planAdherencePct >= 0.8) {
-    return { kind: "plan_adherence", message: `You stuck to ${Math.round(input.planAdherencePct * 100)}% of your planned sessions this week.` };
+    return {
+      kind: "plan_adherence",
+      message: `You stuck to ${Math.round(input.planAdherencePct * 100)}% of your planned sessions this week.`,
+    };
   }
 
   return null;
@@ -155,9 +161,7 @@ export function planAdherence(
   options: { now?: Date; timeZone?: string } = {},
 ): number | null {
   const { now = new Date(), timeZone = defaultTimeZone() } = options;
-  const elapsed = plannedSessions.filter(
-    (p) => new Date(p.startAt).getTime() <= now.getTime(),
-  );
+  const elapsed = plannedSessions.filter((p) => new Date(p.startAt).getTime() <= now.getTime());
   if (elapsed.length === 0) return null;
 
   const kept = elapsed.filter((p) =>

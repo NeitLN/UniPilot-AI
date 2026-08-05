@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { computeAndStoreRisk } from "@/lib/risk/compute";
-import { riskGateReasons, topSuggestion } from "@/lib/rules/risk";
-import { pickPiloAssignment } from "@/lib/rules/assignment";
+import { pickRiskTarget, riskGateReasons, suggestionAction, topSuggestion } from "@/lib/rules/risk";
 import { CheckCircle2, ShieldCheck, Settings2 } from "lucide-react";
 import { Pilo } from "@/components/brand/Pilo";
 import { WarningActions } from "@/components/risk/WarningActions";
@@ -48,7 +47,10 @@ export default async function RiskPage() {
                   {r.includes("weekly availability") && (
                     <>
                       {" "}
-                      <Link href="/settings" className="font-extrabold text-violet hover:underline">
+                      <Link
+                        href="/settings"
+                        className="font-extrabold text-violet-text hover:underline"
+                      >
                         Set it now →
                       </Link>
                     </>
@@ -56,7 +58,10 @@ export default async function RiskPage() {
                   {r.includes("Add at least one assignment") && (
                     <>
                       {" "}
-                      <Link href="/assignments" className="font-extrabold text-violet hover:underline">
+                      <Link
+                        href="/assignments"
+                        className="font-extrabold text-violet-text hover:underline"
+                      >
                         Add one now →
                       </Link>
                     </>
@@ -64,7 +69,10 @@ export default async function RiskPage() {
                   {r.includes("Log focus sessions") && (
                     <>
                       {" "}
-                      <Link href="/focus" className="font-extrabold text-violet hover:underline">
+                      <Link
+                        href="/focus"
+                        className="font-extrabold text-violet-text hover:underline"
+                      >
                         Start a session →
                       </Link>
                     </>
@@ -85,28 +93,37 @@ export default async function RiskPage() {
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
   const sevenDaysAgoKey = sevenDaysAgo.toISOString().slice(0, 10);
 
-  const [{ data: scoreRow }, { data: warning }, { data: trendRows }, { data: activeAssignments }] = await Promise.all([
-    supabase.from("risk_scores").select("computed_at").eq("id", scoreId).single(),
-    supabase
-      .from("risk_warnings")
-      .select("id, status")
-      .eq("risk_score_id", scoreId)
-      .maybeSingle(),
-    supabase
-      .from("risk_scores")
-      .select("score_date, score")
-      .gte("score_date", sevenDaysAgoKey)
-      .order("score_date", { ascending: true }),
-    supabase
-      .from("assignments")
-      .select("id, title, due_at, priority, status, archived_at")
-      .is("archived_at", null)
-      .neq("status", "done"),
-  ]);
+  const [{ data: scoreRow }, { data: warning }, { data: trendRows }, { data: activeAssignments }] =
+    await Promise.all([
+      supabase.from("risk_scores").select("computed_at").eq("id", scoreId).single(),
+      supabase
+        .from("risk_warnings")
+        .select("id, status")
+        .eq("risk_score_id", scoreId)
+        .maybeSingle(),
+      supabase
+        .from("risk_scores")
+        .select("score_date, score")
+        .gte("score_date", sevenDaysAgoKey)
+        .order("score_date", { ascending: true }),
+      supabase
+        .from("assignments")
+        .select("id, title, due_at, priority, status, archived_at")
+        .is("archived_at", null)
+        .neq("status", "done"),
+    ]);
 
-  const trendPoints: RiskTrendPoint[] = (trendRows ?? []).map((r) => ({ scoreDate: r.score_date, score: r.score }));
+  const trendPoints: RiskTrendPoint[] = (trendRows ?? []).map((r) => ({
+    scoreDate: r.score_date,
+    score: r.score,
+  }));
 
-  const suggestionTarget = pickPiloAssignment(
+  // Picked from the factor that is actually driving the score, not from the
+  // generic "what next" tiering — an overdue-driven score should name the
+  // thing that has been outstanding longest, which is the opposite of what
+  // pickPiloAssignment favours.
+  const suggestionTarget = pickRiskTarget(
+    suggestion.type,
     (activeAssignments ?? []).map((a) => ({
       id: a.id,
       title: a.title,
@@ -117,12 +134,15 @@ export default async function RiskPage() {
     })),
     new Date(),
   );
+  const suggestionCta = suggestionAction(suggestion.type, suggestionTarget);
 
   const lighterWeekActions: LighterWeekAction[] = [];
   if (evidence.overdueCount > 0) {
     lighterWeekActions.push({
       icon: <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />,
-      label: suggestionTarget ? `Clear "${suggestionTarget.title}"` : `Clear ${evidence.overdueCount} overdue task${evidence.overdueCount === 1 ? "" : "s"}`,
+      label: suggestionTarget
+        ? `Clear "${suggestionTarget.title}"`
+        : `Clear ${evidence.overdueCount} overdue task${evidence.overdueCount === 1 ? "" : "s"}`,
       href: suggestionTarget ? `/focus?assignment=${suggestionTarget.id}` : "/assignments",
     });
   }
@@ -155,7 +175,11 @@ export default async function RiskPage() {
         </div>
 
         <div className="flex min-w-0 flex-col gap-3.5">
-          <PiloSuggestionCard suggestion={suggestion} target={suggestionTarget} />
+          <PiloSuggestionCard
+            suggestion={suggestion}
+            target={suggestionTarget}
+            action={suggestionCta}
+          />
           {warning?.status === "open" && (
             <div className="rounded-card-sm bg-card p-4">
               <p className="text-[12.5px] font-semibold text-ink-2">Handled this already?</p>
@@ -177,9 +201,7 @@ export default async function RiskPage() {
 function Header() {
   return (
     <div>
-      <h1 className="font-display text-3xl font-semibold text-foreground">
-        Workload risk
-      </h1>
+      <h1 className="font-display text-3xl font-semibold text-foreground">Workload risk</h1>
       <p className="mt-1 text-sm font-semibold text-ink-2">
         Planning aid, not a medical or psychological assessment.
       </p>

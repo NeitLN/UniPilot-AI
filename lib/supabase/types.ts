@@ -2,13 +2,7 @@
 // Regenerate with `npx supabase gen types typescript --project-id cpuxjofpolmpxhlhnsel --schema public`
 // once the Supabase CLI is linked, and diff against this file for drift.
 
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[];
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type AssignmentStatus = "not_started" | "in_progress" | "done";
 export type AssignmentPriority = "low" | "medium" | "high";
@@ -402,6 +396,7 @@ export interface Database {
           push_status: string | null;
           assignment_id: string | null;
           class_block_id: string | null;
+          dedupe_key: string | null;
         };
         Insert: {
           id?: string;
@@ -415,6 +410,7 @@ export interface Database {
           push_status?: string | null;
           assignment_id?: string | null;
           class_block_id?: string | null;
+          dedupe_key?: string | null;
         };
         Update: {
           id?: string;
@@ -428,6 +424,7 @@ export interface Database {
           push_status?: string | null;
           assignment_id?: string | null;
           class_block_id?: string | null;
+          dedupe_key?: string | null;
         };
         Relationships: [];
       };
@@ -441,6 +438,7 @@ export interface Database {
           workload_warnings: boolean;
           weekly_report: boolean;
           focus_reminders: boolean;
+          plan_nudges: boolean;
           updated_at: string;
         };
         Insert: {
@@ -449,6 +447,7 @@ export interface Database {
           workload_warnings?: boolean;
           weekly_report?: boolean;
           focus_reminders?: boolean;
+          plan_nudges?: boolean;
           updated_at?: string;
         };
         Update: {
@@ -457,6 +456,7 @@ export interface Database {
           workload_warnings?: boolean;
           weekly_report?: boolean;
           focus_reminders?: boolean;
+          plan_nudges?: boolean;
           updated_at?: string;
         };
         Relationships: [];
@@ -526,7 +526,14 @@ export interface Database {
       };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      /** SEC-01, migration 0020. user_id is taken from auth.uid() inside the
+       * function rather than passed in, so it is deliberately absent here. */
+      consume_rate_limit: {
+        Args: { p_route: string; p_limit: number; p_window_seconds: number };
+        Returns: { allowed: boolean; remaining: number; reset_at: string }[];
+      };
+    };
     Enums: {
       assignment_status: AssignmentStatus;
       assignment_priority: AssignmentPriority;

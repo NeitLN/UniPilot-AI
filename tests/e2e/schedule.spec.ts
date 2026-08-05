@@ -12,10 +12,11 @@ test.describe("View class schedule", () => {
     }
 
     // Last-sync status is always shown, connected or not (BR-03) — match
-    // whichever of the two states applies rather than the ambiguous
-    // "Google Calendar" substring that appears in both.
+    // whichever state applies rather than the ambiguous "Google Calendar"
+    // substring, which now appears both as the status card's own title and
+    // in the header's "Sync Google Calendar" action.
     await expect(
-      page.getByText(/isn't connected|Last synced|Sync failed/).first(),
+      page.getByText(/Not connected yet|Last synced|Last sync failed|not synced yet/).first(),
     ).toBeVisible();
   });
 });

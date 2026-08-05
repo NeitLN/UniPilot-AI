@@ -1,0 +1,6 @@
+WRITE: written
+BEFORE SIGN-OUT: [{'kind': 'createAssignment', 'title': 'AUDIT-PROBE-DO-NOT-KEEP', 'hasUserId': False}]
+SIGNED OUT (on /login): True
+AFTER SIGN-OUT: [{'kind': 'createAssignment', 'title': 'AUDIT-PROBE-DO-NOT-KEEP', 'hasUserId': False}]
+CLEANUP: deleted
+AFTER CLEANUP: []

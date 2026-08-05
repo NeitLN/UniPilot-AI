@@ -87,9 +87,8 @@ export function ClassDetailPanel({
         {block.reminderMinutesBefore !== null && (
           <p className="mt-0.5 text-[12.5px] font-semibold text-ink-3">
             Alert:{" "}
-            {REMINDER_OPTIONS.find(
-              (o) => o.value === String(block.reminderMinutesBefore),
-            )?.label ?? `${block.reminderMinutesBefore} min before`}
+            {REMINDER_OPTIONS.find((o) => o.value === String(block.reminderMinutesBefore))?.label ??
+              `${block.reminderMinutesBefore} min before`}
           </p>
         )}
 

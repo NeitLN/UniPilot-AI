@@ -12,7 +12,11 @@ const VARIANT_CLASSES = {
   primary: "bg-violet text-white hover:bg-violet-deep",
 } as const;
 
-export function AddCourseButton({ variant = "neutral" }: { variant?: keyof typeof VARIANT_CLASSES }) {
+export function AddCourseButton({
+  variant = "neutral",
+}: {
+  variant?: keyof typeof VARIANT_CLASSES;
+}) {
   const [open, setOpen] = useState(false);
 
   return (

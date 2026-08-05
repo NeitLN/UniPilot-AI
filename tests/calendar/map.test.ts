@@ -75,11 +75,7 @@ describe("mapGoogleEventToClassBlock", () => {
   });
 
   it("returns null when start or end is missing", () => {
-    const row = mapGoogleEventToClassBlock(
-      { id: "evt-5", summary: "No time" },
-      userId,
-      syncedAt,
-    );
+    const row = mapGoogleEventToClassBlock({ id: "evt-5", summary: "No time" }, userId, syncedAt);
     expect(row).toBeNull();
   });
 

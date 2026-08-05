@@ -106,8 +106,8 @@ export function CourseForm({ initialValues, onSaved, onCancel, compact }: Course
 
       {isEdit && initialValues!.hasGrades && (
         <p className="text-[11.5px] font-semibold text-ink-3">
-          This course already has a recorded grade. Changing credits here won&rsquo;t
-          affect it — grades keep their own credit hours from when they were added.
+          This course already has a recorded grade. Changing credits here won&rsquo;t affect it —
+          grades keep their own credit hours from when they were added.
         </p>
       )}
 
@@ -144,4 +144,3 @@ export function CourseForm({ initialValues, onSaved, onCancel, compact }: Course
     </form>
   );
 }
-

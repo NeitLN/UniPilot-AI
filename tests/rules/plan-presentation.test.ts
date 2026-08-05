@@ -12,7 +12,9 @@ import {
   type PlanSessionLite,
 } from "@/lib/rules/plan-presentation";
 
-function session(overrides: Partial<PlanSessionLite> & Pick<PlanSessionLite, "startAt" | "endAt">): PlanSessionLite {
+function session(
+  overrides: Partial<PlanSessionLite> & Pick<PlanSessionLite, "startAt" | "endAt">,
+): PlanSessionLite {
   return {
     id: crypto.randomUUID(),
     assignmentId: "a1",
@@ -72,10 +74,26 @@ describe("totalPlannedMinutes / formatMinutes", () => {
 describe("coveredAssignmentCount / planCoverage", () => {
   it("counts unique assignments, ignoring nulls", () => {
     const sessions = [
-      session({ assignmentId: "a1", startAt: "2026-08-03T09:00:00.000Z", endAt: "2026-08-03T10:00:00.000Z" }),
-      session({ assignmentId: "a1", startAt: "2026-08-04T09:00:00.000Z", endAt: "2026-08-04T10:00:00.000Z" }),
-      session({ assignmentId: "a2", startAt: "2026-08-05T09:00:00.000Z", endAt: "2026-08-05T10:00:00.000Z" }),
-      session({ assignmentId: null, startAt: "2026-08-06T09:00:00.000Z", endAt: "2026-08-06T10:00:00.000Z" }),
+      session({
+        assignmentId: "a1",
+        startAt: "2026-08-03T09:00:00.000Z",
+        endAt: "2026-08-03T10:00:00.000Z",
+      }),
+      session({
+        assignmentId: "a1",
+        startAt: "2026-08-04T09:00:00.000Z",
+        endAt: "2026-08-04T10:00:00.000Z",
+      }),
+      session({
+        assignmentId: "a2",
+        startAt: "2026-08-05T09:00:00.000Z",
+        endAt: "2026-08-05T10:00:00.000Z",
+      }),
+      session({
+        assignmentId: null,
+        startAt: "2026-08-06T09:00:00.000Z",
+        endAt: "2026-08-06T10:00:00.000Z",
+      }),
     ];
     expect(coveredAssignmentCount(sessions)).toBe(2);
   });

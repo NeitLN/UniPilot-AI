@@ -8,6 +8,7 @@ import {
 } from "@/app/(app)/assignments/actions";
 import { ensurePushSubscription } from "@/lib/push/subscribe";
 import { enqueueMutation } from "@/lib/offline/idb";
+import { useQueueOwner } from "@/components/offline/QueueOwnerProvider";
 import { useOnlineStatus } from "@/lib/offline/useOnlineStatus";
 import { REPEAT_OPTIONS, type EventRepeat } from "@/lib/rules/event";
 import { FieldError } from "@/components/ui/FieldError";
@@ -59,15 +60,16 @@ export function AssignmentForm({
   onSaved,
   onCancel,
 }: AssignmentFormProps) {
+  // OFF-001: an offline edit is stored against its author, so it can never
+  // be replayed into whichever account is signed in when connectivity returns.
+  const queueOwner = useQueueOwner();
   const isEdit = Boolean(initialValues);
-  const action = isEdit
-    ? updateAssignment.bind(null, initialValues!.id)
-    : createAssignment;
+  const action = isEdit ? updateAssignment.bind(null, initialValues!.id) : createAssignment;
 
-  const [state, formAction, pending] = useActionState<
-    AssignmentFormState,
-    FormData
-  >(action, INITIAL_STATE);
+  const [state, formAction, pending] = useActionState<AssignmentFormState, FormData>(
+    action,
+    INITIAL_STATE,
+  );
 
   const [progress, setProgress] = useState(initialValues?.progress ?? 0);
   const [repeat, setRepeat] = useState<EventRepeat>("none");
@@ -78,8 +80,7 @@ export function AssignmentForm({
     if (!state.ok) return;
     // Ask for notification permission right here — the moment the user has
     // just saved an assignment with a reminder — not on first app load.
-    const reminderInput =
-      formRef.current?.querySelector<HTMLInputElement>('[name="reminderAt"]');
+    const reminderInput = formRef.current?.querySelector<HTMLInputElement>('[name="reminderAt"]');
     if (reminderInput?.value) {
       void ensurePushSubscription();
     }
@@ -90,9 +91,7 @@ export function AssignmentForm({
     if (!state.errors) return;
     const firstField = FIELD_ORDER.find((name) => state.errors[name]);
     if (firstField) {
-      formRef.current
-        ?.querySelector<HTMLElement>(`[name="${firstField}"]`)
-        ?.focus();
+      formRef.current?.querySelector<HTMLElement>(`[name="${firstField}"]`)?.focus();
     }
   }, [state.errors]);
 
@@ -106,13 +105,17 @@ export function AssignmentForm({
     }
 
     if (isEdit) {
-      await enqueueMutation("updateAssignment", {
-        id: initialValues!.id,
-        snapshotUpdatedAt: initialValues!.updatedAt,
-        ...payload,
-      });
+      await enqueueMutation(
+        "updateAssignment",
+        {
+          id: initialValues!.id,
+          snapshotUpdatedAt: initialValues!.updatedAt,
+          ...payload,
+        },
+        queueOwner,
+      );
     } else {
-      await enqueueMutation("createAssignment", payload);
+      await enqueueMutation("createAssignment", payload, queueOwner);
     }
 
     onSaved();
@@ -240,11 +243,7 @@ export function AssignmentForm({
           </Field>
 
           {repeat !== "none" && (
-            <Field
-              label="Repeat until"
-              error={state.errors.repeatUntil}
-              className="flex-1"
-            >
+            <Field label="Repeat until" error={state.errors.repeatUntil} className="flex-1">
               <input
                 name="repeatUntil"
                 type="date"
@@ -324,4 +323,3 @@ export function AssignmentForm({
     </form>
   );
 }
-

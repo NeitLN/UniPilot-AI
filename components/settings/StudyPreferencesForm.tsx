@@ -47,11 +47,8 @@ export function StudyPreferencesForm({
 
   return (
     <form action={formAction} className="flex flex-col gap-3.5">
-      <Field
-        label="Weekly availability"
-        error={state.errors.weeklyAvailabilityHours}
-      >
-        <p className="font-display text-3xl font-bold text-violet tabular-nums">
+      <Field label="Weekly availability" error={state.errors.weeklyAvailabilityHours}>
+        <p className="font-display text-3xl font-bold text-violet-text tabular-nums">
           {availabilityHours || 0} <span className="text-base font-semibold text-ink-3">hours</span>
         </p>
         <input
@@ -66,8 +63,8 @@ export function StudyPreferencesForm({
           className={`mt-2 ${inputClass(Boolean(state.errors.weeklyAvailabilityHours))}`}
         />
         <span className="mt-1 text-[11px] font-semibold text-ink-3">
-          How many hours a week you can realistically study — this gates the AI
-          Planner and Workload Risk score.
+          How many hours a week you can realistically study — this gates the AI Planner and Workload
+          Risk score.
         </span>
       </Field>
 
@@ -127,10 +124,7 @@ export function StudyPreferencesForm({
         )}
       </div>
 
-      <Field
-        label="Daily focus goal (cycles)"
-        error={state.errors.dailyFocusGoalCycles}
-      >
+      <Field label="Daily focus goal (cycles)" error={state.errors.dailyFocusGoalCycles}>
         <input
           name="dailyFocusGoalCycles"
           type="number"
@@ -154,9 +148,7 @@ export function StudyPreferencesForm({
               onClick={() => toggleDay(day)}
               aria-pressed={days.has(day)}
               className={`flex min-h-11 min-w-11 items-center justify-center rounded-ctl px-3 text-xs font-bold transition-colors ${
-                days.has(day)
-                  ? "bg-violet text-white"
-                  : "bg-line text-ink-2 hover:bg-line-hover"
+                days.has(day) ? "bg-violet text-white" : "bg-line text-ink-2 hover:bg-line-hover"
               }`}
             >
               {WEEKDAY_LABELS[day]}

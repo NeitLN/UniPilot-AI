@@ -200,11 +200,6 @@ function parseTurns(body) {
   return turns;
 }
 
-function lastTurn(body) {
-  const t = parseTurns(body);
-  return t.length ? t[t.length - 1] : null;
-}
-
 // Append a turn under "## Chat", taking the lock. Adds the author to
 // participants if missing. Optionally appends an AGREE line.
 async function appendTurn({ agent, message, agree }) {

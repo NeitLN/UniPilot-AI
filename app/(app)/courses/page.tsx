@@ -30,20 +30,24 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
   // Step 3.1 — batched, not per-course: one round of parallel queries
   // instead of getCourseUsage() called once per course (previously 3N
   // queries for N courses).
-  const [{ data: courseRows, error }, { data: assignmentRows }, { data: gradeRows }, { data: classBlockRows }] =
-    await Promise.all([
-      supabase
-        .from("courses")
-        .select("id, name, code, credits, semester")
-        .order("semester", { ascending: false })
-        .order("name", { ascending: true }),
-      supabase
-        .from("assignments")
-        .select("id, course_id, title, due_at, status, priority, progress, archived_at")
-        .not("course_id", "is", null),
-      supabase.from("grades").select("id, course_id"),
-      supabase.from("class_blocks").select("id, course_id"),
-    ]);
+  const [
+    { data: courseRows, error },
+    { data: assignmentRows },
+    { data: gradeRows },
+    { data: classBlockRows },
+  ] = await Promise.all([
+    supabase
+      .from("courses")
+      .select("id, name, code, credits, semester")
+      .order("semester", { ascending: false })
+      .order("name", { ascending: true }),
+    supabase
+      .from("assignments")
+      .select("id, course_id, title, due_at, status, priority, progress, archived_at")
+      .not("course_id", "is", null),
+    supabase.from("grades").select("id, course_id"),
+    supabase.from("class_blocks").select("id, course_id"),
+  ]);
 
   const allCourses = courseRows ?? [];
 
@@ -149,7 +153,11 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
       {!error && allCourses.length > 0 && filteredCards.length === 0 && (
         <EmptyState
           heading={hasActiveFilters ? "No courses match these filters" : "No courses match"}
-          copy={hasActiveFilters ? "Try a different search, semester, or status filter." : "Try a different search."}
+          copy={
+            hasActiveFilters
+              ? "Try a different search, semester, or status filter."
+              : "Try a different search."
+          }
         />
       )}
 

@@ -5,10 +5,12 @@ import { addDays, isSameDay } from "@/lib/calendar/view";
 import {
   SCHEDULE_WINDOW_END_MIN,
   SCHEDULE_WINDOW_START_MIN,
+  formatClockShort,
   isCurrentDisplayedRange,
   layoutOverlappingEvents,
   positionEvent,
 } from "@/lib/rules/schedule-presentation";
+import { FileText } from "lucide-react";
 import { courseTone, COURSE_TONE_CLASSES } from "@/lib/ui/course-tone";
 import { ClassDetailPanel } from "./ClassDetailPanel";
 import type { AssignmentLink, ClassBlockData } from "./types";
@@ -26,8 +28,29 @@ function hourLabel(h: number): string {
   return `${h12} ${period}`;
 }
 
+/** The now-indicator's clock, in the same 12-hour convention as the axis
+ * above — but without the meridiem. The gutter is a fixed 48px column, and
+ * "2:41 PM" does not fit a padded chip inside it (it wrapped to two lines).
+ * The meridiem is the part that can go: the hour labels bracketing this
+ * rule already read "2 PM" and "3 PM", so it is spelled out immediately
+ * above and below at all times. */
+function clockLabel(date: Date): string {
+  const h = date.getHours() % 12 === 0 ? 12 : date.getHours() % 12;
+  return `${h}:${String(date.getMinutes()).padStart(2, "0")}`;
+}
+
 function minutesOfDayLocal(date: Date): number {
   return date.getHours() * 60 + date.getMinutes();
+}
+
+/** An assignment deadline plotted onto the week grid (concept §8's
+ * "Lab 3 report due" chip). Separate from AssignmentLink, which is the
+ * course-keyed list ClassDetailPanel shows inside a class's modal. */
+export interface DeadlineMarker {
+  id: string;
+  title: string;
+  dueAt: string;
+  courseId: string | null;
 }
 
 export function WeekTimeGrid({
@@ -36,32 +59,43 @@ export function WeekTimeGrid({
   blocks,
   courses,
   assignmentsByCourse,
+  deadlines = [],
 }: {
   rangeStart: Date;
   rangeEnd: Date;
   blocks: ClassBlockData[];
   courses: CourseOption[];
   assignmentsByCourse: Record<string, AssignmentLink[]>;
+  deadlines?: DeadlineMarker[];
 }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = blocks.find((b) => b.id === selectedId) ?? null;
   const now = new Date();
   const showCurrentTime = isCurrentDisplayedRange({ start: rangeStart, end: rangeEnd }, now);
   const days = Array.from({ length: 7 }, (_, i) => addDays(rangeStart, i));
+  const nowMinutes = minutesOfDayLocal(now);
 
   const timedBlocks = blocks.filter((b) => !b.isAllDay);
   const allDayBlocks = blocks.filter((b) => b.isAllDay);
 
   return (
     <div className="overflow-x-auto">
-      <div className="min-w-[720px]">
+      {/* 560px is what the 48px gutter + 7 readable day columns + gaps
+          actually need. It was 720px, which forced a horizontal scrollbar
+          at ordinary laptop widths once the right rail and the app-wide
+          1.2x zoom took their share — the week view is meant to show all
+          seven days without scrolling. */}
+      {/* pb-2 leaves room for the bottom hour label, which sits at top:100%
+          with a -50% translate and would otherwise be sliced in half by the
+          card edge. */}
+      <div className="min-w-[560px] pb-2">
         {allDayBlocks.length > 0 && (
-          <div className="mb-2 grid grid-cols-[48px_repeat(7,1fr)] gap-1.5">
+          <div className="mb-2 grid grid-cols-[48px_repeat(7,1fr)]">
             <div />
             {days.map((day) => {
               const dayAllDay = allDayBlocks.filter((b) => isSameDay(new Date(b.startAt), day));
               return (
-                <div key={day.toISOString()} className="flex flex-col gap-1">
+                <div key={day.toISOString()} className="flex flex-col gap-1 px-0.5">
                   {dayAllDay.map((b) => {
                     const tone = b.courseId ? courseTone(b.courseId) : null;
                     return (
@@ -81,30 +115,32 @@ export function WeekTimeGrid({
           </div>
         )}
 
-        {/* Day headers */}
-        <div className="grid grid-cols-[48px_repeat(7,1fr)] gap-1.5">
+        {/* Day headers — "Mon 3" on one line, as the concept has it. The
+            previous two-row stack with a filled circle on today ate vertical
+            space and made the weekday read as a separate label from its date.
+            Today keeps a violet tint: the red rule below spans all seven
+            columns, so nothing else on the grid says which day is today. */}
+        <div className="grid grid-cols-[48px_repeat(7,1fr)]">
           <div />
           {days.map((day) => {
             const today = isSameDay(day, now);
             return (
-              <div key={day.toISOString()} className="pb-1.5 text-center">
-                <p className={`text-[10.5px] font-extrabold uppercase tracking-wide ${today ? "text-violet" : "text-ink-3"}`}>
-                  {day.toLocaleDateString(undefined, { weekday: "short" })}
-                </p>
+              <div key={day.toISOString()} className="pb-2 text-center">
                 <p
-                  className={`mx-auto mt-0.5 flex h-6 w-6 items-center justify-center rounded-full text-[12.5px] font-bold ${
-                    today ? "bg-violet text-white" : "text-foreground"
-                  }`}
+                  className={`text-[12px] font-bold ${today ? "text-violet-text" : "text-foreground"}`}
                 >
-                  {day.getDate()}
+                  {day.toLocaleDateString(undefined, { weekday: "short" })} {day.getDate()}
                 </p>
               </div>
             );
           })}
         </div>
 
-        {/* Time grid */}
-        <div className="grid grid-cols-[48px_repeat(7,1fr)] gap-1.5">
+        {/* Time grid. `relative` so the current-time rule below can span the
+            full width as one element instead of a separate stub inside each
+            day column — that's what lets it carry a single clock label in
+            the gutter (concept §8) rather than repeating it seven times. */}
+        <div className="relative grid grid-cols-[48px_repeat(7,1fr)]">
           <div className="relative" style={{ height: GRID_HEIGHT_PX }}>
             {HOURS.map((h, i) => (
               <span
@@ -117,17 +153,20 @@ export function WeekTimeGrid({
             ))}
           </div>
 
-          {days.map((day) => {
+          {days.map((day, dayIndex) => {
             const dayBlocks = timedBlocks.filter((b) => isSameDay(new Date(b.startAt), day));
             const laidOut = layoutOverlappingEvents(dayBlocks);
-            const today = isSameDay(day, now);
-            const nowMinutes = minutesOfDayLocal(now);
-            const nowPos = positionEvent(nowMinutes, nowMinutes + 1);
+            const dayDeadlines = deadlines.filter((d) => isSameDay(new Date(d.dueAt), day));
 
             return (
+              // One continuous ruled grid, per the concept: hairline column
+              // rules on the card's own surface, instead of seven detached
+              // rounded `bg-canvas` slabs separated by gaps. The gaps used to
+              // break every hour line into seven disconnected segments, so the
+              // eye couldn't track a time across the week.
               <div
                 key={day.toISOString()}
-                className="relative rounded-ctl bg-canvas"
+                className={`relative border-l border-border-subtle-2 ${dayIndex === 6 ? "border-r" : ""}`}
                 style={{ height: GRID_HEIGHT_PX }}
               >
                 {HOURS.map((h, i) => (
@@ -137,14 +176,6 @@ export function WeekTimeGrid({
                     style={{ top: `${(i / (HOURS.length - 1)) * 100}%` }}
                   />
                 ))}
-
-                {today && showCurrentTime && nowMinutes >= SCHEDULE_WINDOW_START_MIN && nowMinutes <= SCHEDULE_WINDOW_END_MIN && (
-                  <div
-                    aria-hidden="true"
-                    className="absolute inset-x-0 z-10 h-[2px] bg-coral"
-                    style={{ top: `${nowPos.topPct}%` }}
-                  />
-                )}
 
                 {laidOut.map(({ event: b, column, columnCount }) => {
                   const start = new Date(b.startAt);
@@ -157,27 +188,120 @@ export function WeekTimeGrid({
                       key={b.id}
                       type="button"
                       onClick={() => setSelectedId(b.id)}
-                      className={`absolute overflow-hidden rounded-[8px] p-1.5 text-left shadow-sm ${tone ? COURSE_TONE_CLASSES[tone].tint : "bg-line"}`}
+                      className={`absolute overflow-hidden rounded-[8px] p-1.5 text-left shadow-sm ${
+                        tone
+                          ? `${COURSE_TONE_CLASSES[tone].solid} ${COURSE_TONE_CLASSES[tone].onSolid}`
+                          : "bg-line text-ink-2"
+                      }`}
+                      // The 2px inset replaces the column gap the grid used to
+                      // have: absolute children resolve against the padding
+                      // box, so padding on the column would not have insetted
+                      // them.
                       style={{
                         top: `${pos.topPct}%`,
                         height: `${Math.max(pos.heightPct, 3)}%`,
-                        left: `${column * widthPct}%`,
-                        width: `${widthPct}%`,
+                        left: `calc(${column * widthPct}% + 2px)`,
+                        width: `calc(${widthPct}% - 4px)`,
                       }}
                     >
-                      <p className={`truncate text-[10.5px] font-extrabold ${tone ? COURSE_TONE_CLASSES[tone].text : "text-ink-2"}`}>
+                      {/* Wraps to two lines when the block is tall enough to
+                          show them — a truncated "Require…" tells you far
+                          less than the concept's wrapped course name. */}
+                      <p
+                        className={`text-[10px] font-extrabold leading-tight ${pos.heightPct > 9 ? "line-clamp-2" : "truncate"}`}
+                      >
                         {b.title}
                       </p>
-                      <p className="truncate text-[9.5px] font-semibold text-ink-3">
-                        {start.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}
-                        {pos.heightPct > 8 && `–${end.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}`}
+                      {/* Local-time formatting differs SSR vs hydration by design. */}
+                      <p
+                        className="truncate text-[9px] font-semibold opacity-80"
+                        suppressHydrationWarning
+                      >
+                        {formatClockShort(start)}
+                        {pos.heightPct > 8 && `–${formatClockShort(end)}`}
                       </p>
+                      {b.location && pos.heightPct > 11 && (
+                        <p className="truncate text-[9px] font-semibold opacity-75">{b.location}</p>
+                      )}
                     </button>
                   );
                 })}
+
+                {/* Deadlines are a point in time, not a span, and most land
+                    late at night — outside the 08:00-20:00 window entirely.
+                    Rather than drop them or stretch the window to 24h for
+                    one chip a week, they pin to the foot of their own day
+                    with the real due time spelled out. */}
+                {dayDeadlines.length > 0 && (
+                  <div className="absolute inset-x-1 bottom-1 z-10 flex flex-col gap-1">
+                    {dayDeadlines.map((d) => (
+                      <div
+                        key={d.id}
+                        title={`${d.title} — due ${new Date(d.dueAt).toLocaleString()}`}
+                        className="relative rounded-[8px] border border-coral/40 bg-coral-tint px-1.5 py-1"
+                      >
+                        {/* The dot on the top edge is what marks this as a
+                            point in time rather than a block that occupies
+                            one — the chip's own body is only as tall as its
+                            text, which would otherwise read as a duration. */}
+                        <span
+                          aria-hidden="true"
+                          className="absolute -top-1 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-coral"
+                        />
+                        {/* Wraps rather than truncates: "Lab 3 re…" hides the
+                            one thing the chip exists to tell you. */}
+                        <p className="flex items-start gap-1 text-[9.5px] font-extrabold text-coral-text">
+                          <FileText className="mt-px h-2.5 w-2.5 shrink-0" aria-hidden="true" />
+                          <span className="line-clamp-2">{d.title} due</span>
+                        </p>
+                        {/* Local-time formatting differs SSR vs hydration by
+                            design, same as every other time label here. */}
+                        <p
+                          className="truncate text-[9px] font-semibold text-coral-text/80"
+                          suppressHydrationWarning
+                        >
+                          {new Date(d.dueAt).toLocaleTimeString(undefined, {
+                            hour: "numeric",
+                            minute: "2-digit",
+                          })}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             );
           })}
+
+          {showCurrentTime &&
+            nowMinutes >= SCHEDULE_WINDOW_START_MIN &&
+            nowMinutes <= SCHEDULE_WINDOW_END_MIN && (
+              <div
+                className="pointer-events-none absolute inset-x-0 z-20 flex -translate-y-1/2 items-center"
+                style={{ top: `${positionEvent(nowMinutes, nowMinutes + 1).topPct}%` }}
+              >
+                {/* The rule is a coral fill, but this clock label is *text*.
+                  Standing bare on the card it has no theme-stable shade:
+                  --coral-text is a dark shade built to sit on a light tint
+                  (2.61:1 measured here in dark mode) and --coral is the
+                  reverse, light-unsafe. Same trap SR-03/D-03 hit, so this
+                  takes the same way out those settled on — carry your own
+                  background rather than chase one shade across both themes.
+                  --coral-deep is the sanctioned solid fill for small white
+                  text (5.18:1), and unlike a pastel tint chip it still reads
+                  as one piece with the rule it labels. */}
+                <span className="w-12 shrink-0 pr-1.5 text-right">
+                  <span
+                    className="rounded-pill bg-coral-deep px-1 py-px text-[9.5px] font-extrabold whitespace-nowrap text-white"
+                    suppressHydrationWarning
+                  >
+                    {clockLabel(now)}
+                  </span>
+                </span>
+                <span aria-hidden="true" className="h-1.5 w-1.5 shrink-0 rounded-full bg-coral" />
+                <span aria-hidden="true" className="h-[2px] flex-1 bg-coral" />
+              </div>
+            )}
         </div>
       </div>
 

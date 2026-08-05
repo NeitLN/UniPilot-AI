@@ -2,10 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
-import {
-  staggerContainerVariants,
-  staggerItemVariants,
-} from "@/lib/motion/variants";
+import { staggerContainerVariants, staggerItemVariants } from "@/lib/motion/variants";
 
 /** Module-level, not React state: Next.js App Router remounts a route's
  * `page.tsx` tree on every navigation to it (layouts persist, pages don't),

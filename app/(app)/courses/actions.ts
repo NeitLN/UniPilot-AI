@@ -87,9 +87,7 @@ export async function getCourseUsage(courseId: string): Promise<CourseUsage> {
   };
 }
 
-export type DeleteCourseResult =
-  | { ok: true }
-  | { ok: false; reason: "in_use"; usage: CourseUsage };
+export type DeleteCourseResult = { ok: true } | { ok: false; reason: "in_use"; usage: CourseUsage };
 
 /**
  * BR-new (docs/PRODUCT_REVIEW.md FR-20): never cascade a course delete.

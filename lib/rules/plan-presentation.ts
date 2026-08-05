@@ -40,7 +40,11 @@ export function weekDayTabs(weekStartDate: string): DayTab[] {
     return {
       dayKey: key,
       shortLabel: asDate.toLocaleDateString(undefined, { weekday: "short", day: "numeric" }),
-      longLabel: asDate.toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" }),
+      longLabel: asDate.toLocaleDateString(undefined, {
+        weekday: "long",
+        month: "short",
+        day: "numeric",
+      }),
     };
   });
 }
@@ -77,7 +81,8 @@ export function formatMinutes(totalMinutes: number): string {
 }
 
 export function coveredAssignmentCount(sessions: PlanSessionLite[]): number {
-  return new Set(sessions.map((s) => s.assignmentId).filter((id): id is string => Boolean(id))).size;
+  return new Set(sessions.map((s) => s.assignmentId).filter((id): id is string => Boolean(id)))
+    .size;
 }
 
 /** Coverage = unique assignments with a session / assignments due within
@@ -206,7 +211,8 @@ export function freeAvailabilityBands(
     if (b.start > cursor) free.push({ start: cursor, end: b.start });
     cursor = Math.max(cursor, b.end);
   }
-  if (cursor < AVAILABILITY_WINDOW_END_MIN) free.push({ start: cursor, end: AVAILABILITY_WINDOW_END_MIN });
+  if (cursor < AVAILABILITY_WINDOW_END_MIN)
+    free.push({ start: cursor, end: AVAILABILITY_WINDOW_END_MIN });
 
   // Split each free interval at noon and again at 18:00 so morning/
   // afternoon/low-energy can be tinted differently (brief §1.2 — legend
@@ -224,7 +230,11 @@ export function freeAvailabilityBands(
       });
     }
     if (f.end > LOW_ENERGY_START_MIN) {
-      bands.push({ startMinute: Math.max(f.start, LOW_ENERGY_START_MIN), endMinute: f.end, period: "low" });
+      bands.push({
+        startMinute: Math.max(f.start, LOW_ENERGY_START_MIN),
+        endMinute: f.end,
+        period: "low",
+      });
     }
   }
   return bands.filter((b) => b.endMinute > b.startMinute);

@@ -10,7 +10,11 @@ import {
   type ThemePreference,
 } from "@/lib/theme";
 
-const OPTIONS: { value: ThemePreference; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+const OPTIONS: {
+  value: ThemePreference;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+}[] = [
   { value: "light", label: "Light", icon: Sun },
   { value: "dark", label: "Dark", icon: Moon },
   { value: "system", label: "System", icon: Monitor },
@@ -47,20 +51,33 @@ export function ThemeToggle() {
               onClick={() => choose(opt.value)}
               aria-checked={isActive}
               className={`relative flex min-h-[76px] flex-col items-center justify-center gap-1.5 rounded-ctl border-2 transition-colors ${
-                isActive ? "border-violet bg-violet-tint" : "border-border-subtle bg-card hover:bg-line"
+                isActive
+                  ? "border-violet bg-violet-tint"
+                  : "border-border-subtle bg-card hover:bg-line"
               }`}
             >
               {isActive && (
-                <CheckCircle2 className="absolute right-1.5 top-1.5 h-4 w-4 text-violet" aria-hidden="true" fill="currentColor" />
+                <CheckCircle2
+                  className="absolute right-1.5 top-1.5 h-4 w-4 text-violet-text"
+                  aria-hidden="true"
+                  fill="currentColor"
+                />
               )}
-              <Icon className={`h-5 w-5 ${isActive ? "text-violet" : "text-ink-2"}`} aria-hidden="true" />
-              <span className={`text-xs font-bold ${isActive ? "text-violet" : "text-ink-2"}`}>{opt.label}</span>
+              <Icon
+                className={`h-5 w-5 ${isActive ? "text-violet-text" : "text-ink-2"}`}
+                aria-hidden="true"
+              />
+              <span className={`text-xs font-bold ${isActive ? "text-violet-text" : "text-ink-2"}`}>
+                {opt.label}
+              </span>
             </button>
           );
         })}
       </div>
       <p className="mt-1 text-[11px] font-semibold text-ink-3">
-        {pref === "system" ? "System will match your device settings." : `Always use ${pref} theme.`}
+        {pref === "system"
+          ? "System will match your device settings."
+          : `Always use ${pref} theme.`}
       </p>
     </div>
   );

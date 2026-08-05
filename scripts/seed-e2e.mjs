@@ -59,7 +59,13 @@ let courseId = existingCourse?.id;
 if (!courseId) {
   const { data, error } = await sb
     .from("courses")
-    .insert({ user_id: userId, name: "E2E Test Course", code: "E2E101", credits: 3, semester: "E2E" })
+    .insert({
+      user_id: userId,
+      name: "E2E Test Course",
+      code: "E2E101",
+      credits: 3,
+      semester: "E2E",
+    })
     .select("id")
     .single();
   if (error) throw error;

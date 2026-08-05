@@ -47,7 +47,11 @@ export default async function SettingsPage() {
           <SettingsSection id="profile" title="Profile" className="lg:col-span-2">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
               <AvatarColorPicker
-                initialColor={profile?.avatar_color && isAvatarColor(profile.avatar_color) ? profile.avatar_color : "violet"}
+                initialColor={
+                  profile?.avatar_color && isAvatarColor(profile.avatar_color)
+                    ? profile.avatar_color
+                    : "violet"
+                }
               />
               <div className="flex-1">
                 <SettingsForm initialFullName={profile?.full_name ?? ""} email={user?.email} />

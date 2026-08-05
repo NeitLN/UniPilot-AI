@@ -58,15 +58,18 @@ export interface KpiCardProps {
 
 export function KpiCard({ tone, label, value, unit, hint, barPct, icon }: KpiCardProps) {
   return (
-    <div className={`rounded-card ${TONE_BG[tone]} ${TONE_TEXT[tone]} px-5 py-[18px] pb-5`}>
+    // h-full + a bottom-pinned footer: only the Workload risk card carries a
+    // progress bar, so without this it was visibly taller than the other
+    // three and their hint lines sat at three different heights.
+    <div
+      className={`flex h-full flex-col rounded-card ${TONE_BG[tone]} ${TONE_TEXT[tone]} px-5 py-[18px] pb-5`}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-[12.5px] font-bold">{label}</p>
           <p className="mt-1 font-display text-[46px] font-bold leading-none tracking-[-0.045em]">
             {value}
-            {unit && (
-              <span className="ml-1.5 text-[13px] font-bold tracking-normal">{unit}</span>
-            )}
+            {unit && <span className="ml-1.5 text-[13px] font-bold tracking-normal">{unit}</span>}
           </p>
         </div>
         {icon && (
@@ -78,22 +81,28 @@ export function KpiCard({ tone, label, value, unit, hint, barPct, icon }: KpiCar
           </span>
         )}
       </div>
-      {typeof barPct === "number" && (
-        <div className={`mt-3 h-[7px] rounded-full ${TONE_TRACK[tone]}`}>
-          <div
-            className={`h-full rounded-full ${TONE_FILL[tone]}`}
-            style={{ width: `${Math.max(0, Math.min(100, barPct))}%` }}
-          />
-        </div>
-      )}
-      <p className="mt-2.5 text-[11.5px] font-semibold">{hint}</p>
+      {/* Bar and hint travel together at the card's foot, so every card's
+          hint line lands on the same baseline whether or not it has a bar. */}
+      <div className="mt-auto pt-3">
+        {typeof barPct === "number" && (
+          <div className={`h-[7px] rounded-full ${TONE_TRACK[tone]}`}>
+            <div
+              className={`h-full rounded-full ${TONE_FILL[tone]}`}
+              style={{ width: `${Math.max(0, Math.min(100, barPct))}%` }}
+            />
+          </div>
+        )}
+        <p className={`text-[11.5px] font-semibold ${typeof barPct === "number" ? "mt-2.5" : ""}`}>
+          {hint}
+        </p>
+      </div>
     </div>
   );
 }
 
 export function KpiCardSkeleton({ tone }: { tone: KpiTone }) {
   return (
-    <div className={`animate-pulse rounded-card ${TONE_BG[tone]} px-5 py-[18px] pb-5`}>
+    <div className={`h-full animate-pulse rounded-card ${TONE_BG[tone]} px-5 py-[18px] pb-5`}>
       <div className="h-3 w-20 rounded-full bg-white/30" />
       <div className="mt-3 h-9 w-16 rounded-full bg-white/30" />
       <div className="mt-4 h-[7px] w-full rounded-full bg-white/20" />

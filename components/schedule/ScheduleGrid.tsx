@@ -5,12 +5,7 @@ import Link from "next/link";
 import { Pilo } from "@/components/brand/Pilo";
 import { FadeIn } from "@/components/motion/FadeIn";
 import type { CourseOption } from "@/components/assignments/AssignmentForm";
-import {
-  addDays,
-  isSameDay,
-  toDateParam,
-  type ScheduleView,
-} from "@/lib/calendar/view";
+import { addDays, isSameDay, toDateParam, type ScheduleView } from "@/lib/calendar/view";
 import { ClassDetailPanel } from "./ClassDetailPanel";
 import type { AssignmentLink, ClassBlockData } from "./types";
 
@@ -38,20 +33,10 @@ export function ScheduleGrid({
     <>
       {view === "day" && <DayList blocks={blocks} onSelect={setSelectedId} />}
       {view === "week" && (
-        <WeekColumns
-          start={start}
-          today={today}
-          blocks={blocks}
-          onSelect={setSelectedId}
-        />
+        <WeekColumns start={start} today={today} blocks={blocks} onSelect={setSelectedId} />
       )}
       {view === "month" && (
-        <MonthGrid
-          start={start}
-          today={today}
-          blocks={blocks}
-          onSelect={setSelectedId}
-        />
+        <MonthGrid start={start} today={today} blocks={blocks} onSelect={setSelectedId} />
       )}
 
       <ClassDetailPanel
@@ -60,32 +45,20 @@ export function ScheduleGrid({
         open={selected !== null}
         onClose={() => setSelectedId(null)}
         courses={courses}
-        linkedAssignments={
-          selected?.courseId
-            ? (assignmentsByCourse[selected.courseId] ?? [])
-            : []
-        }
+        linkedAssignments={selected?.courseId ? (assignmentsByCourse[selected.courseId] ?? []) : []}
       />
     </>
   );
 }
 
-function BlockCard({
-  block,
-  onSelect,
-}: {
-  block: ClassBlockData;
-  onSelect: (id: string) => void;
-}) {
+function BlockCard({ block, onSelect }: { block: ClassBlockData; onSelect: (id: string) => void }) {
   return (
     <button
       type="button"
       onClick={() => onSelect(block.id)}
       className="w-full rounded-ctl bg-line px-3 py-2 text-left hover:bg-line-hover"
     >
-      <p className="break-words text-[12.5px] font-bold text-foreground">
-        {block.title}
-      </p>
+      <p className="break-words text-[12.5px] font-bold text-foreground">{block.title}</p>
       {/* Formatted in the runtime's local timezone — expected to differ
           between SSR and hydration, not a real mismatch. */}
       {/* D-03 (docs/UIUX_REVIEW.md): text-ink-3 measured 4.4:1 on this
@@ -108,10 +81,7 @@ function BlockCard({
 // which read as the same text printed twice. Also never showed an end
 // time, so there was no way to tell a class's length from the grid alone.
 function blockSubtitle(
-  block: Pick<
-    ClassBlockData,
-    "startAt" | "endAt" | "isAllDay" | "title" | "courseName"
-  >,
+  block: Pick<ClassBlockData, "startAt" | "endAt" | "isAllDay" | "title" | "courseName">,
 ): string {
   const timeRange = block.isAllDay
     ? "All day"
@@ -138,9 +108,7 @@ function DayList({
     return (
       <FadeIn className="flex flex-col items-center gap-2 py-10 text-center">
         <Pilo mood="sleepy" size={64} />
-        <p className="text-[12.5px] font-semibold text-ink-2">
-          No classes on this day.
-        </p>
+        <p className="text-[12.5px] font-semibold text-ink-2">No classes on this day.</p>
       </FadeIn>
     );
   }
@@ -165,19 +133,19 @@ function DayList({
             ) : (
               <>
                 <span>{formatTime(b.startAt)}</span>
-                <span className="text-ink-3/70">{formatTime(b.endAt)}</span>
+                {/* No /70 here: --ink-3 is already the muted end of the
+                    scale, and knocking 30% off it lands at 3.08:1 against
+                    the card — well under AA. The end time reads as
+                    secondary from its position after the start time. */}
+                <span className="text-ink-3">{formatTime(b.endAt)}</span>
               </>
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-bold text-foreground">
-              {b.title}
-            </p>
+            <p className="truncate text-sm font-bold text-foreground">{b.title}</p>
             <p className="truncate text-[11.5px] font-semibold text-ink-3">
               {b.location ?? "No location"}
-              {b.courseName && b.courseName !== b.title
-                ? ` · ${b.courseName}`
-                : ""}
+              {b.courseName && b.courseName !== b.title ? ` · ${b.courseName}` : ""}
             </p>
           </div>
         </button>
@@ -217,8 +185,7 @@ function WeekColumns({
   const isWeekend = (day: Date) => day.getDay() === 0 || day.getDay() === 6;
   const weekendEntries = dayEntries.filter((e) => isWeekend(e.day));
   const weekendEmpty =
-    weekendEntries.length === 2 &&
-    weekendEntries.every((e) => e.dayBlocks.length === 0);
+    weekendEntries.length === 2 && weekendEntries.every((e) => e.dayBlocks.length === 0);
 
   return (
     <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-7">
@@ -234,9 +201,7 @@ function WeekColumns({
       ))}
       {weekendEmpty && (
         <div className="rounded-card bg-card p-3 text-center sm:col-span-2">
-          <p className="text-[11.5px] font-semibold text-ink-3">
-            Weekend — no schedule
-          </p>
+          <p className="text-[11.5px] font-semibold text-ink-3">Weekend — no schedule</p>
         </div>
       )}
     </div>
@@ -262,7 +227,7 @@ function DayColumn({
           expected to differ between SSR and hydration, not a real mismatch. */}
       <p
         className={`text-center text-[11px] font-extrabold uppercase tracking-wide ${
-          isToday ? "text-violet" : "text-ink-3"
+          isToday ? "text-violet-text" : "text-ink-3"
         }`}
         suppressHydrationWarning
       >
@@ -321,11 +286,7 @@ function MonthGrid({
                 to differ between SSR and hydration, not a real mismatch. */}
             <p
               className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold ${
-                isToday
-                  ? "bg-violet text-white"
-                  : inMonth
-                    ? "text-foreground"
-                    : "text-ink-3"
+                isToday ? "bg-violet text-white" : inMonth ? "text-foreground" : "text-ink-3"
               }`}
               suppressHydrationWarning
             >
@@ -337,7 +298,7 @@ function MonthGrid({
                   key={b.id}
                   type="button"
                   onClick={() => onSelect(b.id)}
-                  className="truncate rounded-[6px] bg-violet-tint px-1.5 py-0.5 text-left text-[10px] font-bold text-violet"
+                  className="truncate rounded-[6px] bg-violet-tint px-1.5 py-0.5 text-left text-[10px] font-bold text-violet-text"
                 >
                   {b.title}
                 </button>

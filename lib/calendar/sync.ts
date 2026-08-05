@@ -5,8 +5,7 @@ import { refreshAccessToken } from "./oauth";
 import { decryptToken } from "./tokenCrypto";
 import { mapGoogleEventToClassBlock, type GoogleCalendarEvent } from "./map";
 
-const EVENTS_ENDPOINT =
-  "https://www.googleapis.com/calendar/v3/calendars/primary/events";
+const EVENTS_ENDPOINT = "https://www.googleapis.com/calendar/v3/calendars/primary/events";
 const TOKEN_REFRESH_BUFFER_MS = 60_000;
 const WINDOW_BEFORE_DAYS = 7;
 const WINDOW_AFTER_DAYS = 60;
@@ -30,9 +29,7 @@ export async function syncCalendarForUser(
 ): Promise<SyncResult> {
   const { data: connection, error: connectionError } = await supabase
     .from("google_calendar_connections")
-    .select(
-      "refresh_token, access_token, access_token_expires_at",
-    )
+    .select("refresh_token, access_token, access_token_expires_at")
     .eq("user_id", userId)
     .maybeSingle();
 
@@ -137,8 +134,7 @@ async function fetchEvents(accessToken: string): Promise<GoogleCalendarEvent[]> 
       throw new Error(`Google Calendar API error: ${await res.text()}`);
     }
 
-    const body: { items?: GoogleCalendarEvent[]; nextPageToken?: string } =
-      await res.json();
+    const body: { items?: GoogleCalendarEvent[]; nextPageToken?: string } = await res.json();
     items.push(...(body.items ?? []));
 
     if (!body.nextPageToken) break;

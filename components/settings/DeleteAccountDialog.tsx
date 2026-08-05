@@ -49,9 +49,9 @@ export function DeleteAccountDialog({ userEmail, open, onClose }: DeleteAccountD
         Delete your account permanently?
       </h2>
       <p className="mt-2 text-sm font-semibold text-ink-2">
-        This removes every assignment, course, grade, schedule event, focus session, and
-        plan you have — for good, with no way back. If you want a copy first, use
-        &ldquo;Export your data&rdquo; below before continuing.
+        This removes every assignment, course, grade, schedule event, focus session, and plan you
+        have — for good, with no way back. If you want a copy first, use &ldquo;Export your
+        data&rdquo; below before continuing.
       </p>
 
       <label className="mt-4 flex flex-col gap-1 text-xs font-bold text-ink-2">
