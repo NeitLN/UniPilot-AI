@@ -83,6 +83,14 @@ const MEASURE = `() => {
     const cs = getComputedStyle(el);
     if (cs.visibility === 'hidden' || cs.display === 'none') return;
     if (cs.clipPath === 'inset(50%)') return;
+    // WCAG 1.4.3 explicitly exempts "Inactive User Interface Components"
+    // from the contrast requirement — a disabled control is allowed to look
+    // washed out, since that fade *is* the signal that it can't be used
+    // right now. axe-core skips disabled elements for the same reason.
+    // Surfaced by Pagination's disabled "Previous" button once real E2E
+    // residue finally pushed a list past one page for the first time; the
+    // button's opacity-40 disabled state was correct, this check was not.
+    if (el.closest('[disabled], [aria-disabled="true"]')) return;
     const fg = parse(cs.color); if (!fg) return;
     const bg = bgOf(el);
     // fg === bg exactly means the visible background is an absolutely

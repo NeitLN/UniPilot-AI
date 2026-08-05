@@ -36,6 +36,21 @@ async function createAssignment(
     await dialog.locator('input[name="repeatUntil"]').fill(overrides.repeatUntil ?? "2026-09-15");
   }
   await dialog.getByRole("button", { name: "Add assignment", exact: true }).click();
+  // The dialog closing is the proof the server action resolved (onSaved()
+  // only runs on success) — waiting for it here, rather than racing a
+  // navigation against an in-flight submission.
+  await dialog.waitFor({ state: "hidden", timeout: 20_000 });
+
+  // Verified via search, not by reading whatever page.goto("/assignments")
+  // (unfiltered, 20-per-page, sorted by due date) happens to be showing.
+  // createAssignment always uses the same fixed dueAt, and so does a lot of
+  // accumulated E2E residue — as that residue grows, a freshly created row
+  // increasingly ties with dozens of others on the exact same due date and
+  // can land past page 1 depending on tie-break order. The title is a
+  // run-unique timestamp, so this is the same page.goto(`?q=`) pattern used
+  // for the archived-view and recurring-series checks, generalised to every
+  // caller instead of patched per test.
+  await page.goto(`/assignments?q=${encodeURIComponent(overrides.title)}`);
   // Not a plain page.getByText(title, {exact:true}): a recurring row's title
   // <p> also contains the "↻ Recurring assignment" marker as a child span,
   // so its full text content is "{title} ↻" — an exact match on the bare
@@ -181,6 +196,10 @@ test.describe("FR-24: recurring assignments", () => {
       repeatUntil: "2026-09-15",
     });
 
+    // createAssignment already left the page on the ?q=<title> search view
+    // (a weekly series spanning several occurrences would otherwise have
+    // some of them pushed onto page 2 as accumulated E2E data grows past
+    // 20 rows), so every occurrence of this series is what's rendered here.
     const rows = page.getByTestId("assignment-card").filter({ hasText: title });
     await expect(rows.first()).toBeVisible({ timeout: 10_000 });
     const count = await rows.count();
