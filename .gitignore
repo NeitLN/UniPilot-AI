@@ -52,4 +52,8 @@ next-env.d.ts
 .env*
 
 # Iteration screenshots from local design/verification runs — not product assets.
+# 74 of these had accumulated (8.5 MB) with nothing referencing them; the
+# per-run subfolders are the pattern that produced them, so they stay out.
 docs/screenshots/zoom/
+docs/screenshots/review*/
+docs/screenshots/baseline/

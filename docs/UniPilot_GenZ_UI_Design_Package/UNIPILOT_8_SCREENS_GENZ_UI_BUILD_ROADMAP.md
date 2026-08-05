@@ -31,6 +31,8 @@ Phong cách mục tiêu là **Gen Z productivity**: trẻ, rõ, giàu cá tính,
 
 Đặt các ảnh concept vào `docs/design-concepts/` trước khi bắt đầu, dùng đúng tên:
 
+> **Đã hợp nhất.** Các ảnh này nay nằm ở `docs/design-concepts/` gốc repo và **được đánh số dịch lên một** (repo có thêm `00-dashboard-reference` và `01-assignments`) — xem bảng đối chiếu trong `README.md` cùng thư mục. Tên trong bảng dưới là tên gốc lúc giao package, giữ nguyên để các step phía sau vẫn khớp.
+
 | Màn hình | File concept |
 | --- | --- |
 | AI Planner | `01-ai-planner.png` |
